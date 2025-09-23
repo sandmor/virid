@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_MODEL: string = "chat-model";
+export const DEFAULT_CHAT_MODEL: string = "gpt5";
 
 export type ChatModel = {
   id: string;
@@ -8,14 +8,28 @@ export type ChatModel = {
 
 export const chatModels: ChatModel[] = [
   {
-    id: "chat-model",
-    name: "Grok Vision",
-    description: "Advanced multimodal model with vision and text capabilities",
+    id: "gpt5",
+    name: "GPT-5",
+    description: "OpenAI frontier model: superior reasoning, coding & multilingual capabilities",
   },
   {
-    id: "chat-model-reasoning",
-    name: "Grok Reasoning",
-    description:
-      "Uses advanced chain-of-thought reasoning for complex problems",
+    id: "gemini25FlashImagePreview",
+    name: "Gemini 2.5 Flash Image Preview",
+    description: "Fast multimodal (image + text) with lightweight preview image generation",
+  },
+  {
+    id: "grok4",
+    name: "Grok 4",
+    description: "xAI flagship model: advanced long-context reasoning & multimodal understanding",
+  },
+  {
+    id: "grok4FastFree",
+    name: "Grok 4 Fast (Free)",
+    description: "Lower-latency Grok variant optimized for rapid iterations (free tier)",
+  },
+  {
+    id: "kimiK2Free",
+    name: "Kimi K2 (Free)",
+    description: "Moonshot (Kimi) K2 general model: efficient multilingual + knowledge synthesis",
   },
 ];

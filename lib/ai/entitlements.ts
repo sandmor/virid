@@ -1,4 +1,4 @@
-import type { UserType } from "@/app/(auth)/auth";
+import type { UserType } from "@/lib/auth/types";
 import type { ChatModel } from "./models";
 
 type Entitlements = {
@@ -12,7 +12,10 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
    */
   guest: {
     maxMessagesPerDay: 20,
-    availableChatModelIds: ["chat-model", "chat-model-reasoning"],
+    availableChatModelIds: [
+      "grok4FastFree",
+      "kimiK2Free",
+    ],
   },
 
   /*
@@ -20,10 +23,14 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
    */
   regular: {
     maxMessagesPerDay: 100,
-    availableChatModelIds: ["chat-model", "chat-model-reasoning"],
+    availableChatModelIds: [
+      "gpt5",
+      "gemini25FlashImagePreview",
+      "grok4",
+      "grok4FastFree",
+      "kimiK2Free",
+    ],
   },
 
-  /*
-   * TODO: For users with an account and a paid membership
-   */
+  // Additional membership tiers can be appended here (e.g., "pro" | "enterprise") without changing consumer code.
 };

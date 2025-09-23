@@ -43,7 +43,7 @@ export const textDocumentHandler = createDocumentHandler<"text">({
       experimental_transform: smoothStream({ chunking: "word" }),
       prompt: description,
       providerOptions: {
-        openai: {
+        openrouter: {
           prediction: {
             type: "content",
             content: document.content,

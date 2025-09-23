@@ -42,9 +42,8 @@ export class ArtifactPage {
       .getByTestId("message-assistant")
       .all();
     const lastMessageElement = messageElements.at(-1);
-
     if (!lastMessageElement) {
-      return null;
+      throw new Error("No assistant message found");
     }
 
     const content = await lastMessageElement
@@ -81,9 +80,8 @@ export class ArtifactPage {
       .getByTestId("message-user")
       .all();
     const lastMessageElement = messageElements.at(-1);
-
     if (!lastMessageElement) {
-      return null;
+      throw new Error("No user message found");
     }
 
     const content = await lastMessageElement.innerText();

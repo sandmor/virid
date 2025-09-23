@@ -1,16 +1,12 @@
-import { generateId } from "ai";
-import { genSaltSync, hashSync } from "bcrypt-ts";
+// Password utilities previously used bcrypt hashing. Since Clerk manages
+// authentication & password storage externally, we persist only a constant
+// marker to satisfy the local schema (optional field) without introducing
+// unused crypto dependencies.
 
-export function generateHashedPassword(password: string) {
-  const salt = genSaltSync(10);
-  const hash = hashSync(password, salt);
-
-  return hash;
+export function generateHashedPassword(_password: string) {
+  return "clerk-managed"; // marker value
 }
 
 export function generateDummyPassword() {
-  const password = generateId();
-  const hashedPassword = generateHashedPassword(password);
-
-  return hashedPassword;
+  return "clerk-managed";
 }

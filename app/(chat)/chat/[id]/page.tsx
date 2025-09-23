@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
-import { auth } from "@/app/(auth)/auth";
+import { getAppSession } from "@/lib/auth/session";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
+import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
 
@@ -17,7 +18,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     notFound();
   }
 
-  const session = await auth();
+  const session = await getAppSession();
 
   if (!session) {
     redirect("/api/auth/guest");
@@ -41,14 +42,22 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get("chat-model");
+  const allowedModels = entitlementsByUserType[session.user.type].availableChatModelIds;
+  let initialModel =
+    chatModelFromCookie && allowedModels.includes(chatModelFromCookie.value)
+      ? chatModelFromCookie.value
+      : DEFAULT_CHAT_MODEL;
+  if (!allowedModels.includes(initialModel)) {
+    initialModel = allowedModels[0];
+  }
 
-  if (!chatModelFromCookie) {
+  if (!chatModelFromCookie || !allowedModels.includes(chatModelFromCookie.value)) {
     return (
       <>
         <Chat
           autoResume={true}
           id={chat.id}
-          initialChatModel={DEFAULT_CHAT_MODEL}
+          initialChatModel={initialModel}
           initialLastContext={chat.lastContext ?? undefined}
           initialMessages={uiMessages}
           initialVisibilityType={chat.visibility}
@@ -64,7 +73,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <Chat
         autoResume={true}
         id={chat.id}
-        initialChatModel={chatModelFromCookie.value}
+  initialChatModel={initialModel}
         initialLastContext={chat.lastContext ?? undefined}
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}

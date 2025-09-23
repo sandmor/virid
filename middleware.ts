@@ -1,44 +1,36 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
+import { NextResponse } from "next/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export async function middleware(request: NextRequest) {
+// Wrap our custom logic with Clerk's middleware so that calls to auth() work.
+export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
 
-  /*
-   * Playwright starts the dev server and requires a 200 status to
-   * begin the tests, so this ensures that the tests can start
-   */
+  // Health / test endpoint used by Playwright to know the dev server is ready.
   if (pathname.startsWith("/ping")) {
     return new Response("pong", { status: 200 });
   }
 
+  // Skip any auth / guest session bootstrapping for Clerk's own auth routes.
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-    secureCookie: !isDevelopmentEnvironment,
-  });
+  const { userId } = await auth();
+  const guestCookie = request.cookies.get("guest_session");
 
-  if (!token) {
+  // If no Clerk user and no guest session, create a guest session first, then redirect back.
+  if (!userId && !guestCookie && !["/login", "/register"].includes(pathname)) {
     const redirectUrl = encodeURIComponent(request.url);
-
-    return NextResponse.redirect(
-      new URL(`/api/auth/guest?redirectUrl=${redirectUrl}`, request.url)
-    );
+    return NextResponse.redirect(new URL(`/api/auth/guest?redirectUrl=${redirectUrl}`, request.url));
   }
 
-  const isGuest = guestRegex.test(token?.email ?? "");
-
-  if (token && !isGuest && ["/login", "/register"].includes(pathname)) {
+  // If authenticated via Clerk, block access to login/register pages.
+  if (userId && ["/login", "/register"].includes(pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [

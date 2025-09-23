@@ -1,20 +1,14 @@
-<a href="https://chat.vercel.ai/">
-  <img alt="Next.js 14 and App Router-ready AI chatbot." src="app/(chat)/opengraph-image.png">
-  <h1 align="center">Chat SDK</h1>
-</a>
+<h1 align="center">Virid Chat</h1>
+
+Multimodal AI chat application built with Next.js (App Router), the AI SDK, Clerk authentication, and Postgres persistence. This fork removes public deployment calls-to-action and restricts non-free models to authenticated users.
 
 <p align="center">
-    Chat SDK is a free, open-source template built with Next.js and the AI SDK that helps you quickly build powerful chatbot applications.
-</p>
-
-<p align="center">
-  <a href="https://chat-sdk.dev"><strong>Read Docs</strong></a> ·
   <a href="#features"><strong>Features</strong></a> ·
-  <a href="#model-providers"><strong>Model Providers</strong></a> ·
-  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
+  <a href="#models"><strong>Models</strong></a> ·
+  <a href="#auth"><strong>Auth</strong></a> ·
   <a href="#running-locally"><strong>Running locally</strong></a>
 </p>
-<br/>
+<br />
 
 ## Features
 
@@ -24,47 +18,56 @@
 - [AI SDK](https://ai-sdk.dev/docs/introduction)
   - Unified API for generating text, structured objects, and tool calls with LLMs
   - Hooks for building dynamic chat and generative user interfaces
-  - Supports xAI (default), OpenAI, Fireworks, and other model providers
+  - Supports OpenRouter (default), OpenAI-compatible providers, Fireworks, and others
 - [shadcn/ui](https://ui.shadcn.com)
   - Styling with [Tailwind CSS](https://tailwindcss.com)
   - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
 - Data Persistence
   - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
   - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
-- [Auth.js](https://authjs.dev)
-  - Simple and secure authentication
+- Authentication
+  - Clerk as IdP with custom minimal forms (email/password) + guest fallback
 
-## Model Providers
+## Models
 
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. The default configuration includes [xAI](https://x.ai) models (`grok-2-vision-1212`, `grok-3-mini`) routed through the gateway.
+Provider integration is via OpenRouter. Config lives in `lib/ai/providers.ts`.
 
-### AI Gateway Authentication
+Default model: `GPT-5` (`openai/gpt-5`).
 
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
+Guest users (unauthenticated) are restricted to free-tier models only:
 
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
+- Grok 4 Fast (Free)
+- Kimi K2 (Free)
 
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+Signed-in users (Clerk) gain access to all configured models including GPT‑5, Gemini 2.5 Flash Image Preview, and Grok 4.
 
-## Deploy Your Own
+Changing availability involves editing `lib/ai/entitlements.ts` (server + UI respect the same source of truth) and optionally updating `lib/ai/models.ts`.
 
-You can deploy your own version of the Next.js AI Chatbot to Vercel with one click:
+## Auth
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/next.js/nextjs-ai-chatbot)
+The app uses Clerk. If Clerk env vars are absent (local / CI), a guest session cookie is used. Server routes enforce model entitlements; attempts by guests to use non-free models return `unauthorized:chat`.
 
 ## Running locally
 
-You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js AI Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
-
-> Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
-
-1. Install Vercel CLI: `npm i -g vercel`
-2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`
-3. Download your environment variables: `vercel env pull`
+Copy `.env.example` to `.env.local` and populate required keys (Clerk, database, OpenRouter API key, etc.). Do NOT commit the populated file.
 
 ```bash
-pnpm install
-pnpm dev
+bun install
+bun run dev
 ```
 
-Your app template should now be running on [localhost:3000](http://localhost:3000).
+Navigate to http://localhost:3000.
+
+If you don't configure Clerk keys you'll operate in guest mode; only free models will appear.
+
+## Updating Model Entitlements
+
+1. Edit `lib/ai/entitlements.ts` for per-user-type model IDs and quota.
+2. Ensure any newly added model has a corresponding entry in `lib/ai/models.ts` and provider mapping in `lib/ai/providers.ts`.
+3. (Optional) Adjust UI copy if adding/removing major capabilities.
+
+Both the client selector and server API use the same entitlement source, preventing privilege escalation via crafted requests.
+
+## License
+
+MIT

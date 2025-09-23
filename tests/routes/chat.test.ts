@@ -2,6 +2,7 @@ import { getMessageByErrorCode } from "@/lib/errors";
 import { generateUUID } from "@/lib/utils";
 import { expect, test } from "../fixtures";
 import { TEST_PROMPTS } from "../prompts/routes";
+import { createGuestContext } from "../helpers";
 
 const chatIdsCreatedByAda: string[] = [];
 
@@ -39,6 +40,24 @@ test.describe
       expect(message).toEqual(getMessageByErrorCode("bad_request:api"));
     });
 
+    test("Guest cannot invoke restricted premium model", async ({ browser }) => {
+      const guest = await createGuestContext({ browser });
+      const chatId = generateUUID();
+      const response = await guest.request.post("/api/chat", {
+        data: {
+          id: chatId,
+          message: TEST_PROMPTS.SKY.MESSAGE,
+          selectedChatModel: "gpt5", // premium (not in guest entitlement)
+          selectedVisibilityType: "private",
+        },
+      });
+      expect(response.status()).toBe(403);
+      const { code, message } = await response.json();
+      expect(code).toEqual("forbidden:model");
+      expect(message).toEqual(getMessageByErrorCode("forbidden:model"));
+      await guest.context.close();
+    });
+
     test("Ada can invoke chat generation", async ({ adaContext }) => {
       const chatId = generateUUID();
 
@@ -46,7 +65,7 @@ test.describe
         data: {
           id: chatId,
           message: TEST_PROMPTS.SKY.MESSAGE,
-          selectedChatModel: "chat-model",
+          selectedChatModel: "gpt5",
           selectedVisibilityType: "private",
         },
       });
@@ -75,7 +94,7 @@ test.describe
         data: {
           id: chatId,
           message: TEST_PROMPTS.GRASS.MESSAGE,
-          selectedChatModel: "chat-model",
+          selectedChatModel: "gpt5",
           selectedVisibilityType: "private",
         },
       });
@@ -138,7 +157,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "chat-model",
+          selectedChatModel: "gpt5",
           selectedVisibilityType: "private",
         },
       });
@@ -192,7 +211,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "chat-model",
+          selectedChatModel: "gpt5",
           selectedVisibilityType: "private",
         },
       });
@@ -242,7 +261,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "chat-model",
+          selectedChatModel: "gpt5",
           selectedVisibilityType: "private",
         },
       });
@@ -285,7 +304,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "chat-model",
+          selectedChatModel: "gpt5",
           selectedVisibilityType: "private",
         },
       });
@@ -332,7 +351,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "chat-model",
+          selectedChatModel: "gpt5",
           selectedVisibilityType: "public",
         },
       });

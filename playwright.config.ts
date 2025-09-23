@@ -99,7 +99,9 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "pnpm dev",
+    // Use bun to run the package.json dev script. "bun dev" would try to execute a file named dev.
+    command: "bun run dev",
+    // Hit the lightweight /ping endpoint (handled in middleware) for a fast 200 readiness check.
     url: `${baseURL}/ping`,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,

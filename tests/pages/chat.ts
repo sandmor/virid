@@ -42,6 +42,7 @@ export class ChatPage {
   }
 
   async sendUserMessage(message: string) {
+    await this.page.waitForSelector('[data-testid="multimodal-input"]', { timeout: 10000 });
     await this.multimodalInput.click();
     await this.multimodalInput.fill(message);
     await this.sendButton.click();
@@ -140,9 +141,8 @@ export class ChatPage {
       .getByTestId("message-assistant")
       .all();
     const lastMessageElement = messageElements.at(-1);
-
     if (!lastMessageElement) {
-      return null;
+      throw new Error("No assistant message found");
     }
 
     const content = await lastMessageElement

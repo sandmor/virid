@@ -1,6 +1,6 @@
 "use client";
 
-import type { Session } from "next-auth";
+import type { AppSession } from "@/lib/auth/session";
 import { startTransition, useMemo, useOptimistic, useState } from "react";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ export function ModelSelector({
   selectedModelId,
   className,
 }: {
-  session: Session;
+  session: AppSession;
   selectedModelId: string;
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);

@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useActionState, useEffect, useState } from "react";
-
+import { useEffect, useState } from "react";
+import { useSignIn } from "@clerk/nextjs";
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
-import { type LoginActionState, login } from "../actions";
 
 export default function Page() {
   const router = useRouter();
@@ -16,37 +14,33 @@ export default function Page() {
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
 
-  const [state, formAction] = useActionState<LoginActionState, FormData>(
-    login,
-    {
-      status: "idle",
-    }
-  );
-
-  const { update: updateSession } = useSession();
+  const { isLoaded, signIn, setActive } = useSignIn();
 
   useEffect(() => {
-    if (state.status === "failed") {
-      toast({
-        type: "error",
-        description: "Invalid credentials!",
-      });
-    } else if (state.status === "invalid_data") {
-      toast({
-        type: "error",
-        description: "Failed validating your submission!",
-      });
-    } else if (state.status === "success") {
-      setIsSuccessful(true);
-      updateSession();
-      router.refresh();
+    if (isSuccessful) {
+      const timeout = setTimeout(() => router.push("/chat"), 300);
+      return () => clearTimeout(timeout);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.status, router.refresh, updateSession]);
+  }, [isSuccessful, router]);
 
-  const handleSubmit = (formData: FormData) => {
-    setEmail(formData.get("email") as string);
-    formAction(formData);
+  const handleSubmit = async (formData: FormData) => {
+    if (!isLoaded) return;
+    const emailVal = formData.get("email") as string;
+    const passwordVal = formData.get("password") as string;
+    setEmail(emailVal);
+    try {
+      const result = await signIn.create({ identifier: emailVal, password: passwordVal });
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        setIsSuccessful(true);
+        toast({ type: "success", description: "Signed in successfully" });
+        router.refresh();
+      } else {
+        toast({ type: "error", description: "Additional verification required" });
+      }
+    } catch (e: any) {
+      toast({ type: "error", description: e?.errors?.[0]?.message || "Invalid credentials" });
+    }
   };
 
   return (
@@ -59,7 +53,9 @@ export default function Page() {
           </p>
         </div>
         <AuthForm action={handleSubmit} defaultEmail={email}>
-          <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
+          <SubmitButton isSuccessful={isSuccessful}>
+            {isLoaded ? "Sign in" : "Loading"}
+          </SubmitButton>
           <p className="mt-4 text-center text-gray-600 text-sm dark:text-zinc-400">
             {"Don't have an account? "}
             <Link

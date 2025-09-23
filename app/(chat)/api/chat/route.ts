@@ -16,7 +16,8 @@ import {
 import type { ModelCatalog } from "tokenlens/core";
 import { fetchModels } from "tokenlens/fetch";
 import { getUsage } from "tokenlens/helpers";
-import { auth, type UserType } from "@/app/(auth)/auth";
+import { getAppSession } from "@/lib/auth/session";
+import type { UserType } from "@/lib/auth/types";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
@@ -107,13 +108,21 @@ export async function POST(request: Request) {
       selectedVisibilityType: VisibilityType;
     } = requestBody;
 
-    const session = await auth();
+  const session = await getAppSession();
 
     if (!session?.user) {
       return new ChatSDKError("unauthorized:chat").toResponse();
     }
 
     const userType: UserType = session.user.type;
+
+    // Enforce model entitlement server-side (guards against tampered client requests)
+    const allowedModels = entitlementsByUserType[userType].availableChatModelIds;
+    if (!allowedModels.includes(selectedChatModel)) {
+      return new ChatSDKError(
+        userType === "guest" ? "forbidden:model" : "forbidden:model"
+      ).toResponse();
+    }
 
     const messageCount = await getMessageCountByUserId({
       id: session.user.id,
@@ -180,15 +189,12 @@ export async function POST(request: Request) {
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
-          experimental_activeTools:
-            selectedChatModel === "chat-model-reasoning"
-              ? []
-              : [
-                  "getWeather",
-                  "createDocument",
-                  "updateDocument",
-                  "requestSuggestions",
-                ],
+          experimental_activeTools: [
+            "getWeather",
+            "createDocument",
+            "updateDocument",
+            "requestSuggestions",
+          ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             getWeather,
@@ -315,7 +321,9 @@ export async function DELETE(request: Request) {
     return new ChatSDKError("bad_request:api").toResponse();
   }
 
-  const session = await auth();
+  // Unified session (Clerk or guest)
+  const { getAppSession } = await import("@/lib/auth/session");
+  const session = await getAppSession();
 
   if (!session?.user) {
     return new ChatSDKError("unauthorized:chat").toResponse();

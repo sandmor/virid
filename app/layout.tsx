@@ -4,12 +4,13 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+  // Update to your production domain when available
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_BASE_URL || "https://virid.local"),
+  title: "Virid Chat",
+  description: "Virid – multimodal AI chat with Clerk authentication.",
 };
 
 export const viewport = {
@@ -79,7 +80,7 @@ export default function RootLayout({
           enableSystem
         >
           <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
+          <ClerkProvider>{children}</ClerkProvider>
         </ThemeProvider>
       </body>
     </html>

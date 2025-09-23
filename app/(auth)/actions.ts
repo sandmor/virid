@@ -1,10 +1,10 @@
 "use server";
 
 import { z } from "zod";
-
-import { createUser, getUser } from "@/lib/db/queries";
-
-import { signIn } from "./auth";
+import { clerkClient } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/db/prisma";
+import { getUser } from "@/lib/db/queries";
+import { generateHashedPassword } from "@/lib/db/utils";
 
 const authFormSchema = z.object({
   email: z.string().email(),
@@ -14,6 +14,15 @@ const authFormSchema = z.object({
 export type LoginActionState = {
   status: "idle" | "in_progress" | "success" | "failed" | "invalid_data";
 };
+
+async function ensureDbUser(clerkUserId: string, email: string) {
+  // We store DB user id == clerkUserId for simplicity / referential integrity.
+  await prisma.user.upsert({
+    where: { id: clerkUserId },
+    update: { email },
+  create: { id: clerkUserId, email },
+  });
+}
 
 export const login = async (
   _: LoginActionState,
@@ -25,18 +34,13 @@ export const login = async (
       password: formData.get("password"),
     });
 
-    await signIn("credentials", {
-      email: validatedData.email,
-      password: validatedData.password,
-      redirect: false,
-    });
-
-    return { status: "success" };
+    // For server action based auth without Clerk's frontend SDK we would need to implement a token issuance flow.
+    // Temporarily short-circuit to failed until client-side Clerk sign-in component is integrated.
+    return { status: "failed" };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
     }
-
     return { status: "failed" };
   }
 };
@@ -61,24 +65,22 @@ export const register = async (
       password: formData.get("password"),
     });
 
-    const [user] = await getUser(validatedData.email);
-
-    if (user) {
-      return { status: "user_exists" } as RegisterActionState;
+    const [existing] = await getUser(validatedData.email);
+    if (existing) {
+      return { status: "user_exists" };
     }
-    await createUser(validatedData.email, validatedData.password);
-    await signIn("credentials", {
-      email: validatedData.email,
+
+    const user = await clerkClient.users.createUser({
+      emailAddress: [validatedData.email],
       password: validatedData.password,
-      redirect: false,
     });
 
+    await ensureDbUser(user.id, validatedData.email);
     return { status: "success" };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
     }
-
     return { status: "failed" };
   }
 };
