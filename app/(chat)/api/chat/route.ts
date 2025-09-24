@@ -34,9 +34,12 @@ import {
   getChatById,
   getMessageCountByUserId,
   getMessagesByChatId,
+  getActiveMessagesByChatId,
   saveChat,
   saveMessages,
   updateChatLastContextById,
+  insertAssistantVariant,
+  saveAssistantInitialMessage,
 } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
@@ -101,11 +104,13 @@ export async function POST(request: Request) {
       message,
       selectedChatModel,
       selectedVisibilityType,
+      regeneratingMessageId,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel["id"];
       selectedVisibilityType: VisibilityType;
+      regeneratingMessageId?: string;
     } = requestBody;
 
   const session = await getAppSession();
@@ -152,8 +157,10 @@ export async function POST(request: Request) {
       });
     }
 
-    const messagesFromDb = await getMessagesByChatId({ id });
-    const uiMessages = [...convertToUIMessages(messagesFromDb), message];
+  // Use only active (non-superseded) versions for context
+  const messagesFromDb = await getActiveMessagesByChatId({ id });
+  // For regeneration, we still send the full active path + new user message (handled client side presently)
+  const uiMessages = [...convertToUIMessages(messagesFromDb), message];
 
     const { longitude, latitude, city, country } = geolocation(request);
 
@@ -253,16 +260,27 @@ export async function POST(request: Request) {
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
-        await saveMessages({
-          messages: messages.map((currentMessage) => ({
-            id: currentMessage.id,
-            role: currentMessage.role,
-            parts: currentMessage.parts,
-            createdAt: new Date(),
-            attachments: [],
-            chatId: id,
-          })),
-        });
+        // messages includes the newly streamed assistant response as the last element
+        const assistantMessage = messages.findLast((m) => m.role === "assistant");
+        if (assistantMessage) {
+          if (requestBody.regeneratingMessageId) {
+            // Create variant and mark previous superseded
+            await insertAssistantVariant({
+              chatId: id,
+              previousAssistantMessageId: requestBody.regeneratingMessageId,
+              parts: assistantMessage.parts,
+              attachments: [],
+            });
+          } else {
+            // First generation path: save assistant message with lineage root fields
+            await saveAssistantInitialMessage({
+              id: assistantMessage.id,
+              chatId: id,
+              parts: assistantMessage.parts,
+              attachments: [],
+            });
+          }
+        }
 
         if (finalMergedUsage) {
           try {

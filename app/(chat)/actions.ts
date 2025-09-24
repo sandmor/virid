@@ -7,8 +7,10 @@ import { myProvider } from "@/lib/ai/providers";
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
+  forkChat,
   updateChatVisiblityById,
 } from "@/lib/db/queries";
+import { getAppSession } from "@/lib/auth/session";
 
 export async function saveChatModelAsCookie(model: string) {
   const cookieStore = await cookies();
@@ -50,4 +52,26 @@ export async function updateChatVisibility({
   visibility: VisibilityType;
 }) {
   await updateChatVisiblityById({ chatId, visibility });
+}
+
+export async function forkChatAction({
+  sourceChatId,
+  fromMessageId,
+  editedText,
+}: {
+  sourceChatId: string;
+  fromMessageId: string;
+  editedText: string;
+}) {
+  const session = await getAppSession();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+  const { newChatId } = await forkChat({
+    sourceChatId,
+    fromMessageId,
+    userId: session.user.id,
+  });
+  // Return new chat id and the edited content so client can send it as first message
+  return { newChatId };
 }

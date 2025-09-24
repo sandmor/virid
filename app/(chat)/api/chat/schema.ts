@@ -29,6 +29,7 @@ export const postRequestBodySchema = z.object({
     "kimiK2Free",
   ]),
   selectedVisibilityType: z.enum(["public", "private"]),
+  regeneratingMessageId: z.string().uuid().optional(),
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

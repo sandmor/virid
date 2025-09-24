@@ -14,7 +14,7 @@ export async function getAppSession(): Promise<AppSession | null> {
 
   if (hasClerkEnv) {
     try {
-      const a = auth();
+  const a = await auth();
       if (a.userId) {
         try {
           await prisma.user.upsert({

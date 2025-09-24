@@ -105,6 +105,9 @@ export async function getChatsByUserId({
         userId: c.userId,
         visibility: c.visibility as Chat["visibility"],
         lastContext: (c.lastContext as unknown) as Chat["lastContext"],
+        parentChatId: (c as any).parentChatId ?? null,
+        forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
+        forkDepth: (c as any).forkDepth ?? 0,
       }));
     } else if (endingBefore) {
       const selectedChat = await prisma.chat.findUnique({ where: { id: endingBefore } });
@@ -127,6 +130,9 @@ export async function getChatsByUserId({
         userId: c.userId,
         visibility: c.visibility as Chat["visibility"],
         lastContext: (c.lastContext as unknown) as Chat["lastContext"],
+        parentChatId: (c as any).parentChatId ?? null,
+        forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
+        forkDepth: (c as any).forkDepth ?? 0,
       }));
     } else {
       const rows = await prisma.chat.findMany({
@@ -141,6 +147,9 @@ export async function getChatsByUserId({
         userId: c.userId,
         visibility: c.visibility as Chat["visibility"],
         lastContext: (c.lastContext as unknown) as Chat["lastContext"],
+        parentChatId: (c as any).parentChatId ?? null,
+        forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
+        forkDepth: (c as any).forkDepth ?? 0,
       }));
     }
 
@@ -205,6 +214,53 @@ export async function saveMessages({ messages }: { messages: SaveMessageInput[] 
   }
 }
 
+// Save the very first assistant message (non-regeneration) with lineage root fields.
+export async function saveAssistantInitialMessage({
+  id,
+  chatId,
+  parts,
+  attachments = [],
+}: {
+  id: string;
+  chatId: string;
+  parts: unknown;
+  attachments?: unknown;
+}) {
+  try {
+    await prisma.message_v2.create({
+      data: {
+        id,
+        chatId,
+        role: "assistant",
+        parts: parts as Prisma.InputJsonValue,
+        attachments: attachments as Prisma.InputJsonValue,
+        createdAt: new Date(),
+        baseId: id, // root of its variant chain
+        previousVersionId: null,
+        supersededById: null,
+        regenerationGroupId: id,
+        parentBaseId: null,
+      } as any,
+    });
+  } catch (error) {
+    // Fallback: if migration not applied yet, insert without lineage fields
+    try {
+      await prisma.message_v2.create({
+        data: {
+          id,
+          chatId,
+          role: "assistant",
+          parts: parts as Prisma.InputJsonValue,
+          attachments: attachments as Prisma.InputJsonValue,
+          createdAt: new Date(),
+        },
+      });
+    } catch {
+      throw new ChatSDKError("bad_request:database", "Failed to save assistant message (initial)");
+    }
+  }
+}
+
 export async function getMessagesByChatId({ id }: { id: string }) {
   try {
     return await prisma.message_v2.findMany({
@@ -216,6 +272,129 @@ export async function getMessagesByChatId({ id }: { id: string }) {
       "bad_request:database",
       "Failed to get messages by chat id"
     );
+  }
+}
+
+// Return only active (non-superseded) message versions in chronological order
+export async function getActiveMessagesByChatId({ id }: { id: string }) {
+  try {
+    // Active assistant messages: those not superseded. User/tool messages have no supersession so always included.
+    const rows = await prisma.message_v2.findMany({
+      where: { chatId: id },
+      orderBy: { createdAt: "asc" },
+    });
+    return rows.filter((m: any) => m.role !== "assistant" || m.supersededById === null);
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get active messages by chat id"
+    );
+  }
+}
+
+// Insert a new assistant variant preserving previous version
+export async function insertAssistantVariant({
+  chatId,
+  previousAssistantMessageId,
+  parts,
+  attachments = [],
+}: {
+  chatId: string;
+  previousAssistantMessageId: string;
+  parts: unknown;
+  attachments?: unknown;
+}) {
+  try {
+    const prev: any = await prisma.message_v2.findUnique({ where: { id: previousAssistantMessageId } });
+    if (!prev) throw new ChatSDKError("not_found:database", "Assistant message to regenerate not found");
+    if (prev.role !== "assistant") throw new ChatSDKError("bad_request:database", "Previous message not assistant");
+
+    const baseId = prev.baseId || prev.id; // if first variant, baseId points to itself
+    const newId = generateUUID();
+
+    await prisma.message_v2.update({
+      where: { id: prev.id },
+      data: { supersededById: newId },
+    });
+
+    const created = await prisma.message_v2.create({
+      data: {
+        id: newId,
+        chatId,
+        role: "assistant",
+        parts: parts as Prisma.InputJsonValue,
+        attachments: attachments as Prisma.InputJsonValue,
+        createdAt: new Date(),
+        baseId: baseId,
+        previousVersionId: prev.id,
+        regenerationGroupId: prev.regenerationGroupId || baseId,
+        parentBaseId: prev.parentBaseId || null,
+      },
+    });
+    return created;
+  } catch (error) {
+    if (error instanceof ChatSDKError) throw error;
+    throw new ChatSDKError("bad_request:database", "Failed to insert assistant variant");
+  }
+}
+
+// Fork chat placeholder (full logic to be implemented when wiring edit flows)
+export async function forkChat({
+  sourceChatId,
+  fromMessageId,
+  userId,
+}: {
+  sourceChatId: string;
+  fromMessageId: string;
+  userId: string;
+}) {
+  try {
+    const sourceChat: any = await prisma.chat.findUnique({ where: { id: sourceChatId } });
+    if (!sourceChat) throw new ChatSDKError("not_found:database", "Source chat not found");
+
+    const active = await getActiveMessagesByChatId({ id: sourceChatId });
+    const pivotIndex = active.findIndex((m: any) => m.id === fromMessageId);
+    if (pivotIndex === -1) throw new ChatSDKError("not_found:database", "Pivot message not found in active path");
+
+    const prefix = active.slice(0, pivotIndex); // exclude pivot itself, replaced by edited
+
+    const newChatId = generateUUID();
+    await prisma.chat.create({
+      data: {
+        id: newChatId,
+        createdAt: new Date(),
+        userId,
+        title: sourceChat.title + " (fork)",
+        visibility: sourceChat.visibility as any,
+        lastContext: sourceChat.lastContext as Prisma.InputJsonValue,
+        parentChatId: sourceChat.parentChatId || sourceChat.id,
+        forkedFromMessageId: fromMessageId,
+        forkDepth: (sourceChat.forkDepth || 0) + 1,
+      } as any,
+    });
+
+    if (prefix.length > 0) {
+      await prisma.message_v2.createMany({
+        data: prefix.map((m: any) => ({
+          id: generateUUID(),
+          chatId: newChatId,
+          role: m.role,
+          parts: m.parts as Prisma.InputJsonValue,
+          attachments: m.attachments as Prisma.InputJsonValue,
+          createdAt: m.createdAt,
+          baseId: (m as any).baseId || m.id,
+          previousVersionId: (m as any).previousVersionId || null,
+          supersededById: (m as any).supersededById || null,
+          regenerationGroupId: (m as any).regenerationGroupId || ((m as any).baseId || m.id),
+          parentBaseId: (m as any).parentBaseId || null,
+        })),
+      });
+    }
+
+    return { newChatId };
+  } catch (error) {
+    if (error instanceof ChatSDKError) throw error;
+    throw new ChatSDKError("bad_request:database", "Failed to fork chat");
   }
 }
 
@@ -393,6 +572,28 @@ export async function getMessageById({ id }: { id: string }) {
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to get message by id"
+    );
+  }
+}
+
+// Retrieve all assistant variants (including current) for a given assistant message id.
+// Uses baseId if present, otherwise falls back to the message's own id.
+export async function getAssistantVariantsByMessageId({ messageId }: { messageId: string }) {
+  try {
+    const msg: any = await prisma.message_v2.findUnique({ where: { id: messageId } });
+    if (!msg || msg.role !== "assistant") {
+      return [];
+    }
+    const baseId = msg.baseId || msg.id;
+    const variants: any[] = await prisma.message_v2.findMany({
+      where: { chatId: msg.chatId, role: "assistant", OR: [{ baseId }, { id: baseId }] },
+      orderBy: { createdAt: "desc" },
+    });
+    return variants;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get assistant variants"
     );
   }
 }

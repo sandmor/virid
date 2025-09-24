@@ -70,7 +70,9 @@ export const register = async (
       return { status: "user_exists" };
     }
 
-    const user = await clerkClient.users.createUser({
+    // clerkClient is now async in newer Clerk versions (returns a function you invoke to get the client)
+    const cc = await clerkClient();
+    const user = await cc.users.createUser({
       emailAddress: [validatedData.email],
       password: validatedData.password,
     });

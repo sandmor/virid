@@ -7,6 +7,9 @@ import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { Action, Actions } from "./elements/actions";
 import { CopyIcon, PencilEditIcon, ThumbDownIcon, ThumbUpIcon } from "./icons";
+import dynamic from "next/dynamic";
+
+const AssistantVariantHistory = dynamic(() => import("./assistant-variant-history").then(m => m.AssistantVariantHistory), { ssr: false });
 
 export function PureMessageActions({
   chatId,
@@ -14,12 +17,14 @@ export function PureMessageActions({
   vote,
   isLoading,
   setMode,
+  onRegenerate,
 }: {
   chatId: string;
   message: ChatMessage;
   vote: Vote | undefined;
   isLoading: boolean;
   setMode?: (mode: "view" | "edit") => void;
+  onRegenerate?: (assistantMessageId: string) => void;
 }) {
   const { mutate } = useSWRConfig();
   const [_, copyToClipboard] = useCopyToClipboard();
@@ -68,6 +73,23 @@ export function PureMessageActions({
 
   return (
     <Actions className="-ml-0.5">
+      {onRegenerate && message.role === "assistant" && (
+        <Action
+          onClick={() => onRegenerate(message.id)}
+          tooltip="Regenerate"
+        >
+          <PencilEditIcon />
+        </Action>
+      )}
+      {message.role === "assistant" && (
+        <AssistantVariantHistory
+          chatId={chatId}
+          messageId={message.id}
+          onSelectVariant={() => {
+            // For now we only display variants; selecting could in future replace visible content.
+          }}
+        />
+      )}
       <Action onClick={handleCopy} tooltip="Copy">
         <CopyIcon />
       </Action>

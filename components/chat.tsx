@@ -85,12 +85,16 @@ export function Chat({
       api: "/api/chat",
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest(request) {
+        // If we have marked a message for regeneration, include its id then clear it
+        const regenId = regeneratingMessageIdRef.current;
+        regeneratingMessageIdRef.current = null;
         return {
           body: {
             id: request.id,
             message: request.messages.at(-1),
             selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibilityType,
+            regeneratingMessageId: regenId || undefined,
             ...request.body,
           },
         };
@@ -122,22 +126,40 @@ export function Chat({
     },
   });
 
+  // Track which assistant message is being regenerated so we can pass its id in the next request body
+  const [regeneratingMessageIdState, setRegeneratingMessageIdState] = useState<string | null>(null);
+  const regeneratingMessageIdRef = useRef<string | null>(null);
+  useEffect(() => { regeneratingMessageIdRef.current = regeneratingMessageIdState; }, [regeneratingMessageIdState]);
+
   const searchParams = useSearchParams();
   const query = searchParams.get("query");
+  const initialQueryHandledRef = useRef(false);
 
   const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
 
+  // Single-run initial query injection (forked edit path)
   useEffect(() => {
-    if (query && !hasAppendedQuery) {
-      sendMessage({
-        role: "user" as const,
-        parts: [{ type: "text", text: query }],
-      });
-
+    if (!query) return;
+    if (initialQueryHandledRef.current) return;
+    // Avoid duplicate if a user message with same text already exists
+    const existingSame = messages.some(
+      (m) => m.role === "user" && m.parts.some((p) => p.type === "text" && p.text === query)
+    );
+    if (existingSame) {
+      initialQueryHandledRef.current = true;
       setHasAppendedQuery(true);
       window.history.replaceState({}, "", `/chat/${id}`);
+      return;
     }
-  }, [query, sendMessage, hasAppendedQuery, id]);
+    initialQueryHandledRef.current = true;
+    setHasAppendedQuery(true);
+    sendMessage({
+      role: "user" as const,
+      parts: [{ type: "text", text: query }],
+    });
+    // Strip query param immediately to prevent re-trigger on fast re-render
+    window.history.replaceState({}, "", `/chat/${id}`);
+  }, [query, messages, sendMessage, id]);
 
   const { data: votes } = useSWR<Vote[]>(
     messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
@@ -147,8 +169,10 @@ export function Chat({
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
 
+  // Suppress auto-resume when a query injection is pending to avoid duplicate stream starts
+  const effectiveAutoResume = autoResume && !query && !initialQueryHandledRef.current;
   useAutoResume({
-    autoResume,
+    autoResume: effectiveAutoResume,
     initialMessages,
     resumeStream,
     setMessages,
@@ -169,6 +193,10 @@ export function Chat({
           isReadonly={isReadonly}
           messages={messages}
           regenerate={regenerate}
+          onRegenerateAssistant={(assistantMessageId: string) => {
+            setRegeneratingMessageIdState(assistantMessageId);
+            regenerate();
+          }}
           selectedModelId={initialChatModel}
           setMessages={setMessages}
           status={status}

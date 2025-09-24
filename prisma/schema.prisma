@@ -28,11 +28,17 @@ model Chat {
   visibility  String   @default("private")
   lastContext Json?
 
+  // Fork / lineage metadata
+  parentChatId        String?  @db.Uuid
+  forkedFromMessageId String?  @db.Uuid
+  forkDepth           Int      @default(0)
+
   user       User        @relation(fields: [userId], references: [id])
   messages   Message_v2[]
   votes      Vote_v2[]
   streams    Stream[]
 
+  @@index([parentChatId])
   @@map("Chat")
 }
 
@@ -45,9 +51,20 @@ model Message_v2 {
   attachments Json
   createdAt   DateTime
 
+  // Versioning / regeneration lineage
+  baseId              String?  @db.Uuid  // Stable logical slot id across versions (first version id if null previously)
+  previousVersionId   String?  @db.Uuid  // Points to prior version in same chat
+  supersededById      String?  @db.Uuid  // Filled when a newer version replaces this version
+  regenerationGroupId String?  @db.Uuid  // Group multiple assistant variants from a single user turn
+  parentBaseId        String?  @db.Uuid  // BaseId of previous logical message (sequence helper)
+
   chat  Chat      @relation(fields: [chatId], references: [id])
   votes Vote_v2[]
 
+  @@index([chatId, baseId])
+  @@index([previousVersionId])
+  @@index([supersededById])
+  @@index([regenerationGroupId])
   @@map("Message_v2")
 }
 
