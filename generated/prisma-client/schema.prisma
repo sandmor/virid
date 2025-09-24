@@ -10,6 +10,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Stores per-provider API keys overriding environment variables.
+// Only include providers we integrate with directly (e.g., openai, google, openrouter, etc.)
+// Id is the canonical slug for the provider ("openai", "google", "openrouter").
+model Provider {
+  id     String @id @db.VarChar(64)
+  apiKey String @db.Text
+
+  @@map("Provider")
+}
+
 model User {
   id    String @id @db.VarChar(191) // Accept Clerk style ids (e.g. user_...) or UUIDs
   email String @db.VarChar(128)

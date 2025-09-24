@@ -120,6 +120,11 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.ProviderScalarFieldEnum = {
+  id: 'id',
+  apiKey: 'apiKey'
+};
+
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email'
@@ -216,6 +221,7 @@ exports.Prisma.NullsOrder = {
 
 
 exports.Prisma.ModelName = {
+  Provider: 'Provider',
   User: 'User',
   Chat: 'Chat',
   Message_v2: 'Message_v2',

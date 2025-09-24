@@ -5,7 +5,7 @@ import { getDocumentById, saveSuggestions } from "@/lib/db/queries";
 import type { Suggestion } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { generateUUID } from "@/lib/utils";
-import { myProvider } from "../providers";
+import { getLanguageModel } from "../providers";
 import { ARTIFACT_GENERATION_MODEL } from "../models";
 
 type RequestSuggestionsProps = {
@@ -38,8 +38,9 @@ export const requestSuggestions = ({
         "userId" | "createdAt" | "documentCreatedAt"
       >[] = [];
 
+      const model = await getLanguageModel(ARTIFACT_GENERATION_MODEL);
       const { elementStream } = streamObject({
-  model: myProvider.languageModel(ARTIFACT_GENERATION_MODEL),
+        model,
         system:
           "You are a help writing assistant. Given a piece of writing, please offer suggestions to improve the piece of writing and describe the change. It is very important for the edits to contain full sentences instead of just words. Max 5 suggestions.",
         prompt: document.content,

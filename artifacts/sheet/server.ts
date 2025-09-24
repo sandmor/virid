@@ -1,7 +1,7 @@
 import { streamObject } from "ai";
 import { z } from "zod";
 import { sheetPrompt, updateDocumentPrompt } from "@/lib/ai/prompts";
-import { myProvider } from "@/lib/ai/providers";
+import { getLanguageModel } from "@/lib/ai/providers";
 import { ARTIFACT_GENERATION_MODEL } from "@/lib/ai/models";
 import { createDocumentHandler } from "@/lib/artifacts/server";
 
@@ -10,8 +10,9 @@ export const sheetDocumentHandler = createDocumentHandler<"sheet">({
   onCreateDocument: async ({ title, dataStream }) => {
     let draftContent = "";
 
+    const model = await getLanguageModel(ARTIFACT_GENERATION_MODEL);
     const { fullStream } = streamObject({
-  model: myProvider.languageModel(ARTIFACT_GENERATION_MODEL),
+      model,
       system: sheetPrompt,
       prompt: title,
       schema: z.object({
@@ -49,8 +50,9 @@ export const sheetDocumentHandler = createDocumentHandler<"sheet">({
   onUpdateDocument: async ({ document, description, dataStream }) => {
     let draftContent = "";
 
+    const model = await getLanguageModel(ARTIFACT_GENERATION_MODEL);
     const { fullStream } = streamObject({
-  model: myProvider.languageModel(ARTIFACT_GENERATION_MODEL),
+      model,
       system: updateDocumentPrompt(document.content, "sheet"),
       prompt: description,
       schema: z.object({

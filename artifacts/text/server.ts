@@ -1,6 +1,6 @@
 import { smoothStream, streamText } from "ai";
 import { updateDocumentPrompt } from "@/lib/ai/prompts";
-import { myProvider } from "@/lib/ai/providers";
+import { getLanguageModel } from "@/lib/ai/providers";
 import { ARTIFACT_GENERATION_MODEL } from "@/lib/ai/models";
 import { createDocumentHandler } from "@/lib/artifacts/server";
 
@@ -9,8 +9,9 @@ export const textDocumentHandler = createDocumentHandler<"text">({
   onCreateDocument: async ({ title, dataStream }) => {
     let draftContent = "";
 
+    const model = await getLanguageModel(ARTIFACT_GENERATION_MODEL);
     const { fullStream } = streamText({
-  model: myProvider.languageModel(ARTIFACT_GENERATION_MODEL),
+      model,
       system:
         "Write about the given topic. Markdown is supported. Use headings wherever appropriate.",
       experimental_transform: smoothStream({ chunking: "word" }),
@@ -38,8 +39,9 @@ export const textDocumentHandler = createDocumentHandler<"text">({
   onUpdateDocument: async ({ document, description, dataStream }) => {
     let draftContent = "";
 
+    const model = await getLanguageModel(ARTIFACT_GENERATION_MODEL);
     const { fullStream } = streamText({
-  model: myProvider.languageModel(ARTIFACT_GENERATION_MODEL),
+      model,
       system: updateDocumentPrompt(document.content, "text"),
       experimental_transform: smoothStream({ chunking: "word" }),
       prompt: description,
