@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSignIn } from "@clerk/nextjs";
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
+import { SocialAuthButtons } from "@/components/social-auth-buttons";
 
 export default function Page() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function Page() {
 
   useEffect(() => {
     if (isSuccessful) {
-      const timeout = setTimeout(() => router.push("/chat"), 300);
+      const timeout = setTimeout(() => router.push("/"), 300);
       return () => clearTimeout(timeout);
     }
   }, [isSuccessful, router]);
@@ -43,6 +44,20 @@ export default function Page() {
     }
   };
 
+  // Google OAuth redirect flow
+  const handleGoogle = useCallback(async () => {
+    if (!isLoaded) return;
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/sso-callback",
+  redirectUrlComplete: "/",
+      });
+    } catch (e: any) {
+      toast({ type: "error", description: e?.errors?.[0]?.message || "Google sign-in failed" });
+    }
+  }, [isLoaded, signIn]);
+
   return (
     <div className="flex h-dvh w-screen items-start justify-center bg-background pt-12 md:items-center md:pt-0">
       <div className="flex w-full max-w-md flex-col gap-12 overflow-hidden rounded-2xl">
@@ -56,6 +71,8 @@ export default function Page() {
           <SubmitButton isSuccessful={isSuccessful}>
             {isLoaded ? "Sign in" : "Loading"}
           </SubmitButton>
+          <SocialAuthDivider />
+          <SocialAuthButtons mode="sign-in" />
           <p className="mt-4 text-center text-gray-600 text-sm dark:text-zinc-400">
             {"Don't have an account? "}
             <Link
@@ -67,6 +84,19 @@ export default function Page() {
             {" for free."}
           </p>
         </AuthForm>
+      </div>
+    </div>
+  );
+}
+
+function SocialAuthDivider() {
+  return (
+    <div className="relative my-4">
+      <div className="absolute inset-0 flex items-center" aria-hidden="true">
+        <span className="w-full border-t border-border" />
+      </div>
+      <div className="relative flex justify-center text-xs uppercase">
+        <span className="bg-background px-2 text-muted-foreground">or</span>
       </div>
     </div>
   );

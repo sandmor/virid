@@ -18,6 +18,16 @@ export const chatModels: ChatModel[] = [
     description: "Fast multimodal (image + text) with lightweight preview image generation",
   },
   {
+    id: "gemini25Flash",
+    name: "Gemini 2.5 Flash",
+    description: "Balanced speed + quality multimodal Gemini 2.5 generation",
+  },
+  {
+    id: "gemini25Pro",
+    name: "Gemini 2.5 Pro",
+    description: "Higher‑capability Gemini 2.5 model optimized for complex reasoning & multimodal synthesis",
+  },
+  {
     id: "grok4",
     name: "Grok 4",
     description: "xAI flagship model: advanced long-context reasoning & multimodal understanding",

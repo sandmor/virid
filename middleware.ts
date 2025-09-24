@@ -11,7 +11,7 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   // Skip any auth / guest session bootstrapping for Clerk's own auth routes.
-  if (pathname.startsWith("/api/auth")) {
+  if (pathname.startsWith("/api/auth") || pathname.startsWith("/sso-callback")) {
     return NextResponse.next();
   }
 
@@ -38,7 +38,8 @@ export const config = {
     "/chat/:id",
     "/api/:path*",
     "/login",
-    "/register",
+  "/register",
+  "/sso-callback",
 
     /*
      * Match all request paths except for the ones starting with:

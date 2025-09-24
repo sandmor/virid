@@ -24,6 +24,8 @@ export const postRequestBodySchema = z.object({
   selectedChatModel: z.enum([
     "gpt5",
     "gemini25FlashImagePreview",
+    "gemini25Flash",
+    "gemini25Pro",
     "grok4",
     "grok4FastFree",
     "kimiK2Free",
