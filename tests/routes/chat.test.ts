@@ -47,7 +47,7 @@ test.describe
         data: {
           id: chatId,
           message: TEST_PROMPTS.SKY.MESSAGE,
-          selectedChatModel: "gpt5", // premium (not in guest entitlement)
+          selectedChatModel: "openai:gpt-5", // premium (not in guest entitlement)
           selectedVisibilityType: "private",
         },
       });
@@ -65,7 +65,7 @@ test.describe
         data: {
           id: chatId,
           message: TEST_PROMPTS.SKY.MESSAGE,
-          selectedChatModel: "gpt5",
+          selectedChatModel: "openai:gpt-5",
           selectedVisibilityType: "private",
         },
       });
@@ -94,7 +94,7 @@ test.describe
         data: {
           id: chatId,
           message: TEST_PROMPTS.GRASS.MESSAGE,
-          selectedChatModel: "gpt5",
+          selectedChatModel: "openai:gpt-5",
           selectedVisibilityType: "private",
         },
       });
@@ -157,7 +157,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "gpt5",
+          selectedChatModel: "openai:gpt-5",
           selectedVisibilityType: "private",
         },
       });
@@ -211,7 +211,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "gpt5",
+          selectedChatModel: "openai:gpt-5",
           selectedVisibilityType: "private",
         },
       });
@@ -261,7 +261,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "gpt5",
+          selectedChatModel: "openai:gpt-5",
           selectedVisibilityType: "private",
         },
       });
@@ -304,7 +304,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "gpt5",
+          selectedChatModel: "openai:gpt-5",
           selectedVisibilityType: "private",
         },
       });
@@ -351,7 +351,7 @@ test.describe
             ],
             createdAt: new Date().toISOString(),
           },
-          selectedChatModel: "gpt5",
+          selectedChatModel: "openai:gpt-5",
           selectedVisibilityType: "public",
         },
       });

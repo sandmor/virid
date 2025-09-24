@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma-client"
 }
 
 datasource db {
@@ -10,8 +11,8 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid()) @db.Uuid
-  email    String   @db.VarChar(64)
+  id       String   @id @db.VarChar(191) // Accept Clerk style ids (e.g. user_...) or UUIDs
+  email    String   @db.VarChar(128)
 
   chats       Chat[]
   documents   Document[]
@@ -24,7 +25,7 @@ model Chat {
   id          String   @id @default(uuid()) @db.Uuid
   createdAt   DateTime
   title       String   @db.Text
-  userId      String   @db.Uuid
+  userId      String   @db.VarChar(191)
   visibility  String   @default("private")
   lastContext Json?
 
@@ -87,7 +88,7 @@ model Document {
   title     String   @db.Text
   content   String?
   kind      String   @default("text")
-  userId    String   @db.Uuid
+  userId    String   @db.VarChar(191)
 
   user        User         @relation(fields: [userId], references: [id])
   suggestions Suggestion[]
@@ -104,7 +105,7 @@ model Suggestion {
   suggestedText      String   @db.Text
   description        String?
   isResolved         Boolean  @default(false)
-  userId             String   @db.Uuid
+  userId             String   @db.VarChar(191)
   createdAt          DateTime
 
   user     User     @relation(fields: [userId], references: [id])

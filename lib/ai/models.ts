@@ -1,45 +1,83 @@
-export const DEFAULT_CHAT_MODEL: string = "gpt5";
+export const DEFAULT_CHAT_MODEL = "openrouter:x-ai/grok-4-fast:free";
+
+export const TITLE_GENERATION_MODEL =
+  process.env.TITLE_GENERATION_MODEL ?? "openrouter:x-ai/grok-4-fast:free";
+export const ARTIFACT_GENERATION_MODEL =
+  process.env.ARTIFACT_GENERATION_MODEL ?? "openrouter:x-ai/grok-4-fast:free";
 
 export type ChatModel = {
-  id: string;
-  name: string;
-  description: string;
+  id: string; // composite id provider:model
+  provider: string;
+  model: string; // provider-specific model slug used in SDK calls
+  name: string; // human readable name
+  description?: string; // optional
 };
 
-export const chatModels: ChatModel[] = [
-  {
-    id: "gpt5",
+export function buildCompositeModelId(provider: string, model: string) {
+  return `${provider}:${model}`;
+}
+
+export function parseCompositeModelId(id: string): { provider: string; model: string } {
+  const idx = id.indexOf(":");
+  if (idx === -1) {
+    // Backwards compatibility: assume openrouter if legacy id without provider
+    return { provider: "openrouter", model: id };
+  }
+  return { provider: id.slice(0, idx), model: id.slice(idx + 1) };
+}
+
+// Curated metadata for a *small* set of popular models; absence falls back to automatic derivation.
+// Curated metadata keyed by composite id
+const curated: Record<string, { name: string; description?: string }> = {
+  "openai:gpt-5": {
     name: "GPT-5",
-    description: "OpenAI frontier model: superior reasoning, coding & multilingual capabilities",
+    description: "OpenAI frontier model for high reasoning & multilingual coding tasks",
   },
-  {
-    id: "gemini25FlashImagePreview",
+  "google:gemini-2.5-flash-image-preview": {
     name: "Gemini 2.5 Flash Image Preview",
-    description: "Fast multimodal (image + text) with lightweight preview image generation",
+    description: "Fast multimodal (image+text) with lightweight image preview support",
   },
-  {
-    id: "gemini25Flash",
+  "google:gemini-2.5-flash": {
     name: "Gemini 2.5 Flash",
-    description: "Balanced speed + quality multimodal Gemini 2.5 generation",
+    description: "Balanced speed + quality multimodal generation",
   },
-  {
-    id: "gemini25Pro",
+  "google:gemini-2.5-pro": {
     name: "Gemini 2.5 Pro",
-    description: "Higher‑capability Gemini 2.5 model optimized for complex reasoning & multimodal synthesis",
+    description: "Higher capability Gemini 2.5 for complex reasoning & synthesis",
   },
-  {
-    id: "grok4",
+  "openrouter:x-ai/grok-4": {
     name: "Grok 4",
-    description: "xAI flagship model: advanced long-context reasoning & multimodal understanding",
+    description: "xAI flagship: advanced long‑context reasoning & multimodal understanding",
   },
-  {
-    id: "grok4FastFree",
+  "openrouter:x-ai/grok-4-fast:free": {
     name: "Grok 4 Fast (Free)",
-    description: "Lower-latency Grok variant optimized for rapid iterations (free tier)",
+    description: "Lower latency Grok variant optimized for rapid iteration (free tier)",
   },
-  {
-    id: "kimiK2Free",
+  "openrouter:moonshotai/kimi-k2:free": {
     name: "Kimi K2 (Free)",
-    description: "Moonshot (Kimi) K2 general model: efficient multilingual + knowledge synthesis",
+    description: "Moonshot Kimi K2 general model: efficient multilingual knowledge synthesis",
   },
-];
+};
+
+// When we lack curated metadata, derive a display name heuristically from the slug.
+export function deriveChatModel(id: string): ChatModel {
+  const { provider, model } = parseCompositeModelId(id);
+  const existing = curated[id];
+  if (existing) return { id, provider, model, ...existing };
+  // heuristic: take last path after '/', replace separators
+  const lastSegment = model.split("/").slice(-1)[0];
+  const base = lastSegment.replace(/[:]/g, " ");
+  const words = base.split(/[-_]/).filter(Boolean);
+  const name = words
+    .map((w) => (w.length <= 3 ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1)))
+    .join(" ");
+  return { id, provider, model, name, description: model };
+}
+
+// Export a small known set matching entitlements so existing UI/tests still enumerate choices.
+export const KNOWN_CHAT_MODEL_IDS: string[] = Object.keys(curated);
+export const chatModels: ChatModel[] = KNOWN_CHAT_MODEL_IDS.map(deriveChatModel);
+
+export function getChatModelsByIds(ids: string[]): ChatModel[] {
+  return ids.map(deriveChatModel);
+}

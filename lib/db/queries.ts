@@ -1,7 +1,7 @@
 import "server-only";
 
 import { prisma } from "./prisma";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "../../generated/prisma-client";
 import type { ArtifactKind } from "@/components/artifact";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { ChatSDKError } from "../errors";

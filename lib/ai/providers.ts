@@ -1,123 +1,66 @@
 import { customProvider } from "ai";
 import { isTestEnvironment } from "../constants";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
+import { parseCompositeModelId } from "./models";
 
-// Google provider is optional; loaded dynamically to avoid build errors if package not installed.
-let googleProviderFactory: ((model: string) => any) | null = null;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { google } = require("@ai-sdk/google");
-  googleProviderFactory = google;
-} catch {
-  // Silently ignore; fallback to OpenRouter routed Gemini models.
-}
+const openRouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY ?? "" });
 
-/**
- * Provider registry design:
- *  - Each registry entry returns a language model factory given a model key.
- *  - We track model resolution separately (no mutation of provider objects to avoid read-only property errors).
- *  - Adding a new provider requires only appending to `providerSources` modelMap.
- */
-
-type RegistryFactory = (model: string) => any; // AI SDK model instance
-
-interface ProviderSource {
-  name: string;
-  create: RegistryFactory;
-  // Map of app-level model identifiers to concrete provider model name strings.
-  modelMap: Record<string, string>;
-}
-
-// ---------- Provider Implementations ----------
-
-const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY ?? "" });
-
-// We intentionally avoid decorating or mutating model instances; some have read-only getters.
-// Instead we expose resolution helpers for downstream code needing provider model IDs.
-
-const openRouterSource: ProviderSource = {
-  name: "openrouter",
-  create: (model: string) => openrouter(model),
-  modelMap: {
-    gpt5: "openai/gpt-5",
-    gemini25FlashImagePreview: "google/gemini-2.5-flash-image-preview",
-    gemini25Flash: "google/gemini-2.5-flash",
-    gemini25Pro: "google/gemini-2.5-pro",
-    grok4: "x-ai/grok-4",
-    grok4FastFree: "x-ai/grok-4-fast:free",
-    kimiK2Free: "moonshotai/kimi-k2:free",
-    // internal utility models
-    "title-model": "x-ai/grok-4-fast:free",
-    "artifact-model": "x-ai/grok-4-fast:free",
-  },
+// Supported first-class provider keys -> factory that returns a model given its provider-local slug
+// For openrouter we pass through composite slug portion after provider (e.g. x-ai/grok-4)
+const providerFactories: Record<string, (model: string) => any> = {
+  google: (model) => google(model),
+  openai: (model) => openai(model),
+  openrouter: (model) => openRouter(model),
 };
 
-// Google direct provider (Gemini) via @ai-sdk/google.
-// We only map the two requested model IDs geminiFlash and geminiPro. (app-level ids: gemini25Flash, gemini25Pro)
-const providerSources: ProviderSource[] = (() => {
-  const sources: ProviderSource[] = [];
-  if (googleProviderFactory) {
-    sources.push({
-      name: "google",
-      create: (model: string) => googleProviderFactory!(model),
-      modelMap: {
-        gemini25Flash: "gemini-2.5-flash",
-        gemini25Pro: "gemini-2.5-pro",
-      },
-    });
+function resolveLanguageModel(compositeId: string) {
+  const { provider, model } = parseCompositeModelId(compositeId);
+  const factory = providerFactories[provider];
+  if (!factory) {
+    throw new Error(`Unsupported provider '${provider}' for model '${compositeId}'`);
   }
-  sources.push(openRouterSource);
-  return sources;
-})();
-
-// Build languageModels mapping expected by customProvider from registry + app model ids.
-function buildLanguageModels() {
-  const models: Record<string, any> = {};
-  for (const source of providerSources) {
-    for (const appId of Object.keys(source.modelMap)) {
-      if (models[appId]) continue; // first source wins
-      const providerModelName = source.modelMap[appId];
-      models[appId] = source.create(providerModelName);
-    }
-  }
-  return models;
+  return factory(model);
 }
 
-// Precompute a resolution map (first provider wins for each app model id)
-const resolvedModelMap: Record<string, string> = (() => {
-  const map: Record<string, string> = {};
-  for (const source of providerSources) {
-    for (const [appId, providerModel] of Object.entries(source.modelMap)) {
-      if (!map[appId]) map[appId] = providerModel;
-    }
-  }
-  return map;
-})();
+// Seven curated model IDs surfaced in UI / entitlements.
+const KNOWN_MODEL_IDS = [
+  "openai:gpt-5",
+  "google:gemini-2.5-flash-image-preview",
+  "google:gemini-2.5-flash",
+  "google:gemini-2.5-pro",
+  "openrouter:x-ai/grok-4",
+  "openrouter:x-ai/grok-4-fast:free",
+  "openrouter:moonshotai/kimi-k2:free",
+];
 
-export function getResolvedProviderModelId(appModelId: string): string | undefined {
-  return resolvedModelMap[appModelId];
+function buildLanguageModels(ids: string[]): Record<string, any> {
+  return ids.reduce<Record<string, any>>((acc, id) => {
+    acc[id] = resolveLanguageModel(id);
+    return acc;
+  }, {});
 }
 
 export const myProvider = isTestEnvironment
   ? (() => {
-      const { artifactModel, chatModel, reasoningModel, titleModel } = require("./models.mock");
+      const { artifactModel, chatModel, reasoningModel } = require("./models.mock");
       return customProvider({
         languageModels: {
-          gpt5: chatModel,
-          gemini25FlashImagePreview: reasoningModel,
-          grok4: chatModel,
-          grok4FastFree: reasoningModel,
-          kimiK2Free: chatModel,
-          gemini25Flash: reasoningModel,
-          gemini25Pro: reasoningModel,
-          "title-model": titleModel,
-          "artifact-model": artifactModel,
+          "openai:gpt-5": chatModel,
+          "google:gemini-2.5-flash-image-preview": reasoningModel,
+          "google:gemini-2.5-flash": reasoningModel,
+          "google:gemini-2.5-pro": reasoningModel,
+          "openrouter:x-ai/grok-4": chatModel,
+          "openrouter:x-ai/grok-4-fast:free": reasoningModel,
+          "openrouter:moonshotai/kimi-k2:free": chatModel,
         },
       });
     })()
-  : customProvider({
-      languageModels: buildLanguageModels(),
-    });
+  : customProvider({ languageModels: buildLanguageModels(KNOWN_MODEL_IDS) });
 
-export type RegisteredModelId = keyof ReturnType<typeof buildLanguageModels>;
-export { resolvedModelMap };
+export type RegisteredModelId = string;
+
+export function getResolvedProviderModelId(appModelId: string): string | undefined {
+  return appModelId;
+}

@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Prisma CLI loads .env by default. Next.js will load .env.local at runtime.
+  // Ensure DATABASE_URL is available when running Prisma commands.
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String @id @db.VarChar(191) // Accept Clerk style ids (e.g. user_...) or UUIDs
+  email String @db.VarChar(128)
+
+  chats       Chat[]
+  documents   Document[]
+  suggestions Suggestion[]
+
+  @@map("User")
+}
+
+model Chat {
+  id          String   @id @default(uuid()) @db.Uuid
+  createdAt   DateTime
+  title       String   @db.Text
+  userId      String   @db.VarChar(191)
+  visibility  String   @default("private")
+  lastContext Json?
+
+  // Fork / lineage metadata
+  parentChatId        String? @db.Uuid
+  forkedFromMessageId String? @db.Uuid
+  forkDepth           Int     @default(0)
+
+  user     User         @relation(fields: [userId], references: [id])
+  messages Message_v2[]
+  votes    Vote_v2[]
+  streams  Stream[]
+
+  @@index([parentChatId])
+  @@map("Chat")
+}
+
+model Message_v2 {
+  id          String   @id @default(uuid()) @db.Uuid
+  chatId      String   @db.Uuid
+  role        String
+  parts       Json
+  attachments Json
+  createdAt   DateTime
+
+  // Versioning / regeneration lineage
+  baseId              String? @db.Uuid // Stable logical slot id across versions (first version id if null previously)
+  previousVersionId   String? @db.Uuid // Points to prior version in same chat
+  supersededById      String? @db.Uuid // Filled when a newer version replaces this version
+  regenerationGroupId String? @db.Uuid // Group multiple assistant variants from a single user turn
+  parentBaseId        String? @db.Uuid // BaseId of previous logical message (sequence helper)
+
+  chat  Chat      @relation(fields: [chatId], references: [id])
+  votes Vote_v2[]
+
+  @@index([chatId, baseId])
+  @@index([previousVersionId])
+  @@index([supersededById])
+  @@index([regenerationGroupId])
+  @@map("Message_v2")
+}
+
+model Vote_v2 {
+  chatId    String  @db.Uuid
+  messageId String  @db.Uuid
+  isUpvoted Boolean
+
+  message Message_v2 @relation(fields: [messageId], references: [id])
+  chat    Chat       @relation(fields: [chatId], references: [id])
+
+  @@id([chatId, messageId])
+  @@map("Vote_v2")
+}
+
+model Document {
+  id        String   @db.Uuid
+  createdAt DateTime
+  title     String   @db.Text
+  content   String?
+  kind      String   @default("text")
+  userId    String   @db.VarChar(191)
+
+  user        User         @relation(fields: [userId], references: [id])
+  suggestions Suggestion[]
+
+  @@id([id, createdAt])
+  @@map("Document")
+}
+
+model Suggestion {
+  id                String   @id @default(uuid()) @db.Uuid
+  documentId        String   @db.Uuid
+  documentCreatedAt DateTime
+  originalText      String   @db.Text
+  suggestedText     String   @db.Text
+  description       String?
+  isResolved        Boolean  @default(false)
+  userId            String   @db.VarChar(191)
+  createdAt         DateTime
+
+  user     User     @relation(fields: [userId], references: [id])
+  document Document @relation(fields: [documentId, documentCreatedAt], references: [id, createdAt])
+
+  @@map("Suggestion")
+}
+
+model Stream {
+  id        String   @id @default(uuid()) @db.Uuid
+  chatId    String   @db.Uuid
+  createdAt DateTime
+
+  chat Chat @relation(fields: [chatId], references: [id])
+
+  @@map("Stream")
+}

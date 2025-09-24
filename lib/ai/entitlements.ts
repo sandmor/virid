@@ -1,9 +1,9 @@
 import type { UserType } from "@/lib/auth/types";
-import type { ChatModel } from "./models";
 
 type Entitlements = {
   maxMessagesPerDay: number;
-  availableChatModelIds: ChatModel["id"][];
+  // provider/model slugs (e.g. "openai/gpt-5")
+  availableChatModelIds: string[];
 };
 
 export const entitlementsByUserType: Record<UserType, Entitlements> = {
@@ -13,8 +13,8 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
   guest: {
     maxMessagesPerDay: 20,
     availableChatModelIds: [
-      "grok4FastFree",
-      "kimiK2Free",
+      "openrouter:x-ai/grok-4-fast:free",
+      "openrouter:moonshotai/kimi-k2:free",
     ],
   },
 
@@ -24,13 +24,13 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
   regular: {
     maxMessagesPerDay: 100,
     availableChatModelIds: [
-      "gpt5",
-      "gemini25FlashImagePreview",
-      "gemini25Flash",
-      "gemini25Pro",
-      "grok4",
-      "grok4FastFree",
-      "kimiK2Free",
+      "openai:gpt-5",
+      "google:gemini-2.5-flash-image-preview",
+      "google:gemini-2.5-flash",
+      "google:gemini-2.5-pro",
+      "openrouter:x-ai/grok-4",
+      "openrouter:x-ai/grok-4-fast:free",
+      "openrouter:moonshotai/kimi-k2:free",
     ],
   },
 
