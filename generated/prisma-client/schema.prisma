@@ -20,6 +20,14 @@ model Provider {
   @@map("Provider")
 }
 
+model Tier {
+  id                String   @id @db.VarChar(32)
+  modelIds          String[]
+  maxMessagesPerDay Int
+
+  @@map("Tier")
+}
+
 model User {
   id    String @id @db.VarChar(191) // Accept Clerk style ids (e.g. user_...) or UUIDs
   email String @db.VarChar(128)

@@ -63,10 +63,11 @@ export async function createAuthenticatedContext({
   // Model selector may rely on authenticated user fixtures; only run if visible
   // Optionally select a specific default model if selector present
   try {
-  await chatPage.chooseModelFromSelector("openai:gpt-5");
+    // Attempt to select a premium model (openai:gpt-5) if present for authenticated users.
+    await chatPage.chooseModelFromSelector("openai:gpt-5");
     await expect(chatPage.getSelectedModel()).resolves.toEqual("GPT-5");
   } catch {
-    // ignore if model selector not available in this context
+    // Selector may not include this model (e.g., guest or fallback). Ignore.
   }
 
   await page.waitForTimeout(1000);

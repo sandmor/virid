@@ -10,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import { deriveChatModel } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
 import { CheckCircleFillIcon, ChevronDownIcon } from "./icons";
@@ -18,19 +17,18 @@ import { CheckCircleFillIcon, ChevronDownIcon } from "./icons";
 export function ModelSelector({
   session,
   selectedModelId,
+  modelIds,
   className,
 }: {
   session: AppSession;
   selectedModelId: string;
+  modelIds: string[];
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
   const [optimisticModelId, setOptimisticModelId] =
     useOptimistic(selectedModelId);
 
-  const userType = session.user.type;
-  const { availableChatModelIds } = entitlementsByUserType[userType];
-
-  const availableChatModels = availableChatModelIds.map(deriveChatModel);
+  const availableChatModels = modelIds.map(deriveChatModel);
 
   const selectedChatModel = useMemo(
     () =>

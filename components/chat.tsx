@@ -41,6 +41,7 @@ export function Chat({
   isReadonly,
   autoResume,
   initialLastContext,
+  allowedModelIds,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -49,6 +50,7 @@ export function Chat({
   isReadonly: boolean;
   autoResume: boolean;
   initialLastContext?: AppUsage;
+  allowedModelIds: string[];
 }) {
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -220,6 +222,7 @@ export function Chat({
               status={status}
               stop={stop}
               usage={usage}
+              allowedModelIds={allowedModelIds}
             />
           )}
         </div>
@@ -241,6 +244,7 @@ export function Chat({
         status={status}
         stop={stop}
         votes={votes}
+        allowedModelIds={allowedModelIds}
       />
 
       <AlertDialog

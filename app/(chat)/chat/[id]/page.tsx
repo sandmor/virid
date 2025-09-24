@@ -5,7 +5,7 @@ import { getAppSession } from "@/lib/auth/session";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
-import { entitlementsByUserType } from "@/lib/ai/entitlements";
+import { getTierForUserType } from "@/lib/ai/tiers";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
 
@@ -42,7 +42,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get("chat-model");
-  const allowedModels = entitlementsByUserType[session.user.type].availableChatModelIds;
+  const { modelIds: allowedModels } = await getTierForUserType(session.user.type);
   let initialModel =
     chatModelFromCookie && allowedModels.includes(chatModelFromCookie.value)
       ? chatModelFromCookie.value
@@ -62,6 +62,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           initialMessages={uiMessages}
           initialVisibilityType={chat.visibility}
           isReadonly={session?.user?.id !== chat.userId}
+          allowedModelIds={allowedModels}
         />
         <DataStreamHandler />
       </>
@@ -78,6 +79,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}
         isReadonly={session?.user?.id !== chat.userId}
+        allowedModelIds={allowedModels}
       />
       <DataStreamHandler />
     </>

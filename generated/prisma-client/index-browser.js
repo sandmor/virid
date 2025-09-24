@@ -125,6 +125,12 @@ exports.Prisma.ProviderScalarFieldEnum = {
   apiKey: 'apiKey'
 };
 
+exports.Prisma.TierScalarFieldEnum = {
+  id: 'id',
+  modelIds: 'modelIds',
+  maxMessagesPerDay: 'maxMessagesPerDay'
+};
+
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email'
@@ -222,6 +228,7 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   Provider: 'Provider',
+  Tier: 'Tier',
   User: 'User',
   Chat: 'Chat',
   Message_v2: 'Message_v2',

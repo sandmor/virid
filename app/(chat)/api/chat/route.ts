@@ -19,7 +19,7 @@ import { getUsage } from "tokenlens/helpers";
 import { getAppSession } from "@/lib/auth/session";
 import type { UserType } from "@/lib/auth/types";
 import type { VisibilityType } from "@/components/visibility-selector";
-import { entitlementsByUserType } from "@/lib/ai/entitlements";
+import { getTierForUserType } from "@/lib/ai/tiers";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel, getResolvedProviderModelId } from "@/lib/ai/providers";
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
     const userType: UserType = session.user.type;
 
     // Enforce model entitlement server-side (guards against tampered client requests)
-    const allowedModels = entitlementsByUserType[userType].availableChatModelIds;
+  const { modelIds: allowedModels, maxMessagesPerDay } = await getTierForUserType(userType);
     if (!allowedModels.includes(selectedChatModel)) {
       return new ChatSDKError(
         userType === "guest" ? "forbidden:model" : "forbidden:model"
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
       differenceInHours: 24,
     });
 
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
+  if (messageCount > maxMessagesPerDay) {
       return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
