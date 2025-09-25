@@ -189,6 +189,29 @@
       --background-end-rgb: 0, 0, 0;
     }
   }
+
+  /* KaTeX display blocks: scrollable horizontally with subtle styling */
+  .katex-display {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.25rem 0.5rem; /* reinforce spacing even outside response wrapper */
+  }
+  .katex-display > .katex {
+    white-space: normal; /* allow long expressions to wrap if needed */
+  }
+  .katex-display::-webkit-scrollbar {
+    height: 6px;
+  }
+  .katex-display::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .katex-display::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.25);
+    border-radius: 3px;
+  }
+  .dark .katex-display::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.35);
+  }
 }
 
 @layer base {
