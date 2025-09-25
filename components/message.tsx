@@ -24,6 +24,7 @@ import { MessageEditor } from "./message-editor";
 import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
 import { Weather } from "./weather";
+import { DiffView } from "./diffview";
 
 const PurePreviewMessage = ({
   chatId,
@@ -174,13 +175,138 @@ const PurePreviewMessage = ({
                 <Tool defaultOpen={true} key={toolCallId}>
                   <ToolHeader state={state} type="tool-getWeather" />
                   <ToolContent>
-                    {state === "input-available" && (
-                      <ToolInput input={part.input} />
-                    )}
-                    {state === "output-available" && (
+                    <ToolInput input={part.input ?? {}} />
+                    {(state === "output-available" || state === "output-error") && (
                       <ToolOutput
-                        errorText={undefined}
-                        output={<Weather weatherAtLocation={part.output} />}
+                        errorText={
+                          state === "output-error"
+                            ? part.errorText
+                            : part.output && typeof part.output === 'object' && 'error' in (part.output as any)
+                              ? String((part.output as any).error)
+                              : undefined
+                        }
+                        output={
+                          state === "output-available" && part.output && !(typeof part.output === 'object' && 'error' in (part.output as any)) ? (
+                            <Weather weatherAtLocation={part.output} />
+                          ) : null
+                        }
+                      />
+                    )}
+                  </ToolContent>
+                </Tool>
+              );
+            }
+
+            // Archive tools visibility similar to weather tool
+            if (type === "tool-archiveCreateEntry" ||
+                type === "tool-archiveReadEntry" ||
+                type === "tool-archiveUpdateEntry" ||
+                type === "tool-archiveDeleteEntry" ||
+                type === "tool-archiveLinkEntries" ||
+                type === "tool-archiveSearchEntries" ||
+                type === "tool-archivePinEntry" ||
+                type === "tool-archiveUnpinEntry") {
+              const { toolCallId, state } = part;
+              const output = part.output as any;
+              return (
+                <Tool defaultOpen={true} key={toolCallId}>
+                  <ToolHeader state={state} type={type} />
+                  <ToolContent>
+                    <ToolInput input={part.input ?? {}} />
+                    {(state === "output-available" || state === "output-error") && (
+                      <ToolOutput
+                        errorText={
+                          state === "output-error"
+                            ? part.errorText
+                            : output && typeof output === 'object' && 'error' in output
+                              ? String(output.error)
+                              : undefined
+                        }
+                        output={
+                          state === "output-available" && output && !(typeof output === 'object' && 'error' in output) ? (
+                            <div className="space-y-2 text-xs">
+                              <pre className="whitespace-pre-wrap break-words">
+                                {JSON.stringify(output, null, 2)}
+                              </pre>
+                            </div>
+                          ) : null
+                        }
+                      />
+                    )}
+                  </ToolContent>
+                </Tool>
+              );
+            }
+
+            if (type === "tool-archiveApplyEdits") {
+              const { toolCallId, state } = part;
+              const output = part.output as any;
+              return (
+                <Tool defaultOpen={true} key={toolCallId}>
+                  <ToolHeader state={state} type={type} />
+                  <ToolContent>
+                    <ToolInput input={part.input ?? {}} />
+                    {(state === "output-available" || state === "output-error") && (
+                      <ToolOutput
+                        errorText={
+                          state === "output-error"
+                            ? part.errorText
+                            : output && typeof output === 'object' && 'error' in output
+                              ? String(output.error)
+                              : undefined
+                        }
+                        output={
+                          state === "output-available" && output && !(typeof output === 'object' && 'error' in output) ? (
+                            <div className="space-y-4">
+                              {output.oldBody !== undefined && output.newBody !== undefined && output.oldBody !== output.newBody ? (
+                                <div>
+                                  <h5 className="mb-2 font-medium text-xs uppercase tracking-wide text-muted-foreground">Body Diff</h5>
+                                  <div className="rounded-md border bg-background p-2">
+                                    <DiffView oldContent={output.oldBody} newContent={output.newBody} />
+                                  </div>
+                                </div>
+                              ) : null}
+                              <div className="space-y-2">
+                                <h5 className="font-medium text-xs uppercase tracking-wide text-muted-foreground">Summary</h5>
+                                <ul className="list-inside list-disc text-xs">
+                                  <li>Applied: {output.appliedEdits}</li>
+                                  <li>Skipped: {output.skippedEdits}</li>
+                                  <li>Updated: {String(output.updated)}</li>
+                                  <li>Length: {output.bodyLength}</li>
+                                </ul>
+                              </div>
+                              {Array.isArray(output.edits) && (
+                                <div className="space-y-2">
+                                  <h5 className="font-medium text-xs uppercase tracking-wide text-muted-foreground">Edits</h5>
+                                  <div className="max-h-64 overflow-auto rounded-md bg-muted/50 p-2 text-xs">
+                                    <table className="w-full text-left">
+                                      <thead className="sticky top-0 bg-muted/70 backdrop-blur">
+                                        <tr className="text-[10px] uppercase text-muted-foreground">
+                                          <th className="px-1 py-1">#</th>
+                                          <th className="px-1 py-1">Mode</th>
+                                          <th className="px-1 py-1">Target</th>
+                                          <th className="px-1 py-1">Status</th>
+                                          <th className="px-1 py-1">Reason</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {output.edits.map((e: any) => (
+                                          <tr key={e.index} className="border-t border-border/50">
+                                            <td className="px-1 py-1 align-top text-muted-foreground">{e.index}</td>
+                                            <td className="px-1 py-1 align-top font-mono text-[11px]">{e.mode}</td>
+                                            <td className="px-1 py-1 align-top max-w-[220px] truncate" title={e.target}>{e.target}</td>
+                                            <td className="px-1 py-1 align-top">{e.status}</td>
+                                            <td className="px-1 py-1 align-top text-muted-foreground">{e.reason || ''}</td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ) : null
+                        }
                       />
                     )}
                   </ToolContent>
@@ -214,7 +340,7 @@ const PurePreviewMessage = ({
             if (type === "tool-updateDocument") {
               const { toolCallId } = part;
 
-              if (part.output && "error" in part.output) {
+              if (part.output && typeof part.output === 'object' && 'error' in part.output) {
                 return (
                   <div
                     className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
@@ -228,9 +354,9 @@ const PurePreviewMessage = ({
               return (
                 <div className="relative" key={toolCallId}>
                   <DocumentPreview
-                    args={{ ...part.output, isUpdate: true }}
+                    args={part.output ? { title: (part.output as any).title, kind: (part.output as any).kind, isUpdate: true } : undefined}
                     isReadonly={isReadonly}
-                    result={part.output}
+                    result={part.output ? { id: (part.output as any).id, title: (part.output as any).title, kind: (part.output as any).kind } : undefined}
                   />
                 </div>
               );
@@ -243,24 +369,24 @@ const PurePreviewMessage = ({
                 <Tool defaultOpen={true} key={toolCallId}>
                   <ToolHeader state={state} type="tool-requestSuggestions" />
                   <ToolContent>
-                    {state === "input-available" && (
-                      <ToolInput input={part.input} />
-                    )}
-                    {state === "output-available" && (
+                    <ToolInput input={part.input ?? {}} />
+                    {(state === "output-available" || state === "output-error") && (
                       <ToolOutput
-                        errorText={undefined}
+                        errorText={
+                          state === "output-error"
+                            ? part.errorText
+                            : part.output && typeof part.output === 'object' && 'error' in (part.output as any)
+                              ? String((part.output as any).error)
+                              : undefined
+                        }
                         output={
-                          "error" in part.output ? (
-                            <div className="rounded border p-2 text-red-500">
-                              Error: {String(part.output.error)}
-                            </div>
-                          ) : (
+                          state === "output-available" && part.output && !(typeof part.output === 'object' && 'error' in (part.output as any)) && (part.output as any).id && (part.output as any).title && (part.output as any).kind ? (
                             <DocumentToolResult
                               isReadonly={isReadonly}
-                              result={part.output}
+                              result={{ id: (part.output as any).id, title: (part.output as any).title, kind: (part.output as any).kind }}
                               type="request-suggestions"
                             />
-                          )
+                          ) : null
                         }
                       />
                     )}

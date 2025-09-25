@@ -141,6 +141,30 @@ In CI (detected via `PLAYWRIGHT` / `CI_PLAYWRIGHT`) social auth buttons are supp
 
 Both the client selector and server API use the same entitlement source, preventing privilege escalation via crafted requests.
 
+## Archive Memory System (Developer)
+
+The archive is a per-user durable memory store surfaced only to the model via tool calls (no UI yet). It enables the assistant to remember entities, preferences, and relationships.
+
+Data models (`ArchiveEntry`, `ArchiveLink`) are defined in `prisma/schema.prisma`:
+
+- Entry: `slug` (user-unique), `entity`, `tags[]`, `body`, timestamps.
+- Link: semantic relationship between two entries with `type` label and optional bidirectionality.
+
+Implemented database queries live in `lib/db/queries.ts` (create, update, delete, link, search). Slug uniqueness is enforced per user with auto-suffixing on collisions.
+
+Available tools (registered in chat route):
+
+- `archiveCreateEntry`
+- `archiveReadEntry`
+- `archiveUpdateEntry`
+- `archiveDeleteEntry`
+- `archiveLinkEntries`
+- `archiveSearchEntries`
+
+Model guidance is appended to the system prompt to encourage concise, non-duplicative entries and appropriate linking.
+
+Future enhancements (not yet implemented): semantic vector search, summarization/compaction, richer graph traversal.
+
 ## License
 
 MIT

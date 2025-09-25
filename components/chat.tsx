@@ -53,6 +53,11 @@ export function Chat({
   const [currentModelId, setCurrentModelId] = useState(initialChatModel);
   const currentModelIdRef = useRef(currentModelId);
 
+  // Provisional pinning (allow selecting archive entries before first message creates backend chat row)
+  const [stagedPinnedSlugs, setStagedPinnedSlugs] = useState<string[]>([]);
+  const chatHasStartedRef = useRef(initialMessages.length > 0);
+  useEffect(() => { if (initialMessages.length > 0) chatHasStartedRef.current = true; }, [initialMessages.length]);
+
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
@@ -77,14 +82,16 @@ export function Chat({
         // If we have marked a message for regeneration, include its id then clear it
         const regenId = regeneratingMessageIdRef.current;
         regeneratingMessageIdRef.current = null;
+        const includeInitialPins = !chatHasStartedRef.current && stagedPinnedSlugs.length > 0;
         return {
           body: {
+            ...request.body,
             id: request.id,
             message: request.messages.at(-1),
             selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibilityType,
             regeneratingMessageId: regenId || undefined,
-            ...request.body,
+            initialPinnedSlugs: includeInitialPins ? stagedPinnedSlugs : undefined,
           },
         };
       },
@@ -98,6 +105,7 @@ export function Chat({
     onFinish: () => {
       // Invalidate chat history infinite query (new message might affect ordering)
       queryClient.invalidateQueries({ queryKey: ["chat","history"] });
+      chatHasStartedRef.current = true; // lock-in; subsequent sends won't include initialPinnedSlugs
     },
     onError: (error) => {
       if (error instanceof ChatSDKError) {
@@ -167,7 +175,12 @@ export function Chat({
           chatId={id}
           isReadonly={isReadonly}
           selectedVisibilityType={initialVisibilityType}
+            stagedPinnedSlugs={stagedPinnedSlugs}
+            onAddStagedPin={(slug) => setStagedPinnedSlugs((prev) => prev.includes(slug) ? prev : [...prev, slug])}
+            onRemoveStagedPin={(slug) => setStagedPinnedSlugs((prev) => prev.filter(s => s !== slug))}
+            chatHasStarted={chatHasStartedRef.current}
         />
+
 
         <Messages
           chatId={id}

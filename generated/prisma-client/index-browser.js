@@ -195,6 +195,34 @@ exports.Prisma.StreamScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ArchiveEntryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  slug: 'slug',
+  entity: 'entity',
+  tags: 'tags',
+  body: 'body',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ChatPinnedArchiveEntryScalarFieldEnum = {
+  id: 'id',
+  chatId: 'chatId',
+  archiveEntryId: 'archiveEntryId',
+  userId: 'userId',
+  pinnedAt: 'pinnedAt'
+};
+
+exports.Prisma.ArchiveLinkScalarFieldEnum = {
+  id: 'id',
+  sourceId: 'sourceId',
+  targetId: 'targetId',
+  type: 'type',
+  bidirectional: 'bidirectional',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -235,7 +263,10 @@ exports.Prisma.ModelName = {
   Vote_v2: 'Vote_v2',
   Document: 'Document',
   Suggestion: 'Suggestion',
-  Stream: 'Stream'
+  Stream: 'Stream',
+  ArchiveEntry: 'ArchiveEntry',
+  ChatPinnedArchiveEntry: 'ChatPinnedArchiveEntry',
+  ArchiveLink: 'ArchiveLink'
 };
 
 /**

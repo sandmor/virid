@@ -62,6 +62,14 @@ export function SidebarUserNav({ user }: { user: NavUser }) {
             data-testid="user-nav-menu"
             side="top"
           >
+            {!isGuest && (
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={() => router.push("/profile")}
+              >
+                Profile & Archive
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               className="cursor-pointer"
               data-testid="user-nav-item-theme"

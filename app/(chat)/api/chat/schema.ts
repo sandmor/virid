@@ -32,6 +32,18 @@ export const postRequestBodySchema = z.object({
     }),
   selectedVisibilityType: z.enum(["public", "private"]),
   regeneratingMessageId: z.string().uuid().optional(),
+  // Optional list of archive entry slugs to pin atomically when a brand new chat is created
+  // This allows the UI to stage memory pins before the first message is sent (chat row does not yet exist)
+  initialPinnedSlugs: z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(128)
+        .regex(/^[a-zA-Z0-9._:-]+$/, { message: "Slug contains invalid characters" })
+    )
+    .max(12)
+    .optional(),
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

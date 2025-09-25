@@ -6,6 +6,7 @@ import { useWindowSize } from "usehooks-ts";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "./icons";
+import { ChatPinnedArchive } from "./chat-pinned-archive";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
 
@@ -13,10 +14,18 @@ function PureChatHeader({
   chatId,
   selectedVisibilityType,
   isReadonly,
+  stagedPinnedSlugs,
+  onAddStagedPin,
+  onRemoveStagedPin,
+  chatHasStarted,
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
+  stagedPinnedSlugs: string[];
+  onAddStagedPin: (slug: string) => void;
+  onRemoveStagedPin: (slug: string) => void;
+  chatHasStarted: boolean;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -42,20 +51,29 @@ function PureChatHeader({
       )}
 
       {!isReadonly && (
-        <VisibilitySelector
-          chatId={chatId}
-          className="order-1 md:order-2"
-          selectedVisibilityType={selectedVisibilityType}
-        />
+        <div className="ml-auto flex items-center gap-2">
+          <VisibilitySelector
+            chatId={chatId}
+            className="order-1 md:order-2"
+            selectedVisibilityType={selectedVisibilityType}
+          />
+          <ChatPinnedArchive
+            chatId={chatId}
+            stagedPinnedSlugs={stagedPinnedSlugs}
+            onAddStagedPin={onAddStagedPin}
+            onRemoveStagedPin={onRemoveStagedPin}
+            chatHasStarted={chatHasStarted}
+          />
+        </div>
       )}
     </header>
   );
 }
 
-export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
-  return (
-    prevProps.chatId === nextProps.chatId &&
-    prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
-    prevProps.isReadonly === nextProps.isReadonly
-  );
-});
+export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) =>
+  prevProps.chatId === nextProps.chatId &&
+  prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
+  prevProps.isReadonly === nextProps.isReadonly &&
+  prevProps.chatHasStarted === nextProps.chatHasStarted &&
+  prevProps.stagedPinnedSlugs.join("|") === nextProps.stagedPinnedSlugs.join("|")
+);

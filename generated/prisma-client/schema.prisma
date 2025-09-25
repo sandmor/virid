@@ -32,9 +32,11 @@ model User {
   id    String @id @db.VarChar(191) // Accept Clerk style ids (e.g. user_...) or UUIDs
   email String @db.VarChar(128)
 
-  chats       Chat[]
-  documents   Document[]
-  suggestions Suggestion[]
+  chats                Chat[]
+  documents            Document[]
+  suggestions          Suggestion[]
+  archiveEntries       ArchiveEntry[]
+  pinnedArchiveEntries ChatPinnedArchiveEntry[]
 
   @@map("User")
 }
@@ -52,10 +54,11 @@ model Chat {
   forkedFromMessageId String? @db.Uuid
   forkDepth           Int     @default(0)
 
-  user     User         @relation(fields: [userId], references: [id])
-  messages Message_v2[]
-  votes    Vote_v2[]
-  streams  Stream[]
+  user                 User                     @relation(fields: [userId], references: [id])
+  messages             Message_v2[]
+  votes                Vote_v2[]
+  streams              Stream[]
+  pinnedArchiveEntries ChatPinnedArchiveEntry[]
 
   @@index([parentChatId])
   @@map("Chat")
@@ -138,4 +141,62 @@ model Stream {
   chat Chat @relation(fields: [chatId], references: [id])
 
   @@map("Stream")
+}
+
+// Archive memory system: per-user knowledge entries and their relationships.
+model ArchiveEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.VarChar(191)
+  slug      String   @db.VarChar(128)
+  entity    String   @db.Text
+  tags      String[]
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  outgoingLinks ArchiveLink[]            @relation("sourceLinks")
+  incomingLinks ArchiveLink[]            @relation("targetLinks")
+  pinnedInChats ChatPinnedArchiveEntry[]
+
+  @@unique([userId, slug])
+  @@index([userId, slug])
+  @@map("ArchiveEntry")
+}
+
+// Join table mapping pinned archive entries to chats (user scoped for ownership enforcement)
+model ChatPinnedArchiveEntry {
+  id             String   @id @default(uuid()) @db.Uuid
+  chatId         String   @db.Uuid
+  archiveEntryId String   @db.Uuid
+  userId         String   @db.VarChar(191)
+  pinnedAt       DateTime @default(now())
+
+  chat         Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  archiveEntry ArchiveEntry @relation(fields: [archiveEntryId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, archiveEntryId])
+  @@index([chatId])
+  @@index([archiveEntryId])
+  @@index([userId])
+  @@map("ChatPinnedArchiveEntry")
+}
+
+model ArchiveLink {
+  id            String   @id @default(uuid()) @db.Uuid
+  sourceId      String   @db.Uuid
+  targetId      String   @db.Uuid
+  type          String   @db.VarChar(64)
+  bidirectional Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  source ArchiveEntry @relation("sourceLinks", fields: [sourceId], references: [id], onDelete: Cascade)
+  target ArchiveEntry @relation("targetLinks", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId])
+  @@index([targetId])
+  @@index([type])
+  @@map("ArchiveLink")
 }

@@ -58,6 +58,21 @@ export type Suggestion = $Result.DefaultSelection<Prisma.$SuggestionPayload>
  * 
  */
 export type Stream = $Result.DefaultSelection<Prisma.$StreamPayload>
+/**
+ * Model ArchiveEntry
+ * 
+ */
+export type ArchiveEntry = $Result.DefaultSelection<Prisma.$ArchiveEntryPayload>
+/**
+ * Model ChatPinnedArchiveEntry
+ * 
+ */
+export type ChatPinnedArchiveEntry = $Result.DefaultSelection<Prisma.$ChatPinnedArchiveEntryPayload>
+/**
+ * Model ArchiveLink
+ * 
+ */
+export type ArchiveLink = $Result.DefaultSelection<Prisma.$ArchiveLinkPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -266,6 +281,36 @@ export class PrismaClient<
     * ```
     */
   get stream(): Prisma.StreamDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.archiveEntry`: Exposes CRUD operations for the **ArchiveEntry** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ArchiveEntries
+    * const archiveEntries = await prisma.archiveEntry.findMany()
+    * ```
+    */
+  get archiveEntry(): Prisma.ArchiveEntryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.chatPinnedArchiveEntry`: Exposes CRUD operations for the **ChatPinnedArchiveEntry** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ChatPinnedArchiveEntries
+    * const chatPinnedArchiveEntries = await prisma.chatPinnedArchiveEntry.findMany()
+    * ```
+    */
+  get chatPinnedArchiveEntry(): Prisma.ChatPinnedArchiveEntryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.archiveLink`: Exposes CRUD operations for the **ArchiveLink** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ArchiveLinks
+    * const archiveLinks = await prisma.archiveLink.findMany()
+    * ```
+    */
+  get archiveLink(): Prisma.ArchiveLinkDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -714,7 +759,10 @@ export namespace Prisma {
     Vote_v2: 'Vote_v2',
     Document: 'Document',
     Suggestion: 'Suggestion',
-    Stream: 'Stream'
+    Stream: 'Stream',
+    ArchiveEntry: 'ArchiveEntry',
+    ChatPinnedArchiveEntry: 'ChatPinnedArchiveEntry',
+    ArchiveLink: 'ArchiveLink'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -733,7 +781,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "provider" | "tier" | "user" | "chat" | "message_v2" | "vote_v2" | "document" | "suggestion" | "stream"
+      modelProps: "provider" | "tier" | "user" | "chat" | "message_v2" | "vote_v2" | "document" | "suggestion" | "stream" | "archiveEntry" | "chatPinnedArchiveEntry" | "archiveLink"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1403,6 +1451,228 @@ export namespace Prisma {
           }
         }
       }
+      ArchiveEntry: {
+        payload: Prisma.$ArchiveEntryPayload<ExtArgs>
+        fields: Prisma.ArchiveEntryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ArchiveEntryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ArchiveEntryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload>
+          }
+          findFirst: {
+            args: Prisma.ArchiveEntryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ArchiveEntryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload>
+          }
+          findMany: {
+            args: Prisma.ArchiveEntryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload>[]
+          }
+          create: {
+            args: Prisma.ArchiveEntryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload>
+          }
+          createMany: {
+            args: Prisma.ArchiveEntryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ArchiveEntryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload>[]
+          }
+          delete: {
+            args: Prisma.ArchiveEntryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload>
+          }
+          update: {
+            args: Prisma.ArchiveEntryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload>
+          }
+          deleteMany: {
+            args: Prisma.ArchiveEntryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ArchiveEntryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ArchiveEntryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload>[]
+          }
+          upsert: {
+            args: Prisma.ArchiveEntryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveEntryPayload>
+          }
+          aggregate: {
+            args: Prisma.ArchiveEntryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateArchiveEntry>
+          }
+          groupBy: {
+            args: Prisma.ArchiveEntryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ArchiveEntryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ArchiveEntryCountArgs<ExtArgs>
+            result: $Utils.Optional<ArchiveEntryCountAggregateOutputType> | number
+          }
+        }
+      }
+      ChatPinnedArchiveEntry: {
+        payload: Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>
+        fields: Prisma.ChatPinnedArchiveEntryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ChatPinnedArchiveEntryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ChatPinnedArchiveEntryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload>
+          }
+          findFirst: {
+            args: Prisma.ChatPinnedArchiveEntryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ChatPinnedArchiveEntryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload>
+          }
+          findMany: {
+            args: Prisma.ChatPinnedArchiveEntryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload>[]
+          }
+          create: {
+            args: Prisma.ChatPinnedArchiveEntryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload>
+          }
+          createMany: {
+            args: Prisma.ChatPinnedArchiveEntryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ChatPinnedArchiveEntryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload>[]
+          }
+          delete: {
+            args: Prisma.ChatPinnedArchiveEntryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload>
+          }
+          update: {
+            args: Prisma.ChatPinnedArchiveEntryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload>
+          }
+          deleteMany: {
+            args: Prisma.ChatPinnedArchiveEntryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ChatPinnedArchiveEntryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ChatPinnedArchiveEntryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload>[]
+          }
+          upsert: {
+            args: Prisma.ChatPinnedArchiveEntryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChatPinnedArchiveEntryPayload>
+          }
+          aggregate: {
+            args: Prisma.ChatPinnedArchiveEntryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateChatPinnedArchiveEntry>
+          }
+          groupBy: {
+            args: Prisma.ChatPinnedArchiveEntryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ChatPinnedArchiveEntryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ChatPinnedArchiveEntryCountArgs<ExtArgs>
+            result: $Utils.Optional<ChatPinnedArchiveEntryCountAggregateOutputType> | number
+          }
+        }
+      }
+      ArchiveLink: {
+        payload: Prisma.$ArchiveLinkPayload<ExtArgs>
+        fields: Prisma.ArchiveLinkFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ArchiveLinkFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ArchiveLinkFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload>
+          }
+          findFirst: {
+            args: Prisma.ArchiveLinkFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ArchiveLinkFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload>
+          }
+          findMany: {
+            args: Prisma.ArchiveLinkFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload>[]
+          }
+          create: {
+            args: Prisma.ArchiveLinkCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload>
+          }
+          createMany: {
+            args: Prisma.ArchiveLinkCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ArchiveLinkCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload>[]
+          }
+          delete: {
+            args: Prisma.ArchiveLinkDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload>
+          }
+          update: {
+            args: Prisma.ArchiveLinkUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload>
+          }
+          deleteMany: {
+            args: Prisma.ArchiveLinkDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ArchiveLinkUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ArchiveLinkUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload>[]
+          }
+          upsert: {
+            args: Prisma.ArchiveLinkUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ArchiveLinkPayload>
+          }
+          aggregate: {
+            args: Prisma.ArchiveLinkAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateArchiveLink>
+          }
+          groupBy: {
+            args: Prisma.ArchiveLinkGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ArchiveLinkGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ArchiveLinkCountArgs<ExtArgs>
+            result: $Utils.Optional<ArchiveLinkCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1508,6 +1778,9 @@ export namespace Prisma {
     document?: DocumentOmit
     suggestion?: SuggestionOmit
     stream?: StreamOmit
+    archiveEntry?: ArchiveEntryOmit
+    chatPinnedArchiveEntry?: ChatPinnedArchiveEntryOmit
+    archiveLink?: ArchiveLinkOmit
   }
 
   /* Types for Logging */
@@ -1591,12 +1864,16 @@ export namespace Prisma {
     chats: number
     documents: number
     suggestions: number
+    archiveEntries: number
+    pinnedArchiveEntries: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chats?: boolean | UserCountOutputTypeCountChatsArgs
     documents?: boolean | UserCountOutputTypeCountDocumentsArgs
     suggestions?: boolean | UserCountOutputTypeCountSuggestionsArgs
+    archiveEntries?: boolean | UserCountOutputTypeCountArchiveEntriesArgs
+    pinnedArchiveEntries?: boolean | UserCountOutputTypeCountPinnedArchiveEntriesArgs
   }
 
   // Custom InputTypes
@@ -1631,6 +1908,20 @@ export namespace Prisma {
     where?: SuggestionWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountArchiveEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ArchiveEntryWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPinnedArchiveEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChatPinnedArchiveEntryWhereInput
+  }
+
 
   /**
    * Count Type ChatCountOutputType
@@ -1640,12 +1931,14 @@ export namespace Prisma {
     messages: number
     votes: number
     streams: number
+    pinnedArchiveEntries: number
   }
 
   export type ChatCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     messages?: boolean | ChatCountOutputTypeCountMessagesArgs
     votes?: boolean | ChatCountOutputTypeCountVotesArgs
     streams?: boolean | ChatCountOutputTypeCountStreamsArgs
+    pinnedArchiveEntries?: boolean | ChatCountOutputTypeCountPinnedArchiveEntriesArgs
   }
 
   // Custom InputTypes
@@ -1678,6 +1971,13 @@ export namespace Prisma {
    */
   export type ChatCountOutputTypeCountStreamsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: StreamWhereInput
+  }
+
+  /**
+   * ChatCountOutputType without action
+   */
+  export type ChatCountOutputTypeCountPinnedArchiveEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChatPinnedArchiveEntryWhereInput
   }
 
 
@@ -1740,6 +2040,55 @@ export namespace Prisma {
    */
   export type DocumentCountOutputTypeCountSuggestionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SuggestionWhereInput
+  }
+
+
+  /**
+   * Count Type ArchiveEntryCountOutputType
+   */
+
+  export type ArchiveEntryCountOutputType = {
+    outgoingLinks: number
+    incomingLinks: number
+    pinnedInChats: number
+  }
+
+  export type ArchiveEntryCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    outgoingLinks?: boolean | ArchiveEntryCountOutputTypeCountOutgoingLinksArgs
+    incomingLinks?: boolean | ArchiveEntryCountOutputTypeCountIncomingLinksArgs
+    pinnedInChats?: boolean | ArchiveEntryCountOutputTypeCountPinnedInChatsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ArchiveEntryCountOutputType without action
+   */
+  export type ArchiveEntryCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntryCountOutputType
+     */
+    select?: ArchiveEntryCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ArchiveEntryCountOutputType without action
+   */
+  export type ArchiveEntryCountOutputTypeCountOutgoingLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ArchiveLinkWhereInput
+  }
+
+  /**
+   * ArchiveEntryCountOutputType without action
+   */
+  export type ArchiveEntryCountOutputTypeCountIncomingLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ArchiveLinkWhereInput
+  }
+
+  /**
+   * ArchiveEntryCountOutputType without action
+   */
+  export type ArchiveEntryCountOutputTypeCountPinnedInChatsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChatPinnedArchiveEntryWhereInput
   }
 
 
@@ -3845,6 +4194,8 @@ export namespace Prisma {
     chats?: boolean | User$chatsArgs<ExtArgs>
     documents?: boolean | User$documentsArgs<ExtArgs>
     suggestions?: boolean | User$suggestionsArgs<ExtArgs>
+    archiveEntries?: boolean | User$archiveEntriesArgs<ExtArgs>
+    pinnedArchiveEntries?: boolean | User$pinnedArchiveEntriesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -3868,6 +4219,8 @@ export namespace Prisma {
     chats?: boolean | User$chatsArgs<ExtArgs>
     documents?: boolean | User$documentsArgs<ExtArgs>
     suggestions?: boolean | User$suggestionsArgs<ExtArgs>
+    archiveEntries?: boolean | User$archiveEntriesArgs<ExtArgs>
+    pinnedArchiveEntries?: boolean | User$pinnedArchiveEntriesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3879,6 +4232,8 @@ export namespace Prisma {
       chats: Prisma.$ChatPayload<ExtArgs>[]
       documents: Prisma.$DocumentPayload<ExtArgs>[]
       suggestions: Prisma.$SuggestionPayload<ExtArgs>[]
+      archiveEntries: Prisma.$ArchiveEntryPayload<ExtArgs>[]
+      pinnedArchiveEntries: Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4280,6 +4635,8 @@ export namespace Prisma {
     chats<T extends User$chatsArgs<ExtArgs> = {}>(args?: Subset<T, User$chatsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documents<T extends User$documentsArgs<ExtArgs> = {}>(args?: Subset<T, User$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     suggestions<T extends User$suggestionsArgs<ExtArgs> = {}>(args?: Subset<T, User$suggestionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SuggestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    archiveEntries<T extends User$archiveEntriesArgs<ExtArgs> = {}>(args?: Subset<T, User$archiveEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    pinnedArchiveEntries<T extends User$pinnedArchiveEntriesArgs<ExtArgs> = {}>(args?: Subset<T, User$pinnedArchiveEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4771,6 +5128,54 @@ export namespace Prisma {
   }
 
   /**
+   * User.archiveEntries
+   */
+  export type User$archiveEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    where?: ArchiveEntryWhereInput
+    orderBy?: ArchiveEntryOrderByWithRelationInput | ArchiveEntryOrderByWithRelationInput[]
+    cursor?: ArchiveEntryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ArchiveEntryScalarFieldEnum | ArchiveEntryScalarFieldEnum[]
+  }
+
+  /**
+   * User.pinnedArchiveEntries
+   */
+  export type User$pinnedArchiveEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    where?: ChatPinnedArchiveEntryWhereInput
+    orderBy?: ChatPinnedArchiveEntryOrderByWithRelationInput | ChatPinnedArchiveEntryOrderByWithRelationInput[]
+    cursor?: ChatPinnedArchiveEntryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ChatPinnedArchiveEntryScalarFieldEnum | ChatPinnedArchiveEntryScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5019,6 +5424,7 @@ export namespace Prisma {
     messages?: boolean | Chat$messagesArgs<ExtArgs>
     votes?: boolean | Chat$votesArgs<ExtArgs>
     streams?: boolean | Chat$streamsArgs<ExtArgs>
+    pinnedArchiveEntries?: boolean | Chat$pinnedArchiveEntriesArgs<ExtArgs>
     _count?: boolean | ChatCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["chat"]>
 
@@ -5066,6 +5472,7 @@ export namespace Prisma {
     messages?: boolean | Chat$messagesArgs<ExtArgs>
     votes?: boolean | Chat$votesArgs<ExtArgs>
     streams?: boolean | Chat$streamsArgs<ExtArgs>
+    pinnedArchiveEntries?: boolean | Chat$pinnedArchiveEntriesArgs<ExtArgs>
     _count?: boolean | ChatCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ChatIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5082,6 +5489,7 @@ export namespace Prisma {
       messages: Prisma.$Message_v2Payload<ExtArgs>[]
       votes: Prisma.$Vote_v2Payload<ExtArgs>[]
       streams: Prisma.$StreamPayload<ExtArgs>[]
+      pinnedArchiveEntries: Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -5491,6 +5899,7 @@ export namespace Prisma {
     messages<T extends Chat$messagesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     votes<T extends Chat$votesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     streams<T extends Chat$streamsArgs<ExtArgs> = {}>(args?: Subset<T, Chat$streamsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StreamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    pinnedArchiveEntries<T extends Chat$pinnedArchiveEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$pinnedArchiveEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5994,6 +6403,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: StreamScalarFieldEnum | StreamScalarFieldEnum[]
+  }
+
+  /**
+   * Chat.pinnedArchiveEntries
+   */
+  export type Chat$pinnedArchiveEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    where?: ChatPinnedArchiveEntryWhereInput
+    orderBy?: ChatPinnedArchiveEntryOrderByWithRelationInput | ChatPinnedArchiveEntryOrderByWithRelationInput[]
+    cursor?: ChatPinnedArchiveEntryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ChatPinnedArchiveEntryScalarFieldEnum | ChatPinnedArchiveEntryScalarFieldEnum[]
   }
 
   /**
@@ -11465,6 +11898,3338 @@ export namespace Prisma {
 
 
   /**
+   * Model ArchiveEntry
+   */
+
+  export type AggregateArchiveEntry = {
+    _count: ArchiveEntryCountAggregateOutputType | null
+    _min: ArchiveEntryMinAggregateOutputType | null
+    _max: ArchiveEntryMaxAggregateOutputType | null
+  }
+
+  export type ArchiveEntryMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    slug: string | null
+    entity: string | null
+    body: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ArchiveEntryMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    slug: string | null
+    entity: string | null
+    body: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ArchiveEntryCountAggregateOutputType = {
+    id: number
+    userId: number
+    slug: number
+    entity: number
+    tags: number
+    body: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ArchiveEntryMinAggregateInputType = {
+    id?: true
+    userId?: true
+    slug?: true
+    entity?: true
+    body?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ArchiveEntryMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    slug?: true
+    entity?: true
+    body?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ArchiveEntryCountAggregateInputType = {
+    id?: true
+    userId?: true
+    slug?: true
+    entity?: true
+    tags?: true
+    body?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ArchiveEntryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ArchiveEntry to aggregate.
+     */
+    where?: ArchiveEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ArchiveEntries to fetch.
+     */
+    orderBy?: ArchiveEntryOrderByWithRelationInput | ArchiveEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ArchiveEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ArchiveEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ArchiveEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ArchiveEntries
+    **/
+    _count?: true | ArchiveEntryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ArchiveEntryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ArchiveEntryMaxAggregateInputType
+  }
+
+  export type GetArchiveEntryAggregateType<T extends ArchiveEntryAggregateArgs> = {
+        [P in keyof T & keyof AggregateArchiveEntry]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateArchiveEntry[P]>
+      : GetScalarType<T[P], AggregateArchiveEntry[P]>
+  }
+
+
+
+
+  export type ArchiveEntryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ArchiveEntryWhereInput
+    orderBy?: ArchiveEntryOrderByWithAggregationInput | ArchiveEntryOrderByWithAggregationInput[]
+    by: ArchiveEntryScalarFieldEnum[] | ArchiveEntryScalarFieldEnum
+    having?: ArchiveEntryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ArchiveEntryCountAggregateInputType | true
+    _min?: ArchiveEntryMinAggregateInputType
+    _max?: ArchiveEntryMaxAggregateInputType
+  }
+
+  export type ArchiveEntryGroupByOutputType = {
+    id: string
+    userId: string
+    slug: string
+    entity: string
+    tags: string[]
+    body: string
+    createdAt: Date
+    updatedAt: Date
+    _count: ArchiveEntryCountAggregateOutputType | null
+    _min: ArchiveEntryMinAggregateOutputType | null
+    _max: ArchiveEntryMaxAggregateOutputType | null
+  }
+
+  type GetArchiveEntryGroupByPayload<T extends ArchiveEntryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ArchiveEntryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ArchiveEntryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ArchiveEntryGroupByOutputType[P]>
+            : GetScalarType<T[P], ArchiveEntryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ArchiveEntrySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    slug?: boolean
+    entity?: boolean
+    tags?: boolean
+    body?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    outgoingLinks?: boolean | ArchiveEntry$outgoingLinksArgs<ExtArgs>
+    incomingLinks?: boolean | ArchiveEntry$incomingLinksArgs<ExtArgs>
+    pinnedInChats?: boolean | ArchiveEntry$pinnedInChatsArgs<ExtArgs>
+    _count?: boolean | ArchiveEntryCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["archiveEntry"]>
+
+  export type ArchiveEntrySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    slug?: boolean
+    entity?: boolean
+    tags?: boolean
+    body?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["archiveEntry"]>
+
+  export type ArchiveEntrySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    slug?: boolean
+    entity?: boolean
+    tags?: boolean
+    body?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["archiveEntry"]>
+
+  export type ArchiveEntrySelectScalar = {
+    id?: boolean
+    userId?: boolean
+    slug?: boolean
+    entity?: boolean
+    tags?: boolean
+    body?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ArchiveEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "slug" | "entity" | "tags" | "body" | "createdAt" | "updatedAt", ExtArgs["result"]["archiveEntry"]>
+  export type ArchiveEntryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    outgoingLinks?: boolean | ArchiveEntry$outgoingLinksArgs<ExtArgs>
+    incomingLinks?: boolean | ArchiveEntry$incomingLinksArgs<ExtArgs>
+    pinnedInChats?: boolean | ArchiveEntry$pinnedInChatsArgs<ExtArgs>
+    _count?: boolean | ArchiveEntryCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type ArchiveEntryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type ArchiveEntryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $ArchiveEntryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ArchiveEntry"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      outgoingLinks: Prisma.$ArchiveLinkPayload<ExtArgs>[]
+      incomingLinks: Prisma.$ArchiveLinkPayload<ExtArgs>[]
+      pinnedInChats: Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      slug: string
+      entity: string
+      tags: string[]
+      body: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["archiveEntry"]>
+    composites: {}
+  }
+
+  type ArchiveEntryGetPayload<S extends boolean | null | undefined | ArchiveEntryDefaultArgs> = $Result.GetResult<Prisma.$ArchiveEntryPayload, S>
+
+  type ArchiveEntryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ArchiveEntryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ArchiveEntryCountAggregateInputType | true
+    }
+
+  export interface ArchiveEntryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ArchiveEntry'], meta: { name: 'ArchiveEntry' } }
+    /**
+     * Find zero or one ArchiveEntry that matches the filter.
+     * @param {ArchiveEntryFindUniqueArgs} args - Arguments to find a ArchiveEntry
+     * @example
+     * // Get one ArchiveEntry
+     * const archiveEntry = await prisma.archiveEntry.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ArchiveEntryFindUniqueArgs>(args: SelectSubset<T, ArchiveEntryFindUniqueArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ArchiveEntry that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ArchiveEntryFindUniqueOrThrowArgs} args - Arguments to find a ArchiveEntry
+     * @example
+     * // Get one ArchiveEntry
+     * const archiveEntry = await prisma.archiveEntry.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ArchiveEntryFindUniqueOrThrowArgs>(args: SelectSubset<T, ArchiveEntryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ArchiveEntry that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveEntryFindFirstArgs} args - Arguments to find a ArchiveEntry
+     * @example
+     * // Get one ArchiveEntry
+     * const archiveEntry = await prisma.archiveEntry.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ArchiveEntryFindFirstArgs>(args?: SelectSubset<T, ArchiveEntryFindFirstArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ArchiveEntry that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveEntryFindFirstOrThrowArgs} args - Arguments to find a ArchiveEntry
+     * @example
+     * // Get one ArchiveEntry
+     * const archiveEntry = await prisma.archiveEntry.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ArchiveEntryFindFirstOrThrowArgs>(args?: SelectSubset<T, ArchiveEntryFindFirstOrThrowArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ArchiveEntries that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveEntryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ArchiveEntries
+     * const archiveEntries = await prisma.archiveEntry.findMany()
+     * 
+     * // Get first 10 ArchiveEntries
+     * const archiveEntries = await prisma.archiveEntry.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const archiveEntryWithIdOnly = await prisma.archiveEntry.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ArchiveEntryFindManyArgs>(args?: SelectSubset<T, ArchiveEntryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ArchiveEntry.
+     * @param {ArchiveEntryCreateArgs} args - Arguments to create a ArchiveEntry.
+     * @example
+     * // Create one ArchiveEntry
+     * const ArchiveEntry = await prisma.archiveEntry.create({
+     *   data: {
+     *     // ... data to create a ArchiveEntry
+     *   }
+     * })
+     * 
+     */
+    create<T extends ArchiveEntryCreateArgs>(args: SelectSubset<T, ArchiveEntryCreateArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ArchiveEntries.
+     * @param {ArchiveEntryCreateManyArgs} args - Arguments to create many ArchiveEntries.
+     * @example
+     * // Create many ArchiveEntries
+     * const archiveEntry = await prisma.archiveEntry.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ArchiveEntryCreateManyArgs>(args?: SelectSubset<T, ArchiveEntryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ArchiveEntries and returns the data saved in the database.
+     * @param {ArchiveEntryCreateManyAndReturnArgs} args - Arguments to create many ArchiveEntries.
+     * @example
+     * // Create many ArchiveEntries
+     * const archiveEntry = await prisma.archiveEntry.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ArchiveEntries and only return the `id`
+     * const archiveEntryWithIdOnly = await prisma.archiveEntry.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ArchiveEntryCreateManyAndReturnArgs>(args?: SelectSubset<T, ArchiveEntryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ArchiveEntry.
+     * @param {ArchiveEntryDeleteArgs} args - Arguments to delete one ArchiveEntry.
+     * @example
+     * // Delete one ArchiveEntry
+     * const ArchiveEntry = await prisma.archiveEntry.delete({
+     *   where: {
+     *     // ... filter to delete one ArchiveEntry
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ArchiveEntryDeleteArgs>(args: SelectSubset<T, ArchiveEntryDeleteArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ArchiveEntry.
+     * @param {ArchiveEntryUpdateArgs} args - Arguments to update one ArchiveEntry.
+     * @example
+     * // Update one ArchiveEntry
+     * const archiveEntry = await prisma.archiveEntry.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ArchiveEntryUpdateArgs>(args: SelectSubset<T, ArchiveEntryUpdateArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ArchiveEntries.
+     * @param {ArchiveEntryDeleteManyArgs} args - Arguments to filter ArchiveEntries to delete.
+     * @example
+     * // Delete a few ArchiveEntries
+     * const { count } = await prisma.archiveEntry.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ArchiveEntryDeleteManyArgs>(args?: SelectSubset<T, ArchiveEntryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ArchiveEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveEntryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ArchiveEntries
+     * const archiveEntry = await prisma.archiveEntry.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ArchiveEntryUpdateManyArgs>(args: SelectSubset<T, ArchiveEntryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ArchiveEntries and returns the data updated in the database.
+     * @param {ArchiveEntryUpdateManyAndReturnArgs} args - Arguments to update many ArchiveEntries.
+     * @example
+     * // Update many ArchiveEntries
+     * const archiveEntry = await prisma.archiveEntry.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ArchiveEntries and only return the `id`
+     * const archiveEntryWithIdOnly = await prisma.archiveEntry.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ArchiveEntryUpdateManyAndReturnArgs>(args: SelectSubset<T, ArchiveEntryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ArchiveEntry.
+     * @param {ArchiveEntryUpsertArgs} args - Arguments to update or create a ArchiveEntry.
+     * @example
+     * // Update or create a ArchiveEntry
+     * const archiveEntry = await prisma.archiveEntry.upsert({
+     *   create: {
+     *     // ... data to create a ArchiveEntry
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ArchiveEntry we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ArchiveEntryUpsertArgs>(args: SelectSubset<T, ArchiveEntryUpsertArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ArchiveEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveEntryCountArgs} args - Arguments to filter ArchiveEntries to count.
+     * @example
+     * // Count the number of ArchiveEntries
+     * const count = await prisma.archiveEntry.count({
+     *   where: {
+     *     // ... the filter for the ArchiveEntries we want to count
+     *   }
+     * })
+    **/
+    count<T extends ArchiveEntryCountArgs>(
+      args?: Subset<T, ArchiveEntryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ArchiveEntryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ArchiveEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveEntryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ArchiveEntryAggregateArgs>(args: Subset<T, ArchiveEntryAggregateArgs>): Prisma.PrismaPromise<GetArchiveEntryAggregateType<T>>
+
+    /**
+     * Group by ArchiveEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveEntryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ArchiveEntryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ArchiveEntryGroupByArgs['orderBy'] }
+        : { orderBy?: ArchiveEntryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ArchiveEntryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetArchiveEntryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ArchiveEntry model
+   */
+  readonly fields: ArchiveEntryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ArchiveEntry.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ArchiveEntryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    outgoingLinks<T extends ArchiveEntry$outgoingLinksArgs<ExtArgs> = {}>(args?: Subset<T, ArchiveEntry$outgoingLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    incomingLinks<T extends ArchiveEntry$incomingLinksArgs<ExtArgs> = {}>(args?: Subset<T, ArchiveEntry$incomingLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    pinnedInChats<T extends ArchiveEntry$pinnedInChatsArgs<ExtArgs> = {}>(args?: Subset<T, ArchiveEntry$pinnedInChatsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ArchiveEntry model
+   */
+  interface ArchiveEntryFieldRefs {
+    readonly id: FieldRef<"ArchiveEntry", 'String'>
+    readonly userId: FieldRef<"ArchiveEntry", 'String'>
+    readonly slug: FieldRef<"ArchiveEntry", 'String'>
+    readonly entity: FieldRef<"ArchiveEntry", 'String'>
+    readonly tags: FieldRef<"ArchiveEntry", 'String[]'>
+    readonly body: FieldRef<"ArchiveEntry", 'String'>
+    readonly createdAt: FieldRef<"ArchiveEntry", 'DateTime'>
+    readonly updatedAt: FieldRef<"ArchiveEntry", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ArchiveEntry findUnique
+   */
+  export type ArchiveEntryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveEntry to fetch.
+     */
+    where: ArchiveEntryWhereUniqueInput
+  }
+
+  /**
+   * ArchiveEntry findUniqueOrThrow
+   */
+  export type ArchiveEntryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveEntry to fetch.
+     */
+    where: ArchiveEntryWhereUniqueInput
+  }
+
+  /**
+   * ArchiveEntry findFirst
+   */
+  export type ArchiveEntryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveEntry to fetch.
+     */
+    where?: ArchiveEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ArchiveEntries to fetch.
+     */
+    orderBy?: ArchiveEntryOrderByWithRelationInput | ArchiveEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ArchiveEntries.
+     */
+    cursor?: ArchiveEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ArchiveEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ArchiveEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ArchiveEntries.
+     */
+    distinct?: ArchiveEntryScalarFieldEnum | ArchiveEntryScalarFieldEnum[]
+  }
+
+  /**
+   * ArchiveEntry findFirstOrThrow
+   */
+  export type ArchiveEntryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveEntry to fetch.
+     */
+    where?: ArchiveEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ArchiveEntries to fetch.
+     */
+    orderBy?: ArchiveEntryOrderByWithRelationInput | ArchiveEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ArchiveEntries.
+     */
+    cursor?: ArchiveEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ArchiveEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ArchiveEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ArchiveEntries.
+     */
+    distinct?: ArchiveEntryScalarFieldEnum | ArchiveEntryScalarFieldEnum[]
+  }
+
+  /**
+   * ArchiveEntry findMany
+   */
+  export type ArchiveEntryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveEntries to fetch.
+     */
+    where?: ArchiveEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ArchiveEntries to fetch.
+     */
+    orderBy?: ArchiveEntryOrderByWithRelationInput | ArchiveEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ArchiveEntries.
+     */
+    cursor?: ArchiveEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ArchiveEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ArchiveEntries.
+     */
+    skip?: number
+    distinct?: ArchiveEntryScalarFieldEnum | ArchiveEntryScalarFieldEnum[]
+  }
+
+  /**
+   * ArchiveEntry create
+   */
+  export type ArchiveEntryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ArchiveEntry.
+     */
+    data: XOR<ArchiveEntryCreateInput, ArchiveEntryUncheckedCreateInput>
+  }
+
+  /**
+   * ArchiveEntry createMany
+   */
+  export type ArchiveEntryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ArchiveEntries.
+     */
+    data: ArchiveEntryCreateManyInput | ArchiveEntryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ArchiveEntry createManyAndReturn
+   */
+  export type ArchiveEntryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * The data used to create many ArchiveEntries.
+     */
+    data: ArchiveEntryCreateManyInput | ArchiveEntryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ArchiveEntry update
+   */
+  export type ArchiveEntryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ArchiveEntry.
+     */
+    data: XOR<ArchiveEntryUpdateInput, ArchiveEntryUncheckedUpdateInput>
+    /**
+     * Choose, which ArchiveEntry to update.
+     */
+    where: ArchiveEntryWhereUniqueInput
+  }
+
+  /**
+   * ArchiveEntry updateMany
+   */
+  export type ArchiveEntryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ArchiveEntries.
+     */
+    data: XOR<ArchiveEntryUpdateManyMutationInput, ArchiveEntryUncheckedUpdateManyInput>
+    /**
+     * Filter which ArchiveEntries to update
+     */
+    where?: ArchiveEntryWhereInput
+    /**
+     * Limit how many ArchiveEntries to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ArchiveEntry updateManyAndReturn
+   */
+  export type ArchiveEntryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * The data used to update ArchiveEntries.
+     */
+    data: XOR<ArchiveEntryUpdateManyMutationInput, ArchiveEntryUncheckedUpdateManyInput>
+    /**
+     * Filter which ArchiveEntries to update
+     */
+    where?: ArchiveEntryWhereInput
+    /**
+     * Limit how many ArchiveEntries to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ArchiveEntry upsert
+   */
+  export type ArchiveEntryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ArchiveEntry to update in case it exists.
+     */
+    where: ArchiveEntryWhereUniqueInput
+    /**
+     * In case the ArchiveEntry found by the `where` argument doesn't exist, create a new ArchiveEntry with this data.
+     */
+    create: XOR<ArchiveEntryCreateInput, ArchiveEntryUncheckedCreateInput>
+    /**
+     * In case the ArchiveEntry was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ArchiveEntryUpdateInput, ArchiveEntryUncheckedUpdateInput>
+  }
+
+  /**
+   * ArchiveEntry delete
+   */
+  export type ArchiveEntryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter which ArchiveEntry to delete.
+     */
+    where: ArchiveEntryWhereUniqueInput
+  }
+
+  /**
+   * ArchiveEntry deleteMany
+   */
+  export type ArchiveEntryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ArchiveEntries to delete
+     */
+    where?: ArchiveEntryWhereInput
+    /**
+     * Limit how many ArchiveEntries to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ArchiveEntry.outgoingLinks
+   */
+  export type ArchiveEntry$outgoingLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    where?: ArchiveLinkWhereInput
+    orderBy?: ArchiveLinkOrderByWithRelationInput | ArchiveLinkOrderByWithRelationInput[]
+    cursor?: ArchiveLinkWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ArchiveLinkScalarFieldEnum | ArchiveLinkScalarFieldEnum[]
+  }
+
+  /**
+   * ArchiveEntry.incomingLinks
+   */
+  export type ArchiveEntry$incomingLinksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    where?: ArchiveLinkWhereInput
+    orderBy?: ArchiveLinkOrderByWithRelationInput | ArchiveLinkOrderByWithRelationInput[]
+    cursor?: ArchiveLinkWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ArchiveLinkScalarFieldEnum | ArchiveLinkScalarFieldEnum[]
+  }
+
+  /**
+   * ArchiveEntry.pinnedInChats
+   */
+  export type ArchiveEntry$pinnedInChatsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    where?: ChatPinnedArchiveEntryWhereInput
+    orderBy?: ChatPinnedArchiveEntryOrderByWithRelationInput | ChatPinnedArchiveEntryOrderByWithRelationInput[]
+    cursor?: ChatPinnedArchiveEntryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ChatPinnedArchiveEntryScalarFieldEnum | ChatPinnedArchiveEntryScalarFieldEnum[]
+  }
+
+  /**
+   * ArchiveEntry without action
+   */
+  export type ArchiveEntryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveEntry
+     */
+    select?: ArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveEntry
+     */
+    omit?: ArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveEntryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ChatPinnedArchiveEntry
+   */
+
+  export type AggregateChatPinnedArchiveEntry = {
+    _count: ChatPinnedArchiveEntryCountAggregateOutputType | null
+    _min: ChatPinnedArchiveEntryMinAggregateOutputType | null
+    _max: ChatPinnedArchiveEntryMaxAggregateOutputType | null
+  }
+
+  export type ChatPinnedArchiveEntryMinAggregateOutputType = {
+    id: string | null
+    chatId: string | null
+    archiveEntryId: string | null
+    userId: string | null
+    pinnedAt: Date | null
+  }
+
+  export type ChatPinnedArchiveEntryMaxAggregateOutputType = {
+    id: string | null
+    chatId: string | null
+    archiveEntryId: string | null
+    userId: string | null
+    pinnedAt: Date | null
+  }
+
+  export type ChatPinnedArchiveEntryCountAggregateOutputType = {
+    id: number
+    chatId: number
+    archiveEntryId: number
+    userId: number
+    pinnedAt: number
+    _all: number
+  }
+
+
+  export type ChatPinnedArchiveEntryMinAggregateInputType = {
+    id?: true
+    chatId?: true
+    archiveEntryId?: true
+    userId?: true
+    pinnedAt?: true
+  }
+
+  export type ChatPinnedArchiveEntryMaxAggregateInputType = {
+    id?: true
+    chatId?: true
+    archiveEntryId?: true
+    userId?: true
+    pinnedAt?: true
+  }
+
+  export type ChatPinnedArchiveEntryCountAggregateInputType = {
+    id?: true
+    chatId?: true
+    archiveEntryId?: true
+    userId?: true
+    pinnedAt?: true
+    _all?: true
+  }
+
+  export type ChatPinnedArchiveEntryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ChatPinnedArchiveEntry to aggregate.
+     */
+    where?: ChatPinnedArchiveEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChatPinnedArchiveEntries to fetch.
+     */
+    orderBy?: ChatPinnedArchiveEntryOrderByWithRelationInput | ChatPinnedArchiveEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ChatPinnedArchiveEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChatPinnedArchiveEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChatPinnedArchiveEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ChatPinnedArchiveEntries
+    **/
+    _count?: true | ChatPinnedArchiveEntryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ChatPinnedArchiveEntryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ChatPinnedArchiveEntryMaxAggregateInputType
+  }
+
+  export type GetChatPinnedArchiveEntryAggregateType<T extends ChatPinnedArchiveEntryAggregateArgs> = {
+        [P in keyof T & keyof AggregateChatPinnedArchiveEntry]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateChatPinnedArchiveEntry[P]>
+      : GetScalarType<T[P], AggregateChatPinnedArchiveEntry[P]>
+  }
+
+
+
+
+  export type ChatPinnedArchiveEntryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChatPinnedArchiveEntryWhereInput
+    orderBy?: ChatPinnedArchiveEntryOrderByWithAggregationInput | ChatPinnedArchiveEntryOrderByWithAggregationInput[]
+    by: ChatPinnedArchiveEntryScalarFieldEnum[] | ChatPinnedArchiveEntryScalarFieldEnum
+    having?: ChatPinnedArchiveEntryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ChatPinnedArchiveEntryCountAggregateInputType | true
+    _min?: ChatPinnedArchiveEntryMinAggregateInputType
+    _max?: ChatPinnedArchiveEntryMaxAggregateInputType
+  }
+
+  export type ChatPinnedArchiveEntryGroupByOutputType = {
+    id: string
+    chatId: string
+    archiveEntryId: string
+    userId: string
+    pinnedAt: Date
+    _count: ChatPinnedArchiveEntryCountAggregateOutputType | null
+    _min: ChatPinnedArchiveEntryMinAggregateOutputType | null
+    _max: ChatPinnedArchiveEntryMaxAggregateOutputType | null
+  }
+
+  type GetChatPinnedArchiveEntryGroupByPayload<T extends ChatPinnedArchiveEntryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ChatPinnedArchiveEntryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ChatPinnedArchiveEntryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ChatPinnedArchiveEntryGroupByOutputType[P]>
+            : GetScalarType<T[P], ChatPinnedArchiveEntryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ChatPinnedArchiveEntrySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    chatId?: boolean
+    archiveEntryId?: boolean
+    userId?: boolean
+    pinnedAt?: boolean
+    chat?: boolean | ChatDefaultArgs<ExtArgs>
+    archiveEntry?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["chatPinnedArchiveEntry"]>
+
+  export type ChatPinnedArchiveEntrySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    chatId?: boolean
+    archiveEntryId?: boolean
+    userId?: boolean
+    pinnedAt?: boolean
+    chat?: boolean | ChatDefaultArgs<ExtArgs>
+    archiveEntry?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["chatPinnedArchiveEntry"]>
+
+  export type ChatPinnedArchiveEntrySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    chatId?: boolean
+    archiveEntryId?: boolean
+    userId?: boolean
+    pinnedAt?: boolean
+    chat?: boolean | ChatDefaultArgs<ExtArgs>
+    archiveEntry?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["chatPinnedArchiveEntry"]>
+
+  export type ChatPinnedArchiveEntrySelectScalar = {
+    id?: boolean
+    chatId?: boolean
+    archiveEntryId?: boolean
+    userId?: boolean
+    pinnedAt?: boolean
+  }
+
+  export type ChatPinnedArchiveEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "chatId" | "archiveEntryId" | "userId" | "pinnedAt", ExtArgs["result"]["chatPinnedArchiveEntry"]>
+  export type ChatPinnedArchiveEntryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    chat?: boolean | ChatDefaultArgs<ExtArgs>
+    archiveEntry?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type ChatPinnedArchiveEntryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    chat?: boolean | ChatDefaultArgs<ExtArgs>
+    archiveEntry?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type ChatPinnedArchiveEntryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    chat?: boolean | ChatDefaultArgs<ExtArgs>
+    archiveEntry?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $ChatPinnedArchiveEntryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ChatPinnedArchiveEntry"
+    objects: {
+      chat: Prisma.$ChatPayload<ExtArgs>
+      archiveEntry: Prisma.$ArchiveEntryPayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      chatId: string
+      archiveEntryId: string
+      userId: string
+      pinnedAt: Date
+    }, ExtArgs["result"]["chatPinnedArchiveEntry"]>
+    composites: {}
+  }
+
+  type ChatPinnedArchiveEntryGetPayload<S extends boolean | null | undefined | ChatPinnedArchiveEntryDefaultArgs> = $Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload, S>
+
+  type ChatPinnedArchiveEntryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ChatPinnedArchiveEntryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ChatPinnedArchiveEntryCountAggregateInputType | true
+    }
+
+  export interface ChatPinnedArchiveEntryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ChatPinnedArchiveEntry'], meta: { name: 'ChatPinnedArchiveEntry' } }
+    /**
+     * Find zero or one ChatPinnedArchiveEntry that matches the filter.
+     * @param {ChatPinnedArchiveEntryFindUniqueArgs} args - Arguments to find a ChatPinnedArchiveEntry
+     * @example
+     * // Get one ChatPinnedArchiveEntry
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ChatPinnedArchiveEntryFindUniqueArgs>(args: SelectSubset<T, ChatPinnedArchiveEntryFindUniqueArgs<ExtArgs>>): Prisma__ChatPinnedArchiveEntryClient<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ChatPinnedArchiveEntry that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ChatPinnedArchiveEntryFindUniqueOrThrowArgs} args - Arguments to find a ChatPinnedArchiveEntry
+     * @example
+     * // Get one ChatPinnedArchiveEntry
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ChatPinnedArchiveEntryFindUniqueOrThrowArgs>(args: SelectSubset<T, ChatPinnedArchiveEntryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ChatPinnedArchiveEntryClient<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ChatPinnedArchiveEntry that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatPinnedArchiveEntryFindFirstArgs} args - Arguments to find a ChatPinnedArchiveEntry
+     * @example
+     * // Get one ChatPinnedArchiveEntry
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ChatPinnedArchiveEntryFindFirstArgs>(args?: SelectSubset<T, ChatPinnedArchiveEntryFindFirstArgs<ExtArgs>>): Prisma__ChatPinnedArchiveEntryClient<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ChatPinnedArchiveEntry that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatPinnedArchiveEntryFindFirstOrThrowArgs} args - Arguments to find a ChatPinnedArchiveEntry
+     * @example
+     * // Get one ChatPinnedArchiveEntry
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ChatPinnedArchiveEntryFindFirstOrThrowArgs>(args?: SelectSubset<T, ChatPinnedArchiveEntryFindFirstOrThrowArgs<ExtArgs>>): Prisma__ChatPinnedArchiveEntryClient<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ChatPinnedArchiveEntries that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatPinnedArchiveEntryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ChatPinnedArchiveEntries
+     * const chatPinnedArchiveEntries = await prisma.chatPinnedArchiveEntry.findMany()
+     * 
+     * // Get first 10 ChatPinnedArchiveEntries
+     * const chatPinnedArchiveEntries = await prisma.chatPinnedArchiveEntry.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const chatPinnedArchiveEntryWithIdOnly = await prisma.chatPinnedArchiveEntry.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ChatPinnedArchiveEntryFindManyArgs>(args?: SelectSubset<T, ChatPinnedArchiveEntryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ChatPinnedArchiveEntry.
+     * @param {ChatPinnedArchiveEntryCreateArgs} args - Arguments to create a ChatPinnedArchiveEntry.
+     * @example
+     * // Create one ChatPinnedArchiveEntry
+     * const ChatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.create({
+     *   data: {
+     *     // ... data to create a ChatPinnedArchiveEntry
+     *   }
+     * })
+     * 
+     */
+    create<T extends ChatPinnedArchiveEntryCreateArgs>(args: SelectSubset<T, ChatPinnedArchiveEntryCreateArgs<ExtArgs>>): Prisma__ChatPinnedArchiveEntryClient<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ChatPinnedArchiveEntries.
+     * @param {ChatPinnedArchiveEntryCreateManyArgs} args - Arguments to create many ChatPinnedArchiveEntries.
+     * @example
+     * // Create many ChatPinnedArchiveEntries
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ChatPinnedArchiveEntryCreateManyArgs>(args?: SelectSubset<T, ChatPinnedArchiveEntryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ChatPinnedArchiveEntries and returns the data saved in the database.
+     * @param {ChatPinnedArchiveEntryCreateManyAndReturnArgs} args - Arguments to create many ChatPinnedArchiveEntries.
+     * @example
+     * // Create many ChatPinnedArchiveEntries
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ChatPinnedArchiveEntries and only return the `id`
+     * const chatPinnedArchiveEntryWithIdOnly = await prisma.chatPinnedArchiveEntry.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ChatPinnedArchiveEntryCreateManyAndReturnArgs>(args?: SelectSubset<T, ChatPinnedArchiveEntryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ChatPinnedArchiveEntry.
+     * @param {ChatPinnedArchiveEntryDeleteArgs} args - Arguments to delete one ChatPinnedArchiveEntry.
+     * @example
+     * // Delete one ChatPinnedArchiveEntry
+     * const ChatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.delete({
+     *   where: {
+     *     // ... filter to delete one ChatPinnedArchiveEntry
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ChatPinnedArchiveEntryDeleteArgs>(args: SelectSubset<T, ChatPinnedArchiveEntryDeleteArgs<ExtArgs>>): Prisma__ChatPinnedArchiveEntryClient<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ChatPinnedArchiveEntry.
+     * @param {ChatPinnedArchiveEntryUpdateArgs} args - Arguments to update one ChatPinnedArchiveEntry.
+     * @example
+     * // Update one ChatPinnedArchiveEntry
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ChatPinnedArchiveEntryUpdateArgs>(args: SelectSubset<T, ChatPinnedArchiveEntryUpdateArgs<ExtArgs>>): Prisma__ChatPinnedArchiveEntryClient<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ChatPinnedArchiveEntries.
+     * @param {ChatPinnedArchiveEntryDeleteManyArgs} args - Arguments to filter ChatPinnedArchiveEntries to delete.
+     * @example
+     * // Delete a few ChatPinnedArchiveEntries
+     * const { count } = await prisma.chatPinnedArchiveEntry.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ChatPinnedArchiveEntryDeleteManyArgs>(args?: SelectSubset<T, ChatPinnedArchiveEntryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ChatPinnedArchiveEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatPinnedArchiveEntryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ChatPinnedArchiveEntries
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ChatPinnedArchiveEntryUpdateManyArgs>(args: SelectSubset<T, ChatPinnedArchiveEntryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ChatPinnedArchiveEntries and returns the data updated in the database.
+     * @param {ChatPinnedArchiveEntryUpdateManyAndReturnArgs} args - Arguments to update many ChatPinnedArchiveEntries.
+     * @example
+     * // Update many ChatPinnedArchiveEntries
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ChatPinnedArchiveEntries and only return the `id`
+     * const chatPinnedArchiveEntryWithIdOnly = await prisma.chatPinnedArchiveEntry.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ChatPinnedArchiveEntryUpdateManyAndReturnArgs>(args: SelectSubset<T, ChatPinnedArchiveEntryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ChatPinnedArchiveEntry.
+     * @param {ChatPinnedArchiveEntryUpsertArgs} args - Arguments to update or create a ChatPinnedArchiveEntry.
+     * @example
+     * // Update or create a ChatPinnedArchiveEntry
+     * const chatPinnedArchiveEntry = await prisma.chatPinnedArchiveEntry.upsert({
+     *   create: {
+     *     // ... data to create a ChatPinnedArchiveEntry
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ChatPinnedArchiveEntry we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ChatPinnedArchiveEntryUpsertArgs>(args: SelectSubset<T, ChatPinnedArchiveEntryUpsertArgs<ExtArgs>>): Prisma__ChatPinnedArchiveEntryClient<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ChatPinnedArchiveEntries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatPinnedArchiveEntryCountArgs} args - Arguments to filter ChatPinnedArchiveEntries to count.
+     * @example
+     * // Count the number of ChatPinnedArchiveEntries
+     * const count = await prisma.chatPinnedArchiveEntry.count({
+     *   where: {
+     *     // ... the filter for the ChatPinnedArchiveEntries we want to count
+     *   }
+     * })
+    **/
+    count<T extends ChatPinnedArchiveEntryCountArgs>(
+      args?: Subset<T, ChatPinnedArchiveEntryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ChatPinnedArchiveEntryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ChatPinnedArchiveEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatPinnedArchiveEntryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ChatPinnedArchiveEntryAggregateArgs>(args: Subset<T, ChatPinnedArchiveEntryAggregateArgs>): Prisma.PrismaPromise<GetChatPinnedArchiveEntryAggregateType<T>>
+
+    /**
+     * Group by ChatPinnedArchiveEntry.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChatPinnedArchiveEntryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ChatPinnedArchiveEntryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ChatPinnedArchiveEntryGroupByArgs['orderBy'] }
+        : { orderBy?: ChatPinnedArchiveEntryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ChatPinnedArchiveEntryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetChatPinnedArchiveEntryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ChatPinnedArchiveEntry model
+   */
+  readonly fields: ChatPinnedArchiveEntryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ChatPinnedArchiveEntry.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ChatPinnedArchiveEntryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    chat<T extends ChatDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ChatDefaultArgs<ExtArgs>>): Prisma__ChatClient<$Result.GetResult<Prisma.$ChatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    archiveEntry<T extends ArchiveEntryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ArchiveEntryDefaultArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ChatPinnedArchiveEntry model
+   */
+  interface ChatPinnedArchiveEntryFieldRefs {
+    readonly id: FieldRef<"ChatPinnedArchiveEntry", 'String'>
+    readonly chatId: FieldRef<"ChatPinnedArchiveEntry", 'String'>
+    readonly archiveEntryId: FieldRef<"ChatPinnedArchiveEntry", 'String'>
+    readonly userId: FieldRef<"ChatPinnedArchiveEntry", 'String'>
+    readonly pinnedAt: FieldRef<"ChatPinnedArchiveEntry", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ChatPinnedArchiveEntry findUnique
+   */
+  export type ChatPinnedArchiveEntryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatPinnedArchiveEntry to fetch.
+     */
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+  }
+
+  /**
+   * ChatPinnedArchiveEntry findUniqueOrThrow
+   */
+  export type ChatPinnedArchiveEntryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatPinnedArchiveEntry to fetch.
+     */
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+  }
+
+  /**
+   * ChatPinnedArchiveEntry findFirst
+   */
+  export type ChatPinnedArchiveEntryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatPinnedArchiveEntry to fetch.
+     */
+    where?: ChatPinnedArchiveEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChatPinnedArchiveEntries to fetch.
+     */
+    orderBy?: ChatPinnedArchiveEntryOrderByWithRelationInput | ChatPinnedArchiveEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ChatPinnedArchiveEntries.
+     */
+    cursor?: ChatPinnedArchiveEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChatPinnedArchiveEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChatPinnedArchiveEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ChatPinnedArchiveEntries.
+     */
+    distinct?: ChatPinnedArchiveEntryScalarFieldEnum | ChatPinnedArchiveEntryScalarFieldEnum[]
+  }
+
+  /**
+   * ChatPinnedArchiveEntry findFirstOrThrow
+   */
+  export type ChatPinnedArchiveEntryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatPinnedArchiveEntry to fetch.
+     */
+    where?: ChatPinnedArchiveEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChatPinnedArchiveEntries to fetch.
+     */
+    orderBy?: ChatPinnedArchiveEntryOrderByWithRelationInput | ChatPinnedArchiveEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ChatPinnedArchiveEntries.
+     */
+    cursor?: ChatPinnedArchiveEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChatPinnedArchiveEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChatPinnedArchiveEntries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ChatPinnedArchiveEntries.
+     */
+    distinct?: ChatPinnedArchiveEntryScalarFieldEnum | ChatPinnedArchiveEntryScalarFieldEnum[]
+  }
+
+  /**
+   * ChatPinnedArchiveEntry findMany
+   */
+  export type ChatPinnedArchiveEntryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter, which ChatPinnedArchiveEntries to fetch.
+     */
+    where?: ChatPinnedArchiveEntryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChatPinnedArchiveEntries to fetch.
+     */
+    orderBy?: ChatPinnedArchiveEntryOrderByWithRelationInput | ChatPinnedArchiveEntryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ChatPinnedArchiveEntries.
+     */
+    cursor?: ChatPinnedArchiveEntryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChatPinnedArchiveEntries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChatPinnedArchiveEntries.
+     */
+    skip?: number
+    distinct?: ChatPinnedArchiveEntryScalarFieldEnum | ChatPinnedArchiveEntryScalarFieldEnum[]
+  }
+
+  /**
+   * ChatPinnedArchiveEntry create
+   */
+  export type ChatPinnedArchiveEntryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ChatPinnedArchiveEntry.
+     */
+    data: XOR<ChatPinnedArchiveEntryCreateInput, ChatPinnedArchiveEntryUncheckedCreateInput>
+  }
+
+  /**
+   * ChatPinnedArchiveEntry createMany
+   */
+  export type ChatPinnedArchiveEntryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ChatPinnedArchiveEntries.
+     */
+    data: ChatPinnedArchiveEntryCreateManyInput | ChatPinnedArchiveEntryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ChatPinnedArchiveEntry createManyAndReturn
+   */
+  export type ChatPinnedArchiveEntryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * The data used to create many ChatPinnedArchiveEntries.
+     */
+    data: ChatPinnedArchiveEntryCreateManyInput | ChatPinnedArchiveEntryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ChatPinnedArchiveEntry update
+   */
+  export type ChatPinnedArchiveEntryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ChatPinnedArchiveEntry.
+     */
+    data: XOR<ChatPinnedArchiveEntryUpdateInput, ChatPinnedArchiveEntryUncheckedUpdateInput>
+    /**
+     * Choose, which ChatPinnedArchiveEntry to update.
+     */
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+  }
+
+  /**
+   * ChatPinnedArchiveEntry updateMany
+   */
+  export type ChatPinnedArchiveEntryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ChatPinnedArchiveEntries.
+     */
+    data: XOR<ChatPinnedArchiveEntryUpdateManyMutationInput, ChatPinnedArchiveEntryUncheckedUpdateManyInput>
+    /**
+     * Filter which ChatPinnedArchiveEntries to update
+     */
+    where?: ChatPinnedArchiveEntryWhereInput
+    /**
+     * Limit how many ChatPinnedArchiveEntries to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ChatPinnedArchiveEntry updateManyAndReturn
+   */
+  export type ChatPinnedArchiveEntryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * The data used to update ChatPinnedArchiveEntries.
+     */
+    data: XOR<ChatPinnedArchiveEntryUpdateManyMutationInput, ChatPinnedArchiveEntryUncheckedUpdateManyInput>
+    /**
+     * Filter which ChatPinnedArchiveEntries to update
+     */
+    where?: ChatPinnedArchiveEntryWhereInput
+    /**
+     * Limit how many ChatPinnedArchiveEntries to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ChatPinnedArchiveEntry upsert
+   */
+  export type ChatPinnedArchiveEntryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ChatPinnedArchiveEntry to update in case it exists.
+     */
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    /**
+     * In case the ChatPinnedArchiveEntry found by the `where` argument doesn't exist, create a new ChatPinnedArchiveEntry with this data.
+     */
+    create: XOR<ChatPinnedArchiveEntryCreateInput, ChatPinnedArchiveEntryUncheckedCreateInput>
+    /**
+     * In case the ChatPinnedArchiveEntry was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ChatPinnedArchiveEntryUpdateInput, ChatPinnedArchiveEntryUncheckedUpdateInput>
+  }
+
+  /**
+   * ChatPinnedArchiveEntry delete
+   */
+  export type ChatPinnedArchiveEntryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+    /**
+     * Filter which ChatPinnedArchiveEntry to delete.
+     */
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+  }
+
+  /**
+   * ChatPinnedArchiveEntry deleteMany
+   */
+  export type ChatPinnedArchiveEntryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ChatPinnedArchiveEntries to delete
+     */
+    where?: ChatPinnedArchiveEntryWhereInput
+    /**
+     * Limit how many ChatPinnedArchiveEntries to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ChatPinnedArchiveEntry without action
+   */
+  export type ChatPinnedArchiveEntryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChatPinnedArchiveEntry
+     */
+    select?: ChatPinnedArchiveEntrySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChatPinnedArchiveEntry
+     */
+    omit?: ChatPinnedArchiveEntryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatPinnedArchiveEntryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ArchiveLink
+   */
+
+  export type AggregateArchiveLink = {
+    _count: ArchiveLinkCountAggregateOutputType | null
+    _min: ArchiveLinkMinAggregateOutputType | null
+    _max: ArchiveLinkMaxAggregateOutputType | null
+  }
+
+  export type ArchiveLinkMinAggregateOutputType = {
+    id: string | null
+    sourceId: string | null
+    targetId: string | null
+    type: string | null
+    bidirectional: boolean | null
+    createdAt: Date | null
+  }
+
+  export type ArchiveLinkMaxAggregateOutputType = {
+    id: string | null
+    sourceId: string | null
+    targetId: string | null
+    type: string | null
+    bidirectional: boolean | null
+    createdAt: Date | null
+  }
+
+  export type ArchiveLinkCountAggregateOutputType = {
+    id: number
+    sourceId: number
+    targetId: number
+    type: number
+    bidirectional: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ArchiveLinkMinAggregateInputType = {
+    id?: true
+    sourceId?: true
+    targetId?: true
+    type?: true
+    bidirectional?: true
+    createdAt?: true
+  }
+
+  export type ArchiveLinkMaxAggregateInputType = {
+    id?: true
+    sourceId?: true
+    targetId?: true
+    type?: true
+    bidirectional?: true
+    createdAt?: true
+  }
+
+  export type ArchiveLinkCountAggregateInputType = {
+    id?: true
+    sourceId?: true
+    targetId?: true
+    type?: true
+    bidirectional?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ArchiveLinkAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ArchiveLink to aggregate.
+     */
+    where?: ArchiveLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ArchiveLinks to fetch.
+     */
+    orderBy?: ArchiveLinkOrderByWithRelationInput | ArchiveLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ArchiveLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ArchiveLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ArchiveLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ArchiveLinks
+    **/
+    _count?: true | ArchiveLinkCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ArchiveLinkMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ArchiveLinkMaxAggregateInputType
+  }
+
+  export type GetArchiveLinkAggregateType<T extends ArchiveLinkAggregateArgs> = {
+        [P in keyof T & keyof AggregateArchiveLink]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateArchiveLink[P]>
+      : GetScalarType<T[P], AggregateArchiveLink[P]>
+  }
+
+
+
+
+  export type ArchiveLinkGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ArchiveLinkWhereInput
+    orderBy?: ArchiveLinkOrderByWithAggregationInput | ArchiveLinkOrderByWithAggregationInput[]
+    by: ArchiveLinkScalarFieldEnum[] | ArchiveLinkScalarFieldEnum
+    having?: ArchiveLinkScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ArchiveLinkCountAggregateInputType | true
+    _min?: ArchiveLinkMinAggregateInputType
+    _max?: ArchiveLinkMaxAggregateInputType
+  }
+
+  export type ArchiveLinkGroupByOutputType = {
+    id: string
+    sourceId: string
+    targetId: string
+    type: string
+    bidirectional: boolean
+    createdAt: Date
+    _count: ArchiveLinkCountAggregateOutputType | null
+    _min: ArchiveLinkMinAggregateOutputType | null
+    _max: ArchiveLinkMaxAggregateOutputType | null
+  }
+
+  type GetArchiveLinkGroupByPayload<T extends ArchiveLinkGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ArchiveLinkGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ArchiveLinkGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ArchiveLinkGroupByOutputType[P]>
+            : GetScalarType<T[P], ArchiveLinkGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ArchiveLinkSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sourceId?: boolean
+    targetId?: boolean
+    type?: boolean
+    bidirectional?: boolean
+    createdAt?: boolean
+    source?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    target?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["archiveLink"]>
+
+  export type ArchiveLinkSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sourceId?: boolean
+    targetId?: boolean
+    type?: boolean
+    bidirectional?: boolean
+    createdAt?: boolean
+    source?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    target?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["archiveLink"]>
+
+  export type ArchiveLinkSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    sourceId?: boolean
+    targetId?: boolean
+    type?: boolean
+    bidirectional?: boolean
+    createdAt?: boolean
+    source?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    target?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["archiveLink"]>
+
+  export type ArchiveLinkSelectScalar = {
+    id?: boolean
+    sourceId?: boolean
+    targetId?: boolean
+    type?: boolean
+    bidirectional?: boolean
+    createdAt?: boolean
+  }
+
+  export type ArchiveLinkOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sourceId" | "targetId" | "type" | "bidirectional" | "createdAt", ExtArgs["result"]["archiveLink"]>
+  export type ArchiveLinkInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    source?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    target?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+  }
+  export type ArchiveLinkIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    source?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    target?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+  }
+  export type ArchiveLinkIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    source?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+    target?: boolean | ArchiveEntryDefaultArgs<ExtArgs>
+  }
+
+  export type $ArchiveLinkPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ArchiveLink"
+    objects: {
+      source: Prisma.$ArchiveEntryPayload<ExtArgs>
+      target: Prisma.$ArchiveEntryPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      sourceId: string
+      targetId: string
+      type: string
+      bidirectional: boolean
+      createdAt: Date
+    }, ExtArgs["result"]["archiveLink"]>
+    composites: {}
+  }
+
+  type ArchiveLinkGetPayload<S extends boolean | null | undefined | ArchiveLinkDefaultArgs> = $Result.GetResult<Prisma.$ArchiveLinkPayload, S>
+
+  type ArchiveLinkCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ArchiveLinkFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ArchiveLinkCountAggregateInputType | true
+    }
+
+  export interface ArchiveLinkDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ArchiveLink'], meta: { name: 'ArchiveLink' } }
+    /**
+     * Find zero or one ArchiveLink that matches the filter.
+     * @param {ArchiveLinkFindUniqueArgs} args - Arguments to find a ArchiveLink
+     * @example
+     * // Get one ArchiveLink
+     * const archiveLink = await prisma.archiveLink.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ArchiveLinkFindUniqueArgs>(args: SelectSubset<T, ArchiveLinkFindUniqueArgs<ExtArgs>>): Prisma__ArchiveLinkClient<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ArchiveLink that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ArchiveLinkFindUniqueOrThrowArgs} args - Arguments to find a ArchiveLink
+     * @example
+     * // Get one ArchiveLink
+     * const archiveLink = await prisma.archiveLink.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ArchiveLinkFindUniqueOrThrowArgs>(args: SelectSubset<T, ArchiveLinkFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ArchiveLinkClient<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ArchiveLink that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveLinkFindFirstArgs} args - Arguments to find a ArchiveLink
+     * @example
+     * // Get one ArchiveLink
+     * const archiveLink = await prisma.archiveLink.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ArchiveLinkFindFirstArgs>(args?: SelectSubset<T, ArchiveLinkFindFirstArgs<ExtArgs>>): Prisma__ArchiveLinkClient<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ArchiveLink that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveLinkFindFirstOrThrowArgs} args - Arguments to find a ArchiveLink
+     * @example
+     * // Get one ArchiveLink
+     * const archiveLink = await prisma.archiveLink.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ArchiveLinkFindFirstOrThrowArgs>(args?: SelectSubset<T, ArchiveLinkFindFirstOrThrowArgs<ExtArgs>>): Prisma__ArchiveLinkClient<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ArchiveLinks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveLinkFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ArchiveLinks
+     * const archiveLinks = await prisma.archiveLink.findMany()
+     * 
+     * // Get first 10 ArchiveLinks
+     * const archiveLinks = await prisma.archiveLink.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const archiveLinkWithIdOnly = await prisma.archiveLink.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ArchiveLinkFindManyArgs>(args?: SelectSubset<T, ArchiveLinkFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ArchiveLink.
+     * @param {ArchiveLinkCreateArgs} args - Arguments to create a ArchiveLink.
+     * @example
+     * // Create one ArchiveLink
+     * const ArchiveLink = await prisma.archiveLink.create({
+     *   data: {
+     *     // ... data to create a ArchiveLink
+     *   }
+     * })
+     * 
+     */
+    create<T extends ArchiveLinkCreateArgs>(args: SelectSubset<T, ArchiveLinkCreateArgs<ExtArgs>>): Prisma__ArchiveLinkClient<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ArchiveLinks.
+     * @param {ArchiveLinkCreateManyArgs} args - Arguments to create many ArchiveLinks.
+     * @example
+     * // Create many ArchiveLinks
+     * const archiveLink = await prisma.archiveLink.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ArchiveLinkCreateManyArgs>(args?: SelectSubset<T, ArchiveLinkCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ArchiveLinks and returns the data saved in the database.
+     * @param {ArchiveLinkCreateManyAndReturnArgs} args - Arguments to create many ArchiveLinks.
+     * @example
+     * // Create many ArchiveLinks
+     * const archiveLink = await prisma.archiveLink.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ArchiveLinks and only return the `id`
+     * const archiveLinkWithIdOnly = await prisma.archiveLink.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ArchiveLinkCreateManyAndReturnArgs>(args?: SelectSubset<T, ArchiveLinkCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ArchiveLink.
+     * @param {ArchiveLinkDeleteArgs} args - Arguments to delete one ArchiveLink.
+     * @example
+     * // Delete one ArchiveLink
+     * const ArchiveLink = await prisma.archiveLink.delete({
+     *   where: {
+     *     // ... filter to delete one ArchiveLink
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ArchiveLinkDeleteArgs>(args: SelectSubset<T, ArchiveLinkDeleteArgs<ExtArgs>>): Prisma__ArchiveLinkClient<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ArchiveLink.
+     * @param {ArchiveLinkUpdateArgs} args - Arguments to update one ArchiveLink.
+     * @example
+     * // Update one ArchiveLink
+     * const archiveLink = await prisma.archiveLink.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ArchiveLinkUpdateArgs>(args: SelectSubset<T, ArchiveLinkUpdateArgs<ExtArgs>>): Prisma__ArchiveLinkClient<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ArchiveLinks.
+     * @param {ArchiveLinkDeleteManyArgs} args - Arguments to filter ArchiveLinks to delete.
+     * @example
+     * // Delete a few ArchiveLinks
+     * const { count } = await prisma.archiveLink.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ArchiveLinkDeleteManyArgs>(args?: SelectSubset<T, ArchiveLinkDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ArchiveLinks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveLinkUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ArchiveLinks
+     * const archiveLink = await prisma.archiveLink.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ArchiveLinkUpdateManyArgs>(args: SelectSubset<T, ArchiveLinkUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ArchiveLinks and returns the data updated in the database.
+     * @param {ArchiveLinkUpdateManyAndReturnArgs} args - Arguments to update many ArchiveLinks.
+     * @example
+     * // Update many ArchiveLinks
+     * const archiveLink = await prisma.archiveLink.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ArchiveLinks and only return the `id`
+     * const archiveLinkWithIdOnly = await prisma.archiveLink.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ArchiveLinkUpdateManyAndReturnArgs>(args: SelectSubset<T, ArchiveLinkUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ArchiveLink.
+     * @param {ArchiveLinkUpsertArgs} args - Arguments to update or create a ArchiveLink.
+     * @example
+     * // Update or create a ArchiveLink
+     * const archiveLink = await prisma.archiveLink.upsert({
+     *   create: {
+     *     // ... data to create a ArchiveLink
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ArchiveLink we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ArchiveLinkUpsertArgs>(args: SelectSubset<T, ArchiveLinkUpsertArgs<ExtArgs>>): Prisma__ArchiveLinkClient<$Result.GetResult<Prisma.$ArchiveLinkPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ArchiveLinks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveLinkCountArgs} args - Arguments to filter ArchiveLinks to count.
+     * @example
+     * // Count the number of ArchiveLinks
+     * const count = await prisma.archiveLink.count({
+     *   where: {
+     *     // ... the filter for the ArchiveLinks we want to count
+     *   }
+     * })
+    **/
+    count<T extends ArchiveLinkCountArgs>(
+      args?: Subset<T, ArchiveLinkCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ArchiveLinkCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ArchiveLink.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveLinkAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ArchiveLinkAggregateArgs>(args: Subset<T, ArchiveLinkAggregateArgs>): Prisma.PrismaPromise<GetArchiveLinkAggregateType<T>>
+
+    /**
+     * Group by ArchiveLink.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ArchiveLinkGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ArchiveLinkGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ArchiveLinkGroupByArgs['orderBy'] }
+        : { orderBy?: ArchiveLinkGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ArchiveLinkGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetArchiveLinkGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ArchiveLink model
+   */
+  readonly fields: ArchiveLinkFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ArchiveLink.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ArchiveLinkClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    source<T extends ArchiveEntryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ArchiveEntryDefaultArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    target<T extends ArchiveEntryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ArchiveEntryDefaultArgs<ExtArgs>>): Prisma__ArchiveEntryClient<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ArchiveLink model
+   */
+  interface ArchiveLinkFieldRefs {
+    readonly id: FieldRef<"ArchiveLink", 'String'>
+    readonly sourceId: FieldRef<"ArchiveLink", 'String'>
+    readonly targetId: FieldRef<"ArchiveLink", 'String'>
+    readonly type: FieldRef<"ArchiveLink", 'String'>
+    readonly bidirectional: FieldRef<"ArchiveLink", 'Boolean'>
+    readonly createdAt: FieldRef<"ArchiveLink", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ArchiveLink findUnique
+   */
+  export type ArchiveLinkFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveLink to fetch.
+     */
+    where: ArchiveLinkWhereUniqueInput
+  }
+
+  /**
+   * ArchiveLink findUniqueOrThrow
+   */
+  export type ArchiveLinkFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveLink to fetch.
+     */
+    where: ArchiveLinkWhereUniqueInput
+  }
+
+  /**
+   * ArchiveLink findFirst
+   */
+  export type ArchiveLinkFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveLink to fetch.
+     */
+    where?: ArchiveLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ArchiveLinks to fetch.
+     */
+    orderBy?: ArchiveLinkOrderByWithRelationInput | ArchiveLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ArchiveLinks.
+     */
+    cursor?: ArchiveLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ArchiveLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ArchiveLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ArchiveLinks.
+     */
+    distinct?: ArchiveLinkScalarFieldEnum | ArchiveLinkScalarFieldEnum[]
+  }
+
+  /**
+   * ArchiveLink findFirstOrThrow
+   */
+  export type ArchiveLinkFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveLink to fetch.
+     */
+    where?: ArchiveLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ArchiveLinks to fetch.
+     */
+    orderBy?: ArchiveLinkOrderByWithRelationInput | ArchiveLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ArchiveLinks.
+     */
+    cursor?: ArchiveLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ArchiveLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ArchiveLinks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ArchiveLinks.
+     */
+    distinct?: ArchiveLinkScalarFieldEnum | ArchiveLinkScalarFieldEnum[]
+  }
+
+  /**
+   * ArchiveLink findMany
+   */
+  export type ArchiveLinkFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    /**
+     * Filter, which ArchiveLinks to fetch.
+     */
+    where?: ArchiveLinkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ArchiveLinks to fetch.
+     */
+    orderBy?: ArchiveLinkOrderByWithRelationInput | ArchiveLinkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ArchiveLinks.
+     */
+    cursor?: ArchiveLinkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ArchiveLinks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ArchiveLinks.
+     */
+    skip?: number
+    distinct?: ArchiveLinkScalarFieldEnum | ArchiveLinkScalarFieldEnum[]
+  }
+
+  /**
+   * ArchiveLink create
+   */
+  export type ArchiveLinkCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ArchiveLink.
+     */
+    data: XOR<ArchiveLinkCreateInput, ArchiveLinkUncheckedCreateInput>
+  }
+
+  /**
+   * ArchiveLink createMany
+   */
+  export type ArchiveLinkCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ArchiveLinks.
+     */
+    data: ArchiveLinkCreateManyInput | ArchiveLinkCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ArchiveLink createManyAndReturn
+   */
+  export type ArchiveLinkCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * The data used to create many ArchiveLinks.
+     */
+    data: ArchiveLinkCreateManyInput | ArchiveLinkCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ArchiveLink update
+   */
+  export type ArchiveLinkUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ArchiveLink.
+     */
+    data: XOR<ArchiveLinkUpdateInput, ArchiveLinkUncheckedUpdateInput>
+    /**
+     * Choose, which ArchiveLink to update.
+     */
+    where: ArchiveLinkWhereUniqueInput
+  }
+
+  /**
+   * ArchiveLink updateMany
+   */
+  export type ArchiveLinkUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ArchiveLinks.
+     */
+    data: XOR<ArchiveLinkUpdateManyMutationInput, ArchiveLinkUncheckedUpdateManyInput>
+    /**
+     * Filter which ArchiveLinks to update
+     */
+    where?: ArchiveLinkWhereInput
+    /**
+     * Limit how many ArchiveLinks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ArchiveLink updateManyAndReturn
+   */
+  export type ArchiveLinkUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * The data used to update ArchiveLinks.
+     */
+    data: XOR<ArchiveLinkUpdateManyMutationInput, ArchiveLinkUncheckedUpdateManyInput>
+    /**
+     * Filter which ArchiveLinks to update
+     */
+    where?: ArchiveLinkWhereInput
+    /**
+     * Limit how many ArchiveLinks to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ArchiveLink upsert
+   */
+  export type ArchiveLinkUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ArchiveLink to update in case it exists.
+     */
+    where: ArchiveLinkWhereUniqueInput
+    /**
+     * In case the ArchiveLink found by the `where` argument doesn't exist, create a new ArchiveLink with this data.
+     */
+    create: XOR<ArchiveLinkCreateInput, ArchiveLinkUncheckedCreateInput>
+    /**
+     * In case the ArchiveLink was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ArchiveLinkUpdateInput, ArchiveLinkUncheckedUpdateInput>
+  }
+
+  /**
+   * ArchiveLink delete
+   */
+  export type ArchiveLinkDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+    /**
+     * Filter which ArchiveLink to delete.
+     */
+    where: ArchiveLinkWhereUniqueInput
+  }
+
+  /**
+   * ArchiveLink deleteMany
+   */
+  export type ArchiveLinkDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ArchiveLinks to delete
+     */
+    where?: ArchiveLinkWhereInput
+    /**
+     * Limit how many ArchiveLinks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ArchiveLink without action
+   */
+  export type ArchiveLinkDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ArchiveLink
+     */
+    select?: ArchiveLinkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ArchiveLink
+     */
+    omit?: ArchiveLinkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ArchiveLinkInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -11578,6 +15343,43 @@ export namespace Prisma {
   };
 
   export type StreamScalarFieldEnum = (typeof StreamScalarFieldEnum)[keyof typeof StreamScalarFieldEnum]
+
+
+  export const ArchiveEntryScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    slug: 'slug',
+    entity: 'entity',
+    tags: 'tags',
+    body: 'body',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ArchiveEntryScalarFieldEnum = (typeof ArchiveEntryScalarFieldEnum)[keyof typeof ArchiveEntryScalarFieldEnum]
+
+
+  export const ChatPinnedArchiveEntryScalarFieldEnum: {
+    id: 'id',
+    chatId: 'chatId',
+    archiveEntryId: 'archiveEntryId',
+    userId: 'userId',
+    pinnedAt: 'pinnedAt'
+  };
+
+  export type ChatPinnedArchiveEntryScalarFieldEnum = (typeof ChatPinnedArchiveEntryScalarFieldEnum)[keyof typeof ChatPinnedArchiveEntryScalarFieldEnum]
+
+
+  export const ArchiveLinkScalarFieldEnum: {
+    id: 'id',
+    sourceId: 'sourceId',
+    targetId: 'targetId',
+    type: 'type',
+    bidirectional: 'bidirectional',
+    createdAt: 'createdAt'
+  };
+
+  export type ArchiveLinkScalarFieldEnum = (typeof ArchiveLinkScalarFieldEnum)[keyof typeof ArchiveLinkScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -11803,6 +15605,8 @@ export namespace Prisma {
     chats?: ChatListRelationFilter
     documents?: DocumentListRelationFilter
     suggestions?: SuggestionListRelationFilter
+    archiveEntries?: ArchiveEntryListRelationFilter
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -11811,6 +15615,8 @@ export namespace Prisma {
     chats?: ChatOrderByRelationAggregateInput
     documents?: DocumentOrderByRelationAggregateInput
     suggestions?: SuggestionOrderByRelationAggregateInput
+    archiveEntries?: ArchiveEntryOrderByRelationAggregateInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -11822,6 +15628,8 @@ export namespace Prisma {
     chats?: ChatListRelationFilter
     documents?: DocumentListRelationFilter
     suggestions?: SuggestionListRelationFilter
+    archiveEntries?: ArchiveEntryListRelationFilter
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryListRelationFilter
   }, "id">
 
   export type UserOrderByWithAggregationInput = {
@@ -11857,6 +15665,7 @@ export namespace Prisma {
     messages?: Message_v2ListRelationFilter
     votes?: Vote_v2ListRelationFilter
     streams?: StreamListRelationFilter
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryListRelationFilter
   }
 
   export type ChatOrderByWithRelationInput = {
@@ -11873,6 +15682,7 @@ export namespace Prisma {
     messages?: Message_v2OrderByRelationAggregateInput
     votes?: Vote_v2OrderByRelationAggregateInput
     streams?: StreamOrderByRelationAggregateInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryOrderByRelationAggregateInput
   }
 
   export type ChatWhereUniqueInput = Prisma.AtLeast<{
@@ -11892,6 +15702,7 @@ export namespace Prisma {
     messages?: Message_v2ListRelationFilter
     votes?: Vote_v2ListRelationFilter
     streams?: StreamListRelationFilter
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryListRelationFilter
   }, "id">
 
   export type ChatOrderByWithAggregationInput = {
@@ -12250,6 +16061,211 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Stream"> | Date | string
   }
 
+  export type ArchiveEntryWhereInput = {
+    AND?: ArchiveEntryWhereInput | ArchiveEntryWhereInput[]
+    OR?: ArchiveEntryWhereInput[]
+    NOT?: ArchiveEntryWhereInput | ArchiveEntryWhereInput[]
+    id?: UuidFilter<"ArchiveEntry"> | string
+    userId?: StringFilter<"ArchiveEntry"> | string
+    slug?: StringFilter<"ArchiveEntry"> | string
+    entity?: StringFilter<"ArchiveEntry"> | string
+    tags?: StringNullableListFilter<"ArchiveEntry">
+    body?: StringFilter<"ArchiveEntry"> | string
+    createdAt?: DateTimeFilter<"ArchiveEntry"> | Date | string
+    updatedAt?: DateTimeFilter<"ArchiveEntry"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    outgoingLinks?: ArchiveLinkListRelationFilter
+    incomingLinks?: ArchiveLinkListRelationFilter
+    pinnedInChats?: ChatPinnedArchiveEntryListRelationFilter
+  }
+
+  export type ArchiveEntryOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    slug?: SortOrder
+    entity?: SortOrder
+    tags?: SortOrder
+    body?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    outgoingLinks?: ArchiveLinkOrderByRelationAggregateInput
+    incomingLinks?: ArchiveLinkOrderByRelationAggregateInput
+    pinnedInChats?: ChatPinnedArchiveEntryOrderByRelationAggregateInput
+  }
+
+  export type ArchiveEntryWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId_slug?: ArchiveEntryUserIdSlugCompoundUniqueInput
+    AND?: ArchiveEntryWhereInput | ArchiveEntryWhereInput[]
+    OR?: ArchiveEntryWhereInput[]
+    NOT?: ArchiveEntryWhereInput | ArchiveEntryWhereInput[]
+    userId?: StringFilter<"ArchiveEntry"> | string
+    slug?: StringFilter<"ArchiveEntry"> | string
+    entity?: StringFilter<"ArchiveEntry"> | string
+    tags?: StringNullableListFilter<"ArchiveEntry">
+    body?: StringFilter<"ArchiveEntry"> | string
+    createdAt?: DateTimeFilter<"ArchiveEntry"> | Date | string
+    updatedAt?: DateTimeFilter<"ArchiveEntry"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    outgoingLinks?: ArchiveLinkListRelationFilter
+    incomingLinks?: ArchiveLinkListRelationFilter
+    pinnedInChats?: ChatPinnedArchiveEntryListRelationFilter
+  }, "id" | "userId_slug">
+
+  export type ArchiveEntryOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    slug?: SortOrder
+    entity?: SortOrder
+    tags?: SortOrder
+    body?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ArchiveEntryCountOrderByAggregateInput
+    _max?: ArchiveEntryMaxOrderByAggregateInput
+    _min?: ArchiveEntryMinOrderByAggregateInput
+  }
+
+  export type ArchiveEntryScalarWhereWithAggregatesInput = {
+    AND?: ArchiveEntryScalarWhereWithAggregatesInput | ArchiveEntryScalarWhereWithAggregatesInput[]
+    OR?: ArchiveEntryScalarWhereWithAggregatesInput[]
+    NOT?: ArchiveEntryScalarWhereWithAggregatesInput | ArchiveEntryScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"ArchiveEntry"> | string
+    userId?: StringWithAggregatesFilter<"ArchiveEntry"> | string
+    slug?: StringWithAggregatesFilter<"ArchiveEntry"> | string
+    entity?: StringWithAggregatesFilter<"ArchiveEntry"> | string
+    tags?: StringNullableListFilter<"ArchiveEntry">
+    body?: StringWithAggregatesFilter<"ArchiveEntry"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ArchiveEntry"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ArchiveEntry"> | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryWhereInput = {
+    AND?: ChatPinnedArchiveEntryWhereInput | ChatPinnedArchiveEntryWhereInput[]
+    OR?: ChatPinnedArchiveEntryWhereInput[]
+    NOT?: ChatPinnedArchiveEntryWhereInput | ChatPinnedArchiveEntryWhereInput[]
+    id?: UuidFilter<"ChatPinnedArchiveEntry"> | string
+    chatId?: UuidFilter<"ChatPinnedArchiveEntry"> | string
+    archiveEntryId?: UuidFilter<"ChatPinnedArchiveEntry"> | string
+    userId?: StringFilter<"ChatPinnedArchiveEntry"> | string
+    pinnedAt?: DateTimeFilter<"ChatPinnedArchiveEntry"> | Date | string
+    chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
+    archiveEntry?: XOR<ArchiveEntryScalarRelationFilter, ArchiveEntryWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type ChatPinnedArchiveEntryOrderByWithRelationInput = {
+    id?: SortOrder
+    chatId?: SortOrder
+    archiveEntryId?: SortOrder
+    userId?: SortOrder
+    pinnedAt?: SortOrder
+    chat?: ChatOrderByWithRelationInput
+    archiveEntry?: ArchiveEntryOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type ChatPinnedArchiveEntryWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    chatId_archiveEntryId?: ChatPinnedArchiveEntryChatIdArchiveEntryIdCompoundUniqueInput
+    AND?: ChatPinnedArchiveEntryWhereInput | ChatPinnedArchiveEntryWhereInput[]
+    OR?: ChatPinnedArchiveEntryWhereInput[]
+    NOT?: ChatPinnedArchiveEntryWhereInput | ChatPinnedArchiveEntryWhereInput[]
+    chatId?: UuidFilter<"ChatPinnedArchiveEntry"> | string
+    archiveEntryId?: UuidFilter<"ChatPinnedArchiveEntry"> | string
+    userId?: StringFilter<"ChatPinnedArchiveEntry"> | string
+    pinnedAt?: DateTimeFilter<"ChatPinnedArchiveEntry"> | Date | string
+    chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
+    archiveEntry?: XOR<ArchiveEntryScalarRelationFilter, ArchiveEntryWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "chatId_archiveEntryId">
+
+  export type ChatPinnedArchiveEntryOrderByWithAggregationInput = {
+    id?: SortOrder
+    chatId?: SortOrder
+    archiveEntryId?: SortOrder
+    userId?: SortOrder
+    pinnedAt?: SortOrder
+    _count?: ChatPinnedArchiveEntryCountOrderByAggregateInput
+    _max?: ChatPinnedArchiveEntryMaxOrderByAggregateInput
+    _min?: ChatPinnedArchiveEntryMinOrderByAggregateInput
+  }
+
+  export type ChatPinnedArchiveEntryScalarWhereWithAggregatesInput = {
+    AND?: ChatPinnedArchiveEntryScalarWhereWithAggregatesInput | ChatPinnedArchiveEntryScalarWhereWithAggregatesInput[]
+    OR?: ChatPinnedArchiveEntryScalarWhereWithAggregatesInput[]
+    NOT?: ChatPinnedArchiveEntryScalarWhereWithAggregatesInput | ChatPinnedArchiveEntryScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"ChatPinnedArchiveEntry"> | string
+    chatId?: UuidWithAggregatesFilter<"ChatPinnedArchiveEntry"> | string
+    archiveEntryId?: UuidWithAggregatesFilter<"ChatPinnedArchiveEntry"> | string
+    userId?: StringWithAggregatesFilter<"ChatPinnedArchiveEntry"> | string
+    pinnedAt?: DateTimeWithAggregatesFilter<"ChatPinnedArchiveEntry"> | Date | string
+  }
+
+  export type ArchiveLinkWhereInput = {
+    AND?: ArchiveLinkWhereInput | ArchiveLinkWhereInput[]
+    OR?: ArchiveLinkWhereInput[]
+    NOT?: ArchiveLinkWhereInput | ArchiveLinkWhereInput[]
+    id?: UuidFilter<"ArchiveLink"> | string
+    sourceId?: UuidFilter<"ArchiveLink"> | string
+    targetId?: UuidFilter<"ArchiveLink"> | string
+    type?: StringFilter<"ArchiveLink"> | string
+    bidirectional?: BoolFilter<"ArchiveLink"> | boolean
+    createdAt?: DateTimeFilter<"ArchiveLink"> | Date | string
+    source?: XOR<ArchiveEntryScalarRelationFilter, ArchiveEntryWhereInput>
+    target?: XOR<ArchiveEntryScalarRelationFilter, ArchiveEntryWhereInput>
+  }
+
+  export type ArchiveLinkOrderByWithRelationInput = {
+    id?: SortOrder
+    sourceId?: SortOrder
+    targetId?: SortOrder
+    type?: SortOrder
+    bidirectional?: SortOrder
+    createdAt?: SortOrder
+    source?: ArchiveEntryOrderByWithRelationInput
+    target?: ArchiveEntryOrderByWithRelationInput
+  }
+
+  export type ArchiveLinkWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ArchiveLinkWhereInput | ArchiveLinkWhereInput[]
+    OR?: ArchiveLinkWhereInput[]
+    NOT?: ArchiveLinkWhereInput | ArchiveLinkWhereInput[]
+    sourceId?: UuidFilter<"ArchiveLink"> | string
+    targetId?: UuidFilter<"ArchiveLink"> | string
+    type?: StringFilter<"ArchiveLink"> | string
+    bidirectional?: BoolFilter<"ArchiveLink"> | boolean
+    createdAt?: DateTimeFilter<"ArchiveLink"> | Date | string
+    source?: XOR<ArchiveEntryScalarRelationFilter, ArchiveEntryWhereInput>
+    target?: XOR<ArchiveEntryScalarRelationFilter, ArchiveEntryWhereInput>
+  }, "id">
+
+  export type ArchiveLinkOrderByWithAggregationInput = {
+    id?: SortOrder
+    sourceId?: SortOrder
+    targetId?: SortOrder
+    type?: SortOrder
+    bidirectional?: SortOrder
+    createdAt?: SortOrder
+    _count?: ArchiveLinkCountOrderByAggregateInput
+    _max?: ArchiveLinkMaxOrderByAggregateInput
+    _min?: ArchiveLinkMinOrderByAggregateInput
+  }
+
+  export type ArchiveLinkScalarWhereWithAggregatesInput = {
+    AND?: ArchiveLinkScalarWhereWithAggregatesInput | ArchiveLinkScalarWhereWithAggregatesInput[]
+    OR?: ArchiveLinkScalarWhereWithAggregatesInput[]
+    NOT?: ArchiveLinkScalarWhereWithAggregatesInput | ArchiveLinkScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"ArchiveLink"> | string
+    sourceId?: UuidWithAggregatesFilter<"ArchiveLink"> | string
+    targetId?: UuidWithAggregatesFilter<"ArchiveLink"> | string
+    type?: StringWithAggregatesFilter<"ArchiveLink"> | string
+    bidirectional?: BoolWithAggregatesFilter<"ArchiveLink"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"ArchiveLink"> | Date | string
+  }
+
   export type ProviderCreateInput = {
     id: string
     apiKey: string
@@ -12333,6 +16349,8 @@ export namespace Prisma {
     chats?: ChatCreateNestedManyWithoutUserInput
     documents?: DocumentCreateNestedManyWithoutUserInput
     suggestions?: SuggestionCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -12341,6 +16359,8 @@ export namespace Prisma {
     chats?: ChatUncheckedCreateNestedManyWithoutUserInput
     documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -12349,6 +16369,8 @@ export namespace Prisma {
     chats?: ChatUpdateManyWithoutUserNestedInput
     documents?: DocumentUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -12357,6 +16379,8 @@ export namespace Prisma {
     chats?: ChatUncheckedUpdateManyWithoutUserNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -12387,6 +16411,7 @@ export namespace Prisma {
     messages?: Message_v2CreateNestedManyWithoutChatInput
     votes?: Vote_v2CreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
 
   export type ChatUncheckedCreateInput = {
@@ -12402,6 +16427,7 @@ export namespace Prisma {
     messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
     votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
 
   export type ChatUpdateInput = {
@@ -12417,6 +16443,7 @@ export namespace Prisma {
     messages?: Message_v2UpdateManyWithoutChatNestedInput
     votes?: Vote_v2UpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
 
   export type ChatUncheckedUpdateInput = {
@@ -12432,6 +16459,7 @@ export namespace Prisma {
     messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
     votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
   }
 
   export type ChatCreateManyInput = {
@@ -12796,6 +16824,208 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ArchiveEntryCreateInput = {
+    id?: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutArchiveEntriesInput
+    outgoingLinks?: ArchiveLinkCreateNestedManyWithoutSourceInput
+    incomingLinks?: ArchiveLinkCreateNestedManyWithoutTargetInput
+    pinnedInChats?: ChatPinnedArchiveEntryCreateNestedManyWithoutArchiveEntryInput
+  }
+
+  export type ArchiveEntryUncheckedCreateInput = {
+    id?: string
+    userId: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    outgoingLinks?: ArchiveLinkUncheckedCreateNestedManyWithoutSourceInput
+    incomingLinks?: ArchiveLinkUncheckedCreateNestedManyWithoutTargetInput
+    pinnedInChats?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutArchiveEntryInput
+  }
+
+  export type ArchiveEntryUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutArchiveEntriesNestedInput
+    outgoingLinks?: ArchiveLinkUpdateManyWithoutSourceNestedInput
+    incomingLinks?: ArchiveLinkUpdateManyWithoutTargetNestedInput
+    pinnedInChats?: ChatPinnedArchiveEntryUpdateManyWithoutArchiveEntryNestedInput
+  }
+
+  export type ArchiveEntryUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    outgoingLinks?: ArchiveLinkUncheckedUpdateManyWithoutSourceNestedInput
+    incomingLinks?: ArchiveLinkUncheckedUpdateManyWithoutTargetNestedInput
+    pinnedInChats?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutArchiveEntryNestedInput
+  }
+
+  export type ArchiveEntryCreateManyInput = {
+    id?: string
+    userId: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ArchiveEntryUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ArchiveEntryUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryCreateInput = {
+    id?: string
+    pinnedAt?: Date | string
+    chat: ChatCreateNestedOneWithoutPinnedArchiveEntriesInput
+    archiveEntry: ArchiveEntryCreateNestedOneWithoutPinnedInChatsInput
+    user: UserCreateNestedOneWithoutPinnedArchiveEntriesInput
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedCreateInput = {
+    id?: string
+    chatId: string
+    archiveEntryId: string
+    userId: string
+    pinnedAt?: Date | string
+  }
+
+  export type ChatPinnedArchiveEntryUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    chat?: ChatUpdateOneRequiredWithoutPinnedArchiveEntriesNestedInput
+    archiveEntry?: ArchiveEntryUpdateOneRequiredWithoutPinnedInChatsNestedInput
+    user?: UserUpdateOneRequiredWithoutPinnedArchiveEntriesNestedInput
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chatId?: StringFieldUpdateOperationsInput | string
+    archiveEntryId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryCreateManyInput = {
+    id?: string
+    chatId: string
+    archiveEntryId: string
+    userId: string
+    pinnedAt?: Date | string
+  }
+
+  export type ChatPinnedArchiveEntryUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chatId?: StringFieldUpdateOperationsInput | string
+    archiveEntryId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ArchiveLinkCreateInput = {
+    id?: string
+    type: string
+    bidirectional?: boolean
+    createdAt?: Date | string
+    source: ArchiveEntryCreateNestedOneWithoutOutgoingLinksInput
+    target: ArchiveEntryCreateNestedOneWithoutIncomingLinksInput
+  }
+
+  export type ArchiveLinkUncheckedCreateInput = {
+    id?: string
+    sourceId: string
+    targetId: string
+    type: string
+    bidirectional?: boolean
+    createdAt?: Date | string
+  }
+
+  export type ArchiveLinkUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    source?: ArchiveEntryUpdateOneRequiredWithoutOutgoingLinksNestedInput
+    target?: ArchiveEntryUpdateOneRequiredWithoutIncomingLinksNestedInput
+  }
+
+  export type ArchiveLinkUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    targetId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ArchiveLinkCreateManyInput = {
+    id?: string
+    sourceId: string
+    targetId: string
+    type: string
+    bidirectional?: boolean
+    createdAt?: Date | string
+  }
+
+  export type ArchiveLinkUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ArchiveLinkUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    targetId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -12921,6 +17151,18 @@ export namespace Prisma {
     none?: SuggestionWhereInput
   }
 
+  export type ArchiveEntryListRelationFilter = {
+    every?: ArchiveEntryWhereInput
+    some?: ArchiveEntryWhereInput
+    none?: ArchiveEntryWhereInput
+  }
+
+  export type ChatPinnedArchiveEntryListRelationFilter = {
+    every?: ChatPinnedArchiveEntryWhereInput
+    some?: ChatPinnedArchiveEntryWhereInput
+    none?: ChatPinnedArchiveEntryWhereInput
+  }
+
   export type ChatOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -12930,6 +17172,14 @@ export namespace Prisma {
   }
 
   export type SuggestionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ArchiveEntryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ChatPinnedArchiveEntryOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -13415,6 +17665,113 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type ArchiveLinkListRelationFilter = {
+    every?: ArchiveLinkWhereInput
+    some?: ArchiveLinkWhereInput
+    none?: ArchiveLinkWhereInput
+  }
+
+  export type ArchiveLinkOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ArchiveEntryUserIdSlugCompoundUniqueInput = {
+    userId: string
+    slug: string
+  }
+
+  export type ArchiveEntryCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    slug?: SortOrder
+    entity?: SortOrder
+    tags?: SortOrder
+    body?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ArchiveEntryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    slug?: SortOrder
+    entity?: SortOrder
+    body?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ArchiveEntryMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    slug?: SortOrder
+    entity?: SortOrder
+    body?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ArchiveEntryScalarRelationFilter = {
+    is?: ArchiveEntryWhereInput
+    isNot?: ArchiveEntryWhereInput
+  }
+
+  export type ChatPinnedArchiveEntryChatIdArchiveEntryIdCompoundUniqueInput = {
+    chatId: string
+    archiveEntryId: string
+  }
+
+  export type ChatPinnedArchiveEntryCountOrderByAggregateInput = {
+    id?: SortOrder
+    chatId?: SortOrder
+    archiveEntryId?: SortOrder
+    userId?: SortOrder
+    pinnedAt?: SortOrder
+  }
+
+  export type ChatPinnedArchiveEntryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    chatId?: SortOrder
+    archiveEntryId?: SortOrder
+    userId?: SortOrder
+    pinnedAt?: SortOrder
+  }
+
+  export type ChatPinnedArchiveEntryMinOrderByAggregateInput = {
+    id?: SortOrder
+    chatId?: SortOrder
+    archiveEntryId?: SortOrder
+    userId?: SortOrder
+    pinnedAt?: SortOrder
+  }
+
+  export type ArchiveLinkCountOrderByAggregateInput = {
+    id?: SortOrder
+    sourceId?: SortOrder
+    targetId?: SortOrder
+    type?: SortOrder
+    bidirectional?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ArchiveLinkMaxOrderByAggregateInput = {
+    id?: SortOrder
+    sourceId?: SortOrder
+    targetId?: SortOrder
+    type?: SortOrder
+    bidirectional?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ArchiveLinkMinOrderByAggregateInput = {
+    id?: SortOrder
+    sourceId?: SortOrder
+    targetId?: SortOrder
+    type?: SortOrder
+    bidirectional?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -13457,6 +17814,20 @@ export namespace Prisma {
     connect?: SuggestionWhereUniqueInput | SuggestionWhereUniqueInput[]
   }
 
+  export type ArchiveEntryCreateNestedManyWithoutUserInput = {
+    create?: XOR<ArchiveEntryCreateWithoutUserInput, ArchiveEntryUncheckedCreateWithoutUserInput> | ArchiveEntryCreateWithoutUserInput[] | ArchiveEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutUserInput | ArchiveEntryCreateOrConnectWithoutUserInput[]
+    createMany?: ArchiveEntryCreateManyUserInputEnvelope
+    connect?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+  }
+
+  export type ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutUserInput, ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput> | ChatPinnedArchiveEntryCreateWithoutUserInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput | ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyUserInputEnvelope
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+  }
+
   export type ChatUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<ChatCreateWithoutUserInput, ChatUncheckedCreateWithoutUserInput> | ChatCreateWithoutUserInput[] | ChatUncheckedCreateWithoutUserInput[]
     connectOrCreate?: ChatCreateOrConnectWithoutUserInput | ChatCreateOrConnectWithoutUserInput[]
@@ -13476,6 +17847,20 @@ export namespace Prisma {
     connectOrCreate?: SuggestionCreateOrConnectWithoutUserInput | SuggestionCreateOrConnectWithoutUserInput[]
     createMany?: SuggestionCreateManyUserInputEnvelope
     connect?: SuggestionWhereUniqueInput | SuggestionWhereUniqueInput[]
+  }
+
+  export type ArchiveEntryUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<ArchiveEntryCreateWithoutUserInput, ArchiveEntryUncheckedCreateWithoutUserInput> | ArchiveEntryCreateWithoutUserInput[] | ArchiveEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutUserInput | ArchiveEntryCreateOrConnectWithoutUserInput[]
+    createMany?: ArchiveEntryCreateManyUserInputEnvelope
+    connect?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutUserInput, ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput> | ChatPinnedArchiveEntryCreateWithoutUserInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput | ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyUserInputEnvelope
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
   }
 
   export type ChatUpdateManyWithoutUserNestedInput = {
@@ -13520,6 +17905,34 @@ export namespace Prisma {
     deleteMany?: SuggestionScalarWhereInput | SuggestionScalarWhereInput[]
   }
 
+  export type ArchiveEntryUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ArchiveEntryCreateWithoutUserInput, ArchiveEntryUncheckedCreateWithoutUserInput> | ArchiveEntryCreateWithoutUserInput[] | ArchiveEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutUserInput | ArchiveEntryCreateOrConnectWithoutUserInput[]
+    upsert?: ArchiveEntryUpsertWithWhereUniqueWithoutUserInput | ArchiveEntryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ArchiveEntryCreateManyUserInputEnvelope
+    set?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+    disconnect?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+    delete?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+    connect?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+    update?: ArchiveEntryUpdateWithWhereUniqueWithoutUserInput | ArchiveEntryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ArchiveEntryUpdateManyWithWhereWithoutUserInput | ArchiveEntryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ArchiveEntryScalarWhereInput | ArchiveEntryScalarWhereInput[]
+  }
+
+  export type ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutUserInput, ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput> | ChatPinnedArchiveEntryCreateWithoutUserInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput | ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput[]
+    upsert?: ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutUserInput | ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyUserInputEnvelope
+    set?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    disconnect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    delete?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    update?: ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutUserInput | ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ChatPinnedArchiveEntryUpdateManyWithWhereWithoutUserInput | ChatPinnedArchiveEntryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
+  }
+
   export type ChatUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<ChatCreateWithoutUserInput, ChatUncheckedCreateWithoutUserInput> | ChatCreateWithoutUserInput[] | ChatUncheckedCreateWithoutUserInput[]
     connectOrCreate?: ChatCreateOrConnectWithoutUserInput | ChatCreateOrConnectWithoutUserInput[]
@@ -13562,6 +17975,34 @@ export namespace Prisma {
     deleteMany?: SuggestionScalarWhereInput | SuggestionScalarWhereInput[]
   }
 
+  export type ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ArchiveEntryCreateWithoutUserInput, ArchiveEntryUncheckedCreateWithoutUserInput> | ArchiveEntryCreateWithoutUserInput[] | ArchiveEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutUserInput | ArchiveEntryCreateOrConnectWithoutUserInput[]
+    upsert?: ArchiveEntryUpsertWithWhereUniqueWithoutUserInput | ArchiveEntryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ArchiveEntryCreateManyUserInputEnvelope
+    set?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+    disconnect?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+    delete?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+    connect?: ArchiveEntryWhereUniqueInput | ArchiveEntryWhereUniqueInput[]
+    update?: ArchiveEntryUpdateWithWhereUniqueWithoutUserInput | ArchiveEntryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ArchiveEntryUpdateManyWithWhereWithoutUserInput | ArchiveEntryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ArchiveEntryScalarWhereInput | ArchiveEntryScalarWhereInput[]
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutUserInput, ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput> | ChatPinnedArchiveEntryCreateWithoutUserInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput | ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput[]
+    upsert?: ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutUserInput | ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyUserInputEnvelope
+    set?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    disconnect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    delete?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    update?: ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutUserInput | ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ChatPinnedArchiveEntryUpdateManyWithWhereWithoutUserInput | ChatPinnedArchiveEntryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutChatsInput = {
     create?: XOR<UserCreateWithoutChatsInput, UserUncheckedCreateWithoutChatsInput>
     connectOrCreate?: UserCreateOrConnectWithoutChatsInput
@@ -13589,6 +18030,13 @@ export namespace Prisma {
     connect?: StreamWhereUniqueInput | StreamWhereUniqueInput[]
   }
 
+  export type ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutChatInput, ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput> | ChatPinnedArchiveEntryCreateWithoutChatInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutChatInput | ChatPinnedArchiveEntryCreateOrConnectWithoutChatInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyChatInputEnvelope
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+  }
+
   export type Message_v2UncheckedCreateNestedManyWithoutChatInput = {
     create?: XOR<Message_v2CreateWithoutChatInput, Message_v2UncheckedCreateWithoutChatInput> | Message_v2CreateWithoutChatInput[] | Message_v2UncheckedCreateWithoutChatInput[]
     connectOrCreate?: Message_v2CreateOrConnectWithoutChatInput | Message_v2CreateOrConnectWithoutChatInput[]
@@ -13608,6 +18056,13 @@ export namespace Prisma {
     connectOrCreate?: StreamCreateOrConnectWithoutChatInput | StreamCreateOrConnectWithoutChatInput[]
     createMany?: StreamCreateManyChatInputEnvelope
     connect?: StreamWhereUniqueInput | StreamWhereUniqueInput[]
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutChatInput, ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput> | ChatPinnedArchiveEntryCreateWithoutChatInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutChatInput | ChatPinnedArchiveEntryCreateOrConnectWithoutChatInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyChatInputEnvelope
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -13668,6 +18123,20 @@ export namespace Prisma {
     deleteMany?: StreamScalarWhereInput | StreamScalarWhereInput[]
   }
 
+  export type ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutChatInput, ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput> | ChatPinnedArchiveEntryCreateWithoutChatInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutChatInput | ChatPinnedArchiveEntryCreateOrConnectWithoutChatInput[]
+    upsert?: ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutChatInput | ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutChatInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyChatInputEnvelope
+    set?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    disconnect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    delete?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    update?: ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutChatInput | ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutChatInput[]
+    updateMany?: ChatPinnedArchiveEntryUpdateManyWithWhereWithoutChatInput | ChatPinnedArchiveEntryUpdateManyWithWhereWithoutChatInput[]
+    deleteMany?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
+  }
+
   export type Message_v2UncheckedUpdateManyWithoutChatNestedInput = {
     create?: XOR<Message_v2CreateWithoutChatInput, Message_v2UncheckedCreateWithoutChatInput> | Message_v2CreateWithoutChatInput[] | Message_v2UncheckedCreateWithoutChatInput[]
     connectOrCreate?: Message_v2CreateOrConnectWithoutChatInput | Message_v2CreateOrConnectWithoutChatInput[]
@@ -13708,6 +18177,20 @@ export namespace Prisma {
     update?: StreamUpdateWithWhereUniqueWithoutChatInput | StreamUpdateWithWhereUniqueWithoutChatInput[]
     updateMany?: StreamUpdateManyWithWhereWithoutChatInput | StreamUpdateManyWithWhereWithoutChatInput[]
     deleteMany?: StreamScalarWhereInput | StreamScalarWhereInput[]
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutChatInput, ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput> | ChatPinnedArchiveEntryCreateWithoutChatInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutChatInput | ChatPinnedArchiveEntryCreateOrConnectWithoutChatInput[]
+    upsert?: ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutChatInput | ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutChatInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyChatInputEnvelope
+    set?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    disconnect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    delete?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    update?: ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutChatInput | ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutChatInput[]
+    updateMany?: ChatPinnedArchiveEntryUpdateManyWithWhereWithoutChatInput | ChatPinnedArchiveEntryUpdateManyWithWhereWithoutChatInput[]
+    deleteMany?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
   }
 
   export type ChatCreateNestedOneWithoutMessagesInput = {
@@ -13894,6 +18377,225 @@ export namespace Prisma {
     upsert?: ChatUpsertWithoutStreamsInput
     connect?: ChatWhereUniqueInput
     update?: XOR<XOR<ChatUpdateToOneWithWhereWithoutStreamsInput, ChatUpdateWithoutStreamsInput>, ChatUncheckedUpdateWithoutStreamsInput>
+  }
+
+  export type ArchiveEntryCreatetagsInput = {
+    set: string[]
+  }
+
+  export type UserCreateNestedOneWithoutArchiveEntriesInput = {
+    create?: XOR<UserCreateWithoutArchiveEntriesInput, UserUncheckedCreateWithoutArchiveEntriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutArchiveEntriesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type ArchiveLinkCreateNestedManyWithoutSourceInput = {
+    create?: XOR<ArchiveLinkCreateWithoutSourceInput, ArchiveLinkUncheckedCreateWithoutSourceInput> | ArchiveLinkCreateWithoutSourceInput[] | ArchiveLinkUncheckedCreateWithoutSourceInput[]
+    connectOrCreate?: ArchiveLinkCreateOrConnectWithoutSourceInput | ArchiveLinkCreateOrConnectWithoutSourceInput[]
+    createMany?: ArchiveLinkCreateManySourceInputEnvelope
+    connect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+  }
+
+  export type ArchiveLinkCreateNestedManyWithoutTargetInput = {
+    create?: XOR<ArchiveLinkCreateWithoutTargetInput, ArchiveLinkUncheckedCreateWithoutTargetInput> | ArchiveLinkCreateWithoutTargetInput[] | ArchiveLinkUncheckedCreateWithoutTargetInput[]
+    connectOrCreate?: ArchiveLinkCreateOrConnectWithoutTargetInput | ArchiveLinkCreateOrConnectWithoutTargetInput[]
+    createMany?: ArchiveLinkCreateManyTargetInputEnvelope
+    connect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+  }
+
+  export type ChatPinnedArchiveEntryCreateNestedManyWithoutArchiveEntryInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput, ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput> | ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutArchiveEntryInput | ChatPinnedArchiveEntryCreateOrConnectWithoutArchiveEntryInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyArchiveEntryInputEnvelope
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+  }
+
+  export type ArchiveLinkUncheckedCreateNestedManyWithoutSourceInput = {
+    create?: XOR<ArchiveLinkCreateWithoutSourceInput, ArchiveLinkUncheckedCreateWithoutSourceInput> | ArchiveLinkCreateWithoutSourceInput[] | ArchiveLinkUncheckedCreateWithoutSourceInput[]
+    connectOrCreate?: ArchiveLinkCreateOrConnectWithoutSourceInput | ArchiveLinkCreateOrConnectWithoutSourceInput[]
+    createMany?: ArchiveLinkCreateManySourceInputEnvelope
+    connect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+  }
+
+  export type ArchiveLinkUncheckedCreateNestedManyWithoutTargetInput = {
+    create?: XOR<ArchiveLinkCreateWithoutTargetInput, ArchiveLinkUncheckedCreateWithoutTargetInput> | ArchiveLinkCreateWithoutTargetInput[] | ArchiveLinkUncheckedCreateWithoutTargetInput[]
+    connectOrCreate?: ArchiveLinkCreateOrConnectWithoutTargetInput | ArchiveLinkCreateOrConnectWithoutTargetInput[]
+    createMany?: ArchiveLinkCreateManyTargetInputEnvelope
+    connect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutArchiveEntryInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput, ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput> | ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutArchiveEntryInput | ChatPinnedArchiveEntryCreateOrConnectWithoutArchiveEntryInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyArchiveEntryInputEnvelope
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+  }
+
+  export type ArchiveEntryUpdatetagsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type UserUpdateOneRequiredWithoutArchiveEntriesNestedInput = {
+    create?: XOR<UserCreateWithoutArchiveEntriesInput, UserUncheckedCreateWithoutArchiveEntriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutArchiveEntriesInput
+    upsert?: UserUpsertWithoutArchiveEntriesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutArchiveEntriesInput, UserUpdateWithoutArchiveEntriesInput>, UserUncheckedUpdateWithoutArchiveEntriesInput>
+  }
+
+  export type ArchiveLinkUpdateManyWithoutSourceNestedInput = {
+    create?: XOR<ArchiveLinkCreateWithoutSourceInput, ArchiveLinkUncheckedCreateWithoutSourceInput> | ArchiveLinkCreateWithoutSourceInput[] | ArchiveLinkUncheckedCreateWithoutSourceInput[]
+    connectOrCreate?: ArchiveLinkCreateOrConnectWithoutSourceInput | ArchiveLinkCreateOrConnectWithoutSourceInput[]
+    upsert?: ArchiveLinkUpsertWithWhereUniqueWithoutSourceInput | ArchiveLinkUpsertWithWhereUniqueWithoutSourceInput[]
+    createMany?: ArchiveLinkCreateManySourceInputEnvelope
+    set?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    disconnect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    delete?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    connect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    update?: ArchiveLinkUpdateWithWhereUniqueWithoutSourceInput | ArchiveLinkUpdateWithWhereUniqueWithoutSourceInput[]
+    updateMany?: ArchiveLinkUpdateManyWithWhereWithoutSourceInput | ArchiveLinkUpdateManyWithWhereWithoutSourceInput[]
+    deleteMany?: ArchiveLinkScalarWhereInput | ArchiveLinkScalarWhereInput[]
+  }
+
+  export type ArchiveLinkUpdateManyWithoutTargetNestedInput = {
+    create?: XOR<ArchiveLinkCreateWithoutTargetInput, ArchiveLinkUncheckedCreateWithoutTargetInput> | ArchiveLinkCreateWithoutTargetInput[] | ArchiveLinkUncheckedCreateWithoutTargetInput[]
+    connectOrCreate?: ArchiveLinkCreateOrConnectWithoutTargetInput | ArchiveLinkCreateOrConnectWithoutTargetInput[]
+    upsert?: ArchiveLinkUpsertWithWhereUniqueWithoutTargetInput | ArchiveLinkUpsertWithWhereUniqueWithoutTargetInput[]
+    createMany?: ArchiveLinkCreateManyTargetInputEnvelope
+    set?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    disconnect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    delete?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    connect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    update?: ArchiveLinkUpdateWithWhereUniqueWithoutTargetInput | ArchiveLinkUpdateWithWhereUniqueWithoutTargetInput[]
+    updateMany?: ArchiveLinkUpdateManyWithWhereWithoutTargetInput | ArchiveLinkUpdateManyWithWhereWithoutTargetInput[]
+    deleteMany?: ArchiveLinkScalarWhereInput | ArchiveLinkScalarWhereInput[]
+  }
+
+  export type ChatPinnedArchiveEntryUpdateManyWithoutArchiveEntryNestedInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput, ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput> | ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutArchiveEntryInput | ChatPinnedArchiveEntryCreateOrConnectWithoutArchiveEntryInput[]
+    upsert?: ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutArchiveEntryInput | ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutArchiveEntryInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyArchiveEntryInputEnvelope
+    set?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    disconnect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    delete?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    update?: ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutArchiveEntryInput | ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutArchiveEntryInput[]
+    updateMany?: ChatPinnedArchiveEntryUpdateManyWithWhereWithoutArchiveEntryInput | ChatPinnedArchiveEntryUpdateManyWithWhereWithoutArchiveEntryInput[]
+    deleteMany?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
+  }
+
+  export type ArchiveLinkUncheckedUpdateManyWithoutSourceNestedInput = {
+    create?: XOR<ArchiveLinkCreateWithoutSourceInput, ArchiveLinkUncheckedCreateWithoutSourceInput> | ArchiveLinkCreateWithoutSourceInput[] | ArchiveLinkUncheckedCreateWithoutSourceInput[]
+    connectOrCreate?: ArchiveLinkCreateOrConnectWithoutSourceInput | ArchiveLinkCreateOrConnectWithoutSourceInput[]
+    upsert?: ArchiveLinkUpsertWithWhereUniqueWithoutSourceInput | ArchiveLinkUpsertWithWhereUniqueWithoutSourceInput[]
+    createMany?: ArchiveLinkCreateManySourceInputEnvelope
+    set?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    disconnect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    delete?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    connect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    update?: ArchiveLinkUpdateWithWhereUniqueWithoutSourceInput | ArchiveLinkUpdateWithWhereUniqueWithoutSourceInput[]
+    updateMany?: ArchiveLinkUpdateManyWithWhereWithoutSourceInput | ArchiveLinkUpdateManyWithWhereWithoutSourceInput[]
+    deleteMany?: ArchiveLinkScalarWhereInput | ArchiveLinkScalarWhereInput[]
+  }
+
+  export type ArchiveLinkUncheckedUpdateManyWithoutTargetNestedInput = {
+    create?: XOR<ArchiveLinkCreateWithoutTargetInput, ArchiveLinkUncheckedCreateWithoutTargetInput> | ArchiveLinkCreateWithoutTargetInput[] | ArchiveLinkUncheckedCreateWithoutTargetInput[]
+    connectOrCreate?: ArchiveLinkCreateOrConnectWithoutTargetInput | ArchiveLinkCreateOrConnectWithoutTargetInput[]
+    upsert?: ArchiveLinkUpsertWithWhereUniqueWithoutTargetInput | ArchiveLinkUpsertWithWhereUniqueWithoutTargetInput[]
+    createMany?: ArchiveLinkCreateManyTargetInputEnvelope
+    set?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    disconnect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    delete?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    connect?: ArchiveLinkWhereUniqueInput | ArchiveLinkWhereUniqueInput[]
+    update?: ArchiveLinkUpdateWithWhereUniqueWithoutTargetInput | ArchiveLinkUpdateWithWhereUniqueWithoutTargetInput[]
+    updateMany?: ArchiveLinkUpdateManyWithWhereWithoutTargetInput | ArchiveLinkUpdateManyWithWhereWithoutTargetInput[]
+    deleteMany?: ArchiveLinkScalarWhereInput | ArchiveLinkScalarWhereInput[]
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateManyWithoutArchiveEntryNestedInput = {
+    create?: XOR<ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput, ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput> | ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput[] | ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput[]
+    connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutArchiveEntryInput | ChatPinnedArchiveEntryCreateOrConnectWithoutArchiveEntryInput[]
+    upsert?: ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutArchiveEntryInput | ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutArchiveEntryInput[]
+    createMany?: ChatPinnedArchiveEntryCreateManyArchiveEntryInputEnvelope
+    set?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    disconnect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    delete?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+    update?: ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutArchiveEntryInput | ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutArchiveEntryInput[]
+    updateMany?: ChatPinnedArchiveEntryUpdateManyWithWhereWithoutArchiveEntryInput | ChatPinnedArchiveEntryUpdateManyWithWhereWithoutArchiveEntryInput[]
+    deleteMany?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
+  }
+
+  export type ChatCreateNestedOneWithoutPinnedArchiveEntriesInput = {
+    create?: XOR<ChatCreateWithoutPinnedArchiveEntriesInput, ChatUncheckedCreateWithoutPinnedArchiveEntriesInput>
+    connectOrCreate?: ChatCreateOrConnectWithoutPinnedArchiveEntriesInput
+    connect?: ChatWhereUniqueInput
+  }
+
+  export type ArchiveEntryCreateNestedOneWithoutPinnedInChatsInput = {
+    create?: XOR<ArchiveEntryCreateWithoutPinnedInChatsInput, ArchiveEntryUncheckedCreateWithoutPinnedInChatsInput>
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutPinnedInChatsInput
+    connect?: ArchiveEntryWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutPinnedArchiveEntriesInput = {
+    create?: XOR<UserCreateWithoutPinnedArchiveEntriesInput, UserUncheckedCreateWithoutPinnedArchiveEntriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPinnedArchiveEntriesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type ChatUpdateOneRequiredWithoutPinnedArchiveEntriesNestedInput = {
+    create?: XOR<ChatCreateWithoutPinnedArchiveEntriesInput, ChatUncheckedCreateWithoutPinnedArchiveEntriesInput>
+    connectOrCreate?: ChatCreateOrConnectWithoutPinnedArchiveEntriesInput
+    upsert?: ChatUpsertWithoutPinnedArchiveEntriesInput
+    connect?: ChatWhereUniqueInput
+    update?: XOR<XOR<ChatUpdateToOneWithWhereWithoutPinnedArchiveEntriesInput, ChatUpdateWithoutPinnedArchiveEntriesInput>, ChatUncheckedUpdateWithoutPinnedArchiveEntriesInput>
+  }
+
+  export type ArchiveEntryUpdateOneRequiredWithoutPinnedInChatsNestedInput = {
+    create?: XOR<ArchiveEntryCreateWithoutPinnedInChatsInput, ArchiveEntryUncheckedCreateWithoutPinnedInChatsInput>
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutPinnedInChatsInput
+    upsert?: ArchiveEntryUpsertWithoutPinnedInChatsInput
+    connect?: ArchiveEntryWhereUniqueInput
+    update?: XOR<XOR<ArchiveEntryUpdateToOneWithWhereWithoutPinnedInChatsInput, ArchiveEntryUpdateWithoutPinnedInChatsInput>, ArchiveEntryUncheckedUpdateWithoutPinnedInChatsInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutPinnedArchiveEntriesNestedInput = {
+    create?: XOR<UserCreateWithoutPinnedArchiveEntriesInput, UserUncheckedCreateWithoutPinnedArchiveEntriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPinnedArchiveEntriesInput
+    upsert?: UserUpsertWithoutPinnedArchiveEntriesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPinnedArchiveEntriesInput, UserUpdateWithoutPinnedArchiveEntriesInput>, UserUncheckedUpdateWithoutPinnedArchiveEntriesInput>
+  }
+
+  export type ArchiveEntryCreateNestedOneWithoutOutgoingLinksInput = {
+    create?: XOR<ArchiveEntryCreateWithoutOutgoingLinksInput, ArchiveEntryUncheckedCreateWithoutOutgoingLinksInput>
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutOutgoingLinksInput
+    connect?: ArchiveEntryWhereUniqueInput
+  }
+
+  export type ArchiveEntryCreateNestedOneWithoutIncomingLinksInput = {
+    create?: XOR<ArchiveEntryCreateWithoutIncomingLinksInput, ArchiveEntryUncheckedCreateWithoutIncomingLinksInput>
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutIncomingLinksInput
+    connect?: ArchiveEntryWhereUniqueInput
+  }
+
+  export type ArchiveEntryUpdateOneRequiredWithoutOutgoingLinksNestedInput = {
+    create?: XOR<ArchiveEntryCreateWithoutOutgoingLinksInput, ArchiveEntryUncheckedCreateWithoutOutgoingLinksInput>
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutOutgoingLinksInput
+    upsert?: ArchiveEntryUpsertWithoutOutgoingLinksInput
+    connect?: ArchiveEntryWhereUniqueInput
+    update?: XOR<XOR<ArchiveEntryUpdateToOneWithWhereWithoutOutgoingLinksInput, ArchiveEntryUpdateWithoutOutgoingLinksInput>, ArchiveEntryUncheckedUpdateWithoutOutgoingLinksInput>
+  }
+
+  export type ArchiveEntryUpdateOneRequiredWithoutIncomingLinksNestedInput = {
+    create?: XOR<ArchiveEntryCreateWithoutIncomingLinksInput, ArchiveEntryUncheckedCreateWithoutIncomingLinksInput>
+    connectOrCreate?: ArchiveEntryCreateOrConnectWithoutIncomingLinksInput
+    upsert?: ArchiveEntryUpsertWithoutIncomingLinksInput
+    connect?: ArchiveEntryWhereUniqueInput
+    update?: XOR<XOR<ArchiveEntryUpdateToOneWithWhereWithoutIncomingLinksInput, ArchiveEntryUpdateWithoutIncomingLinksInput>, ArchiveEntryUncheckedUpdateWithoutIncomingLinksInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -14153,6 +18855,7 @@ export namespace Prisma {
     messages?: Message_v2CreateNestedManyWithoutChatInput
     votes?: Vote_v2CreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
 
   export type ChatUncheckedCreateWithoutUserInput = {
@@ -14167,6 +18870,7 @@ export namespace Prisma {
     messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
     votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
 
   export type ChatCreateOrConnectWithoutUserInput = {
@@ -14235,6 +18939,66 @@ export namespace Prisma {
 
   export type SuggestionCreateManyUserInputEnvelope = {
     data: SuggestionCreateManyUserInput | SuggestionCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ArchiveEntryCreateWithoutUserInput = {
+    id?: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    outgoingLinks?: ArchiveLinkCreateNestedManyWithoutSourceInput
+    incomingLinks?: ArchiveLinkCreateNestedManyWithoutTargetInput
+    pinnedInChats?: ChatPinnedArchiveEntryCreateNestedManyWithoutArchiveEntryInput
+  }
+
+  export type ArchiveEntryUncheckedCreateWithoutUserInput = {
+    id?: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    outgoingLinks?: ArchiveLinkUncheckedCreateNestedManyWithoutSourceInput
+    incomingLinks?: ArchiveLinkUncheckedCreateNestedManyWithoutTargetInput
+    pinnedInChats?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutArchiveEntryInput
+  }
+
+  export type ArchiveEntryCreateOrConnectWithoutUserInput = {
+    where: ArchiveEntryWhereUniqueInput
+    create: XOR<ArchiveEntryCreateWithoutUserInput, ArchiveEntryUncheckedCreateWithoutUserInput>
+  }
+
+  export type ArchiveEntryCreateManyUserInputEnvelope = {
+    data: ArchiveEntryCreateManyUserInput | ArchiveEntryCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ChatPinnedArchiveEntryCreateWithoutUserInput = {
+    id?: string
+    pinnedAt?: Date | string
+    chat: ChatCreateNestedOneWithoutPinnedArchiveEntriesInput
+    archiveEntry: ArchiveEntryCreateNestedOneWithoutPinnedInChatsInput
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput = {
+    id?: string
+    chatId: string
+    archiveEntryId: string
+    pinnedAt?: Date | string
+  }
+
+  export type ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput = {
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    create: XOR<ChatPinnedArchiveEntryCreateWithoutUserInput, ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput>
+  }
+
+  export type ChatPinnedArchiveEntryCreateManyUserInputEnvelope = {
+    data: ChatPinnedArchiveEntryCreateManyUserInput | ChatPinnedArchiveEntryCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -14328,11 +19092,70 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Suggestion"> | Date | string
   }
 
+  export type ArchiveEntryUpsertWithWhereUniqueWithoutUserInput = {
+    where: ArchiveEntryWhereUniqueInput
+    update: XOR<ArchiveEntryUpdateWithoutUserInput, ArchiveEntryUncheckedUpdateWithoutUserInput>
+    create: XOR<ArchiveEntryCreateWithoutUserInput, ArchiveEntryUncheckedCreateWithoutUserInput>
+  }
+
+  export type ArchiveEntryUpdateWithWhereUniqueWithoutUserInput = {
+    where: ArchiveEntryWhereUniqueInput
+    data: XOR<ArchiveEntryUpdateWithoutUserInput, ArchiveEntryUncheckedUpdateWithoutUserInput>
+  }
+
+  export type ArchiveEntryUpdateManyWithWhereWithoutUserInput = {
+    where: ArchiveEntryScalarWhereInput
+    data: XOR<ArchiveEntryUpdateManyMutationInput, ArchiveEntryUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type ArchiveEntryScalarWhereInput = {
+    AND?: ArchiveEntryScalarWhereInput | ArchiveEntryScalarWhereInput[]
+    OR?: ArchiveEntryScalarWhereInput[]
+    NOT?: ArchiveEntryScalarWhereInput | ArchiveEntryScalarWhereInput[]
+    id?: UuidFilter<"ArchiveEntry"> | string
+    userId?: StringFilter<"ArchiveEntry"> | string
+    slug?: StringFilter<"ArchiveEntry"> | string
+    entity?: StringFilter<"ArchiveEntry"> | string
+    tags?: StringNullableListFilter<"ArchiveEntry">
+    body?: StringFilter<"ArchiveEntry"> | string
+    createdAt?: DateTimeFilter<"ArchiveEntry"> | Date | string
+    updatedAt?: DateTimeFilter<"ArchiveEntry"> | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutUserInput = {
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    update: XOR<ChatPinnedArchiveEntryUpdateWithoutUserInput, ChatPinnedArchiveEntryUncheckedUpdateWithoutUserInput>
+    create: XOR<ChatPinnedArchiveEntryCreateWithoutUserInput, ChatPinnedArchiveEntryUncheckedCreateWithoutUserInput>
+  }
+
+  export type ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutUserInput = {
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    data: XOR<ChatPinnedArchiveEntryUpdateWithoutUserInput, ChatPinnedArchiveEntryUncheckedUpdateWithoutUserInput>
+  }
+
+  export type ChatPinnedArchiveEntryUpdateManyWithWhereWithoutUserInput = {
+    where: ChatPinnedArchiveEntryScalarWhereInput
+    data: XOR<ChatPinnedArchiveEntryUpdateManyMutationInput, ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type ChatPinnedArchiveEntryScalarWhereInput = {
+    AND?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
+    OR?: ChatPinnedArchiveEntryScalarWhereInput[]
+    NOT?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
+    id?: UuidFilter<"ChatPinnedArchiveEntry"> | string
+    chatId?: UuidFilter<"ChatPinnedArchiveEntry"> | string
+    archiveEntryId?: UuidFilter<"ChatPinnedArchiveEntry"> | string
+    userId?: StringFilter<"ChatPinnedArchiveEntry"> | string
+    pinnedAt?: DateTimeFilter<"ChatPinnedArchiveEntry"> | Date | string
+  }
+
   export type UserCreateWithoutChatsInput = {
     id: string
     email: string
     documents?: DocumentCreateNestedManyWithoutUserInput
     suggestions?: SuggestionCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutChatsInput = {
@@ -14340,6 +19163,8 @@ export namespace Prisma {
     email: string
     documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutChatsInput = {
@@ -14425,6 +19250,30 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ChatPinnedArchiveEntryCreateWithoutChatInput = {
+    id?: string
+    pinnedAt?: Date | string
+    archiveEntry: ArchiveEntryCreateNestedOneWithoutPinnedInChatsInput
+    user: UserCreateNestedOneWithoutPinnedArchiveEntriesInput
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput = {
+    id?: string
+    archiveEntryId: string
+    userId: string
+    pinnedAt?: Date | string
+  }
+
+  export type ChatPinnedArchiveEntryCreateOrConnectWithoutChatInput = {
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    create: XOR<ChatPinnedArchiveEntryCreateWithoutChatInput, ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput>
+  }
+
+  export type ChatPinnedArchiveEntryCreateManyChatInputEnvelope = {
+    data: ChatPinnedArchiveEntryCreateManyChatInput | ChatPinnedArchiveEntryCreateManyChatInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutChatsInput = {
     update: XOR<UserUpdateWithoutChatsInput, UserUncheckedUpdateWithoutChatsInput>
     create: XOR<UserCreateWithoutChatsInput, UserUncheckedCreateWithoutChatsInput>
@@ -14441,6 +19290,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     documents?: DocumentUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutChatsInput = {
@@ -14448,6 +19299,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type Message_v2UpsertWithWhereUniqueWithoutChatInput = {
@@ -14533,6 +19386,22 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Stream"> | Date | string
   }
 
+  export type ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutChatInput = {
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    update: XOR<ChatPinnedArchiveEntryUpdateWithoutChatInput, ChatPinnedArchiveEntryUncheckedUpdateWithoutChatInput>
+    create: XOR<ChatPinnedArchiveEntryCreateWithoutChatInput, ChatPinnedArchiveEntryUncheckedCreateWithoutChatInput>
+  }
+
+  export type ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutChatInput = {
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    data: XOR<ChatPinnedArchiveEntryUpdateWithoutChatInput, ChatPinnedArchiveEntryUncheckedUpdateWithoutChatInput>
+  }
+
+  export type ChatPinnedArchiveEntryUpdateManyWithWhereWithoutChatInput = {
+    where: ChatPinnedArchiveEntryScalarWhereInput
+    data: XOR<ChatPinnedArchiveEntryUpdateManyMutationInput, ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatInput>
+  }
+
   export type ChatCreateWithoutMessagesInput = {
     id?: string
     createdAt: Date | string
@@ -14545,6 +19414,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutChatsInput
     votes?: Vote_v2CreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
 
   export type ChatUncheckedCreateWithoutMessagesInput = {
@@ -14559,6 +19429,7 @@ export namespace Prisma {
     forkDepth?: number
     votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
 
   export type ChatCreateOrConnectWithoutMessagesInput = {
@@ -14609,6 +19480,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
     votes?: Vote_v2UpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
 
   export type ChatUncheckedUpdateWithoutMessagesInput = {
@@ -14623,6 +19495,7 @@ export namespace Prisma {
     forkDepth?: IntFieldUpdateOperationsInput | number
     votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
   }
 
   export type Vote_v2UpsertWithWhereUniqueWithoutMessageInput = {
@@ -14686,6 +19559,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutChatsInput
     messages?: Message_v2CreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
 
   export type ChatUncheckedCreateWithoutVotesInput = {
@@ -14700,6 +19574,7 @@ export namespace Prisma {
     forkDepth?: number
     messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
 
   export type ChatCreateOrConnectWithoutVotesInput = {
@@ -14769,6 +19644,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
     messages?: Message_v2UpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
 
   export type ChatUncheckedUpdateWithoutVotesInput = {
@@ -14783,6 +19659,7 @@ export namespace Prisma {
     forkDepth?: IntFieldUpdateOperationsInput | number
     messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
   }
 
   export type UserCreateWithoutDocumentsInput = {
@@ -14790,6 +19667,8 @@ export namespace Prisma {
     email: string
     chats?: ChatCreateNestedManyWithoutUserInput
     suggestions?: SuggestionCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDocumentsInput = {
@@ -14797,6 +19676,8 @@ export namespace Prisma {
     email: string
     chats?: ChatUncheckedCreateNestedManyWithoutUserInput
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDocumentsInput = {
@@ -14850,6 +19731,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     chats?: ChatUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDocumentsInput = {
@@ -14857,6 +19740,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     chats?: ChatUncheckedUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type SuggestionUpsertWithWhereUniqueWithoutDocumentInput = {
@@ -14880,6 +19765,8 @@ export namespace Prisma {
     email: string
     chats?: ChatCreateNestedManyWithoutUserInput
     documents?: DocumentCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSuggestionsInput = {
@@ -14887,6 +19774,8 @@ export namespace Prisma {
     email: string
     chats?: ChatUncheckedCreateNestedManyWithoutUserInput
     documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSuggestionsInput = {
@@ -14933,6 +19822,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     chats?: ChatUpdateManyWithoutUserNestedInput
     documents?: DocumentUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSuggestionsInput = {
@@ -14940,6 +19831,8 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     chats?: ChatUncheckedUpdateManyWithoutUserNestedInput
     documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type DocumentUpsertWithoutSuggestionsInput = {
@@ -14983,6 +19876,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutChatsInput
     messages?: Message_v2CreateNestedManyWithoutChatInput
     votes?: Vote_v2CreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
 
   export type ChatUncheckedCreateWithoutStreamsInput = {
@@ -14997,6 +19891,7 @@ export namespace Prisma {
     forkDepth?: number
     messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
     votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
 
   export type ChatCreateOrConnectWithoutStreamsInput = {
@@ -15027,6 +19922,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
     messages?: Message_v2UpdateManyWithoutChatNestedInput
     votes?: Vote_v2UpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
 
   export type ChatUncheckedUpdateWithoutStreamsInput = {
@@ -15041,6 +19937,527 @@ export namespace Prisma {
     forkDepth?: IntFieldUpdateOperationsInput | number
     messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
     votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
+  }
+
+  export type UserCreateWithoutArchiveEntriesInput = {
+    id: string
+    email: string
+    chats?: ChatCreateNestedManyWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
+    suggestions?: SuggestionCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutArchiveEntriesInput = {
+    id: string
+    email: string
+    chats?: ChatUncheckedCreateNestedManyWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
+    suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutArchiveEntriesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutArchiveEntriesInput, UserUncheckedCreateWithoutArchiveEntriesInput>
+  }
+
+  export type ArchiveLinkCreateWithoutSourceInput = {
+    id?: string
+    type: string
+    bidirectional?: boolean
+    createdAt?: Date | string
+    target: ArchiveEntryCreateNestedOneWithoutIncomingLinksInput
+  }
+
+  export type ArchiveLinkUncheckedCreateWithoutSourceInput = {
+    id?: string
+    targetId: string
+    type: string
+    bidirectional?: boolean
+    createdAt?: Date | string
+  }
+
+  export type ArchiveLinkCreateOrConnectWithoutSourceInput = {
+    where: ArchiveLinkWhereUniqueInput
+    create: XOR<ArchiveLinkCreateWithoutSourceInput, ArchiveLinkUncheckedCreateWithoutSourceInput>
+  }
+
+  export type ArchiveLinkCreateManySourceInputEnvelope = {
+    data: ArchiveLinkCreateManySourceInput | ArchiveLinkCreateManySourceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ArchiveLinkCreateWithoutTargetInput = {
+    id?: string
+    type: string
+    bidirectional?: boolean
+    createdAt?: Date | string
+    source: ArchiveEntryCreateNestedOneWithoutOutgoingLinksInput
+  }
+
+  export type ArchiveLinkUncheckedCreateWithoutTargetInput = {
+    id?: string
+    sourceId: string
+    type: string
+    bidirectional?: boolean
+    createdAt?: Date | string
+  }
+
+  export type ArchiveLinkCreateOrConnectWithoutTargetInput = {
+    where: ArchiveLinkWhereUniqueInput
+    create: XOR<ArchiveLinkCreateWithoutTargetInput, ArchiveLinkUncheckedCreateWithoutTargetInput>
+  }
+
+  export type ArchiveLinkCreateManyTargetInputEnvelope = {
+    data: ArchiveLinkCreateManyTargetInput | ArchiveLinkCreateManyTargetInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput = {
+    id?: string
+    pinnedAt?: Date | string
+    chat: ChatCreateNestedOneWithoutPinnedArchiveEntriesInput
+    user: UserCreateNestedOneWithoutPinnedArchiveEntriesInput
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput = {
+    id?: string
+    chatId: string
+    userId: string
+    pinnedAt?: Date | string
+  }
+
+  export type ChatPinnedArchiveEntryCreateOrConnectWithoutArchiveEntryInput = {
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    create: XOR<ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput, ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput>
+  }
+
+  export type ChatPinnedArchiveEntryCreateManyArchiveEntryInputEnvelope = {
+    data: ChatPinnedArchiveEntryCreateManyArchiveEntryInput | ChatPinnedArchiveEntryCreateManyArchiveEntryInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutArchiveEntriesInput = {
+    update: XOR<UserUpdateWithoutArchiveEntriesInput, UserUncheckedUpdateWithoutArchiveEntriesInput>
+    create: XOR<UserCreateWithoutArchiveEntriesInput, UserUncheckedCreateWithoutArchiveEntriesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutArchiveEntriesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutArchiveEntriesInput, UserUncheckedUpdateWithoutArchiveEntriesInput>
+  }
+
+  export type UserUpdateWithoutArchiveEntriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    chats?: ChatUpdateManyWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
+    suggestions?: SuggestionUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutArchiveEntriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    chats?: ChatUncheckedUpdateManyWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
+    suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type ArchiveLinkUpsertWithWhereUniqueWithoutSourceInput = {
+    where: ArchiveLinkWhereUniqueInput
+    update: XOR<ArchiveLinkUpdateWithoutSourceInput, ArchiveLinkUncheckedUpdateWithoutSourceInput>
+    create: XOR<ArchiveLinkCreateWithoutSourceInput, ArchiveLinkUncheckedCreateWithoutSourceInput>
+  }
+
+  export type ArchiveLinkUpdateWithWhereUniqueWithoutSourceInput = {
+    where: ArchiveLinkWhereUniqueInput
+    data: XOR<ArchiveLinkUpdateWithoutSourceInput, ArchiveLinkUncheckedUpdateWithoutSourceInput>
+  }
+
+  export type ArchiveLinkUpdateManyWithWhereWithoutSourceInput = {
+    where: ArchiveLinkScalarWhereInput
+    data: XOR<ArchiveLinkUpdateManyMutationInput, ArchiveLinkUncheckedUpdateManyWithoutSourceInput>
+  }
+
+  export type ArchiveLinkScalarWhereInput = {
+    AND?: ArchiveLinkScalarWhereInput | ArchiveLinkScalarWhereInput[]
+    OR?: ArchiveLinkScalarWhereInput[]
+    NOT?: ArchiveLinkScalarWhereInput | ArchiveLinkScalarWhereInput[]
+    id?: UuidFilter<"ArchiveLink"> | string
+    sourceId?: UuidFilter<"ArchiveLink"> | string
+    targetId?: UuidFilter<"ArchiveLink"> | string
+    type?: StringFilter<"ArchiveLink"> | string
+    bidirectional?: BoolFilter<"ArchiveLink"> | boolean
+    createdAt?: DateTimeFilter<"ArchiveLink"> | Date | string
+  }
+
+  export type ArchiveLinkUpsertWithWhereUniqueWithoutTargetInput = {
+    where: ArchiveLinkWhereUniqueInput
+    update: XOR<ArchiveLinkUpdateWithoutTargetInput, ArchiveLinkUncheckedUpdateWithoutTargetInput>
+    create: XOR<ArchiveLinkCreateWithoutTargetInput, ArchiveLinkUncheckedCreateWithoutTargetInput>
+  }
+
+  export type ArchiveLinkUpdateWithWhereUniqueWithoutTargetInput = {
+    where: ArchiveLinkWhereUniqueInput
+    data: XOR<ArchiveLinkUpdateWithoutTargetInput, ArchiveLinkUncheckedUpdateWithoutTargetInput>
+  }
+
+  export type ArchiveLinkUpdateManyWithWhereWithoutTargetInput = {
+    where: ArchiveLinkScalarWhereInput
+    data: XOR<ArchiveLinkUpdateManyMutationInput, ArchiveLinkUncheckedUpdateManyWithoutTargetInput>
+  }
+
+  export type ChatPinnedArchiveEntryUpsertWithWhereUniqueWithoutArchiveEntryInput = {
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    update: XOR<ChatPinnedArchiveEntryUpdateWithoutArchiveEntryInput, ChatPinnedArchiveEntryUncheckedUpdateWithoutArchiveEntryInput>
+    create: XOR<ChatPinnedArchiveEntryCreateWithoutArchiveEntryInput, ChatPinnedArchiveEntryUncheckedCreateWithoutArchiveEntryInput>
+  }
+
+  export type ChatPinnedArchiveEntryUpdateWithWhereUniqueWithoutArchiveEntryInput = {
+    where: ChatPinnedArchiveEntryWhereUniqueInput
+    data: XOR<ChatPinnedArchiveEntryUpdateWithoutArchiveEntryInput, ChatPinnedArchiveEntryUncheckedUpdateWithoutArchiveEntryInput>
+  }
+
+  export type ChatPinnedArchiveEntryUpdateManyWithWhereWithoutArchiveEntryInput = {
+    where: ChatPinnedArchiveEntryScalarWhereInput
+    data: XOR<ChatPinnedArchiveEntryUpdateManyMutationInput, ChatPinnedArchiveEntryUncheckedUpdateManyWithoutArchiveEntryInput>
+  }
+
+  export type ChatCreateWithoutPinnedArchiveEntriesInput = {
+    id?: string
+    createdAt: Date | string
+    title: string
+    visibility?: string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: string | null
+    forkedFromMessageId?: string | null
+    forkDepth?: number
+    user: UserCreateNestedOneWithoutChatsInput
+    messages?: Message_v2CreateNestedManyWithoutChatInput
+    votes?: Vote_v2CreateNestedManyWithoutChatInput
+    streams?: StreamCreateNestedManyWithoutChatInput
+  }
+
+  export type ChatUncheckedCreateWithoutPinnedArchiveEntriesInput = {
+    id?: string
+    createdAt: Date | string
+    title: string
+    userId: string
+    visibility?: string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: string | null
+    forkedFromMessageId?: string | null
+    forkDepth?: number
+    messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
+    votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
+    streams?: StreamUncheckedCreateNestedManyWithoutChatInput
+  }
+
+  export type ChatCreateOrConnectWithoutPinnedArchiveEntriesInput = {
+    where: ChatWhereUniqueInput
+    create: XOR<ChatCreateWithoutPinnedArchiveEntriesInput, ChatUncheckedCreateWithoutPinnedArchiveEntriesInput>
+  }
+
+  export type ArchiveEntryCreateWithoutPinnedInChatsInput = {
+    id?: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutArchiveEntriesInput
+    outgoingLinks?: ArchiveLinkCreateNestedManyWithoutSourceInput
+    incomingLinks?: ArchiveLinkCreateNestedManyWithoutTargetInput
+  }
+
+  export type ArchiveEntryUncheckedCreateWithoutPinnedInChatsInput = {
+    id?: string
+    userId: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    outgoingLinks?: ArchiveLinkUncheckedCreateNestedManyWithoutSourceInput
+    incomingLinks?: ArchiveLinkUncheckedCreateNestedManyWithoutTargetInput
+  }
+
+  export type ArchiveEntryCreateOrConnectWithoutPinnedInChatsInput = {
+    where: ArchiveEntryWhereUniqueInput
+    create: XOR<ArchiveEntryCreateWithoutPinnedInChatsInput, ArchiveEntryUncheckedCreateWithoutPinnedInChatsInput>
+  }
+
+  export type UserCreateWithoutPinnedArchiveEntriesInput = {
+    id: string
+    email: string
+    chats?: ChatCreateNestedManyWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
+    suggestions?: SuggestionCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutPinnedArchiveEntriesInput = {
+    id: string
+    email: string
+    chats?: ChatUncheckedCreateNestedManyWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
+    suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutPinnedArchiveEntriesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPinnedArchiveEntriesInput, UserUncheckedCreateWithoutPinnedArchiveEntriesInput>
+  }
+
+  export type ChatUpsertWithoutPinnedArchiveEntriesInput = {
+    update: XOR<ChatUpdateWithoutPinnedArchiveEntriesInput, ChatUncheckedUpdateWithoutPinnedArchiveEntriesInput>
+    create: XOR<ChatCreateWithoutPinnedArchiveEntriesInput, ChatUncheckedCreateWithoutPinnedArchiveEntriesInput>
+    where?: ChatWhereInput
+  }
+
+  export type ChatUpdateToOneWithWhereWithoutPinnedArchiveEntriesInput = {
+    where?: ChatWhereInput
+    data: XOR<ChatUpdateWithoutPinnedArchiveEntriesInput, ChatUncheckedUpdateWithoutPinnedArchiveEntriesInput>
+  }
+
+  export type ChatUpdateWithoutPinnedArchiveEntriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    title?: StringFieldUpdateOperationsInput | string
+    visibility?: StringFieldUpdateOperationsInput | string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkDepth?: IntFieldUpdateOperationsInput | number
+    user?: UserUpdateOneRequiredWithoutChatsNestedInput
+    messages?: Message_v2UpdateManyWithoutChatNestedInput
+    votes?: Vote_v2UpdateManyWithoutChatNestedInput
+    streams?: StreamUpdateManyWithoutChatNestedInput
+  }
+
+  export type ChatUncheckedUpdateWithoutPinnedArchiveEntriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    title?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    visibility?: StringFieldUpdateOperationsInput | string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkDepth?: IntFieldUpdateOperationsInput | number
+    messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
+    votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
+    streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
+  }
+
+  export type ArchiveEntryUpsertWithoutPinnedInChatsInput = {
+    update: XOR<ArchiveEntryUpdateWithoutPinnedInChatsInput, ArchiveEntryUncheckedUpdateWithoutPinnedInChatsInput>
+    create: XOR<ArchiveEntryCreateWithoutPinnedInChatsInput, ArchiveEntryUncheckedCreateWithoutPinnedInChatsInput>
+    where?: ArchiveEntryWhereInput
+  }
+
+  export type ArchiveEntryUpdateToOneWithWhereWithoutPinnedInChatsInput = {
+    where?: ArchiveEntryWhereInput
+    data: XOR<ArchiveEntryUpdateWithoutPinnedInChatsInput, ArchiveEntryUncheckedUpdateWithoutPinnedInChatsInput>
+  }
+
+  export type ArchiveEntryUpdateWithoutPinnedInChatsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutArchiveEntriesNestedInput
+    outgoingLinks?: ArchiveLinkUpdateManyWithoutSourceNestedInput
+    incomingLinks?: ArchiveLinkUpdateManyWithoutTargetNestedInput
+  }
+
+  export type ArchiveEntryUncheckedUpdateWithoutPinnedInChatsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    outgoingLinks?: ArchiveLinkUncheckedUpdateManyWithoutSourceNestedInput
+    incomingLinks?: ArchiveLinkUncheckedUpdateManyWithoutTargetNestedInput
+  }
+
+  export type UserUpsertWithoutPinnedArchiveEntriesInput = {
+    update: XOR<UserUpdateWithoutPinnedArchiveEntriesInput, UserUncheckedUpdateWithoutPinnedArchiveEntriesInput>
+    create: XOR<UserCreateWithoutPinnedArchiveEntriesInput, UserUncheckedCreateWithoutPinnedArchiveEntriesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPinnedArchiveEntriesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPinnedArchiveEntriesInput, UserUncheckedUpdateWithoutPinnedArchiveEntriesInput>
+  }
+
+  export type UserUpdateWithoutPinnedArchiveEntriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    chats?: ChatUpdateManyWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
+    suggestions?: SuggestionUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPinnedArchiveEntriesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    chats?: ChatUncheckedUpdateManyWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
+    suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type ArchiveEntryCreateWithoutOutgoingLinksInput = {
+    id?: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutArchiveEntriesInput
+    incomingLinks?: ArchiveLinkCreateNestedManyWithoutTargetInput
+    pinnedInChats?: ChatPinnedArchiveEntryCreateNestedManyWithoutArchiveEntryInput
+  }
+
+  export type ArchiveEntryUncheckedCreateWithoutOutgoingLinksInput = {
+    id?: string
+    userId: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    incomingLinks?: ArchiveLinkUncheckedCreateNestedManyWithoutTargetInput
+    pinnedInChats?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutArchiveEntryInput
+  }
+
+  export type ArchiveEntryCreateOrConnectWithoutOutgoingLinksInput = {
+    where: ArchiveEntryWhereUniqueInput
+    create: XOR<ArchiveEntryCreateWithoutOutgoingLinksInput, ArchiveEntryUncheckedCreateWithoutOutgoingLinksInput>
+  }
+
+  export type ArchiveEntryCreateWithoutIncomingLinksInput = {
+    id?: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutArchiveEntriesInput
+    outgoingLinks?: ArchiveLinkCreateNestedManyWithoutSourceInput
+    pinnedInChats?: ChatPinnedArchiveEntryCreateNestedManyWithoutArchiveEntryInput
+  }
+
+  export type ArchiveEntryUncheckedCreateWithoutIncomingLinksInput = {
+    id?: string
+    userId: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    outgoingLinks?: ArchiveLinkUncheckedCreateNestedManyWithoutSourceInput
+    pinnedInChats?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutArchiveEntryInput
+  }
+
+  export type ArchiveEntryCreateOrConnectWithoutIncomingLinksInput = {
+    where: ArchiveEntryWhereUniqueInput
+    create: XOR<ArchiveEntryCreateWithoutIncomingLinksInput, ArchiveEntryUncheckedCreateWithoutIncomingLinksInput>
+  }
+
+  export type ArchiveEntryUpsertWithoutOutgoingLinksInput = {
+    update: XOR<ArchiveEntryUpdateWithoutOutgoingLinksInput, ArchiveEntryUncheckedUpdateWithoutOutgoingLinksInput>
+    create: XOR<ArchiveEntryCreateWithoutOutgoingLinksInput, ArchiveEntryUncheckedCreateWithoutOutgoingLinksInput>
+    where?: ArchiveEntryWhereInput
+  }
+
+  export type ArchiveEntryUpdateToOneWithWhereWithoutOutgoingLinksInput = {
+    where?: ArchiveEntryWhereInput
+    data: XOR<ArchiveEntryUpdateWithoutOutgoingLinksInput, ArchiveEntryUncheckedUpdateWithoutOutgoingLinksInput>
+  }
+
+  export type ArchiveEntryUpdateWithoutOutgoingLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutArchiveEntriesNestedInput
+    incomingLinks?: ArchiveLinkUpdateManyWithoutTargetNestedInput
+    pinnedInChats?: ChatPinnedArchiveEntryUpdateManyWithoutArchiveEntryNestedInput
+  }
+
+  export type ArchiveEntryUncheckedUpdateWithoutOutgoingLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    incomingLinks?: ArchiveLinkUncheckedUpdateManyWithoutTargetNestedInput
+    pinnedInChats?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutArchiveEntryNestedInput
+  }
+
+  export type ArchiveEntryUpsertWithoutIncomingLinksInput = {
+    update: XOR<ArchiveEntryUpdateWithoutIncomingLinksInput, ArchiveEntryUncheckedUpdateWithoutIncomingLinksInput>
+    create: XOR<ArchiveEntryCreateWithoutIncomingLinksInput, ArchiveEntryUncheckedCreateWithoutIncomingLinksInput>
+    where?: ArchiveEntryWhereInput
+  }
+
+  export type ArchiveEntryUpdateToOneWithWhereWithoutIncomingLinksInput = {
+    where?: ArchiveEntryWhereInput
+    data: XOR<ArchiveEntryUpdateWithoutIncomingLinksInput, ArchiveEntryUncheckedUpdateWithoutIncomingLinksInput>
+  }
+
+  export type ArchiveEntryUpdateWithoutIncomingLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutArchiveEntriesNestedInput
+    outgoingLinks?: ArchiveLinkUpdateManyWithoutSourceNestedInput
+    pinnedInChats?: ChatPinnedArchiveEntryUpdateManyWithoutArchiveEntryNestedInput
+  }
+
+  export type ArchiveEntryUncheckedUpdateWithoutIncomingLinksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    outgoingLinks?: ArchiveLinkUncheckedUpdateManyWithoutSourceNestedInput
+    pinnedInChats?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutArchiveEntryNestedInput
   }
 
   export type ChatCreateManyUserInput = {
@@ -15073,6 +20490,23 @@ export namespace Prisma {
     createdAt: Date | string
   }
 
+  export type ArchiveEntryCreateManyUserInput = {
+    id?: string
+    slug: string
+    entity: string
+    tags?: ArchiveEntryCreatetagsInput | string[]
+    body: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ChatPinnedArchiveEntryCreateManyUserInput = {
+    id?: string
+    chatId: string
+    archiveEntryId: string
+    pinnedAt?: Date | string
+  }
+
   export type ChatUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15085,6 +20519,7 @@ export namespace Prisma {
     messages?: Message_v2UpdateManyWithoutChatNestedInput
     votes?: Vote_v2UpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
 
   export type ChatUncheckedUpdateWithoutUserInput = {
@@ -15099,6 +20534,7 @@ export namespace Prisma {
     messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
     votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
   }
 
   export type ChatUncheckedUpdateManyWithoutUserInput = {
@@ -15170,6 +20606,63 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ArchiveEntryUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    outgoingLinks?: ArchiveLinkUpdateManyWithoutSourceNestedInput
+    incomingLinks?: ArchiveLinkUpdateManyWithoutTargetNestedInput
+    pinnedInChats?: ChatPinnedArchiveEntryUpdateManyWithoutArchiveEntryNestedInput
+  }
+
+  export type ArchiveEntryUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    outgoingLinks?: ArchiveLinkUncheckedUpdateManyWithoutSourceNestedInput
+    incomingLinks?: ArchiveLinkUncheckedUpdateManyWithoutTargetNestedInput
+    pinnedInChats?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutArchiveEntryNestedInput
+  }
+
+  export type ArchiveEntryUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    entity?: StringFieldUpdateOperationsInput | string
+    tags?: ArchiveEntryUpdatetagsInput | string[]
+    body?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    chat?: ChatUpdateOneRequiredWithoutPinnedArchiveEntriesNestedInput
+    archiveEntry?: ArchiveEntryUpdateOneRequiredWithoutPinnedInChatsNestedInput
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chatId?: StringFieldUpdateOperationsInput | string
+    archiveEntryId?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chatId?: StringFieldUpdateOperationsInput | string
+    archiveEntryId?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type Message_v2CreateManyChatInput = {
     id?: string
     role: string
@@ -15191,6 +20684,13 @@ export namespace Prisma {
   export type StreamCreateManyChatInput = {
     id?: string
     createdAt: Date | string
+  }
+
+  export type ChatPinnedArchiveEntryCreateManyChatInput = {
+    id?: string
+    archiveEntryId: string
+    userId: string
+    pinnedAt?: Date | string
   }
 
   export type Message_v2UpdateWithoutChatInput = {
@@ -15264,6 +20764,27 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ChatPinnedArchiveEntryUpdateWithoutChatInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    archiveEntry?: ArchiveEntryUpdateOneRequiredWithoutPinnedInChatsNestedInput
+    user?: UserUpdateOneRequiredWithoutPinnedArchiveEntriesNestedInput
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateWithoutChatInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    archiveEntryId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    archiveEntryId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type Vote_v2CreateManyMessageInput = {
     chatId: string
     isUpvoted: boolean
@@ -15322,6 +20843,98 @@ export namespace Prisma {
     isResolved?: BoolFieldUpdateOperationsInput | boolean
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ArchiveLinkCreateManySourceInput = {
+    id?: string
+    targetId: string
+    type: string
+    bidirectional?: boolean
+    createdAt?: Date | string
+  }
+
+  export type ArchiveLinkCreateManyTargetInput = {
+    id?: string
+    sourceId: string
+    type: string
+    bidirectional?: boolean
+    createdAt?: Date | string
+  }
+
+  export type ChatPinnedArchiveEntryCreateManyArchiveEntryInput = {
+    id?: string
+    chatId: string
+    userId: string
+    pinnedAt?: Date | string
+  }
+
+  export type ArchiveLinkUpdateWithoutSourceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    target?: ArchiveEntryUpdateOneRequiredWithoutIncomingLinksNestedInput
+  }
+
+  export type ArchiveLinkUncheckedUpdateWithoutSourceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    targetId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ArchiveLinkUncheckedUpdateManyWithoutSourceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    targetId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ArchiveLinkUpdateWithoutTargetInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    source?: ArchiveEntryUpdateOneRequiredWithoutOutgoingLinksNestedInput
+  }
+
+  export type ArchiveLinkUncheckedUpdateWithoutTargetInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ArchiveLinkUncheckedUpdateManyWithoutTargetInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    bidirectional?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryUpdateWithoutArchiveEntryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    chat?: ChatUpdateOneRequiredWithoutPinnedArchiveEntriesNestedInput
+    user?: UserUpdateOneRequiredWithoutPinnedArchiveEntriesNestedInput
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateWithoutArchiveEntryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chatId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatPinnedArchiveEntryUncheckedUpdateManyWithoutArchiveEntryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chatId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

@@ -25,6 +25,15 @@ import { isModelIdAllowed } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel, getResolvedProviderModelId } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
+import { archiveCreateEntry } from "@/lib/ai/tools/archive-create-entry";
+import { archiveReadEntry } from "@/lib/ai/tools/archive-read-entry";
+import { archiveUpdateEntry } from "@/lib/ai/tools/archive-update-entry";
+import { archiveDeleteEntry } from "@/lib/ai/tools/archive-delete-entry";
+import { archiveLinkEntries } from "@/lib/ai/tools/archive-link-entries";
+import { archiveSearchEntries } from "@/lib/ai/tools/archive-search-entries";
+import { archiveApplyEdits } from "@/lib/ai/tools/archive-apply-edits";
+import { archivePinEntry } from "@/lib/ai/tools/archive-pin-entry";
+import { archiveUnpinEntry } from "@/lib/ai/tools/archive-unpin-entry";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
@@ -41,6 +50,7 @@ import {
   updateChatLastContextById,
   insertAssistantVariant,
   saveAssistantInitialMessage,
+  getPinnedArchiveEntriesForChat,
 } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
@@ -106,12 +116,14 @@ export async function POST(request: Request) {
       selectedChatModel,
       selectedVisibilityType,
       regeneratingMessageId,
+      initialPinnedSlugs,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel["id"];
       selectedVisibilityType: VisibilityType;
       regeneratingMessageId?: string;
+      initialPinnedSlugs?: string[];
     } = requestBody;
 
   const session = await getAppSession();
@@ -139,7 +151,8 @@ export async function POST(request: Request) {
       return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
-    const chat = await getChatById({ id });
+  const chat = await getChatById({ id });
+  let createdNewChat = false;
 
     if (chat) {
       if (chat.userId !== session.user.id) {
@@ -156,6 +169,24 @@ export async function POST(request: Request) {
         title,
         visibility: selectedVisibilityType,
       });
+      createdNewChat = true;
+      // If UI provided initialPinnedSlugs, attempt to pin them now (best-effort, ignore individual failures)
+      if (initialPinnedSlugs && initialPinnedSlugs.length) {
+        // De-duplicate slugs client may have repeated
+        const unique = Array.from(new Set(initialPinnedSlugs)).slice(0, 12);
+        // Lazy import pin helper to avoid expanding top-level import surface
+        const { pinArchiveEntryToChat } = await import("@/lib/db/queries");
+        await Promise.all(
+          unique.map(async (slug) => {
+            try {
+              await pinArchiveEntryToChat({ userId: session.user.id, chatId: id, slug });
+            } catch (e) {
+              // Swallow errors – individual pin failure shouldn't abort first message send
+              console.warn("Initial pin failed", { chatId: id, slug, error: e });
+            }
+          })
+        );
+      }
     }
 
   // Use only active (non-superseded) versions for context
@@ -193,9 +224,21 @@ export async function POST(request: Request) {
     const stream = createUIMessageStream({
       execute: async ({ writer: dataStream }) => {
         const model = await getLanguageModel(selectedChatModel);
+        // Load pinned archive entries for this chat (if any) to enrich system prompt
+        let pinnedForPrompt: { slug: string; entity: string; body: string }[] | undefined;
+        try {
+          const pinned = await getPinnedArchiveEntriesForChat({ userId: session.user.id, chatId: id });
+          if (pinned.length) {
+            // Only include body if reasonably small; large bodies trimmed inside systemPrompt
+            pinnedForPrompt = pinned.map(p => ({ slug: p.slug, entity: p.entity, body: p.body }));
+          }
+        } catch (e) {
+          console.warn("Failed to load pinned entries for chat", id, e);
+        }
+
         const result = streamText({
           model,
-          system: systemPrompt({ selectedChatModel, requestHints }),
+          system: systemPrompt({ selectedChatModel, requestHints, pinnedEntries: pinnedForPrompt }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools: [
@@ -203,16 +246,31 @@ export async function POST(request: Request) {
             "createDocument",
             "updateDocument",
             "requestSuggestions",
+            "archiveCreateEntry",
+            "archiveReadEntry",
+            "archiveUpdateEntry",
+            "archiveDeleteEntry",
+            "archiveLinkEntries",
+            "archiveSearchEntries",
+            "archiveApplyEdits",
+            "archivePinEntry",
+            "archiveUnpinEntry",
           ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             getWeather,
             createDocument: createDocument({ session, dataStream }),
             updateDocument: updateDocument({ session, dataStream }),
-            requestSuggestions: requestSuggestions({
-              session,
-              dataStream,
-            }),
+            requestSuggestions: requestSuggestions({ session, dataStream }),
+            archiveCreateEntry: archiveCreateEntry({ session }),
+            archiveReadEntry: archiveReadEntry({ session }),
+            archiveUpdateEntry: archiveUpdateEntry({ session }),
+            archiveDeleteEntry: archiveDeleteEntry({ session }),
+            archiveLinkEntries: archiveLinkEntries({ session }),
+            archiveSearchEntries: archiveSearchEntries({ session }),
+            archiveApplyEdits: archiveApplyEdits({ session }),
+            archivePinEntry: archivePinEntry({ session, chatId: id }),
+            archiveUnpinEntry: archiveUnpinEntry({ session, chatId: id }),
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,

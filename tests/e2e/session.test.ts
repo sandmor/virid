@@ -1,5 +1,6 @@
 import { getMessageByErrorCode } from "@/lib/errors";
 import { expect, test } from "../fixtures";
+import type { Request as PWRequest } from "@playwright/test";
 import { generateRandomTestUser } from "../helpers";
 import { AuthPage } from "../pages/auth";
 import { ChatPage } from "../pages/chat";
@@ -15,13 +16,12 @@ test.describe
         throw new Error("Failed to load page");
       }
 
-      let request = response.request();
-
+  let current: PWRequest | null = response.request();
       const chain: string[] = [];
-
-      while (request) {
-        chain.unshift(request.url());
-        request = request.redirectedFrom();
+      while (current) {
+        chain.unshift(current.url());
+        const prev = current.redirectedFrom();
+        current = prev ?? null;
       }
 
       expect(chain).toEqual([
@@ -57,13 +57,12 @@ test.describe
         throw new Error("Failed to load page");
       }
 
-      let request = response.request();
-
+  let current: PWRequest | null = response.request();
       const chain: string[] = [];
-
-      while (request) {
-        chain.unshift(request.url());
-        request = request.redirectedFrom();
+      while (current) {
+        chain.unshift(current.url());
+        const prev = current.redirectedFrom();
+        current = prev ?? null;
       }
 
       expect(chain).toEqual(["http://localhost:3000/"]);

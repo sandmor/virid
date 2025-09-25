@@ -1,4 +1,21 @@
 -- CreateTable
+CREATE TABLE "public"."Provider" (
+    "id" VARCHAR(64) NOT NULL,
+    "apiKey" TEXT NOT NULL,
+
+    CONSTRAINT "Provider_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."Tier" (
+    "id" VARCHAR(32) NOT NULL,
+    "modelIds" TEXT[],
+    "maxMessagesPerDay" INTEGER NOT NULL,
+
+    CONSTRAINT "Tier_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "public"."User" (
     "id" VARCHAR(191) NOT NULL,
     "email" VARCHAR(128) NOT NULL,
@@ -83,6 +100,43 @@ CREATE TABLE "public"."Stream" (
     CONSTRAINT "Stream_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."ArchiveEntry" (
+    "id" UUID NOT NULL,
+    "userId" VARCHAR(191) NOT NULL,
+    "slug" VARCHAR(128) NOT NULL,
+    "entity" TEXT NOT NULL,
+    "tags" TEXT[],
+    "body" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ArchiveEntry_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."ChatPinnedArchiveEntry" (
+    "id" UUID NOT NULL,
+    "chatId" UUID NOT NULL,
+    "archiveEntryId" UUID NOT NULL,
+    "userId" VARCHAR(191) NOT NULL,
+    "pinnedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ChatPinnedArchiveEntry_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."ArchiveLink" (
+    "id" UUID NOT NULL,
+    "sourceId" UUID NOT NULL,
+    "targetId" UUID NOT NULL,
+    "type" VARCHAR(64) NOT NULL,
+    "bidirectional" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ArchiveLink_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "Chat_parentChatId_idx" ON "public"."Chat"("parentChatId");
 
@@ -97,6 +151,33 @@ CREATE INDEX "Message_v2_supersededById_idx" ON "public"."Message_v2"("supersede
 
 -- CreateIndex
 CREATE INDEX "Message_v2_regenerationGroupId_idx" ON "public"."Message_v2"("regenerationGroupId");
+
+-- CreateIndex
+CREATE INDEX "ArchiveEntry_userId_slug_idx" ON "public"."ArchiveEntry"("userId", "slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ArchiveEntry_userId_slug_key" ON "public"."ArchiveEntry"("userId", "slug");
+
+-- CreateIndex
+CREATE INDEX "ChatPinnedArchiveEntry_chatId_idx" ON "public"."ChatPinnedArchiveEntry"("chatId");
+
+-- CreateIndex
+CREATE INDEX "ChatPinnedArchiveEntry_archiveEntryId_idx" ON "public"."ChatPinnedArchiveEntry"("archiveEntryId");
+
+-- CreateIndex
+CREATE INDEX "ChatPinnedArchiveEntry_userId_idx" ON "public"."ChatPinnedArchiveEntry"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ChatPinnedArchiveEntry_chatId_archiveEntryId_key" ON "public"."ChatPinnedArchiveEntry"("chatId", "archiveEntryId");
+
+-- CreateIndex
+CREATE INDEX "ArchiveLink_sourceId_idx" ON "public"."ArchiveLink"("sourceId");
+
+-- CreateIndex
+CREATE INDEX "ArchiveLink_targetId_idx" ON "public"."ArchiveLink"("targetId");
+
+-- CreateIndex
+CREATE INDEX "ArchiveLink_type_idx" ON "public"."ArchiveLink"("type");
 
 -- AddForeignKey
 ALTER TABLE "public"."Chat" ADD CONSTRAINT "Chat_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -121,3 +202,21 @@ ALTER TABLE "public"."Suggestion" ADD CONSTRAINT "Suggestion_documentId_document
 
 -- AddForeignKey
 ALTER TABLE "public"."Stream" ADD CONSTRAINT "Stream_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "public"."Chat"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."ArchiveEntry" ADD CONSTRAINT "ArchiveEntry_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."ChatPinnedArchiveEntry" ADD CONSTRAINT "ChatPinnedArchiveEntry_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "public"."Chat"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."ChatPinnedArchiveEntry" ADD CONSTRAINT "ChatPinnedArchiveEntry_archiveEntryId_fkey" FOREIGN KEY ("archiveEntryId") REFERENCES "public"."ArchiveEntry"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."ChatPinnedArchiveEntry" ADD CONSTRAINT "ChatPinnedArchiveEntry_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."ArchiveLink" ADD CONSTRAINT "ArchiveLink_sourceId_fkey" FOREIGN KEY ("sourceId") REFERENCES "public"."ArchiveEntry"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."ArchiveLink" ADD CONSTRAINT "ArchiveLink_targetId_fkey" FOREIGN KEY ("targetId") REFERENCES "public"."ArchiveEntry"("id") ON DELETE CASCADE ON UPDATE CASCADE;
