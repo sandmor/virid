@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { expect, type Page } from "@playwright/test";
-import { deriveChatModel } from "@/lib/ai/models";
+import { chatModels } from "@/lib/ai/models";
 
 const CHAT_ID_REGEX =
   /^http:\/\/localhost:3000\/chat\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -42,7 +42,6 @@ export class ChatPage {
   }
 
   async sendUserMessage(message: string) {
-    await this.page.waitForSelector('[data-testid="multimodal-input"]', { timeout: 10000 });
     await this.multimodalInput.click();
     await this.multimodalInput.fill(message);
     await this.sendButton.click();
@@ -108,8 +107,13 @@ export class ChatPage {
   }
 
   async chooseModelFromSelector(chatModelId: string) {
-    // We no longer have a static exported array of models; derive display metadata on the fly.
-    const chatModel = deriveChatModel(chatModelId);
+    const chatModel = chatModels.find(
+      (currentChatModel) => currentChatModel.id === chatModelId
+    );
+
+    if (!chatModel) {
+      throw new Error(`Model with id ${chatModelId} not found`);
+    }
 
     await this.page.getByTestId("model-selector").click();
     await this.page.getByTestId(`model-selector-item-${chatModelId}`).click();
@@ -136,8 +140,9 @@ export class ChatPage {
       .getByTestId("message-assistant")
       .all();
     const lastMessageElement = messageElements.at(-1);
+
     if (!lastMessageElement) {
-      throw new Error("No assistant message found");
+      return null;
     }
 
     const content = await lastMessageElement

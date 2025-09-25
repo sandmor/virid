@@ -1,7 +1,7 @@
 import equal from "fast-deep-equal";
 import { memo } from "react";
 import { toast } from "sonner";
-import { useSWRConfig } from "swr";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCopyToClipboard } from "usehooks-ts";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
@@ -26,7 +26,64 @@ export function PureMessageActions({
   setMode?: (mode: "view" | "edit") => void;
   onRegenerate?: (assistantMessageId: string) => void;
 }) {
-  const { mutate } = useSWRConfig();
+  const queryClient = useQueryClient();
+  const voteQueryKey = ["chat","votes", chatId];
+
+  const upvoteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/vote", {
+        method: "PATCH",
+        body: JSON.stringify({ chatId, messageId: message.id, type: "up" }),
+      });
+      if (!res.ok) throw new Error("Failed to upvote");
+      return res.json().catch(() => ({}));
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: voteQueryKey });
+      const prev = queryClient.getQueryData<Vote[] | undefined>(voteQueryKey);
+      queryClient.setQueryData<Vote[] | undefined>(voteQueryKey, (current) => {
+        const safe = current || [];
+        const filtered = safe.filter((v) => v.messageId !== message.id);
+        return [...filtered, { chatId, messageId: message.id, isUpvoted: true } as Vote];
+      });
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(voteQueryKey, ctx.prev);
+      toast.error("Failed to upvote response.");
+    },
+    onSuccess: () => {
+      toast.success("Upvoted Response!");
+    },
+  });
+
+  const downvoteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/vote", {
+        method: "PATCH",
+        body: JSON.stringify({ chatId, messageId: message.id, type: "down" }),
+      });
+      if (!res.ok) throw new Error("Failed to downvote");
+      return res.json().catch(() => ({}));
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: voteQueryKey });
+      const prev = queryClient.getQueryData<Vote[] | undefined>(voteQueryKey);
+      queryClient.setQueryData<Vote[] | undefined>(voteQueryKey, (current) => {
+        const safe = current || [];
+        const filtered = safe.filter((v) => v.messageId !== message.id);
+        return [...filtered, { chatId, messageId: message.id, isUpvoted: false } as Vote];
+      });
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(voteQueryKey, ctx.prev);
+      toast.error("Failed to downvote response.");
+    },
+    onSuccess: () => {
+      toast.success("Downvoted Response!");
+    },
+  });
   const [_, copyToClipboard] = useCopyToClipboard();
 
   if (isLoading) {
@@ -98,45 +155,7 @@ export function PureMessageActions({
         data-testid="message-upvote"
         disabled={vote?.isUpvoted}
         onClick={() => {
-          const upvote = fetch("/api/vote", {
-            method: "PATCH",
-            body: JSON.stringify({
-              chatId,
-              messageId: message.id,
-              type: "up",
-            }),
-          });
-
-          toast.promise(upvote, {
-            loading: "Upvoting Response...",
-            success: () => {
-              mutate<Vote[]>(
-                `/api/vote?chatId=${chatId}`,
-                (currentVotes) => {
-                  if (!currentVotes) {
-                    return [];
-                  }
-
-                  const votesWithoutCurrent = currentVotes.filter(
-                    (currentVote) => currentVote.messageId !== message.id
-                  );
-
-                  return [
-                    ...votesWithoutCurrent,
-                    {
-                      chatId,
-                      messageId: message.id,
-                      isUpvoted: true,
-                    },
-                  ];
-                },
-                { revalidate: false }
-              );
-
-              return "Upvoted Response!";
-            },
-            error: "Failed to upvote response.",
-          });
+          upvoteMutation.mutate();
         }}
         tooltip="Upvote Response"
       >
@@ -147,45 +166,7 @@ export function PureMessageActions({
         data-testid="message-downvote"
         disabled={vote && !vote.isUpvoted}
         onClick={() => {
-          const downvote = fetch("/api/vote", {
-            method: "PATCH",
-            body: JSON.stringify({
-              chatId,
-              messageId: message.id,
-              type: "down",
-            }),
-          });
-
-          toast.promise(downvote, {
-            loading: "Downvoting Response...",
-            success: () => {
-              mutate<Vote[]>(
-                `/api/vote?chatId=${chatId}`,
-                (currentVotes) => {
-                  if (!currentVotes) {
-                    return [];
-                  }
-
-                  const votesWithoutCurrent = currentVotes.filter(
-                    (currentVote) => currentVote.messageId !== message.id
-                  );
-
-                  return [
-                    ...votesWithoutCurrent,
-                    {
-                      chatId,
-                      messageId: message.id,
-                      isUpvoted: false,
-                    },
-                  ];
-                },
-                { revalidate: false }
-              );
-
-              return "Downvoted Response!";
-            },
-            error: "Failed to downvote response.",
-          });
+          downvoteMutation.mutate();
         }}
         tooltip="Downvote Response"
       >

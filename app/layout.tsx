@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { QueryProvider } from "@/components/query-provider";
 
 export const metadata: Metadata = {
   // Update to your production domain when available
@@ -80,7 +81,11 @@ export default function RootLayout({
           enableSystem
         >
           <Toaster position="top-center" />
-          <ClerkProvider>{children}</ClerkProvider>
+          <ClerkProvider>
+            <QueryProvider>
+              {children}
+            </QueryProvider>
+          </ClerkProvider>
         </ThemeProvider>
       </body>
     </html>

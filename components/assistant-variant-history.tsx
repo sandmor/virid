@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ClockRewind } from "@/components/icons";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 export function AssistantVariantHistory({
   chatId,
@@ -16,18 +17,17 @@ export function AssistantVariantHistory({
   onSelectVariant: (variant: ChatMessage) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [variants, setVariants] = useState<ChatMessage[]>([]);
-
-  useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    fetch(`/api/assistant-variants?chatId=${chatId}&messageId=${messageId}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(r)))
-      .then((data) => setVariants(data.variants || []))
-      .catch(() => setVariants([]))
-      .finally(() => setLoading(false));
-  }, [open, chatId, messageId]);
+  const { data, isFetching: loading } = useQuery<{ variants: ChatMessage[] }>({
+    queryKey: ["assistant","variants", chatId, messageId],
+    queryFn: async () => {
+      const res = await fetch(`/api/assistant-variants?chatId=${chatId}&messageId=${messageId}`);
+      if (!res.ok) throw new Error("Failed to load variants");
+      return res.json();
+    },
+    enabled: open, // only fetch when popover opened
+    staleTime: 30_000,
+  });
+  const variants = data?.variants || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

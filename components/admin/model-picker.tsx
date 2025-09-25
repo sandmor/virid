@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown } from "lucide-react";
 import { Combobox, type ComboOption } from "@/components/ui/combobox";
 import { SUPPORTED_PROVIDERS, displayProviderName } from "@/lib/ai/registry";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function ModelPicker({
   value,
@@ -18,43 +19,44 @@ export function ModelPicker({
 }) {
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
   const [optionsByProvider, setOptionsByProvider] = useState<Record<string, ComboOption[]>>({});
-  const [loading, setLoading] = useState(false);
-  const [catalog, setCatalog] = useState<Record<string, any> | null>(null);
+  const queryClient = useQueryClient();
+  const { data: catalog, isFetching: loading } = useQuery<Record<string, any>>({
+    queryKey: ["admin","model-catalog"],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/models`);
+      if (!res.ok) throw new Error("Failed to load model catalog");
+      return res.json();
+    },
+    staleTime: 5 * 60_000,
+  });
+  const [customInputs, setCustomInputs] = useState<Record<string, string>>({});
 
-  // Shared fetch function
-  async function fetchCatalog(force = false) {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/models${force ? "?refresh=1" : ""}`);
-      if (!res.ok) return;
-      const cat = (await res.json()) as Record<string, any>;
-      setCatalog(cat);
-      const map: Record<string, ComboOption[]> = {};
-      for (const p of SUPPORTED_PROVIDERS) {
-        const entry = cat[p];
-        const modelIds = entry?.models ? Object.keys(entry.models).sort() : [];
-        map[p] = modelIds.map((m: string) => ({ value: `${p}:${m}`, label: m }));
-      }
-      setOptionsByProvider(map);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // Initial load
+  // Build options when catalog changes
   useEffect(() => {
-    fetchCatalog(false);
-  }, []);
+    if (!catalog) return;
+    const map: Record<string, ComboOption[]> = {};
+    for (const p of SUPPORTED_PROVIDERS) {
+      const entry = catalog[p];
+      const modelIds = entry?.models ? Object.keys(entry.models).sort() : [];
+      map[p] = modelIds.map((m: string) => ({ value: `${p}:${m}`, label: m }));
+    }
+    setOptionsByProvider(map);
+  }, [catalog]);
 
   // Listen for global refresh event dispatched elsewhere in the admin UI
   useEffect(() => {
     function handler(e: Event) {
       const detail = (e as CustomEvent)?.detail as { force?: boolean } | undefined;
-      fetchCatalog(!!detail?.force);
+      if (detail?.force) {
+        // Hard refetch ignoring cache (e.g., provider keys changed)
+        queryClient.invalidateQueries({ queryKey: ["admin","model-catalog"] });
+        queryClient.removeQueries({ queryKey: ["admin","model-catalog"], exact: true });
+      }
+      queryClient.invalidateQueries({ queryKey: ["admin","model-catalog"] });
     }
     window.addEventListener("catalog:refresh", handler as EventListener);
     return () => window.removeEventListener("catalog:refresh", handler as EventListener);
-  }, []);
+  }, [queryClient]);
 
   const selectedSet = useMemo(() => new Set(value), [value]);
 
@@ -64,36 +66,63 @@ export function ModelPicker({
     onChange([...value, id]);
   }
 
+  function normalizeCustomModel(provider: string, raw: string): string | null {
+    const input = raw.trim();
+    if (!input) return null;
+    // Allow either plain model slug or full composite id
+    if (input.includes(":")) {
+      // If they provided provider:model form, validate provider matches
+      const [p, rest] = input.split(":", 2);
+      if (!rest) return null;
+      if (p !== provider) {
+        // Wrong provider prefix; reject
+        return null;
+      }
+      return `${p}:${rest}`;
+    }
+    // Plain slug -> compose
+    return `${provider}:${input}`;
+  }
+
+  function addCustomModel(provider: string) {
+    const raw = customInputs[provider] || "";
+    const id = normalizeCustomModel(provider, raw);
+    if (!id) return; // silently ignore invalid for now
+    if (selectedSet.has(id)) return;
+    onChange([...value, id]);
+    setCustomInputs((s) => ({ ...s, [provider]: "" }));
+  }
+
   function removeModel(id: string) {
     onChange(value.filter((m) => m !== id));
   }
 
-  function addAllForProvider(p: string) {
+  const addAllForProvider = useCallback((p: string) => {
     const opts = optionsByProvider[p] || [];
     const ids = opts.map((o) => o.value);
     const next = new Set(value);
     ids.forEach((id) => next.add(id));
     onChange(Array.from(next));
-  }
+  }, [optionsByProvider, value, onChange]);
 
-  function removeAllForProvider(p: string) {
+  const removeAllForProvider = useCallback((p: string) => {
     const opts = optionsByProvider[p] || [];
     const idSet = new Set(opts.map((o) => o.value));
     onChange(value.filter((id) => !idSet.has(id)));
-  }
+  }, [optionsByProvider, value, onChange]);
 
-  function addAllProviders() {
+  const addAllProviders = useCallback(() => {
     const next = new Set(value);
     for (const p of SUPPORTED_PROVIDERS) {
       const opts = optionsByProvider[p] || [];
       opts.forEach((o) => next.add(o.value));
     }
     onChange(Array.from(next));
-  }
+  }, [optionsByProvider, value, onChange]);
 
-  function removeAllProviders() {
+  const removeAllProviders = useCallback(() => {
     onChange([]);
-  }
+  }, [onChange]);
 
   return (
     <div className="space-y-3">
@@ -160,8 +189,34 @@ export function ModelPicker({
                   />
                 ) : (
                   <p className="text-xs text-muted-foreground">
-                    {loading ? "Loading models…" : "No models found. Use the global refresh."}
+                    {loading ? "Loading models…" : "No models found in catalog. You can still add a custom model below."}
                   </p>
+                )}
+                <div className="flex gap-2 items-center pt-1">
+                  <input
+                    className="flex-1 rounded-md border px-2 py-1 text-xs bg-background"
+                    placeholder={`Custom ${p} model slug or ${p}:model…`}
+                    value={customInputs[p] || ""}
+                    onChange={(e) => setCustomInputs((s) => ({ ...s, [p]: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addCustomModel(p);
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => addCustomModel(p)}
+                    disabled={loading || !(customInputs[p] || "").trim()}
+                  >
+                    Add
+                  </Button>
+                </div>
+                {customInputs[p] && customInputs[p].includes(":") && !customInputs[p].startsWith(`${p}:`) && (
+                  <p className="text-[10px] text-red-500">Prefix must be {p}:</p>
                 )}
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                   <span>{opts.length} models</span>

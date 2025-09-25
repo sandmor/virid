@@ -15,7 +15,7 @@ test.describe
         throw new Error("Failed to load page");
       }
 
-  let request: any | null = response.request();
+      let request = response.request();
 
       const chain: string[] = [];
 
@@ -57,7 +57,7 @@ test.describe
         throw new Error("Failed to load page");
       }
 
-  let request: any | null = response.request();
+      let request = response.request();
 
       const chain: string[] = [];
 
@@ -94,9 +94,6 @@ test.describe
 
 test.describe
   .serial("Login and Registration", () => {
-    if (process.env.PLAYWRIGHT) {
-      test.skip(true, "Skipping Clerk login/registration tests in PLAYWRIGHT environment (guest-only mode)");
-    }
     let authPage: AuthPage;
 
     const testUser = generateRandomTestUser();

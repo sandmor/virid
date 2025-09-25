@@ -4,8 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import useSWR, { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChatHeader } from "@/components/chat-header";
 import { useArtifactSelector } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
@@ -19,7 +18,6 @@ import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
-import { getChatHistoryPaginationKey } from "./sidebar-history";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
 
@@ -47,7 +45,7 @@ export function Chat({
     initialVisibilityType,
   });
 
-  const { mutate } = useSWRConfig();
+  const queryClient = useQueryClient();
   const { setDataStream } = useDataStream();
 
   const [input, setInput] = useState<string>("");
@@ -98,7 +96,8 @@ export function Chat({
       }
     },
     onFinish: () => {
-      mutate(unstable_serialize(getChatHistoryPaginationKey));
+      // Invalidate chat history infinite query (new message might affect ordering)
+      queryClient.invalidateQueries({ queryKey: ["chat","history"] });
     },
     onError: (error) => {
       if (error instanceof ChatSDKError) {
@@ -142,10 +141,12 @@ export function Chat({
     window.history.replaceState({}, "", `/chat/${id}`);
   }, [query, messages, sendMessage, id]);
 
-  const { data: votes } = useSWR<Vote[]>(
-    messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
-    fetcher
-  );
+  const { data: votes } = useQuery<Vote[] | undefined>({
+    queryKey: ["chat","votes", id],
+    queryFn: async () => fetcher(`/api/vote?chatId=${id}`),
+    enabled: messages.length >= 2,
+    staleTime: 30_000,
+  });
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);

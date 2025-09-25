@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 type SidebarUser = { id?: string; email?: string | null };
 import { useState } from "react";
 import { toast } from "sonner";
-import useSWRInfinite from "swr/infinite";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +24,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { Chat } from "@/lib/db/schema";
-import { fetcher } from "@/lib/utils";
+// fetcher retained in utils for other components; not needed here
 import { LoaderIcon } from "./icons";
 import { ChatItem } from "./sidebar-history-item";
 
@@ -76,52 +76,49 @@ const groupChatsByDate = (chats: Chat[]): GroupedChats => {
   );
 };
 
-export function getChatHistoryPaginationKey(
-  pageIndex: number,
-  previousPageData: ChatHistory
-) {
-  if (previousPageData && previousPageData.hasMore === false) {
-    return null;
-  }
-
-  if (pageIndex === 0) {
-    return `/api/history?limit=${PAGE_SIZE}`;
-  }
-
-  const firstChatFromPage = previousPageData.chats.at(-1);
-
-  if (!firstChatFromPage) {
-    return null;
-  }
-
-  return `/api/history?ending_before=${firstChatFromPage.id}&limit=${PAGE_SIZE}`;
+// React Query version of pagination logic
+function buildPageUrl(cursor: string | undefined) {
+  if (!cursor) return `/api/history?limit=${PAGE_SIZE}`;
+  return `/api/history?ending_before=${cursor}&limit=${PAGE_SIZE}`;
 }
 
 export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
   const { setOpenMobile } = useSidebar();
   const { id } = useParams();
 
+  const queryClient = useQueryClient();
   const {
     data: paginatedChatHistories,
-    setSize,
-    isValidating,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading,
-    mutate,
-  } = useSWRInfinite<ChatHistory>(getChatHistoryPaginationKey, fetcher, {
-    fallbackData: [],
+    isFetching,
+  } = useInfiniteQuery<ChatHistory>({
+    queryKey: ["chat","history"],
+    queryFn: async ({ pageParam }) => {
+      const url = buildPageUrl(pageParam as string | undefined);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch chat history");
+      return res.json();
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.hasMore) return undefined;
+      const lastChat = lastPage.chats.at(-1);
+      return lastChat?.id;
+    },
+    staleTime: 30_000,
   });
 
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const hasReachedEnd = paginatedChatHistories
-    ? paginatedChatHistories.some((page) => page.hasMore === false)
-    : false;
+  const pages = paginatedChatHistories?.pages || [];
+  const hasReachedEnd = pages.length > 0 ? pages.some((p) => p.hasMore === false) : false;
 
-  const hasEmptyChatHistory = paginatedChatHistories
-    ? paginatedChatHistories.every((page) => page.chats.length === 0)
-    : false;
+  const hasEmptyChatHistory = pages.length > 0 ? pages.every((p) => p.chats.length === 0) : false;
 
   const handleDelete = () => {
     const deletePromise = fetch(`/api/chat?id=${deleteId}`, {
@@ -131,13 +128,15 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
     toast.promise(deletePromise, {
       loading: "Deleting chat...",
       success: () => {
-        mutate((chatHistories) => {
-          if (chatHistories) {
-            return chatHistories.map((chatHistory) => ({
-              ...chatHistory,
-              chats: chatHistory.chats.filter((chat) => chat.id !== deleteId),
-            }));
-          }
+        queryClient.setQueryData(["chat","history"], (current: any) => {
+          if (!current) return current;
+          return {
+            ...current,
+            pages: current.pages.map((page: ChatHistory) => ({
+              ...page,
+              chats: page.chats.filter((c) => c.id !== deleteId),
+            })),
+          };
         });
 
         return "Chat deleted successfully";
@@ -210,11 +209,9 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
-            {paginatedChatHistories &&
+            {pages &&
               (() => {
-                const chatsFromHistory = paginatedChatHistories.flatMap(
-                  (paginatedChatHistory) => paginatedChatHistory.chats
-                );
+                const chatsFromHistory = pages.flatMap((p) => p.chats);
 
                 const groupedChats = groupChatsByDate(chatsFromHistory);
 
@@ -326,8 +323,8 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
 
           <motion.div
             onViewportEnter={() => {
-              if (!isValidating && !hasReachedEnd) {
-                setSize((size) => size + 1);
+              if (!isFetchingNextPage && !hasReachedEnd) {
+                fetchNextPage();
               }
             }}
           />
@@ -341,7 +338,7 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
               <div className="animate-spin">
                 <LoaderIcon />
               </div>
-              <div>Loading Chats...</div>
+              <div>{isFetchingNextPage || isFetching ? "Loading Chats..." : "Load more"}</div>
             </div>
           )}
         </SidebarGroupContent>

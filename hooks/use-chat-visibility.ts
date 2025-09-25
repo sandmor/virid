@@ -1,13 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import useSWR, { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { updateChatVisibility } from "@/app/(chat)/actions";
-import {
-  type ChatHistory,
-  getChatHistoryPaginationKey,
-} from "@/components/sidebar-history";
+import type { ChatHistory } from "@/components/sidebar-history";
 import type { VisibilityType } from "@/components/visibility-selector";
 
 export function useChatVisibility({
@@ -17,22 +13,22 @@ export function useChatVisibility({
   chatId: string;
   initialVisibilityType: VisibilityType;
 }) {
-  const { mutate, cache } = useSWRConfig();
-  const history: ChatHistory = cache.get("/api/history")?.data;
-
-  const { data: localVisibility, mutate: setLocalVisibility } = useSWR(
-    `${chatId}-visibility`,
-    null,
-    {
-      fallbackData: initialVisibilityType,
-    }
-  );
+  const queryClient = useQueryClient();
+  // Local visibility (optimistic) stored in React Query cache
+  const visibilityKey = ["chat","visibility", chatId];
+  const { data: localVisibility } = useQuery<VisibilityType>({
+    queryKey: visibilityKey,
+    // Provide initial data only; canonical value is derived from history when present
+    initialData: initialVisibilityType,
+    queryFn: async () => initialVisibilityType,
+    staleTime: Infinity,
+    enabled: false, // we don't actually fetch
+  });
+  const history = queryClient.getQueryData<any>(["chat","history"])
+    ?.pages?.[0] as ChatHistory | undefined; // best-effort; pages structure per infinite query
 
   const visibilityType = useMemo(() => {
-    if (!history) {
-      return localVisibility;
-    }
-    const chat = history.chats.find((currentChat) => currentChat.id === chatId);
+    const chat = history?.chats?.find((currentChat: any) => currentChat.id === chatId);
     if (!chat) {
       return "private";
     }
@@ -40,8 +36,9 @@ export function useChatVisibility({
   }, [history, chatId, localVisibility]);
 
   const setVisibilityType = (updatedVisibilityType: VisibilityType) => {
-    setLocalVisibility(updatedVisibilityType);
-    mutate(unstable_serialize(getChatHistoryPaginationKey));
+    queryClient.setQueryData(visibilityKey, updatedVisibilityType);
+    // Invalidate chat history so visibility updates propagate
+    queryClient.invalidateQueries({ queryKey: ["chat","history"] });
 
     updateChatVisibility({
       chatId,
