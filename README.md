@@ -6,6 +6,7 @@ Multimodal AI chat application built with Next.js (App Router), the AI SDK, Cler
   <a href="#features"><strong>Features</strong></a> ·
   <a href="#models"><strong>Models</strong></a> ·
   <a href="#auth"><strong>Auth</strong></a> ·
+  <a href="#admin"><strong>Admin</strong></a> ·
   <a href="#running-locally"><strong>Running locally</strong></a>
 </p>
 <br />
@@ -59,6 +60,24 @@ Changing availability involves editing `lib/ai/entitlements.ts` (server + UI res
 
 The app uses Clerk. If Clerk env vars are absent (local / CI), a guest session cookie is used. Server routes enforce model entitlements; attempts by guests to use non-free models return `unauthorized:chat`.
 
+Email is obtained from the Clerk user profile to support SSO providers that don’t include an email claim in the session token. We resolve it from `user.primaryEmailAddress` (or first `emailAddresses`) and persist to the `User` row.
+
+If you ever need to inspect your Clerk user id for admin gating, it looks like `user_XXXXXXXX`. Use that in `ADMIN_USER_ID`.
+
+## Admin
+
+An internal admin dashboard exists at `/admin` to manage:
+
+- Provider API key overrides (DB takes precedence over env for those providers)
+- Usage tiers (model lists and per-day message limits)
+
+Access is gated by one of the following environment variables (set in `.env.local`):
+
+- `ADMIN_USER_ID` — the Clerk user id (preferred; stable across email changes)
+- `ADMIN_EMAIL` — fallback, case-insensitive match against signed-in user’s email
+
+If both are set, `ADMIN_USER_ID` takes precedence.
+
 ## Running locally
 
 Copy `.env.example` to `.env.local` and populate required keys (Clerk, database, OpenRouter API key, etc.). Do NOT commit the populated file.
@@ -76,24 +95,29 @@ If you don't configure Clerk keys you'll operate in guest mode; only free models
 
 Essential (minimum to enable full auth + models):
 
-| Variable | Purpose |
-|----------|---------|
-| `AUTH_SECRET` | Session secret for Next.js / edge crypto helpers. |
-| `NEXT_PUBLIC_APP_BASE_URL` | Absolute base URL used for metadata + OAuth redirects. |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` | Clerk authentication (publishable + backend). |
-| `OPENROUTER_API_KEY` | LLM provider key for OpenRouter. |
-| `POSTGRES_URL` | Primary Postgres connection string (pooled). |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob storage token (RW). |
-| `REDIS_URL` | Upstash / Redis for transient data & rate limiting (optional but recommended). |
+| Variable                                                 | Purpose                                                                        |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `AUTH_SECRET`                                            | Session secret for Next.js / edge crypto helpers.                              |
+| `GUEST_SECRET`                                           | Optional; cookie signing secret for guest sessions (falls back to AUTH_SECRET) |
+| `NEXT_PUBLIC_APP_BASE_URL`                               | Absolute base URL used for metadata + OAuth redirects.                         |
+| `NEXT_PUBLIC_APP_URL`                                    | Alias used in a few routes; keep in sync with base URL above.                  |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` | Clerk authentication (publishable + backend).                                  |
+| `OPENROUTER_API_KEY`                                     | LLM provider key for OpenRouter.                                               |
+| `DATABASE_URL`                                           | Primary Postgres connection string (pooled).                                   |
+| `BLOB_READ_WRITE_TOKEN`                                  | Vercel Blob storage token (RW).                                                |
+| `REDIS_URL`                                              | Upstash / Redis for transient data & rate limiting (optional but recommended). |
 
 Optional:
 
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_DISABLE_SOCIAL_AUTH` | Set to `1` to hide Google/social buttons. |
-| `POSTGRES_URL_NON_POOLING`, `POSTGRES_PRISMA_URL` | Alternate DSNs if needed. |
-| `VERCEL_OIDC_TOKEN` | Provided automatically in Vercel build environment. |
-| `AI_GATEWAY_API_KEY` | If routing via a custom AI gateway instead of direct OpenRouter. |
+| Variable                                               | Purpose                                             |
+| ------------------------------------------------------ | --------------------------------------------------- |
+| `NEXT_PUBLIC_DISABLE_SOCIAL_AUTH`                      | Set to `1` to hide Google/social buttons.           |
+| `DATABASE_URL_UNPOOLED`                                | Alternate non-pooled DSN if needed.                 |
+| `VERCEL_OIDC_TOKEN`                                    | Provided automatically in Vercel build environment. |
+| `OPENAI_API_KEY`                                       | Optional; direct OpenAI calls.                      |
+| `GOOGLE_GENERATIVE_AI_API_KEY` / `GOOGLE_API_KEY`      | Optional; direct Gemini calls.                      |
+| `TITLE_GENERATION_MODEL` / `ARTIFACT_GENERATION_MODEL` | Optional overrides for internal tasks.              |
+| `ADMIN_USER_ID` / `ADMIN_EMAIL`                        | Admin dashboard access (ID preferred).              |
 
 ### Social Authentication (Google)
 

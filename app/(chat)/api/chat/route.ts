@@ -21,6 +21,7 @@ import type { UserType } from "@/lib/auth/types";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { getTierForUserType } from "@/lib/ai/tiers";
 import type { ChatModel } from "@/lib/ai/models";
+import { isModelIdAllowed } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { getLanguageModel, getResolvedProviderModelId } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
@@ -65,7 +66,7 @@ const getTokenlensCatalog = cache(
     }
   },
   ["tokenlens-catalog"],
-  { revalidate: 24 * 60 * 60 } // 24 hours
+  { revalidate: 60 * 60 }
 );
 
 export function getStreamContext() {
@@ -123,7 +124,7 @@ export async function POST(request: Request) {
 
     // Enforce model entitlement server-side (guards against tampered client requests)
   const { modelIds: allowedModels, maxMessagesPerDay } = await getTierForUserType(userType);
-    if (!allowedModels.includes(selectedChatModel)) {
+    if (!isModelIdAllowed(selectedChatModel, allowedModels)) {
       return new ChatSDKError(
         userType === "guest" ? "forbidden:model" : "forbidden:model"
       ).toResponse();
@@ -220,6 +221,7 @@ export async function POST(request: Request) {
           onFinish: async ({ usage }) => {
             try {
               const providers = await getTokenlensCatalog();
+              // Report usage against the exact selected model id
               const modelId = getResolvedProviderModelId(selectedChatModel);
               if (!modelId) {
                 finalMergedUsage = usage;
@@ -316,15 +318,6 @@ export async function POST(request: Request) {
       return error.toResponse();
     }
 
-    // Check for Vercel AI Gateway credit card error
-    if (
-      error instanceof Error &&
-      error.message?.includes(
-        "AI Gateway requires a valid credit card on file to service requests"
-      )
-    ) {
-      return new ChatSDKError("bad_request:activate_gateway").toResponse();
-    }
 
     console.error("Unhandled error in chat API:", error, { vercelId });
     return new ChatSDKError("offline:chat").toResponse();

@@ -21,15 +21,15 @@ export const postRequestBodySchema = z.object({
     role: z.enum(["user"]),
     parts: z.array(partSchema),
   }),
-  selectedChatModel: z.enum([
-  "openai:gpt-5",
-    "google:gemini-2.5-flash-image-preview",
-    "google:gemini-2.5-flash",
-    "google:gemini-2.5-pro",
-    "openrouter:x-ai/grok-4",
-    "openrouter:x-ai/grok-4-fast:free",
-    "openrouter:moonshotai/kimi-k2:free",
-  ]),
+  // Accept any composite provider:model id; entitlement check is enforced server-side.
+  // Examples: 'openai:gpt-5', 'google:gemini-2.5-pro', 'openrouter:openai/gpt-5', 'openrouter:x-ai/grok-4-fast:free'
+  selectedChatModel: z
+    .string()
+    .min(3)
+    .max(200)
+    .refine((v) => v.includes(":"), {
+      message: "selectedChatModel must be a composite id of the form 'provider:model'",
+    }),
   selectedVisibilityType: z.enum(["public", "private"]),
   regeneratingMessageId: z.string().uuid().optional(),
 });

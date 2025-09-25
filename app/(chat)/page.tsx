@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
-import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
+import { DEFAULT_CHAT_MODEL, isModelIdAllowed } from "@/lib/ai/models";
 import { getTierForUserType } from "@/lib/ai/tiers";
 import { generateUUID } from "@/lib/utils";
 import { getAppSession } from "@/lib/auth/session";
@@ -20,14 +20,15 @@ export default async function Page() {
   const modelIdFromCookie = cookieStore.get("chat-model");
 
   const { modelIds: allowedModels } = await getTierForUserType(session.user.type);
-  let initialModel = modelIdFromCookie && allowedModels.includes(modelIdFromCookie.value)
-    ? modelIdFromCookie.value
+  const cookieCandidate = modelIdFromCookie ? modelIdFromCookie.value : undefined;
+  let initialModel = cookieCandidate && isModelIdAllowed(cookieCandidate, allowedModels)
+    ? cookieCandidate
     : DEFAULT_CHAT_MODEL;
-  if (!allowedModels.includes(initialModel)) {
+  if (!isModelIdAllowed(initialModel, allowedModels)) {
     initialModel = allowedModels[0];
   }
 
-  if (!modelIdFromCookie || !allowedModels.includes(modelIdFromCookie.value)) {
+  if (!modelIdFromCookie || !isModelIdAllowed(modelIdFromCookie.value, allowedModels)) {
     return (
       <>
         <Chat

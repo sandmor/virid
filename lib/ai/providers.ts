@@ -4,6 +4,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { parseCompositeModelId } from "./models";
 import { getProviderApiKey } from "./provider-keys";
+import { SUPPORTED_PROVIDERS, type SupportedProvider } from "./registry";
 
 const TTL_MS = 60_000;
 let providerVersion = 0; // increments each rebuild
@@ -48,7 +49,7 @@ async function resolveLanguageModel(compositeId: string) {
   return client(model);
 }
 
-// Seven curated model IDs surfaced in UI / entitlements.
+// Curated model IDs surfaced in UI / entitlements.
 const KNOWN_MODEL_IDS = [
   "openai:gpt-5",
   "google:gemini-2.5-flash-image-preview",
@@ -62,6 +63,8 @@ const KNOWN_MODEL_IDS = [
 let modelsCache: Record<string, any> | null = null;
 let modelsFetchedAt = 0;
 let modelsBuildPromise: Promise<Record<string, any>> | null = null;
+const DYNAMIC_MODEL_CACHE_TTL_MS = 10 * 60_000; // 10 minutes for dynamically resolved models
+let dynamicModelsCache: Record<string, { model: any; fetchedAt: number }> = {};
 
 async function buildModels(): Promise<Record<string, any>> {
   if (isTestEnvironment) {
@@ -99,8 +102,16 @@ async function ensureModelsFresh(): Promise<Record<string, any>> {
 // Async accessors.
 export async function getLanguageModel(id: string) {
   const map = await ensureModelsFresh();
-  const model = map[id];
-  if (!model) throw new Error(`Unknown model id '${id}'`);
+  let model = map[id];
+  if (model) return model;
+  // On-demand resolution for arbitrary composite IDs (e.g., 'openrouter:openai/gpt-5').
+  const cached = dynamicModelsCache[id];
+  const now = Date.now();
+  if (cached && now - cached.fetchedAt < DYNAMIC_MODEL_CACHE_TTL_MS) {
+    return cached.model;
+  }
+  model = await resolveLanguageModel(id);
+  dynamicModelsCache[id] = { model, fetchedAt: now };
   return model;
 }
 
@@ -123,5 +134,9 @@ export async function forceRefreshProviders() {
   providerClientCache.clear();
   modelsCache = null;
   modelsFetchedAt = 0;
+  dynamicModelsCache = {};
   providerVersion++;
 }
+
+// Centralized provider registry used across the app (UI, admin, etc.)
+export { SUPPORTED_PROVIDERS };

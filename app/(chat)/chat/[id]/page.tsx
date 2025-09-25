@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getAppSession } from "@/lib/auth/session";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
-import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
+import { DEFAULT_CHAT_MODEL, isModelIdAllowed } from "@/lib/ai/models";
 import { getTierForUserType } from "@/lib/ai/tiers";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
@@ -43,15 +43,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get("chat-model");
   const { modelIds: allowedModels } = await getTierForUserType(session.user.type);
-  let initialModel =
-    chatModelFromCookie && allowedModels.includes(chatModelFromCookie.value)
-      ? chatModelFromCookie.value
-      : DEFAULT_CHAT_MODEL;
-  if (!allowedModels.includes(initialModel)) {
+  const cookieCandidate = chatModelFromCookie ? chatModelFromCookie.value : undefined;
+  let initialModel = cookieCandidate && isModelIdAllowed(cookieCandidate, allowedModels)
+    ? cookieCandidate
+    : DEFAULT_CHAT_MODEL;
+  if (!isModelIdAllowed(initialModel, allowedModels)) {
     initialModel = allowedModels[0];
   }
 
-  if (!chatModelFromCookie || !allowedModels.includes(chatModelFromCookie.value)) {
+  if (!chatModelFromCookie || !isModelIdAllowed(chatModelFromCookie.value, allowedModels)) {
     return (
       <>
         <Chat

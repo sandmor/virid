@@ -26,6 +26,10 @@ export function parseCompositeModelId(id: string): { provider: string; model: st
   return { provider: id.slice(0, idx), model: id.slice(idx + 1) };
 }
 
+export function isModelIdAllowed(selectedId: string, allowedIds: string[]): boolean {
+  return allowedIds.includes(selectedId);
+}
+
 // Curated metadata for a *small* set of popular models; absence falls back to automatic derivation.
 // Curated metadata keyed by composite id
 const curated: Record<string, { name: string; description?: string }> = {

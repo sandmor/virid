@@ -9,4 +9,10 @@ export const isTestEnvironment = Boolean(
 
 export const guestRegex = /^guest-\d+$/;
 
+// Single admin email (simple bootstrap). In future, move to roles/permissions table.
+export const adminEmail = process.env.ADMIN_EMAIL || "";
+// Optional stronger identifier for admin (Clerk user id). If set, it takes precedence.
+export const adminUserId = process.env.ADMIN_USER_ID || "";
+
+
 

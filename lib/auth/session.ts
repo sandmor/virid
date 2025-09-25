@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/prisma";
 import { readGuestSession } from "./guest";
 
@@ -16,13 +16,32 @@ export async function getAppSession(): Promise<AppSession | null> {
     try {
   const a = await auth();
       if (a.userId) {
+        // Resolve email reliably from Clerk user profile; session claims may not include it for some providers
+        let resolvedEmail: string | undefined;
+        try {
+          const client = await clerkClient();
+          const user = await client.users.getUser(a.userId);
+          resolvedEmail =
+            user.primaryEmailAddress?.emailAddress ||
+            user.emailAddresses?.[0]?.emailAddress ||
+            undefined;
+        } catch {
+          /* ignore, fallback below */
+        }
+        if (!resolvedEmail) {
+          const claims = a.sessionClaims as any;
+          resolvedEmail =
+            claims?.email ||
+            claims?.email_address ||
+            (claims?.primary_email_address as string | undefined);
+        }
         try {
           await prisma.user.upsert({
             where: { id: a.userId },
-            update: { email: (a.sessionClaims as any)?.email as string | undefined },
+            update: { email: resolvedEmail },
             create: {
               id: a.userId,
-              email: ((a.sessionClaims as any)?.email as string | undefined) || "user@unknown",
+              email: resolvedEmail || "user@unknown",
             },
           });
         } catch {
@@ -32,7 +51,7 @@ export async function getAppSession(): Promise<AppSession | null> {
           user: {
             id: a.userId,
             type: "regular",
-            email: (a.sessionClaims as any)?.email as string | undefined,
+            email: resolvedEmail,
           },
         };
       }
