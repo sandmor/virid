@@ -65,9 +65,9 @@ export function SidebarUserNav({ user }: { user: NavUser }) {
             {!isGuest && (
               <DropdownMenuItem
                 className="cursor-pointer"
-                onSelect={() => router.push("/profile")}
+                onSelect={() => router.push("/settings?tab=archive")}
               >
-                Profile & Archive
+                Account & Settings
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
