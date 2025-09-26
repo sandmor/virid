@@ -2,7 +2,7 @@ import { memo } from "react";
 import { toast } from "sonner";
 import { useArtifact } from "@/hooks/use-artifact";
 import type { ArtifactKind } from "./artifact";
-import { FileIcon, LoaderIcon, MessageIcon, PencilEditIcon } from "./icons";
+import { File, Loader, MessageSquare, PencilLine } from "lucide-react";
 
 const getActionText = (
   type: "create" | "update" | "request-suggestions",
@@ -69,11 +69,11 @@ function PureDocumentToolResult({
     >
       <div className="mt-1 text-muted-foreground">
         {type === "create" ? (
-          <FileIcon />
+          <File size={16} />
         ) : type === "update" ? (
-          <PencilEditIcon />
+          <PencilLine size={16} />
         ) : type === "request-suggestions" ? (
-          <MessageIcon />
+          <MessageSquare size={16} />
         ) : null}
       </div>
       <div className="text-left">
@@ -132,11 +132,11 @@ function PureDocumentToolCall({
       <div className="flex flex-row items-start gap-3">
         <div className="mt-1 text-zinc-500">
           {type === "create" ? (
-            <FileIcon />
+            <File size={16} />
           ) : type === "update" ? (
-            <PencilEditIcon />
+            <PencilLine size={16} />
           ) : type === "request-suggestions" ? (
-            <MessageIcon />
+            <MessageSquare size={16} />
           ) : null}
         </div>
 
@@ -153,7 +153,7 @@ function PureDocumentToolCall({
         </div>
       </div>
 
-      <div className="mt-1 animate-spin">{<LoaderIcon />}</div>
+      <div className="mt-1 animate-spin">{<Loader />}</div>
     </button>
   );
 }

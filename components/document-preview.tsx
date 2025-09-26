@@ -17,7 +17,7 @@ import type { ArtifactKind, UIArtifact } from "./artifact";
 import { CodeEditor } from "./code-editor";
 import { DocumentToolCall, DocumentToolResult } from "./document";
 import { InlineDocumentSkeleton } from "./document-skeleton";
-import { FileIcon, FullscreenIcon, ImageIcon, LoaderIcon } from "./icons";
+import { File, Image, Loader, Maximize } from "lucide-react";
 import { ImageEditor } from "./image-editor";
 import { SpreadsheetEditor } from "./sheet-editor";
 import { Editor } from "./text-editor";
@@ -128,7 +128,7 @@ const LoadingSkeleton = ({ artifactKind }: { artifactKind: ArtifactKind }) => (
         <div className="h-4 w-24 animate-pulse rounded-lg bg-muted-foreground/20" />
       </div>
       <div>
-        <FullscreenIcon />
+        <Maximize />
       </div>
     </div>
     {artifactKind === "image" ? (
@@ -189,7 +189,7 @@ const PureHitboxLayer = ({
     >
       <div className="flex w-full items-center justify-end p-4">
         <div className="absolute top-[13px] right-[9px] rounded-md p-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
-          <FullscreenIcon />
+          <Maximize />
         </div>
       </div>
     </div>
@@ -217,12 +217,12 @@ const PureDocumentHeader = ({
       <div className="text-muted-foreground">
         {isStreaming ? (
           <div className="animate-spin">
-            <LoaderIcon />
+            <Loader />
           </div>
         ) : kind === "image" ? (
-          <ImageIcon />
+          <Image />
         ) : (
-          <FileIcon />
+          <File />
         )}
       </div>
       <div className="-translate-y-1 font-medium sm:translate-y-0">{title}</div>

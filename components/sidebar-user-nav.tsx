@@ -19,7 +19,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { guestRegex } from "@/lib/constants";
-import { LoaderIcon } from "./icons";
+import { Loader } from "lucide-react";
 import { toast } from "./toast";
 
 export function SidebarUserNav({ user }: { user: NavUser }) {

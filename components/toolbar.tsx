@@ -27,7 +27,7 @@ import {
 import type { ChatMessage } from "@/lib/types";
 import { type ArtifactKind, artifactDefinitions } from "./artifact";
 import type { ArtifactToolbarItem } from "./create-artifact";
-import { ArrowUpIcon, StopIcon, SummarizeIcon } from "./icons";
+import { ArrowUp, List, StopCircle } from "lucide-react";
 
 type ToolProps = {
   description: string;
@@ -117,7 +117,7 @@ const Tool = ({
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          {selectedTool === description ? <ArrowUpIcon /> : icon}
+          {selectedTool === description ? <ArrowUp /> : icon}
         </motion.div>
       </TooltipTrigger>
       <TooltipContent
@@ -228,7 +228,7 @@ const ReadingLevelSelector = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {currentLevel === 2 ? <SummarizeIcon /> : <ArrowUpIcon />}
+              {currentLevel === 2 ? <List /> : <ArrowUp />}
             </motion.div>
           </TooltipTrigger>
           <TooltipContent
@@ -435,7 +435,7 @@ const PureToolbar = ({
               setMessages((messages) => messages);
             }}
           >
-            <StopIcon />
+            <StopCircle />
           </motion.div>
         ) : selectedTool === "adjust-reading-level" ? (
           <ReadingLevelSelector

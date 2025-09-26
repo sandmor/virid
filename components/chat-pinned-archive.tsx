@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { LoaderIcon } from "./icons";
+import { Loader } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -67,8 +67,8 @@ export function ChatPinnedArchive({
         <div className="border-b px-3 py-2 flex items-center justify-between text-xs font-medium">
           <span>Pinned Entries</span>
           <div className="flex gap-1">
-            {pinMutation.isPending && <span className="animate-spin"><LoaderIcon size={12} /></span>}
-            {unpinMutation.isPending && <span className="animate-spin"><LoaderIcon size={12} /></span>}
+            {pinMutation.isPending && <span className="animate-spin"><Loader size={12} /></span>}
+            {unpinMutation.isPending && <span className="animate-spin"><Loader size={12} /></span>}
           </div>
         </div>
         <div className="max-h-[60vh] overflow-hidden flex flex-col">

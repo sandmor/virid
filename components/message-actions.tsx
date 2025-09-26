@@ -6,7 +6,7 @@ import { useCopyToClipboard } from "usehooks-ts";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { Action, Actions } from "./elements/actions";
-import { CopyIcon, PencilEditIcon, ThumbDownIcon, ThumbUpIcon } from "./icons";
+import { Copy, Pencil, ThumbsUp, ThumbsDown, RotateCcw } from "lucide-react";
 // Variant history removed with simplified message model
 
 export function PureMessageActions({
@@ -27,7 +27,7 @@ export function PureMessageActions({
   disableRegenerate?: boolean;
 }) {
   const queryClient = useQueryClient();
-  const voteQueryKey = ["chat","votes", chatId];
+  const voteQueryKey = ["chat", "votes", chatId];
 
   const upvoteMutation = useMutation({
     mutationFn: async () => {
@@ -44,7 +44,10 @@ export function PureMessageActions({
       queryClient.setQueryData<Vote[] | undefined>(voteQueryKey, (current) => {
         const safe = current || [];
         const filtered = safe.filter((v) => v.messageId !== message.id);
-        return [...filtered, { chatId, messageId: message.id, isUpvoted: true } as Vote];
+        return [
+          ...filtered,
+          { chatId, messageId: message.id, isUpvoted: true } as Vote,
+        ];
       });
       return { prev };
     },
@@ -72,7 +75,10 @@ export function PureMessageActions({
       queryClient.setQueryData<Vote[] | undefined>(voteQueryKey, (current) => {
         const safe = current || [];
         const filtered = safe.filter((v) => v.messageId !== message.id);
-        return [...filtered, { chatId, messageId: message.id, isUpvoted: false } as Vote];
+        return [
+          ...filtered,
+          { chatId, messageId: message.id, isUpvoted: false } as Vote,
+        ];
       });
       return { prev };
     },
@@ -117,11 +123,11 @@ export function PureMessageActions({
               onClick={() => setMode("edit")}
               tooltip="Edit"
             >
-              <PencilEditIcon />
+              <Pencil size={16} />
             </Action>
           )}
           <Action onClick={handleCopy} tooltip="Copy">
-            <CopyIcon />
+            <Copy size={16} />
           </Action>
         </div>
       </Actions>
@@ -136,12 +142,12 @@ export function PureMessageActions({
           tooltip={disableRegenerate ? "Regenerating…" : "Regenerate"}
           disabled={disableRegenerate}
         >
-          <PencilEditIcon />
+          <RotateCcw size={16} />
         </Action>
       )}
       {/* Variant history action removed */}
       <Action onClick={handleCopy} tooltip="Copy">
-        <CopyIcon />
+        <Copy size={16} />
       </Action>
 
       <Action
@@ -152,7 +158,7 @@ export function PureMessageActions({
         }}
         tooltip="Upvote Response"
       >
-        <ThumbUpIcon />
+        <ThumbsUp size={16} />
       </Action>
 
       <Action
@@ -163,7 +169,7 @@ export function PureMessageActions({
         }}
         tooltip="Downvote Response"
       >
-        <ThumbDownIcon />
+        <ThumbsDown size={16} />
       </Action>
     </Actions>
   );

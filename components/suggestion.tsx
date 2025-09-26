@@ -7,7 +7,7 @@ import { useWindowSize } from "usehooks-ts";
 import type { UISuggestion } from "@/lib/editor/suggestions";
 import { cn } from "@/lib/utils";
 import type { ArtifactKind } from "./artifact";
-import { CrossIcon, MessageIcon } from "./icons";
+import { X, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const Suggestion = ({
@@ -46,7 +46,7 @@ export const Suggestion = ({
               }}
               type="button"
             >
-              <CrossIcon size={12} />
+              <X size={12} />
             </button>
           </div>
           <div>{suggestion.description}</div>
@@ -69,7 +69,7 @@ export const Suggestion = ({
           }}
           whileHover={{ scale: 1.1 }}
         >
-          <MessageIcon size={windowWidth && windowWidth < 768 ? 16 : 14} />
+          <MessageSquare size={windowWidth && windowWidth < 768 ? 16 : 14} />
         </motion.div>
       )}
     </AnimatePresence>

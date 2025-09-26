@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 type AppSidebarUser = { id?: string; email?: string | null };
-import { PlusIcon } from "@/components/icons";
+import { Plus } from "lucide-react";
 import { SidebarHistory } from "@/components/sidebar-history";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ export function AppSidebar({ user }: { user: AppSidebarUser | undefined }) {
                   type="button"
                   variant="ghost"
                 >
-                  <PlusIcon />
+                  <Plus size={16} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent align="end" className="hidden md:block">

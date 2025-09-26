@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import type { Chat } from "@/lib/db/schema";
 // fetcher retained in utils for other components; not needed here
-import { LoaderIcon } from "./icons";
+import { Loader } from "lucide-react";
 import { ChatItem } from "./sidebar-history-item";
 
 type GroupedChats = {
@@ -336,7 +336,7 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
           ) : (
             <div className="mt-8 flex flex-row items-center gap-2 p-2 text-zinc-500 dark:text-zinc-400">
               <div className="animate-spin">
-                <LoaderIcon />
+                <Loader />
               </div>
               <div>{isFetchingNextPage || isFetching ? "Loading Chats..." : "Load more"}</div>
             </div>
