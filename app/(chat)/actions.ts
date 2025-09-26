@@ -8,7 +8,7 @@ import { TITLE_GENERATION_MODEL } from "@/lib/ai/models";
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
-  forkChat,
+  forkChatSimplified,
   updateChatVisiblityById,
 } from "@/lib/db/queries";
 import { getAppSession } from "@/lib/auth/session";
@@ -58,22 +58,23 @@ export async function updateChatVisibility({
 
 export async function forkChatAction({
   sourceChatId,
-  fromMessageId,
+  pivotMessageId,
+  mode,
   editedText,
 }: {
   sourceChatId: string;
-  fromMessageId: string;
-  editedText: string;
+  pivotMessageId: string; // assistant id (regenerate) or user id (edit)
+  mode: "regenerate" | "edit";
+  editedText?: string;
 }) {
   const session = await getAppSession();
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
-  const { newChatId } = await forkChat({
+  if (!session?.user) throw new Error("Unauthorized");
+  const result = await forkChatSimplified({
     sourceChatId,
-    fromMessageId,
+    pivotMessageId,
     userId: session.user.id,
+    mode,
+    editedText,
   });
-  // Return new chat id and the edited content so client can send it as first message
-  return { newChatId };
+  return result;
 }

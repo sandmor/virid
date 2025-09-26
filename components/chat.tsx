@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChatHeader } from "@/components/chat-header";
@@ -44,6 +44,7 @@ export function Chat({
     chatId: id,
     initialVisibilityType,
   });
+  const router = useRouter();
 
   const queryClient = useQueryClient();
   const { setDataStream } = useDataStream();
@@ -79,9 +80,6 @@ export function Chat({
       api: "/api/chat",
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest(request) {
-        // If we have marked a message for regeneration, include its id then clear it
-        const regenId = regeneratingMessageIdRef.current;
-        regeneratingMessageIdRef.current = null;
         const includeInitialPins = !chatHasStartedRef.current && stagedPinnedSlugs.length > 0;
         return {
           body: {
@@ -90,7 +88,6 @@ export function Chat({
             message: request.messages.at(-1),
             selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibilityType,
-            regeneratingMessageId: regenId || undefined,
             initialPinnedSlugs: includeInitialPins ? stagedPinnedSlugs : undefined,
           },
         };
@@ -114,10 +111,7 @@ export function Chat({
     },
   });
 
-  // Track which assistant message is being regenerated so we can pass its id in the next request body
-  const [regeneratingMessageIdState, setRegeneratingMessageIdState] = useState<string | null>(null);
-  const regeneratingMessageIdRef = useRef<string | null>(null);
-  useEffect(() => { regeneratingMessageIdRef.current = regeneratingMessageIdState; }, [regeneratingMessageIdState]);
+  // Regeneration now handled by chat fork redirect; no inline state needed
 
   const searchParams = useSearchParams();
   const query = searchParams.get("query");
@@ -168,6 +162,8 @@ export function Chat({
     setMessages,
   });
 
+  const [isForking, setIsForking] = useState(false);
+
   return (
     <>
       <div className="overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background">
@@ -188,14 +184,41 @@ export function Chat({
           isReadonly={isReadonly}
           messages={messages}
           regenerate={regenerate}
-          onRegenerateAssistant={(assistantMessageId: string) => {
-            setRegeneratingMessageIdState(assistantMessageId);
-            regenerate();
+          onRegenerateAssistant={async (assistantMessageId: string) => {
+            if (isForking) return; // guard against double clicks
+            setIsForking(true);
+            toast({ type: "success", description: "Forking chat…" });
+            try {
+              const match = window.location.pathname.match(/\/chat\/(.+)$/);
+              if (!match) throw new Error("Cannot infer current chat id");
+              const currentChatId = match[1];
+              const { forkChatAction } = await import("@/app/(chat)/actions");
+              const result: any = await forkChatAction({
+                sourceChatId: currentChatId,
+                pivotMessageId: assistantMessageId,
+                mode: "regenerate",
+              });
+              if (!result?.newChatId) {
+                throw new Error("Fork action did not return newChatId");
+              }
+              const qp = result.previousUserText
+                ? `?query=${encodeURIComponent(result.previousUserText)}`
+                : "";
+              // Optimistic UX: delay a tick to allow toast to render
+              requestAnimationFrame(() => {
+                router.push(`/chat/${result.newChatId}${qp}`);
+              });
+            } catch (e) {
+              console.error("Regenerate fork failed", e);
+              toast({ type: "error", description: (e as Error).message || "Failed to fork chat" });
+              setIsForking(false);
+            }
           }}
           selectedModelId={initialChatModel}
           setMessages={setMessages}
           status={status}
           votes={votes}
+          disableRegenerate={isForking}
         />
 
         <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
@@ -220,6 +243,18 @@ export function Chat({
           )}
         </div>
       </div>
+
+      {isForking && (
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center bg-gradient-to-t from-background/80 via-background/20 to-transparent p-6">
+          <div className="flex items-center gap-2 rounded-full border bg-background/90 px-4 py-2 text-sm shadow-lg backdrop-blur-md">
+            <span className="relative inline-flex h-4 w-4">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-40" />
+              <span className="relative inline-flex h-4 w-4 rounded-full bg-primary" />
+            </span>
+            <span>Creating fork…</span>
+          </div>
+        </div>
+      )}
 
       <Artifact
         attachments={attachments}

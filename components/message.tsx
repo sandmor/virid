@@ -36,6 +36,7 @@ const PurePreviewMessage = ({
   isReadonly,
   requiresScrollPadding,
   onRegenerateAssistant,
+  disableRegenerate,
 }: {
   chatId: string;
   message: ChatMessage;
@@ -46,6 +47,7 @@ const PurePreviewMessage = ({
   isReadonly: boolean;
   requiresScrollPadding: boolean;
   onRegenerateAssistant?: (assistantMessageId: string) => void;
+  disableRegenerate?: boolean;
 }) => {
   const [mode, setMode] = useState<"view" | "edit">("view");
 
@@ -407,6 +409,7 @@ const PurePreviewMessage = ({
               setMode={setMode}
               vote={vote}
               onRegenerate={onRegenerateAssistant}
+              disableRegenerate={disableRegenerate}
             />
           )}
         </div>

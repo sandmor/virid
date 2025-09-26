@@ -29,20 +29,25 @@ export type Tier = $Result.DefaultSelection<Prisma.$TierPayload>
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
+ * Model UserRateLimit
+ * 
+ */
+export type UserRateLimit = $Result.DefaultSelection<Prisma.$UserRateLimitPayload>
+/**
  * Model Chat
  * 
  */
 export type Chat = $Result.DefaultSelection<Prisma.$ChatPayload>
 /**
- * Model Message_v2
+ * Model Message
  * 
  */
-export type Message_v2 = $Result.DefaultSelection<Prisma.$Message_v2Payload>
+export type Message = $Result.DefaultSelection<Prisma.$MessagePayload>
 /**
- * Model Vote_v2
+ * Model Vote
  * 
  */
-export type Vote_v2 = $Result.DefaultSelection<Prisma.$Vote_v2Payload>
+export type Vote = $Result.DefaultSelection<Prisma.$VotePayload>
 /**
  * Model Document
  * 
@@ -223,6 +228,16 @@ export class PrismaClient<
   get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.userRateLimit`: Exposes CRUD operations for the **UserRateLimit** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserRateLimits
+    * const userRateLimits = await prisma.userRateLimit.findMany()
+    * ```
+    */
+  get userRateLimit(): Prisma.UserRateLimitDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.chat`: Exposes CRUD operations for the **Chat** model.
     * Example usage:
     * ```ts
@@ -233,24 +248,24 @@ export class PrismaClient<
   get chat(): Prisma.ChatDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.message_v2`: Exposes CRUD operations for the **Message_v2** model.
+   * `prisma.message`: Exposes CRUD operations for the **Message** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more Message_v2s
-    * const message_v2s = await prisma.message_v2.findMany()
+    * // Fetch zero or more Messages
+    * const messages = await prisma.message.findMany()
     * ```
     */
-  get message_v2(): Prisma.Message_v2Delegate<ExtArgs, ClientOptions>;
+  get message(): Prisma.MessageDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.vote_v2`: Exposes CRUD operations for the **Vote_v2** model.
+   * `prisma.vote`: Exposes CRUD operations for the **Vote** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more Vote_v2s
-    * const vote_v2s = await prisma.vote_v2.findMany()
+    * // Fetch zero or more Votes
+    * const votes = await prisma.vote.findMany()
     * ```
     */
-  get vote_v2(): Prisma.Vote_v2Delegate<ExtArgs, ClientOptions>;
+  get vote(): Prisma.VoteDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.document`: Exposes CRUD operations for the **Document** model.
@@ -754,9 +769,10 @@ export namespace Prisma {
     Provider: 'Provider',
     Tier: 'Tier',
     User: 'User',
+    UserRateLimit: 'UserRateLimit',
     Chat: 'Chat',
-    Message_v2: 'Message_v2',
-    Vote_v2: 'Vote_v2',
+    Message: 'Message',
+    Vote: 'Vote',
     Document: 'Document',
     Suggestion: 'Suggestion',
     Stream: 'Stream',
@@ -781,7 +797,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "provider" | "tier" | "user" | "chat" | "message_v2" | "vote_v2" | "document" | "suggestion" | "stream" | "archiveEntry" | "chatPinnedArchiveEntry" | "archiveLink"
+      modelProps: "provider" | "tier" | "user" | "userRateLimit" | "chat" | "message" | "vote" | "document" | "suggestion" | "stream" | "archiveEntry" | "chatPinnedArchiveEntry" | "archiveLink"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1007,6 +1023,80 @@ export namespace Prisma {
           }
         }
       }
+      UserRateLimit: {
+        payload: Prisma.$UserRateLimitPayload<ExtArgs>
+        fields: Prisma.UserRateLimitFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserRateLimitFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserRateLimitFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload>
+          }
+          findFirst: {
+            args: Prisma.UserRateLimitFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserRateLimitFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload>
+          }
+          findMany: {
+            args: Prisma.UserRateLimitFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload>[]
+          }
+          create: {
+            args: Prisma.UserRateLimitCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload>
+          }
+          createMany: {
+            args: Prisma.UserRateLimitCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserRateLimitCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload>[]
+          }
+          delete: {
+            args: Prisma.UserRateLimitDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload>
+          }
+          update: {
+            args: Prisma.UserRateLimitUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserRateLimitDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserRateLimitUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UserRateLimitUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload>[]
+          }
+          upsert: {
+            args: Prisma.UserRateLimitUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserRateLimitPayload>
+          }
+          aggregate: {
+            args: Prisma.UserRateLimitAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserRateLimit>
+          }
+          groupBy: {
+            args: Prisma.UserRateLimitGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserRateLimitGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserRateLimitCountArgs<ExtArgs>
+            result: $Utils.Optional<UserRateLimitCountAggregateOutputType> | number
+          }
+        }
+      }
       Chat: {
         payload: Prisma.$ChatPayload<ExtArgs>
         fields: Prisma.ChatFieldRefs
@@ -1081,151 +1171,151 @@ export namespace Prisma {
           }
         }
       }
-      Message_v2: {
-        payload: Prisma.$Message_v2Payload<ExtArgs>
-        fields: Prisma.Message_v2FieldRefs
+      Message: {
+        payload: Prisma.$MessagePayload<ExtArgs>
+        fields: Prisma.MessageFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.Message_v2FindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload> | null
+            args: Prisma.MessageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.Message_v2FindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload>
+            args: Prisma.MessageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload>
           }
           findFirst: {
-            args: Prisma.Message_v2FindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload> | null
+            args: Prisma.MessageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.Message_v2FindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload>
+            args: Prisma.MessageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload>
           }
           findMany: {
-            args: Prisma.Message_v2FindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload>[]
+            args: Prisma.MessageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload>[]
           }
           create: {
-            args: Prisma.Message_v2CreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload>
+            args: Prisma.MessageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload>
           }
           createMany: {
-            args: Prisma.Message_v2CreateManyArgs<ExtArgs>
+            args: Prisma.MessageCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.Message_v2CreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload>[]
+            args: Prisma.MessageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload>[]
           }
           delete: {
-            args: Prisma.Message_v2DeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload>
+            args: Prisma.MessageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload>
           }
           update: {
-            args: Prisma.Message_v2UpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload>
+            args: Prisma.MessageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload>
           }
           deleteMany: {
-            args: Prisma.Message_v2DeleteManyArgs<ExtArgs>
+            args: Prisma.MessageDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.Message_v2UpdateManyArgs<ExtArgs>
+            args: Prisma.MessageUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.Message_v2UpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload>[]
+            args: Prisma.MessageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload>[]
           }
           upsert: {
-            args: Prisma.Message_v2UpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Message_v2Payload>
+            args: Prisma.MessageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MessagePayload>
           }
           aggregate: {
-            args: Prisma.Message_v2AggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateMessage_v2>
+            args: Prisma.MessageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMessage>
           }
           groupBy: {
-            args: Prisma.Message_v2GroupByArgs<ExtArgs>
-            result: $Utils.Optional<Message_v2GroupByOutputType>[]
+            args: Prisma.MessageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MessageGroupByOutputType>[]
           }
           count: {
-            args: Prisma.Message_v2CountArgs<ExtArgs>
-            result: $Utils.Optional<Message_v2CountAggregateOutputType> | number
+            args: Prisma.MessageCountArgs<ExtArgs>
+            result: $Utils.Optional<MessageCountAggregateOutputType> | number
           }
         }
       }
-      Vote_v2: {
-        payload: Prisma.$Vote_v2Payload<ExtArgs>
-        fields: Prisma.Vote_v2FieldRefs
+      Vote: {
+        payload: Prisma.$VotePayload<ExtArgs>
+        fields: Prisma.VoteFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.Vote_v2FindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload> | null
+            args: Prisma.VoteFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.Vote_v2FindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload>
+            args: Prisma.VoteFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload>
           }
           findFirst: {
-            args: Prisma.Vote_v2FindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload> | null
+            args: Prisma.VoteFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.Vote_v2FindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload>
+            args: Prisma.VoteFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload>
           }
           findMany: {
-            args: Prisma.Vote_v2FindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload>[]
+            args: Prisma.VoteFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload>[]
           }
           create: {
-            args: Prisma.Vote_v2CreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload>
+            args: Prisma.VoteCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload>
           }
           createMany: {
-            args: Prisma.Vote_v2CreateManyArgs<ExtArgs>
+            args: Prisma.VoteCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.Vote_v2CreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload>[]
+            args: Prisma.VoteCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload>[]
           }
           delete: {
-            args: Prisma.Vote_v2DeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload>
+            args: Prisma.VoteDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload>
           }
           update: {
-            args: Prisma.Vote_v2UpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload>
+            args: Prisma.VoteUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload>
           }
           deleteMany: {
-            args: Prisma.Vote_v2DeleteManyArgs<ExtArgs>
+            args: Prisma.VoteDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.Vote_v2UpdateManyArgs<ExtArgs>
+            args: Prisma.VoteUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.Vote_v2UpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload>[]
+            args: Prisma.VoteUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload>[]
           }
           upsert: {
-            args: Prisma.Vote_v2UpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$Vote_v2Payload>
+            args: Prisma.VoteUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VotePayload>
           }
           aggregate: {
-            args: Prisma.Vote_v2AggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateVote_v2>
+            args: Prisma.VoteAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVote>
           }
           groupBy: {
-            args: Prisma.Vote_v2GroupByArgs<ExtArgs>
-            result: $Utils.Optional<Vote_v2GroupByOutputType>[]
+            args: Prisma.VoteGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VoteGroupByOutputType>[]
           }
           count: {
-            args: Prisma.Vote_v2CountArgs<ExtArgs>
-            result: $Utils.Optional<Vote_v2CountAggregateOutputType> | number
+            args: Prisma.VoteCountArgs<ExtArgs>
+            result: $Utils.Optional<VoteCountAggregateOutputType> | number
           }
         }
       }
@@ -1772,9 +1862,10 @@ export namespace Prisma {
     provider?: ProviderOmit
     tier?: TierOmit
     user?: UserOmit
+    userRateLimit?: UserRateLimitOmit
     chat?: ChatOmit
-    message_v2?: Message_v2Omit
-    vote_v2?: Vote_v2Omit
+    message?: MessageOmit
+    vote?: VoteOmit
     document?: DocumentOmit
     suggestion?: SuggestionOmit
     stream?: StreamOmit
@@ -1956,14 +2047,14 @@ export namespace Prisma {
    * ChatCountOutputType without action
    */
   export type ChatCountOutputTypeCountMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: Message_v2WhereInput
+    where?: MessageWhereInput
   }
 
   /**
    * ChatCountOutputType without action
    */
   export type ChatCountOutputTypeCountVotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: Vote_v2WhereInput
+    where?: VoteWhereInput
   }
 
   /**
@@ -1982,33 +2073,33 @@ export namespace Prisma {
 
 
   /**
-   * Count Type Message_v2CountOutputType
+   * Count Type MessageCountOutputType
    */
 
-  export type Message_v2CountOutputType = {
+  export type MessageCountOutputType = {
     votes: number
   }
 
-  export type Message_v2CountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    votes?: boolean | Message_v2CountOutputTypeCountVotesArgs
+  export type MessageCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    votes?: boolean | MessageCountOutputTypeCountVotesArgs
   }
 
   // Custom InputTypes
   /**
-   * Message_v2CountOutputType without action
+   * MessageCountOutputType without action
    */
-  export type Message_v2CountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2CountOutputType
+     * Select specific fields to fetch from the MessageCountOutputType
      */
-    select?: Message_v2CountOutputTypeSelect<ExtArgs> | null
+    select?: MessageCountOutputTypeSelect<ExtArgs> | null
   }
 
   /**
-   * Message_v2CountOutputType without action
+   * MessageCountOutputType without action
    */
-  export type Message_v2CountOutputTypeCountVotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: Vote_v2WhereInput
+  export type MessageCountOutputTypeCountVotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VoteWhereInput
   }
 
 
@@ -3065,53 +3156,73 @@ export namespace Prisma {
   }
 
   export type TierAvgAggregateOutputType = {
-    maxMessagesPerDay: number | null
+    bucketCapacity: number | null
+    bucketRefillAmount: number | null
+    bucketRefillIntervalSeconds: number | null
   }
 
   export type TierSumAggregateOutputType = {
-    maxMessagesPerDay: number | null
+    bucketCapacity: number | null
+    bucketRefillAmount: number | null
+    bucketRefillIntervalSeconds: number | null
   }
 
   export type TierMinAggregateOutputType = {
     id: string | null
-    maxMessagesPerDay: number | null
+    bucketCapacity: number | null
+    bucketRefillAmount: number | null
+    bucketRefillIntervalSeconds: number | null
   }
 
   export type TierMaxAggregateOutputType = {
     id: string | null
-    maxMessagesPerDay: number | null
+    bucketCapacity: number | null
+    bucketRefillAmount: number | null
+    bucketRefillIntervalSeconds: number | null
   }
 
   export type TierCountAggregateOutputType = {
     id: number
     modelIds: number
-    maxMessagesPerDay: number
+    bucketCapacity: number
+    bucketRefillAmount: number
+    bucketRefillIntervalSeconds: number
     _all: number
   }
 
 
   export type TierAvgAggregateInputType = {
-    maxMessagesPerDay?: true
+    bucketCapacity?: true
+    bucketRefillAmount?: true
+    bucketRefillIntervalSeconds?: true
   }
 
   export type TierSumAggregateInputType = {
-    maxMessagesPerDay?: true
+    bucketCapacity?: true
+    bucketRefillAmount?: true
+    bucketRefillIntervalSeconds?: true
   }
 
   export type TierMinAggregateInputType = {
     id?: true
-    maxMessagesPerDay?: true
+    bucketCapacity?: true
+    bucketRefillAmount?: true
+    bucketRefillIntervalSeconds?: true
   }
 
   export type TierMaxAggregateInputType = {
     id?: true
-    maxMessagesPerDay?: true
+    bucketCapacity?: true
+    bucketRefillAmount?: true
+    bucketRefillIntervalSeconds?: true
   }
 
   export type TierCountAggregateInputType = {
     id?: true
     modelIds?: true
-    maxMessagesPerDay?: true
+    bucketCapacity?: true
+    bucketRefillAmount?: true
+    bucketRefillIntervalSeconds?: true
     _all?: true
   }
 
@@ -3204,7 +3315,9 @@ export namespace Prisma {
   export type TierGroupByOutputType = {
     id: string
     modelIds: string[]
-    maxMessagesPerDay: number
+    bucketCapacity: number
+    bucketRefillAmount: number
+    bucketRefillIntervalSeconds: number
     _count: TierCountAggregateOutputType | null
     _avg: TierAvgAggregateOutputType | null
     _sum: TierSumAggregateOutputType | null
@@ -3229,28 +3342,36 @@ export namespace Prisma {
   export type TierSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     modelIds?: boolean
-    maxMessagesPerDay?: boolean
+    bucketCapacity?: boolean
+    bucketRefillAmount?: boolean
+    bucketRefillIntervalSeconds?: boolean
   }, ExtArgs["result"]["tier"]>
 
   export type TierSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     modelIds?: boolean
-    maxMessagesPerDay?: boolean
+    bucketCapacity?: boolean
+    bucketRefillAmount?: boolean
+    bucketRefillIntervalSeconds?: boolean
   }, ExtArgs["result"]["tier"]>
 
   export type TierSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     modelIds?: boolean
-    maxMessagesPerDay?: boolean
+    bucketCapacity?: boolean
+    bucketRefillAmount?: boolean
+    bucketRefillIntervalSeconds?: boolean
   }, ExtArgs["result"]["tier"]>
 
   export type TierSelectScalar = {
     id?: boolean
     modelIds?: boolean
-    maxMessagesPerDay?: boolean
+    bucketCapacity?: boolean
+    bucketRefillAmount?: boolean
+    bucketRefillIntervalSeconds?: boolean
   }
 
-  export type TierOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "modelIds" | "maxMessagesPerDay", ExtArgs["result"]["tier"]>
+  export type TierOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "modelIds" | "bucketCapacity" | "bucketRefillAmount" | "bucketRefillIntervalSeconds", ExtArgs["result"]["tier"]>
 
   export type $TierPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Tier"
@@ -3258,7 +3379,9 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       modelIds: string[]
-      maxMessagesPerDay: number
+      bucketCapacity: number
+      bucketRefillAmount: number
+      bucketRefillIntervalSeconds: number
     }, ExtArgs["result"]["tier"]>
     composites: {}
   }
@@ -3684,7 +3807,9 @@ export namespace Prisma {
   interface TierFieldRefs {
     readonly id: FieldRef<"Tier", 'String'>
     readonly modelIds: FieldRef<"Tier", 'String[]'>
-    readonly maxMessagesPerDay: FieldRef<"Tier", 'Int'>
+    readonly bucketCapacity: FieldRef<"Tier", 'Int'>
+    readonly bucketRefillAmount: FieldRef<"Tier", 'Int'>
+    readonly bucketRefillIntervalSeconds: FieldRef<"Tier", 'Int'>
   }
     
 
@@ -4196,6 +4321,7 @@ export namespace Prisma {
     suggestions?: boolean | User$suggestionsArgs<ExtArgs>
     archiveEntries?: boolean | User$archiveEntriesArgs<ExtArgs>
     pinnedArchiveEntries?: boolean | User$pinnedArchiveEntriesArgs<ExtArgs>
+    rateLimit?: boolean | User$rateLimitArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -4221,6 +4347,7 @@ export namespace Prisma {
     suggestions?: boolean | User$suggestionsArgs<ExtArgs>
     archiveEntries?: boolean | User$archiveEntriesArgs<ExtArgs>
     pinnedArchiveEntries?: boolean | User$pinnedArchiveEntriesArgs<ExtArgs>
+    rateLimit?: boolean | User$rateLimitArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -4234,6 +4361,7 @@ export namespace Prisma {
       suggestions: Prisma.$SuggestionPayload<ExtArgs>[]
       archiveEntries: Prisma.$ArchiveEntryPayload<ExtArgs>[]
       pinnedArchiveEntries: Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>[]
+      rateLimit: Prisma.$UserRateLimitPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4637,6 +4765,7 @@ export namespace Prisma {
     suggestions<T extends User$suggestionsArgs<ExtArgs> = {}>(args?: Subset<T, User$suggestionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SuggestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     archiveEntries<T extends User$archiveEntriesArgs<ExtArgs> = {}>(args?: Subset<T, User$archiveEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ArchiveEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     pinnedArchiveEntries<T extends User$pinnedArchiveEntriesArgs<ExtArgs> = {}>(args?: Subset<T, User$pinnedArchiveEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rateLimit<T extends User$rateLimitArgs<ExtArgs> = {}>(args?: Subset<T, User$rateLimitArgs<ExtArgs>>): Prisma__UserRateLimitClient<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5176,6 +5305,25 @@ export namespace Prisma {
   }
 
   /**
+   * User.rateLimit
+   */
+  export type User$rateLimitArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    where?: UserRateLimitWhereInput
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5191,6 +5339,1072 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model UserRateLimit
+   */
+
+  export type AggregateUserRateLimit = {
+    _count: UserRateLimitCountAggregateOutputType | null
+    _avg: UserRateLimitAvgAggregateOutputType | null
+    _sum: UserRateLimitSumAggregateOutputType | null
+    _min: UserRateLimitMinAggregateOutputType | null
+    _max: UserRateLimitMaxAggregateOutputType | null
+  }
+
+  export type UserRateLimitAvgAggregateOutputType = {
+    tokens: number | null
+  }
+
+  export type UserRateLimitSumAggregateOutputType = {
+    tokens: number | null
+  }
+
+  export type UserRateLimitMinAggregateOutputType = {
+    userId: string | null
+    tokens: number | null
+    lastRefill: Date | null
+  }
+
+  export type UserRateLimitMaxAggregateOutputType = {
+    userId: string | null
+    tokens: number | null
+    lastRefill: Date | null
+  }
+
+  export type UserRateLimitCountAggregateOutputType = {
+    userId: number
+    tokens: number
+    lastRefill: number
+    _all: number
+  }
+
+
+  export type UserRateLimitAvgAggregateInputType = {
+    tokens?: true
+  }
+
+  export type UserRateLimitSumAggregateInputType = {
+    tokens?: true
+  }
+
+  export type UserRateLimitMinAggregateInputType = {
+    userId?: true
+    tokens?: true
+    lastRefill?: true
+  }
+
+  export type UserRateLimitMaxAggregateInputType = {
+    userId?: true
+    tokens?: true
+    lastRefill?: true
+  }
+
+  export type UserRateLimitCountAggregateInputType = {
+    userId?: true
+    tokens?: true
+    lastRefill?: true
+    _all?: true
+  }
+
+  export type UserRateLimitAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserRateLimit to aggregate.
+     */
+    where?: UserRateLimitWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserRateLimits to fetch.
+     */
+    orderBy?: UserRateLimitOrderByWithRelationInput | UserRateLimitOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserRateLimitWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserRateLimits from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserRateLimits.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserRateLimits
+    **/
+    _count?: true | UserRateLimitCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: UserRateLimitAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: UserRateLimitSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserRateLimitMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserRateLimitMaxAggregateInputType
+  }
+
+  export type GetUserRateLimitAggregateType<T extends UserRateLimitAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserRateLimit]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserRateLimit[P]>
+      : GetScalarType<T[P], AggregateUserRateLimit[P]>
+  }
+
+
+
+
+  export type UserRateLimitGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserRateLimitWhereInput
+    orderBy?: UserRateLimitOrderByWithAggregationInput | UserRateLimitOrderByWithAggregationInput[]
+    by: UserRateLimitScalarFieldEnum[] | UserRateLimitScalarFieldEnum
+    having?: UserRateLimitScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserRateLimitCountAggregateInputType | true
+    _avg?: UserRateLimitAvgAggregateInputType
+    _sum?: UserRateLimitSumAggregateInputType
+    _min?: UserRateLimitMinAggregateInputType
+    _max?: UserRateLimitMaxAggregateInputType
+  }
+
+  export type UserRateLimitGroupByOutputType = {
+    userId: string
+    tokens: number
+    lastRefill: Date
+    _count: UserRateLimitCountAggregateOutputType | null
+    _avg: UserRateLimitAvgAggregateOutputType | null
+    _sum: UserRateLimitSumAggregateOutputType | null
+    _min: UserRateLimitMinAggregateOutputType | null
+    _max: UserRateLimitMaxAggregateOutputType | null
+  }
+
+  type GetUserRateLimitGroupByPayload<T extends UserRateLimitGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserRateLimitGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserRateLimitGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserRateLimitGroupByOutputType[P]>
+            : GetScalarType<T[P], UserRateLimitGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserRateLimitSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    tokens?: boolean
+    lastRefill?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userRateLimit"]>
+
+  export type UserRateLimitSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    tokens?: boolean
+    lastRefill?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userRateLimit"]>
+
+  export type UserRateLimitSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    tokens?: boolean
+    lastRefill?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userRateLimit"]>
+
+  export type UserRateLimitSelectScalar = {
+    userId?: boolean
+    tokens?: boolean
+    lastRefill?: boolean
+  }
+
+  export type UserRateLimitOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "tokens" | "lastRefill", ExtArgs["result"]["userRateLimit"]>
+  export type UserRateLimitInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type UserRateLimitIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type UserRateLimitIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $UserRateLimitPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserRateLimit"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      userId: string
+      tokens: number
+      lastRefill: Date
+    }, ExtArgs["result"]["userRateLimit"]>
+    composites: {}
+  }
+
+  type UserRateLimitGetPayload<S extends boolean | null | undefined | UserRateLimitDefaultArgs> = $Result.GetResult<Prisma.$UserRateLimitPayload, S>
+
+  type UserRateLimitCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserRateLimitFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserRateLimitCountAggregateInputType | true
+    }
+
+  export interface UserRateLimitDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserRateLimit'], meta: { name: 'UserRateLimit' } }
+    /**
+     * Find zero or one UserRateLimit that matches the filter.
+     * @param {UserRateLimitFindUniqueArgs} args - Arguments to find a UserRateLimit
+     * @example
+     * // Get one UserRateLimit
+     * const userRateLimit = await prisma.userRateLimit.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserRateLimitFindUniqueArgs>(args: SelectSubset<T, UserRateLimitFindUniqueArgs<ExtArgs>>): Prisma__UserRateLimitClient<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one UserRateLimit that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UserRateLimitFindUniqueOrThrowArgs} args - Arguments to find a UserRateLimit
+     * @example
+     * // Get one UserRateLimit
+     * const userRateLimit = await prisma.userRateLimit.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserRateLimitFindUniqueOrThrowArgs>(args: SelectSubset<T, UserRateLimitFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserRateLimitClient<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserRateLimit that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserRateLimitFindFirstArgs} args - Arguments to find a UserRateLimit
+     * @example
+     * // Get one UserRateLimit
+     * const userRateLimit = await prisma.userRateLimit.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserRateLimitFindFirstArgs>(args?: SelectSubset<T, UserRateLimitFindFirstArgs<ExtArgs>>): Prisma__UserRateLimitClient<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserRateLimit that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserRateLimitFindFirstOrThrowArgs} args - Arguments to find a UserRateLimit
+     * @example
+     * // Get one UserRateLimit
+     * const userRateLimit = await prisma.userRateLimit.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserRateLimitFindFirstOrThrowArgs>(args?: SelectSubset<T, UserRateLimitFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserRateLimitClient<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more UserRateLimits that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserRateLimitFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserRateLimits
+     * const userRateLimits = await prisma.userRateLimit.findMany()
+     * 
+     * // Get first 10 UserRateLimits
+     * const userRateLimits = await prisma.userRateLimit.findMany({ take: 10 })
+     * 
+     * // Only select the `userId`
+     * const userRateLimitWithUserIdOnly = await prisma.userRateLimit.findMany({ select: { userId: true } })
+     * 
+     */
+    findMany<T extends UserRateLimitFindManyArgs>(args?: SelectSubset<T, UserRateLimitFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a UserRateLimit.
+     * @param {UserRateLimitCreateArgs} args - Arguments to create a UserRateLimit.
+     * @example
+     * // Create one UserRateLimit
+     * const UserRateLimit = await prisma.userRateLimit.create({
+     *   data: {
+     *     // ... data to create a UserRateLimit
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserRateLimitCreateArgs>(args: SelectSubset<T, UserRateLimitCreateArgs<ExtArgs>>): Prisma__UserRateLimitClient<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many UserRateLimits.
+     * @param {UserRateLimitCreateManyArgs} args - Arguments to create many UserRateLimits.
+     * @example
+     * // Create many UserRateLimits
+     * const userRateLimit = await prisma.userRateLimit.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserRateLimitCreateManyArgs>(args?: SelectSubset<T, UserRateLimitCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserRateLimits and returns the data saved in the database.
+     * @param {UserRateLimitCreateManyAndReturnArgs} args - Arguments to create many UserRateLimits.
+     * @example
+     * // Create many UserRateLimits
+     * const userRateLimit = await prisma.userRateLimit.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserRateLimits and only return the `userId`
+     * const userRateLimitWithUserIdOnly = await prisma.userRateLimit.createManyAndReturn({
+     *   select: { userId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserRateLimitCreateManyAndReturnArgs>(args?: SelectSubset<T, UserRateLimitCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a UserRateLimit.
+     * @param {UserRateLimitDeleteArgs} args - Arguments to delete one UserRateLimit.
+     * @example
+     * // Delete one UserRateLimit
+     * const UserRateLimit = await prisma.userRateLimit.delete({
+     *   where: {
+     *     // ... filter to delete one UserRateLimit
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserRateLimitDeleteArgs>(args: SelectSubset<T, UserRateLimitDeleteArgs<ExtArgs>>): Prisma__UserRateLimitClient<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one UserRateLimit.
+     * @param {UserRateLimitUpdateArgs} args - Arguments to update one UserRateLimit.
+     * @example
+     * // Update one UserRateLimit
+     * const userRateLimit = await prisma.userRateLimit.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserRateLimitUpdateArgs>(args: SelectSubset<T, UserRateLimitUpdateArgs<ExtArgs>>): Prisma__UserRateLimitClient<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more UserRateLimits.
+     * @param {UserRateLimitDeleteManyArgs} args - Arguments to filter UserRateLimits to delete.
+     * @example
+     * // Delete a few UserRateLimits
+     * const { count } = await prisma.userRateLimit.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserRateLimitDeleteManyArgs>(args?: SelectSubset<T, UserRateLimitDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserRateLimits.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserRateLimitUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserRateLimits
+     * const userRateLimit = await prisma.userRateLimit.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserRateLimitUpdateManyArgs>(args: SelectSubset<T, UserRateLimitUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserRateLimits and returns the data updated in the database.
+     * @param {UserRateLimitUpdateManyAndReturnArgs} args - Arguments to update many UserRateLimits.
+     * @example
+     * // Update many UserRateLimits
+     * const userRateLimit = await prisma.userRateLimit.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more UserRateLimits and only return the `userId`
+     * const userRateLimitWithUserIdOnly = await prisma.userRateLimit.updateManyAndReturn({
+     *   select: { userId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserRateLimitUpdateManyAndReturnArgs>(args: SelectSubset<T, UserRateLimitUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one UserRateLimit.
+     * @param {UserRateLimitUpsertArgs} args - Arguments to update or create a UserRateLimit.
+     * @example
+     * // Update or create a UserRateLimit
+     * const userRateLimit = await prisma.userRateLimit.upsert({
+     *   create: {
+     *     // ... data to create a UserRateLimit
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserRateLimit we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserRateLimitUpsertArgs>(args: SelectSubset<T, UserRateLimitUpsertArgs<ExtArgs>>): Prisma__UserRateLimitClient<$Result.GetResult<Prisma.$UserRateLimitPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of UserRateLimits.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserRateLimitCountArgs} args - Arguments to filter UserRateLimits to count.
+     * @example
+     * // Count the number of UserRateLimits
+     * const count = await prisma.userRateLimit.count({
+     *   where: {
+     *     // ... the filter for the UserRateLimits we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserRateLimitCountArgs>(
+      args?: Subset<T, UserRateLimitCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserRateLimitCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserRateLimit.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserRateLimitAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserRateLimitAggregateArgs>(args: Subset<T, UserRateLimitAggregateArgs>): Prisma.PrismaPromise<GetUserRateLimitAggregateType<T>>
+
+    /**
+     * Group by UserRateLimit.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserRateLimitGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserRateLimitGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserRateLimitGroupByArgs['orderBy'] }
+        : { orderBy?: UserRateLimitGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserRateLimitGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserRateLimitGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserRateLimit model
+   */
+  readonly fields: UserRateLimitFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserRateLimit.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserRateLimitClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserRateLimit model
+   */
+  interface UserRateLimitFieldRefs {
+    readonly userId: FieldRef<"UserRateLimit", 'String'>
+    readonly tokens: FieldRef<"UserRateLimit", 'Int'>
+    readonly lastRefill: FieldRef<"UserRateLimit", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserRateLimit findUnique
+   */
+  export type UserRateLimitFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    /**
+     * Filter, which UserRateLimit to fetch.
+     */
+    where: UserRateLimitWhereUniqueInput
+  }
+
+  /**
+   * UserRateLimit findUniqueOrThrow
+   */
+  export type UserRateLimitFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    /**
+     * Filter, which UserRateLimit to fetch.
+     */
+    where: UserRateLimitWhereUniqueInput
+  }
+
+  /**
+   * UserRateLimit findFirst
+   */
+  export type UserRateLimitFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    /**
+     * Filter, which UserRateLimit to fetch.
+     */
+    where?: UserRateLimitWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserRateLimits to fetch.
+     */
+    orderBy?: UserRateLimitOrderByWithRelationInput | UserRateLimitOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserRateLimits.
+     */
+    cursor?: UserRateLimitWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserRateLimits from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserRateLimits.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserRateLimits.
+     */
+    distinct?: UserRateLimitScalarFieldEnum | UserRateLimitScalarFieldEnum[]
+  }
+
+  /**
+   * UserRateLimit findFirstOrThrow
+   */
+  export type UserRateLimitFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    /**
+     * Filter, which UserRateLimit to fetch.
+     */
+    where?: UserRateLimitWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserRateLimits to fetch.
+     */
+    orderBy?: UserRateLimitOrderByWithRelationInput | UserRateLimitOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserRateLimits.
+     */
+    cursor?: UserRateLimitWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserRateLimits from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserRateLimits.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserRateLimits.
+     */
+    distinct?: UserRateLimitScalarFieldEnum | UserRateLimitScalarFieldEnum[]
+  }
+
+  /**
+   * UserRateLimit findMany
+   */
+  export type UserRateLimitFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    /**
+     * Filter, which UserRateLimits to fetch.
+     */
+    where?: UserRateLimitWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserRateLimits to fetch.
+     */
+    orderBy?: UserRateLimitOrderByWithRelationInput | UserRateLimitOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserRateLimits.
+     */
+    cursor?: UserRateLimitWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserRateLimits from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserRateLimits.
+     */
+    skip?: number
+    distinct?: UserRateLimitScalarFieldEnum | UserRateLimitScalarFieldEnum[]
+  }
+
+  /**
+   * UserRateLimit create
+   */
+  export type UserRateLimitCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    /**
+     * The data needed to create a UserRateLimit.
+     */
+    data: XOR<UserRateLimitCreateInput, UserRateLimitUncheckedCreateInput>
+  }
+
+  /**
+   * UserRateLimit createMany
+   */
+  export type UserRateLimitCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserRateLimits.
+     */
+    data: UserRateLimitCreateManyInput | UserRateLimitCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserRateLimit createManyAndReturn
+   */
+  export type UserRateLimitCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * The data used to create many UserRateLimits.
+     */
+    data: UserRateLimitCreateManyInput | UserRateLimitCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserRateLimit update
+   */
+  export type UserRateLimitUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    /**
+     * The data needed to update a UserRateLimit.
+     */
+    data: XOR<UserRateLimitUpdateInput, UserRateLimitUncheckedUpdateInput>
+    /**
+     * Choose, which UserRateLimit to update.
+     */
+    where: UserRateLimitWhereUniqueInput
+  }
+
+  /**
+   * UserRateLimit updateMany
+   */
+  export type UserRateLimitUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserRateLimits.
+     */
+    data: XOR<UserRateLimitUpdateManyMutationInput, UserRateLimitUncheckedUpdateManyInput>
+    /**
+     * Filter which UserRateLimits to update
+     */
+    where?: UserRateLimitWhereInput
+    /**
+     * Limit how many UserRateLimits to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserRateLimit updateManyAndReturn
+   */
+  export type UserRateLimitUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * The data used to update UserRateLimits.
+     */
+    data: XOR<UserRateLimitUpdateManyMutationInput, UserRateLimitUncheckedUpdateManyInput>
+    /**
+     * Filter which UserRateLimits to update
+     */
+    where?: UserRateLimitWhereInput
+    /**
+     * Limit how many UserRateLimits to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserRateLimit upsert
+   */
+  export type UserRateLimitUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    /**
+     * The filter to search for the UserRateLimit to update in case it exists.
+     */
+    where: UserRateLimitWhereUniqueInput
+    /**
+     * In case the UserRateLimit found by the `where` argument doesn't exist, create a new UserRateLimit with this data.
+     */
+    create: XOR<UserRateLimitCreateInput, UserRateLimitUncheckedCreateInput>
+    /**
+     * In case the UserRateLimit was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserRateLimitUpdateInput, UserRateLimitUncheckedUpdateInput>
+  }
+
+  /**
+   * UserRateLimit delete
+   */
+  export type UserRateLimitDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
+    /**
+     * Filter which UserRateLimit to delete.
+     */
+    where: UserRateLimitWhereUniqueInput
+  }
+
+  /**
+   * UserRateLimit deleteMany
+   */
+  export type UserRateLimitDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserRateLimits to delete
+     */
+    where?: UserRateLimitWhereInput
+    /**
+     * Limit how many UserRateLimits to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserRateLimit without action
+   */
+  export type UserRateLimitDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserRateLimit
+     */
+    select?: UserRateLimitSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserRateLimit
+     */
+    omit?: UserRateLimitOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserRateLimitInclude<ExtArgs> | null
   }
 
 
@@ -5486,8 +6700,8 @@ export namespace Prisma {
     name: "Chat"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
-      messages: Prisma.$Message_v2Payload<ExtArgs>[]
-      votes: Prisma.$Vote_v2Payload<ExtArgs>[]
+      messages: Prisma.$MessagePayload<ExtArgs>[]
+      votes: Prisma.$VotePayload<ExtArgs>[]
       streams: Prisma.$StreamPayload<ExtArgs>[]
       pinnedArchiveEntries: Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>[]
     }
@@ -5896,8 +7110,8 @@ export namespace Prisma {
   export interface Prisma__ChatClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    messages<T extends Chat$messagesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    votes<T extends Chat$votesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    messages<T extends Chat$messagesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    votes<T extends Chat$votesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     streams<T extends Chat$streamsArgs<ExtArgs> = {}>(args?: Subset<T, Chat$streamsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StreamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     pinnedArchiveEntries<T extends Chat$pinnedArchiveEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$pinnedArchiveEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPinnedArchiveEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -6338,23 +7552,23 @@ export namespace Prisma {
    */
   export type Chat$messagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
-    where?: Message_v2WhereInput
-    orderBy?: Message_v2OrderByWithRelationInput | Message_v2OrderByWithRelationInput[]
-    cursor?: Message_v2WhereUniqueInput
+    include?: MessageInclude<ExtArgs> | null
+    where?: MessageWhereInput
+    orderBy?: MessageOrderByWithRelationInput | MessageOrderByWithRelationInput[]
+    cursor?: MessageWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: Message_v2ScalarFieldEnum | Message_v2ScalarFieldEnum[]
+    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
   }
 
   /**
@@ -6362,23 +7576,23 @@ export namespace Prisma {
    */
   export type Chat$votesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
-    where?: Vote_v2WhereInput
-    orderBy?: Vote_v2OrderByWithRelationInput | Vote_v2OrderByWithRelationInput[]
-    cursor?: Vote_v2WhereUniqueInput
+    include?: VoteInclude<ExtArgs> | null
+    where?: VoteWhereInput
+    orderBy?: VoteOrderByWithRelationInput | VoteOrderByWithRelationInput[]
+    cursor?: VoteWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: Vote_v2ScalarFieldEnum | Vote_v2ScalarFieldEnum[]
+    distinct?: VoteScalarFieldEnum | VoteScalarFieldEnum[]
   }
 
   /**
@@ -6449,276 +7663,221 @@ export namespace Prisma {
 
 
   /**
-   * Model Message_v2
+   * Model Message
    */
 
-  export type AggregateMessage_v2 = {
-    _count: Message_v2CountAggregateOutputType | null
-    _min: Message_v2MinAggregateOutputType | null
-    _max: Message_v2MaxAggregateOutputType | null
+  export type AggregateMessage = {
+    _count: MessageCountAggregateOutputType | null
+    _min: MessageMinAggregateOutputType | null
+    _max: MessageMaxAggregateOutputType | null
   }
 
-  export type Message_v2MinAggregateOutputType = {
+  export type MessageMinAggregateOutputType = {
     id: string | null
     chatId: string | null
     role: string | null
     createdAt: Date | null
-    baseId: string | null
-    previousVersionId: string | null
-    supersededById: string | null
-    regenerationGroupId: string | null
-    parentBaseId: string | null
   }
 
-  export type Message_v2MaxAggregateOutputType = {
+  export type MessageMaxAggregateOutputType = {
     id: string | null
     chatId: string | null
     role: string | null
     createdAt: Date | null
-    baseId: string | null
-    previousVersionId: string | null
-    supersededById: string | null
-    regenerationGroupId: string | null
-    parentBaseId: string | null
   }
 
-  export type Message_v2CountAggregateOutputType = {
+  export type MessageCountAggregateOutputType = {
     id: number
     chatId: number
     role: number
     parts: number
     attachments: number
     createdAt: number
-    baseId: number
-    previousVersionId: number
-    supersededById: number
-    regenerationGroupId: number
-    parentBaseId: number
     _all: number
   }
 
 
-  export type Message_v2MinAggregateInputType = {
+  export type MessageMinAggregateInputType = {
     id?: true
     chatId?: true
     role?: true
     createdAt?: true
-    baseId?: true
-    previousVersionId?: true
-    supersededById?: true
-    regenerationGroupId?: true
-    parentBaseId?: true
   }
 
-  export type Message_v2MaxAggregateInputType = {
+  export type MessageMaxAggregateInputType = {
     id?: true
     chatId?: true
     role?: true
     createdAt?: true
-    baseId?: true
-    previousVersionId?: true
-    supersededById?: true
-    regenerationGroupId?: true
-    parentBaseId?: true
   }
 
-  export type Message_v2CountAggregateInputType = {
+  export type MessageCountAggregateInputType = {
     id?: true
     chatId?: true
     role?: true
     parts?: true
     attachments?: true
     createdAt?: true
-    baseId?: true
-    previousVersionId?: true
-    supersededById?: true
-    regenerationGroupId?: true
-    parentBaseId?: true
     _all?: true
   }
 
-  export type Message_v2AggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which Message_v2 to aggregate.
+     * Filter which Message to aggregate.
      */
-    where?: Message_v2WhereInput
+    where?: MessageWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Message_v2s to fetch.
+     * Determine the order of Messages to fetch.
      */
-    orderBy?: Message_v2OrderByWithRelationInput | Message_v2OrderByWithRelationInput[]
+    orderBy?: MessageOrderByWithRelationInput | MessageOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: Message_v2WhereUniqueInput
+    cursor?: MessageWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Message_v2s from the position of the cursor.
+     * Take `±n` Messages from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Message_v2s.
+     * Skip the first `n` Messages.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Count returned Message_v2s
+     * Count returned Messages
     **/
-    _count?: true | Message_v2CountAggregateInputType
+    _count?: true | MessageCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
-    _min?: Message_v2MinAggregateInputType
+    _min?: MessageMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
-    _max?: Message_v2MaxAggregateInputType
+    _max?: MessageMaxAggregateInputType
   }
 
-  export type GetMessage_v2AggregateType<T extends Message_v2AggregateArgs> = {
-        [P in keyof T & keyof AggregateMessage_v2]: P extends '_count' | 'count'
+  export type GetMessageAggregateType<T extends MessageAggregateArgs> = {
+        [P in keyof T & keyof AggregateMessage]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateMessage_v2[P]>
-      : GetScalarType<T[P], AggregateMessage_v2[P]>
+        : GetScalarType<T[P], AggregateMessage[P]>
+      : GetScalarType<T[P], AggregateMessage[P]>
   }
 
 
 
 
-  export type Message_v2GroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: Message_v2WhereInput
-    orderBy?: Message_v2OrderByWithAggregationInput | Message_v2OrderByWithAggregationInput[]
-    by: Message_v2ScalarFieldEnum[] | Message_v2ScalarFieldEnum
-    having?: Message_v2ScalarWhereWithAggregatesInput
+  export type MessageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MessageWhereInput
+    orderBy?: MessageOrderByWithAggregationInput | MessageOrderByWithAggregationInput[]
+    by: MessageScalarFieldEnum[] | MessageScalarFieldEnum
+    having?: MessageScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: Message_v2CountAggregateInputType | true
-    _min?: Message_v2MinAggregateInputType
-    _max?: Message_v2MaxAggregateInputType
+    _count?: MessageCountAggregateInputType | true
+    _min?: MessageMinAggregateInputType
+    _max?: MessageMaxAggregateInputType
   }
 
-  export type Message_v2GroupByOutputType = {
+  export type MessageGroupByOutputType = {
     id: string
     chatId: string
     role: string
     parts: JsonValue
     attachments: JsonValue
     createdAt: Date
-    baseId: string | null
-    previousVersionId: string | null
-    supersededById: string | null
-    regenerationGroupId: string | null
-    parentBaseId: string | null
-    _count: Message_v2CountAggregateOutputType | null
-    _min: Message_v2MinAggregateOutputType | null
-    _max: Message_v2MaxAggregateOutputType | null
+    _count: MessageCountAggregateOutputType | null
+    _min: MessageMinAggregateOutputType | null
+    _max: MessageMaxAggregateOutputType | null
   }
 
-  type GetMessage_v2GroupByPayload<T extends Message_v2GroupByArgs> = Prisma.PrismaPromise<
+  type GetMessageGroupByPayload<T extends MessageGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<Message_v2GroupByOutputType, T['by']> &
+      PickEnumerable<MessageGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof Message_v2GroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof MessageGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], Message_v2GroupByOutputType[P]>
-            : GetScalarType<T[P], Message_v2GroupByOutputType[P]>
+              : GetScalarType<T[P], MessageGroupByOutputType[P]>
+            : GetScalarType<T[P], MessageGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type Message_v2Select<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type MessageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     chatId?: boolean
     role?: boolean
     parts?: boolean
     attachments?: boolean
     createdAt?: boolean
-    baseId?: boolean
-    previousVersionId?: boolean
-    supersededById?: boolean
-    regenerationGroupId?: boolean
-    parentBaseId?: boolean
     chat?: boolean | ChatDefaultArgs<ExtArgs>
-    votes?: boolean | Message_v2$votesArgs<ExtArgs>
-    _count?: boolean | Message_v2CountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["message_v2"]>
+    votes?: boolean | Message$votesArgs<ExtArgs>
+    _count?: boolean | MessageCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["message"]>
 
-  export type Message_v2SelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type MessageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     chatId?: boolean
     role?: boolean
     parts?: boolean
     attachments?: boolean
     createdAt?: boolean
-    baseId?: boolean
-    previousVersionId?: boolean
-    supersededById?: boolean
-    regenerationGroupId?: boolean
-    parentBaseId?: boolean
     chat?: boolean | ChatDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["message_v2"]>
+  }, ExtArgs["result"]["message"]>
 
-  export type Message_v2SelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type MessageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     chatId?: boolean
     role?: boolean
     parts?: boolean
     attachments?: boolean
     createdAt?: boolean
-    baseId?: boolean
-    previousVersionId?: boolean
-    supersededById?: boolean
-    regenerationGroupId?: boolean
-    parentBaseId?: boolean
     chat?: boolean | ChatDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["message_v2"]>
+  }, ExtArgs["result"]["message"]>
 
-  export type Message_v2SelectScalar = {
+  export type MessageSelectScalar = {
     id?: boolean
     chatId?: boolean
     role?: boolean
     parts?: boolean
     attachments?: boolean
     createdAt?: boolean
-    baseId?: boolean
-    previousVersionId?: boolean
-    supersededById?: boolean
-    regenerationGroupId?: boolean
-    parentBaseId?: boolean
   }
 
-  export type Message_v2Omit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "chatId" | "role" | "parts" | "attachments" | "createdAt" | "baseId" | "previousVersionId" | "supersededById" | "regenerationGroupId" | "parentBaseId", ExtArgs["result"]["message_v2"]>
-  export type Message_v2Include<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "chatId" | "role" | "parts" | "attachments" | "createdAt", ExtArgs["result"]["message"]>
+  export type MessageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat?: boolean | ChatDefaultArgs<ExtArgs>
-    votes?: boolean | Message_v2$votesArgs<ExtArgs>
-    _count?: boolean | Message_v2CountOutputTypeDefaultArgs<ExtArgs>
+    votes?: boolean | Message$votesArgs<ExtArgs>
+    _count?: boolean | MessageCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type Message_v2IncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat?: boolean | ChatDefaultArgs<ExtArgs>
   }
-  export type Message_v2IncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat?: boolean | ChatDefaultArgs<ExtArgs>
   }
 
-  export type $Message_v2Payload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Message_v2"
+  export type $MessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Message"
     objects: {
       chat: Prisma.$ChatPayload<ExtArgs>
-      votes: Prisma.$Vote_v2Payload<ExtArgs>[]
+      votes: Prisma.$VotePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6727,141 +7886,136 @@ export namespace Prisma {
       parts: Prisma.JsonValue
       attachments: Prisma.JsonValue
       createdAt: Date
-      baseId: string | null
-      previousVersionId: string | null
-      supersededById: string | null
-      regenerationGroupId: string | null
-      parentBaseId: string | null
-    }, ExtArgs["result"]["message_v2"]>
+    }, ExtArgs["result"]["message"]>
     composites: {}
   }
 
-  type Message_v2GetPayload<S extends boolean | null | undefined | Message_v2DefaultArgs> = $Result.GetResult<Prisma.$Message_v2Payload, S>
+  type MessageGetPayload<S extends boolean | null | undefined | MessageDefaultArgs> = $Result.GetResult<Prisma.$MessagePayload, S>
 
-  type Message_v2CountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<Message_v2FindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: Message_v2CountAggregateInputType | true
+  type MessageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MessageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MessageCountAggregateInputType | true
     }
 
-  export interface Message_v2Delegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Message_v2'], meta: { name: 'Message_v2' } }
+  export interface MessageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Message'], meta: { name: 'Message' } }
     /**
-     * Find zero or one Message_v2 that matches the filter.
-     * @param {Message_v2FindUniqueArgs} args - Arguments to find a Message_v2
+     * Find zero or one Message that matches the filter.
+     * @param {MessageFindUniqueArgs} args - Arguments to find a Message
      * @example
-     * // Get one Message_v2
-     * const message_v2 = await prisma.message_v2.findUnique({
+     * // Get one Message
+     * const message = await prisma.message.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends Message_v2FindUniqueArgs>(args: SelectSubset<T, Message_v2FindUniqueArgs<ExtArgs>>): Prisma__Message_v2Client<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends MessageFindUniqueArgs>(args: SelectSubset<T, MessageFindUniqueArgs<ExtArgs>>): Prisma__MessageClient<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one Message_v2 that matches the filter or throw an error with `error.code='P2025'`
+     * Find one Message that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {Message_v2FindUniqueOrThrowArgs} args - Arguments to find a Message_v2
+     * @param {MessageFindUniqueOrThrowArgs} args - Arguments to find a Message
      * @example
-     * // Get one Message_v2
-     * const message_v2 = await prisma.message_v2.findUniqueOrThrow({
+     * // Get one Message
+     * const message = await prisma.message.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends Message_v2FindUniqueOrThrowArgs>(args: SelectSubset<T, Message_v2FindUniqueOrThrowArgs<ExtArgs>>): Prisma__Message_v2Client<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends MessageFindUniqueOrThrowArgs>(args: SelectSubset<T, MessageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MessageClient<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first Message_v2 that matches the filter.
+     * Find the first Message that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Message_v2FindFirstArgs} args - Arguments to find a Message_v2
+     * @param {MessageFindFirstArgs} args - Arguments to find a Message
      * @example
-     * // Get one Message_v2
-     * const message_v2 = await prisma.message_v2.findFirst({
+     * // Get one Message
+     * const message = await prisma.message.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends Message_v2FindFirstArgs>(args?: SelectSubset<T, Message_v2FindFirstArgs<ExtArgs>>): Prisma__Message_v2Client<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends MessageFindFirstArgs>(args?: SelectSubset<T, MessageFindFirstArgs<ExtArgs>>): Prisma__MessageClient<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first Message_v2 that matches the filter or
+     * Find the first Message that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Message_v2FindFirstOrThrowArgs} args - Arguments to find a Message_v2
+     * @param {MessageFindFirstOrThrowArgs} args - Arguments to find a Message
      * @example
-     * // Get one Message_v2
-     * const message_v2 = await prisma.message_v2.findFirstOrThrow({
+     * // Get one Message
+     * const message = await prisma.message.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends Message_v2FindFirstOrThrowArgs>(args?: SelectSubset<T, Message_v2FindFirstOrThrowArgs<ExtArgs>>): Prisma__Message_v2Client<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends MessageFindFirstOrThrowArgs>(args?: SelectSubset<T, MessageFindFirstOrThrowArgs<ExtArgs>>): Prisma__MessageClient<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more Message_v2s that matches the filter.
+     * Find zero or more Messages that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Message_v2FindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {MessageFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all Message_v2s
-     * const message_v2s = await prisma.message_v2.findMany()
+     * // Get all Messages
+     * const messages = await prisma.message.findMany()
      * 
-     * // Get first 10 Message_v2s
-     * const message_v2s = await prisma.message_v2.findMany({ take: 10 })
+     * // Get first 10 Messages
+     * const messages = await prisma.message.findMany({ take: 10 })
      * 
      * // Only select the `id`
-     * const message_v2WithIdOnly = await prisma.message_v2.findMany({ select: { id: true } })
+     * const messageWithIdOnly = await prisma.message.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends Message_v2FindManyArgs>(args?: SelectSubset<T, Message_v2FindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends MessageFindManyArgs>(args?: SelectSubset<T, MessageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a Message_v2.
-     * @param {Message_v2CreateArgs} args - Arguments to create a Message_v2.
+     * Create a Message.
+     * @param {MessageCreateArgs} args - Arguments to create a Message.
      * @example
-     * // Create one Message_v2
-     * const Message_v2 = await prisma.message_v2.create({
+     * // Create one Message
+     * const Message = await prisma.message.create({
      *   data: {
-     *     // ... data to create a Message_v2
+     *     // ... data to create a Message
      *   }
      * })
      * 
      */
-    create<T extends Message_v2CreateArgs>(args: SelectSubset<T, Message_v2CreateArgs<ExtArgs>>): Prisma__Message_v2Client<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends MessageCreateArgs>(args: SelectSubset<T, MessageCreateArgs<ExtArgs>>): Prisma__MessageClient<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many Message_v2s.
-     * @param {Message_v2CreateManyArgs} args - Arguments to create many Message_v2s.
+     * Create many Messages.
+     * @param {MessageCreateManyArgs} args - Arguments to create many Messages.
      * @example
-     * // Create many Message_v2s
-     * const message_v2 = await prisma.message_v2.createMany({
+     * // Create many Messages
+     * const message = await prisma.message.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
-    createMany<T extends Message_v2CreateManyArgs>(args?: SelectSubset<T, Message_v2CreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends MessageCreateManyArgs>(args?: SelectSubset<T, MessageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many Message_v2s and returns the data saved in the database.
-     * @param {Message_v2CreateManyAndReturnArgs} args - Arguments to create many Message_v2s.
+     * Create many Messages and returns the data saved in the database.
+     * @param {MessageCreateManyAndReturnArgs} args - Arguments to create many Messages.
      * @example
-     * // Create many Message_v2s
-     * const message_v2 = await prisma.message_v2.createManyAndReturn({
+     * // Create many Messages
+     * const message = await prisma.message.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
-     * // Create many Message_v2s and only return the `id`
-     * const message_v2WithIdOnly = await prisma.message_v2.createManyAndReturn({
+     * // Create many Messages and only return the `id`
+     * const messageWithIdOnly = await prisma.message.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -6871,28 +8025,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends Message_v2CreateManyAndReturnArgs>(args?: SelectSubset<T, Message_v2CreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends MessageCreateManyAndReturnArgs>(args?: SelectSubset<T, MessageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a Message_v2.
-     * @param {Message_v2DeleteArgs} args - Arguments to delete one Message_v2.
+     * Delete a Message.
+     * @param {MessageDeleteArgs} args - Arguments to delete one Message.
      * @example
-     * // Delete one Message_v2
-     * const Message_v2 = await prisma.message_v2.delete({
+     * // Delete one Message
+     * const Message = await prisma.message.delete({
      *   where: {
-     *     // ... filter to delete one Message_v2
+     *     // ... filter to delete one Message
      *   }
      * })
      * 
      */
-    delete<T extends Message_v2DeleteArgs>(args: SelectSubset<T, Message_v2DeleteArgs<ExtArgs>>): Prisma__Message_v2Client<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends MessageDeleteArgs>(args: SelectSubset<T, MessageDeleteArgs<ExtArgs>>): Prisma__MessageClient<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one Message_v2.
-     * @param {Message_v2UpdateArgs} args - Arguments to update one Message_v2.
+     * Update one Message.
+     * @param {MessageUpdateArgs} args - Arguments to update one Message.
      * @example
-     * // Update one Message_v2
-     * const message_v2 = await prisma.message_v2.update({
+     * // Update one Message
+     * const message = await prisma.message.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -6902,30 +8056,30 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends Message_v2UpdateArgs>(args: SelectSubset<T, Message_v2UpdateArgs<ExtArgs>>): Prisma__Message_v2Client<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends MessageUpdateArgs>(args: SelectSubset<T, MessageUpdateArgs<ExtArgs>>): Prisma__MessageClient<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more Message_v2s.
-     * @param {Message_v2DeleteManyArgs} args - Arguments to filter Message_v2s to delete.
+     * Delete zero or more Messages.
+     * @param {MessageDeleteManyArgs} args - Arguments to filter Messages to delete.
      * @example
-     * // Delete a few Message_v2s
-     * const { count } = await prisma.message_v2.deleteMany({
+     * // Delete a few Messages
+     * const { count } = await prisma.message.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
-    deleteMany<T extends Message_v2DeleteManyArgs>(args?: SelectSubset<T, Message_v2DeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends MessageDeleteManyArgs>(args?: SelectSubset<T, MessageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Message_v2s.
+     * Update zero or more Messages.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Message_v2UpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {MessageUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many Message_v2s
-     * const message_v2 = await prisma.message_v2.updateMany({
+     * // Update many Messages
+     * const message = await prisma.message.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -6935,14 +8089,14 @@ export namespace Prisma {
      * })
      * 
      */
-    updateMany<T extends Message_v2UpdateManyArgs>(args: SelectSubset<T, Message_v2UpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends MessageUpdateManyArgs>(args: SelectSubset<T, MessageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Message_v2s and returns the data updated in the database.
-     * @param {Message_v2UpdateManyAndReturnArgs} args - Arguments to update many Message_v2s.
+     * Update zero or more Messages and returns the data updated in the database.
+     * @param {MessageUpdateManyAndReturnArgs} args - Arguments to update many Messages.
      * @example
-     * // Update many Message_v2s
-     * const message_v2 = await prisma.message_v2.updateManyAndReturn({
+     * // Update many Messages
+     * const message = await prisma.message.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -6951,8 +8105,8 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more Message_v2s and only return the `id`
-     * const message_v2WithIdOnly = await prisma.message_v2.updateManyAndReturn({
+     * // Update zero or more Messages and only return the `id`
+     * const messageWithIdOnly = await prisma.message.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -6965,56 +8119,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends Message_v2UpdateManyAndReturnArgs>(args: SelectSubset<T, Message_v2UpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends MessageUpdateManyAndReturnArgs>(args: SelectSubset<T, MessageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one Message_v2.
-     * @param {Message_v2UpsertArgs} args - Arguments to update or create a Message_v2.
+     * Create or update one Message.
+     * @param {MessageUpsertArgs} args - Arguments to update or create a Message.
      * @example
-     * // Update or create a Message_v2
-     * const message_v2 = await prisma.message_v2.upsert({
+     * // Update or create a Message
+     * const message = await prisma.message.upsert({
      *   create: {
-     *     // ... data to create a Message_v2
+     *     // ... data to create a Message
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the Message_v2 we want to update
+     *     // ... the filter for the Message we want to update
      *   }
      * })
      */
-    upsert<T extends Message_v2UpsertArgs>(args: SelectSubset<T, Message_v2UpsertArgs<ExtArgs>>): Prisma__Message_v2Client<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends MessageUpsertArgs>(args: SelectSubset<T, MessageUpsertArgs<ExtArgs>>): Prisma__MessageClient<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of Message_v2s.
+     * Count the number of Messages.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Message_v2CountArgs} args - Arguments to filter Message_v2s to count.
+     * @param {MessageCountArgs} args - Arguments to filter Messages to count.
      * @example
-     * // Count the number of Message_v2s
-     * const count = await prisma.message_v2.count({
+     * // Count the number of Messages
+     * const count = await prisma.message.count({
      *   where: {
-     *     // ... the filter for the Message_v2s we want to count
+     *     // ... the filter for the Messages we want to count
      *   }
      * })
     **/
-    count<T extends Message_v2CountArgs>(
-      args?: Subset<T, Message_v2CountArgs>,
+    count<T extends MessageCountArgs>(
+      args?: Subset<T, MessageCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], Message_v2CountAggregateOutputType>
+          : GetScalarType<T['select'], MessageCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a Message_v2.
+     * Allows you to perform aggregations operations on a Message.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Message_v2AggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {MessageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -7034,13 +8188,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends Message_v2AggregateArgs>(args: Subset<T, Message_v2AggregateArgs>): Prisma.PrismaPromise<GetMessage_v2AggregateType<T>>
+    aggregate<T extends MessageAggregateArgs>(args: Subset<T, MessageAggregateArgs>): Prisma.PrismaPromise<GetMessageAggregateType<T>>
 
     /**
-     * Group by Message_v2.
+     * Group by Message.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Message_v2GroupByArgs} args - Group by arguments.
+     * @param {MessageGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -7055,14 +8209,14 @@ export namespace Prisma {
      * 
     **/
     groupBy<
-      T extends Message_v2GroupByArgs,
+      T extends MessageGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: Message_v2GroupByArgs['orderBy'] }
-        : { orderBy?: Message_v2GroupByArgs['orderBy'] },
+        ? { orderBy: MessageGroupByArgs['orderBy'] }
+        : { orderBy?: MessageGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -7111,23 +8265,23 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, Message_v2GroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMessage_v2GroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, MessageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMessageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the Message_v2 model
+   * Fields of the Message model
    */
-  readonly fields: Message_v2FieldRefs;
+  readonly fields: MessageFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for Message_v2.
+   * The delegate class that acts as a "Promise-like" for Message.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__Message_v2Client<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__MessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     chat<T extends ChatDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ChatDefaultArgs<ExtArgs>>): Prisma__ChatClient<$Result.GetResult<Prisma.$ChatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    votes<T extends Message_v2$votesArgs<ExtArgs> = {}>(args?: Subset<T, Message_v2$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    votes<T extends Message$votesArgs<ExtArgs> = {}>(args?: Subset<T, Message$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7154,481 +8308,476 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the Message_v2 model
+   * Fields of the Message model
    */
-  interface Message_v2FieldRefs {
-    readonly id: FieldRef<"Message_v2", 'String'>
-    readonly chatId: FieldRef<"Message_v2", 'String'>
-    readonly role: FieldRef<"Message_v2", 'String'>
-    readonly parts: FieldRef<"Message_v2", 'Json'>
-    readonly attachments: FieldRef<"Message_v2", 'Json'>
-    readonly createdAt: FieldRef<"Message_v2", 'DateTime'>
-    readonly baseId: FieldRef<"Message_v2", 'String'>
-    readonly previousVersionId: FieldRef<"Message_v2", 'String'>
-    readonly supersededById: FieldRef<"Message_v2", 'String'>
-    readonly regenerationGroupId: FieldRef<"Message_v2", 'String'>
-    readonly parentBaseId: FieldRef<"Message_v2", 'String'>
+  interface MessageFieldRefs {
+    readonly id: FieldRef<"Message", 'String'>
+    readonly chatId: FieldRef<"Message", 'String'>
+    readonly role: FieldRef<"Message", 'String'>
+    readonly parts: FieldRef<"Message", 'Json'>
+    readonly attachments: FieldRef<"Message", 'Json'>
+    readonly createdAt: FieldRef<"Message", 'DateTime'>
   }
     
 
   // Custom InputTypes
   /**
-   * Message_v2 findUnique
+   * Message findUnique
    */
-  export type Message_v2FindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
     /**
-     * Filter, which Message_v2 to fetch.
+     * Filter, which Message to fetch.
      */
-    where: Message_v2WhereUniqueInput
+    where: MessageWhereUniqueInput
   }
 
   /**
-   * Message_v2 findUniqueOrThrow
+   * Message findUniqueOrThrow
    */
-  export type Message_v2FindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
     /**
-     * Filter, which Message_v2 to fetch.
+     * Filter, which Message to fetch.
      */
-    where: Message_v2WhereUniqueInput
+    where: MessageWhereUniqueInput
   }
 
   /**
-   * Message_v2 findFirst
+   * Message findFirst
    */
-  export type Message_v2FindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
     /**
-     * Filter, which Message_v2 to fetch.
+     * Filter, which Message to fetch.
      */
-    where?: Message_v2WhereInput
+    where?: MessageWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Message_v2s to fetch.
+     * Determine the order of Messages to fetch.
      */
-    orderBy?: Message_v2OrderByWithRelationInput | Message_v2OrderByWithRelationInput[]
+    orderBy?: MessageOrderByWithRelationInput | MessageOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for Message_v2s.
+     * Sets the position for searching for Messages.
      */
-    cursor?: Message_v2WhereUniqueInput
+    cursor?: MessageWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Message_v2s from the position of the cursor.
+     * Take `±n` Messages from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Message_v2s.
+     * Skip the first `n` Messages.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of Message_v2s.
+     * Filter by unique combinations of Messages.
      */
-    distinct?: Message_v2ScalarFieldEnum | Message_v2ScalarFieldEnum[]
+    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
   }
 
   /**
-   * Message_v2 findFirstOrThrow
+   * Message findFirstOrThrow
    */
-  export type Message_v2FindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
     /**
-     * Filter, which Message_v2 to fetch.
+     * Filter, which Message to fetch.
      */
-    where?: Message_v2WhereInput
+    where?: MessageWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Message_v2s to fetch.
+     * Determine the order of Messages to fetch.
      */
-    orderBy?: Message_v2OrderByWithRelationInput | Message_v2OrderByWithRelationInput[]
+    orderBy?: MessageOrderByWithRelationInput | MessageOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for Message_v2s.
+     * Sets the position for searching for Messages.
      */
-    cursor?: Message_v2WhereUniqueInput
+    cursor?: MessageWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Message_v2s from the position of the cursor.
+     * Take `±n` Messages from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Message_v2s.
+     * Skip the first `n` Messages.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of Message_v2s.
+     * Filter by unique combinations of Messages.
      */
-    distinct?: Message_v2ScalarFieldEnum | Message_v2ScalarFieldEnum[]
+    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
   }
 
   /**
-   * Message_v2 findMany
+   * Message findMany
    */
-  export type Message_v2FindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
     /**
-     * Filter, which Message_v2s to fetch.
+     * Filter, which Messages to fetch.
      */
-    where?: Message_v2WhereInput
+    where?: MessageWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Message_v2s to fetch.
+     * Determine the order of Messages to fetch.
      */
-    orderBy?: Message_v2OrderByWithRelationInput | Message_v2OrderByWithRelationInput[]
+    orderBy?: MessageOrderByWithRelationInput | MessageOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for listing Message_v2s.
+     * Sets the position for listing Messages.
      */
-    cursor?: Message_v2WhereUniqueInput
+    cursor?: MessageWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Message_v2s from the position of the cursor.
+     * Take `±n` Messages from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Message_v2s.
+     * Skip the first `n` Messages.
      */
     skip?: number
-    distinct?: Message_v2ScalarFieldEnum | Message_v2ScalarFieldEnum[]
+    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
   }
 
   /**
-   * Message_v2 create
+   * Message create
    */
-  export type Message_v2CreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
     /**
-     * The data needed to create a Message_v2.
+     * The data needed to create a Message.
      */
-    data: XOR<Message_v2CreateInput, Message_v2UncheckedCreateInput>
+    data: XOR<MessageCreateInput, MessageUncheckedCreateInput>
   }
 
   /**
-   * Message_v2 createMany
+   * Message createMany
    */
-  export type Message_v2CreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many Message_v2s.
+     * The data used to create many Messages.
      */
-    data: Message_v2CreateManyInput | Message_v2CreateManyInput[]
+    data: MessageCreateManyInput | MessageCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * Message_v2 createManyAndReturn
+   * Message createManyAndReturn
    */
-  export type Message_v2CreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2SelectCreateManyAndReturn<ExtArgs> | null
+    select?: MessageSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
-     * The data used to create many Message_v2s.
+     * The data used to create many Messages.
      */
-    data: Message_v2CreateManyInput | Message_v2CreateManyInput[]
+    data: MessageCreateManyInput | MessageCreateManyInput[]
     skipDuplicates?: boolean
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2IncludeCreateManyAndReturn<ExtArgs> | null
+    include?: MessageIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * Message_v2 update
+   * Message update
    */
-  export type Message_v2UpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
     /**
-     * The data needed to update a Message_v2.
+     * The data needed to update a Message.
      */
-    data: XOR<Message_v2UpdateInput, Message_v2UncheckedUpdateInput>
+    data: XOR<MessageUpdateInput, MessageUncheckedUpdateInput>
     /**
-     * Choose, which Message_v2 to update.
+     * Choose, which Message to update.
      */
-    where: Message_v2WhereUniqueInput
+    where: MessageWhereUniqueInput
   }
 
   /**
-   * Message_v2 updateMany
+   * Message updateMany
    */
-  export type Message_v2UpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update Message_v2s.
+     * The data used to update Messages.
      */
-    data: XOR<Message_v2UpdateManyMutationInput, Message_v2UncheckedUpdateManyInput>
+    data: XOR<MessageUpdateManyMutationInput, MessageUncheckedUpdateManyInput>
     /**
-     * Filter which Message_v2s to update
+     * Filter which Messages to update
      */
-    where?: Message_v2WhereInput
+    where?: MessageWhereInput
     /**
-     * Limit how many Message_v2s to update.
+     * Limit how many Messages to update.
      */
     limit?: number
   }
 
   /**
-   * Message_v2 updateManyAndReturn
+   * Message updateManyAndReturn
    */
-  export type Message_v2UpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2SelectUpdateManyAndReturn<ExtArgs> | null
+    select?: MessageSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
-     * The data used to update Message_v2s.
+     * The data used to update Messages.
      */
-    data: XOR<Message_v2UpdateManyMutationInput, Message_v2UncheckedUpdateManyInput>
+    data: XOR<MessageUpdateManyMutationInput, MessageUncheckedUpdateManyInput>
     /**
-     * Filter which Message_v2s to update
+     * Filter which Messages to update
      */
-    where?: Message_v2WhereInput
+    where?: MessageWhereInput
     /**
-     * Limit how many Message_v2s to update.
+     * Limit how many Messages to update.
      */
     limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2IncludeUpdateManyAndReturn<ExtArgs> | null
+    include?: MessageIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * Message_v2 upsert
+   * Message upsert
    */
-  export type Message_v2UpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
     /**
-     * The filter to search for the Message_v2 to update in case it exists.
+     * The filter to search for the Message to update in case it exists.
      */
-    where: Message_v2WhereUniqueInput
+    where: MessageWhereUniqueInput
     /**
-     * In case the Message_v2 found by the `where` argument doesn't exist, create a new Message_v2 with this data.
+     * In case the Message found by the `where` argument doesn't exist, create a new Message with this data.
      */
-    create: XOR<Message_v2CreateInput, Message_v2UncheckedCreateInput>
+    create: XOR<MessageCreateInput, MessageUncheckedCreateInput>
     /**
-     * In case the Message_v2 was found with the provided `where` argument, update it with this data.
+     * In case the Message was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<Message_v2UpdateInput, Message_v2UncheckedUpdateInput>
+    update: XOR<MessageUpdateInput, MessageUncheckedUpdateInput>
   }
 
   /**
-   * Message_v2 delete
+   * Message delete
    */
-  export type Message_v2DeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
     /**
-     * Filter which Message_v2 to delete.
+     * Filter which Message to delete.
      */
-    where: Message_v2WhereUniqueInput
+    where: MessageWhereUniqueInput
   }
 
   /**
-   * Message_v2 deleteMany
+   * Message deleteMany
    */
-  export type Message_v2DeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which Message_v2s to delete
+     * Filter which Messages to delete
      */
-    where?: Message_v2WhereInput
+    where?: MessageWhereInput
     /**
-     * Limit how many Message_v2s to delete.
+     * Limit how many Messages to delete.
      */
     limit?: number
   }
 
   /**
-   * Message_v2.votes
+   * Message.votes
    */
-  export type Message_v2$votesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Message$votesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
-    where?: Vote_v2WhereInput
-    orderBy?: Vote_v2OrderByWithRelationInput | Vote_v2OrderByWithRelationInput[]
-    cursor?: Vote_v2WhereUniqueInput
+    include?: VoteInclude<ExtArgs> | null
+    where?: VoteWhereInput
+    orderBy?: VoteOrderByWithRelationInput | VoteOrderByWithRelationInput[]
+    cursor?: VoteWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: Vote_v2ScalarFieldEnum | Vote_v2ScalarFieldEnum[]
+    distinct?: VoteScalarFieldEnum | VoteScalarFieldEnum[]
   }
 
   /**
-   * Message_v2 without action
+   * Message without action
    */
-  export type Message_v2DefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type MessageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Message_v2
+     * Select specific fields to fetch from the Message
      */
-    select?: Message_v2Select<ExtArgs> | null
+    select?: MessageSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Message_v2
+     * Omit specific fields from the Message
      */
-    omit?: Message_v2Omit<ExtArgs> | null
+    omit?: MessageOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Message_v2Include<ExtArgs> | null
+    include?: MessageInclude<ExtArgs> | null
   }
 
 
   /**
-   * Model Vote_v2
+   * Model Vote
    */
 
-  export type AggregateVote_v2 = {
-    _count: Vote_v2CountAggregateOutputType | null
-    _min: Vote_v2MinAggregateOutputType | null
-    _max: Vote_v2MaxAggregateOutputType | null
+  export type AggregateVote = {
+    _count: VoteCountAggregateOutputType | null
+    _min: VoteMinAggregateOutputType | null
+    _max: VoteMaxAggregateOutputType | null
   }
 
-  export type Vote_v2MinAggregateOutputType = {
+  export type VoteMinAggregateOutputType = {
     chatId: string | null
     messageId: string | null
     isUpvoted: boolean | null
   }
 
-  export type Vote_v2MaxAggregateOutputType = {
+  export type VoteMaxAggregateOutputType = {
     chatId: string | null
     messageId: string | null
     isUpvoted: boolean | null
   }
 
-  export type Vote_v2CountAggregateOutputType = {
+  export type VoteCountAggregateOutputType = {
     chatId: number
     messageId: number
     isUpvoted: number
@@ -7636,304 +8785,304 @@ export namespace Prisma {
   }
 
 
-  export type Vote_v2MinAggregateInputType = {
+  export type VoteMinAggregateInputType = {
     chatId?: true
     messageId?: true
     isUpvoted?: true
   }
 
-  export type Vote_v2MaxAggregateInputType = {
+  export type VoteMaxAggregateInputType = {
     chatId?: true
     messageId?: true
     isUpvoted?: true
   }
 
-  export type Vote_v2CountAggregateInputType = {
+  export type VoteCountAggregateInputType = {
     chatId?: true
     messageId?: true
     isUpvoted?: true
     _all?: true
   }
 
-  export type Vote_v2AggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which Vote_v2 to aggregate.
+     * Filter which Vote to aggregate.
      */
-    where?: Vote_v2WhereInput
+    where?: VoteWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Vote_v2s to fetch.
+     * Determine the order of Votes to fetch.
      */
-    orderBy?: Vote_v2OrderByWithRelationInput | Vote_v2OrderByWithRelationInput[]
+    orderBy?: VoteOrderByWithRelationInput | VoteOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
      * Sets the start position
      */
-    cursor?: Vote_v2WhereUniqueInput
+    cursor?: VoteWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Vote_v2s from the position of the cursor.
+     * Take `±n` Votes from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Vote_v2s.
+     * Skip the first `n` Votes.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Count returned Vote_v2s
+     * Count returned Votes
     **/
-    _count?: true | Vote_v2CountAggregateInputType
+    _count?: true | VoteCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the minimum value
     **/
-    _min?: Vote_v2MinAggregateInputType
+    _min?: VoteMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
      * Select which fields to find the maximum value
     **/
-    _max?: Vote_v2MaxAggregateInputType
+    _max?: VoteMaxAggregateInputType
   }
 
-  export type GetVote_v2AggregateType<T extends Vote_v2AggregateArgs> = {
-        [P in keyof T & keyof AggregateVote_v2]: P extends '_count' | 'count'
+  export type GetVoteAggregateType<T extends VoteAggregateArgs> = {
+        [P in keyof T & keyof AggregateVote]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateVote_v2[P]>
-      : GetScalarType<T[P], AggregateVote_v2[P]>
+        : GetScalarType<T[P], AggregateVote[P]>
+      : GetScalarType<T[P], AggregateVote[P]>
   }
 
 
 
 
-  export type Vote_v2GroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: Vote_v2WhereInput
-    orderBy?: Vote_v2OrderByWithAggregationInput | Vote_v2OrderByWithAggregationInput[]
-    by: Vote_v2ScalarFieldEnum[] | Vote_v2ScalarFieldEnum
-    having?: Vote_v2ScalarWhereWithAggregatesInput
+  export type VoteGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VoteWhereInput
+    orderBy?: VoteOrderByWithAggregationInput | VoteOrderByWithAggregationInput[]
+    by: VoteScalarFieldEnum[] | VoteScalarFieldEnum
+    having?: VoteScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: Vote_v2CountAggregateInputType | true
-    _min?: Vote_v2MinAggregateInputType
-    _max?: Vote_v2MaxAggregateInputType
+    _count?: VoteCountAggregateInputType | true
+    _min?: VoteMinAggregateInputType
+    _max?: VoteMaxAggregateInputType
   }
 
-  export type Vote_v2GroupByOutputType = {
+  export type VoteGroupByOutputType = {
     chatId: string
     messageId: string
     isUpvoted: boolean
-    _count: Vote_v2CountAggregateOutputType | null
-    _min: Vote_v2MinAggregateOutputType | null
-    _max: Vote_v2MaxAggregateOutputType | null
+    _count: VoteCountAggregateOutputType | null
+    _min: VoteMinAggregateOutputType | null
+    _max: VoteMaxAggregateOutputType | null
   }
 
-  type GetVote_v2GroupByPayload<T extends Vote_v2GroupByArgs> = Prisma.PrismaPromise<
+  type GetVoteGroupByPayload<T extends VoteGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<Vote_v2GroupByOutputType, T['by']> &
+      PickEnumerable<VoteGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof Vote_v2GroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof VoteGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], Vote_v2GroupByOutputType[P]>
-            : GetScalarType<T[P], Vote_v2GroupByOutputType[P]>
+              : GetScalarType<T[P], VoteGroupByOutputType[P]>
+            : GetScalarType<T[P], VoteGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type Vote_v2Select<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type VoteSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     chatId?: boolean
     messageId?: boolean
     isUpvoted?: boolean
-    message?: boolean | Message_v2DefaultArgs<ExtArgs>
+    message?: boolean | MessageDefaultArgs<ExtArgs>
     chat?: boolean | ChatDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["vote_v2"]>
+  }, ExtArgs["result"]["vote"]>
 
-  export type Vote_v2SelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type VoteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     chatId?: boolean
     messageId?: boolean
     isUpvoted?: boolean
-    message?: boolean | Message_v2DefaultArgs<ExtArgs>
+    message?: boolean | MessageDefaultArgs<ExtArgs>
     chat?: boolean | ChatDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["vote_v2"]>
+  }, ExtArgs["result"]["vote"]>
 
-  export type Vote_v2SelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type VoteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     chatId?: boolean
     messageId?: boolean
     isUpvoted?: boolean
-    message?: boolean | Message_v2DefaultArgs<ExtArgs>
+    message?: boolean | MessageDefaultArgs<ExtArgs>
     chat?: boolean | ChatDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["vote_v2"]>
+  }, ExtArgs["result"]["vote"]>
 
-  export type Vote_v2SelectScalar = {
+  export type VoteSelectScalar = {
     chatId?: boolean
     messageId?: boolean
     isUpvoted?: boolean
   }
 
-  export type Vote_v2Omit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"chatId" | "messageId" | "isUpvoted", ExtArgs["result"]["vote_v2"]>
-  export type Vote_v2Include<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    message?: boolean | Message_v2DefaultArgs<ExtArgs>
+  export type VoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"chatId" | "messageId" | "isUpvoted", ExtArgs["result"]["vote"]>
+  export type VoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    message?: boolean | MessageDefaultArgs<ExtArgs>
     chat?: boolean | ChatDefaultArgs<ExtArgs>
   }
-  export type Vote_v2IncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    message?: boolean | Message_v2DefaultArgs<ExtArgs>
+  export type VoteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    message?: boolean | MessageDefaultArgs<ExtArgs>
     chat?: boolean | ChatDefaultArgs<ExtArgs>
   }
-  export type Vote_v2IncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    message?: boolean | Message_v2DefaultArgs<ExtArgs>
+  export type VoteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    message?: boolean | MessageDefaultArgs<ExtArgs>
     chat?: boolean | ChatDefaultArgs<ExtArgs>
   }
 
-  export type $Vote_v2Payload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Vote_v2"
+  export type $VotePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Vote"
     objects: {
-      message: Prisma.$Message_v2Payload<ExtArgs>
+      message: Prisma.$MessagePayload<ExtArgs>
       chat: Prisma.$ChatPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       chatId: string
       messageId: string
       isUpvoted: boolean
-    }, ExtArgs["result"]["vote_v2"]>
+    }, ExtArgs["result"]["vote"]>
     composites: {}
   }
 
-  type Vote_v2GetPayload<S extends boolean | null | undefined | Vote_v2DefaultArgs> = $Result.GetResult<Prisma.$Vote_v2Payload, S>
+  type VoteGetPayload<S extends boolean | null | undefined | VoteDefaultArgs> = $Result.GetResult<Prisma.$VotePayload, S>
 
-  type Vote_v2CountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<Vote_v2FindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: Vote_v2CountAggregateInputType | true
+  type VoteCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VoteFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VoteCountAggregateInputType | true
     }
 
-  export interface Vote_v2Delegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Vote_v2'], meta: { name: 'Vote_v2' } }
+  export interface VoteDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Vote'], meta: { name: 'Vote' } }
     /**
-     * Find zero or one Vote_v2 that matches the filter.
-     * @param {Vote_v2FindUniqueArgs} args - Arguments to find a Vote_v2
+     * Find zero or one Vote that matches the filter.
+     * @param {VoteFindUniqueArgs} args - Arguments to find a Vote
      * @example
-     * // Get one Vote_v2
-     * const vote_v2 = await prisma.vote_v2.findUnique({
+     * // Get one Vote
+     * const vote = await prisma.vote.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends Vote_v2FindUniqueArgs>(args: SelectSubset<T, Vote_v2FindUniqueArgs<ExtArgs>>): Prisma__Vote_v2Client<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends VoteFindUniqueArgs>(args: SelectSubset<T, VoteFindUniqueArgs<ExtArgs>>): Prisma__VoteClient<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one Vote_v2 that matches the filter or throw an error with `error.code='P2025'`
+     * Find one Vote that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {Vote_v2FindUniqueOrThrowArgs} args - Arguments to find a Vote_v2
+     * @param {VoteFindUniqueOrThrowArgs} args - Arguments to find a Vote
      * @example
-     * // Get one Vote_v2
-     * const vote_v2 = await prisma.vote_v2.findUniqueOrThrow({
+     * // Get one Vote
+     * const vote = await prisma.vote.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends Vote_v2FindUniqueOrThrowArgs>(args: SelectSubset<T, Vote_v2FindUniqueOrThrowArgs<ExtArgs>>): Prisma__Vote_v2Client<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends VoteFindUniqueOrThrowArgs>(args: SelectSubset<T, VoteFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VoteClient<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first Vote_v2 that matches the filter.
+     * Find the first Vote that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Vote_v2FindFirstArgs} args - Arguments to find a Vote_v2
+     * @param {VoteFindFirstArgs} args - Arguments to find a Vote
      * @example
-     * // Get one Vote_v2
-     * const vote_v2 = await prisma.vote_v2.findFirst({
+     * // Get one Vote
+     * const vote = await prisma.vote.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends Vote_v2FindFirstArgs>(args?: SelectSubset<T, Vote_v2FindFirstArgs<ExtArgs>>): Prisma__Vote_v2Client<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends VoteFindFirstArgs>(args?: SelectSubset<T, VoteFindFirstArgs<ExtArgs>>): Prisma__VoteClient<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first Vote_v2 that matches the filter or
+     * Find the first Vote that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Vote_v2FindFirstOrThrowArgs} args - Arguments to find a Vote_v2
+     * @param {VoteFindFirstOrThrowArgs} args - Arguments to find a Vote
      * @example
-     * // Get one Vote_v2
-     * const vote_v2 = await prisma.vote_v2.findFirstOrThrow({
+     * // Get one Vote
+     * const vote = await prisma.vote.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends Vote_v2FindFirstOrThrowArgs>(args?: SelectSubset<T, Vote_v2FindFirstOrThrowArgs<ExtArgs>>): Prisma__Vote_v2Client<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends VoteFindFirstOrThrowArgs>(args?: SelectSubset<T, VoteFindFirstOrThrowArgs<ExtArgs>>): Prisma__VoteClient<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more Vote_v2s that matches the filter.
+     * Find zero or more Votes that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Vote_v2FindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {VoteFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all Vote_v2s
-     * const vote_v2s = await prisma.vote_v2.findMany()
+     * // Get all Votes
+     * const votes = await prisma.vote.findMany()
      * 
-     * // Get first 10 Vote_v2s
-     * const vote_v2s = await prisma.vote_v2.findMany({ take: 10 })
+     * // Get first 10 Votes
+     * const votes = await prisma.vote.findMany({ take: 10 })
      * 
      * // Only select the `chatId`
-     * const vote_v2WithChatIdOnly = await prisma.vote_v2.findMany({ select: { chatId: true } })
+     * const voteWithChatIdOnly = await prisma.vote.findMany({ select: { chatId: true } })
      * 
      */
-    findMany<T extends Vote_v2FindManyArgs>(args?: SelectSubset<T, Vote_v2FindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends VoteFindManyArgs>(args?: SelectSubset<T, VoteFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a Vote_v2.
-     * @param {Vote_v2CreateArgs} args - Arguments to create a Vote_v2.
+     * Create a Vote.
+     * @param {VoteCreateArgs} args - Arguments to create a Vote.
      * @example
-     * // Create one Vote_v2
-     * const Vote_v2 = await prisma.vote_v2.create({
+     * // Create one Vote
+     * const Vote = await prisma.vote.create({
      *   data: {
-     *     // ... data to create a Vote_v2
+     *     // ... data to create a Vote
      *   }
      * })
      * 
      */
-    create<T extends Vote_v2CreateArgs>(args: SelectSubset<T, Vote_v2CreateArgs<ExtArgs>>): Prisma__Vote_v2Client<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends VoteCreateArgs>(args: SelectSubset<T, VoteCreateArgs<ExtArgs>>): Prisma__VoteClient<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many Vote_v2s.
-     * @param {Vote_v2CreateManyArgs} args - Arguments to create many Vote_v2s.
+     * Create many Votes.
+     * @param {VoteCreateManyArgs} args - Arguments to create many Votes.
      * @example
-     * // Create many Vote_v2s
-     * const vote_v2 = await prisma.vote_v2.createMany({
+     * // Create many Votes
+     * const vote = await prisma.vote.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *     
      */
-    createMany<T extends Vote_v2CreateManyArgs>(args?: SelectSubset<T, Vote_v2CreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends VoteCreateManyArgs>(args?: SelectSubset<T, VoteCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many Vote_v2s and returns the data saved in the database.
-     * @param {Vote_v2CreateManyAndReturnArgs} args - Arguments to create many Vote_v2s.
+     * Create many Votes and returns the data saved in the database.
+     * @param {VoteCreateManyAndReturnArgs} args - Arguments to create many Votes.
      * @example
-     * // Create many Vote_v2s
-     * const vote_v2 = await prisma.vote_v2.createManyAndReturn({
+     * // Create many Votes
+     * const vote = await prisma.vote.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      * 
-     * // Create many Vote_v2s and only return the `chatId`
-     * const vote_v2WithChatIdOnly = await prisma.vote_v2.createManyAndReturn({
+     * // Create many Votes and only return the `chatId`
+     * const voteWithChatIdOnly = await prisma.vote.createManyAndReturn({
      *   select: { chatId: true },
      *   data: [
      *     // ... provide data here
@@ -7943,28 +9092,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends Vote_v2CreateManyAndReturnArgs>(args?: SelectSubset<T, Vote_v2CreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends VoteCreateManyAndReturnArgs>(args?: SelectSubset<T, VoteCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a Vote_v2.
-     * @param {Vote_v2DeleteArgs} args - Arguments to delete one Vote_v2.
+     * Delete a Vote.
+     * @param {VoteDeleteArgs} args - Arguments to delete one Vote.
      * @example
-     * // Delete one Vote_v2
-     * const Vote_v2 = await prisma.vote_v2.delete({
+     * // Delete one Vote
+     * const Vote = await prisma.vote.delete({
      *   where: {
-     *     // ... filter to delete one Vote_v2
+     *     // ... filter to delete one Vote
      *   }
      * })
      * 
      */
-    delete<T extends Vote_v2DeleteArgs>(args: SelectSubset<T, Vote_v2DeleteArgs<ExtArgs>>): Prisma__Vote_v2Client<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends VoteDeleteArgs>(args: SelectSubset<T, VoteDeleteArgs<ExtArgs>>): Prisma__VoteClient<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one Vote_v2.
-     * @param {Vote_v2UpdateArgs} args - Arguments to update one Vote_v2.
+     * Update one Vote.
+     * @param {VoteUpdateArgs} args - Arguments to update one Vote.
      * @example
-     * // Update one Vote_v2
-     * const vote_v2 = await prisma.vote_v2.update({
+     * // Update one Vote
+     * const vote = await prisma.vote.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -7974,30 +9123,30 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends Vote_v2UpdateArgs>(args: SelectSubset<T, Vote_v2UpdateArgs<ExtArgs>>): Prisma__Vote_v2Client<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends VoteUpdateArgs>(args: SelectSubset<T, VoteUpdateArgs<ExtArgs>>): Prisma__VoteClient<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more Vote_v2s.
-     * @param {Vote_v2DeleteManyArgs} args - Arguments to filter Vote_v2s to delete.
+     * Delete zero or more Votes.
+     * @param {VoteDeleteManyArgs} args - Arguments to filter Votes to delete.
      * @example
-     * // Delete a few Vote_v2s
-     * const { count } = await prisma.vote_v2.deleteMany({
+     * // Delete a few Votes
+     * const { count } = await prisma.vote.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      * 
      */
-    deleteMany<T extends Vote_v2DeleteManyArgs>(args?: SelectSubset<T, Vote_v2DeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends VoteDeleteManyArgs>(args?: SelectSubset<T, VoteDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Vote_v2s.
+     * Update zero or more Votes.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Vote_v2UpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {VoteUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many Vote_v2s
-     * const vote_v2 = await prisma.vote_v2.updateMany({
+     * // Update many Votes
+     * const vote = await prisma.vote.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -8007,14 +9156,14 @@ export namespace Prisma {
      * })
      * 
      */
-    updateMany<T extends Vote_v2UpdateManyArgs>(args: SelectSubset<T, Vote_v2UpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends VoteUpdateManyArgs>(args: SelectSubset<T, VoteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Vote_v2s and returns the data updated in the database.
-     * @param {Vote_v2UpdateManyAndReturnArgs} args - Arguments to update many Vote_v2s.
+     * Update zero or more Votes and returns the data updated in the database.
+     * @param {VoteUpdateManyAndReturnArgs} args - Arguments to update many Votes.
      * @example
-     * // Update many Vote_v2s
-     * const vote_v2 = await prisma.vote_v2.updateManyAndReturn({
+     * // Update many Votes
+     * const vote = await prisma.vote.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -8023,8 +9172,8 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more Vote_v2s and only return the `chatId`
-     * const vote_v2WithChatIdOnly = await prisma.vote_v2.updateManyAndReturn({
+     * // Update zero or more Votes and only return the `chatId`
+     * const voteWithChatIdOnly = await prisma.vote.updateManyAndReturn({
      *   select: { chatId: true },
      *   where: {
      *     // ... provide filter here
@@ -8037,56 +9186,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    updateManyAndReturn<T extends Vote_v2UpdateManyAndReturnArgs>(args: SelectSubset<T, Vote_v2UpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends VoteUpdateManyAndReturnArgs>(args: SelectSubset<T, VoteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one Vote_v2.
-     * @param {Vote_v2UpsertArgs} args - Arguments to update or create a Vote_v2.
+     * Create or update one Vote.
+     * @param {VoteUpsertArgs} args - Arguments to update or create a Vote.
      * @example
-     * // Update or create a Vote_v2
-     * const vote_v2 = await prisma.vote_v2.upsert({
+     * // Update or create a Vote
+     * const vote = await prisma.vote.upsert({
      *   create: {
-     *     // ... data to create a Vote_v2
+     *     // ... data to create a Vote
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the Vote_v2 we want to update
+     *     // ... the filter for the Vote we want to update
      *   }
      * })
      */
-    upsert<T extends Vote_v2UpsertArgs>(args: SelectSubset<T, Vote_v2UpsertArgs<ExtArgs>>): Prisma__Vote_v2Client<$Result.GetResult<Prisma.$Vote_v2Payload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends VoteUpsertArgs>(args: SelectSubset<T, VoteUpsertArgs<ExtArgs>>): Prisma__VoteClient<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of Vote_v2s.
+     * Count the number of Votes.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Vote_v2CountArgs} args - Arguments to filter Vote_v2s to count.
+     * @param {VoteCountArgs} args - Arguments to filter Votes to count.
      * @example
-     * // Count the number of Vote_v2s
-     * const count = await prisma.vote_v2.count({
+     * // Count the number of Votes
+     * const count = await prisma.vote.count({
      *   where: {
-     *     // ... the filter for the Vote_v2s we want to count
+     *     // ... the filter for the Votes we want to count
      *   }
      * })
     **/
-    count<T extends Vote_v2CountArgs>(
-      args?: Subset<T, Vote_v2CountArgs>,
+    count<T extends VoteCountArgs>(
+      args?: Subset<T, VoteCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], Vote_v2CountAggregateOutputType>
+          : GetScalarType<T['select'], VoteCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a Vote_v2.
+     * Allows you to perform aggregations operations on a Vote.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Vote_v2AggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {VoteAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -8106,13 +9255,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends Vote_v2AggregateArgs>(args: Subset<T, Vote_v2AggregateArgs>): Prisma.PrismaPromise<GetVote_v2AggregateType<T>>
+    aggregate<T extends VoteAggregateArgs>(args: Subset<T, VoteAggregateArgs>): Prisma.PrismaPromise<GetVoteAggregateType<T>>
 
     /**
-     * Group by Vote_v2.
+     * Group by Vote.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {Vote_v2GroupByArgs} args - Group by arguments.
+     * @param {VoteGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -8127,14 +9276,14 @@ export namespace Prisma {
      * 
     **/
     groupBy<
-      T extends Vote_v2GroupByArgs,
+      T extends VoteGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: Vote_v2GroupByArgs['orderBy'] }
-        : { orderBy?: Vote_v2GroupByArgs['orderBy'] },
+        ? { orderBy: VoteGroupByArgs['orderBy'] }
+        : { orderBy?: VoteGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -8183,22 +9332,22 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, Vote_v2GroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVote_v2GroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, VoteGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVoteGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the Vote_v2 model
+   * Fields of the Vote model
    */
-  readonly fields: Vote_v2FieldRefs;
+  readonly fields: VoteFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for Vote_v2.
+   * The delegate class that acts as a "Promise-like" for Vote.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__Vote_v2Client<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__VoteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    message<T extends Message_v2DefaultArgs<ExtArgs> = {}>(args?: Subset<T, Message_v2DefaultArgs<ExtArgs>>): Prisma__Message_v2Client<$Result.GetResult<Prisma.$Message_v2Payload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    message<T extends MessageDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MessageDefaultArgs<ExtArgs>>): Prisma__MessageClient<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     chat<T extends ChatDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ChatDefaultArgs<ExtArgs>>): Prisma__ChatClient<$Result.GetResult<Prisma.$ChatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -8226,423 +9375,423 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the Vote_v2 model
+   * Fields of the Vote model
    */
-  interface Vote_v2FieldRefs {
-    readonly chatId: FieldRef<"Vote_v2", 'String'>
-    readonly messageId: FieldRef<"Vote_v2", 'String'>
-    readonly isUpvoted: FieldRef<"Vote_v2", 'Boolean'>
+  interface VoteFieldRefs {
+    readonly chatId: FieldRef<"Vote", 'String'>
+    readonly messageId: FieldRef<"Vote", 'String'>
+    readonly isUpvoted: FieldRef<"Vote", 'Boolean'>
   }
     
 
   // Custom InputTypes
   /**
-   * Vote_v2 findUnique
+   * Vote findUnique
    */
-  export type Vote_v2FindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
     /**
-     * Filter, which Vote_v2 to fetch.
+     * Filter, which Vote to fetch.
      */
-    where: Vote_v2WhereUniqueInput
+    where: VoteWhereUniqueInput
   }
 
   /**
-   * Vote_v2 findUniqueOrThrow
+   * Vote findUniqueOrThrow
    */
-  export type Vote_v2FindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
     /**
-     * Filter, which Vote_v2 to fetch.
+     * Filter, which Vote to fetch.
      */
-    where: Vote_v2WhereUniqueInput
+    where: VoteWhereUniqueInput
   }
 
   /**
-   * Vote_v2 findFirst
+   * Vote findFirst
    */
-  export type Vote_v2FindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
     /**
-     * Filter, which Vote_v2 to fetch.
+     * Filter, which Vote to fetch.
      */
-    where?: Vote_v2WhereInput
+    where?: VoteWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Vote_v2s to fetch.
+     * Determine the order of Votes to fetch.
      */
-    orderBy?: Vote_v2OrderByWithRelationInput | Vote_v2OrderByWithRelationInput[]
+    orderBy?: VoteOrderByWithRelationInput | VoteOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for Vote_v2s.
+     * Sets the position for searching for Votes.
      */
-    cursor?: Vote_v2WhereUniqueInput
+    cursor?: VoteWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Vote_v2s from the position of the cursor.
+     * Take `±n` Votes from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Vote_v2s.
+     * Skip the first `n` Votes.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of Vote_v2s.
+     * Filter by unique combinations of Votes.
      */
-    distinct?: Vote_v2ScalarFieldEnum | Vote_v2ScalarFieldEnum[]
+    distinct?: VoteScalarFieldEnum | VoteScalarFieldEnum[]
   }
 
   /**
-   * Vote_v2 findFirstOrThrow
+   * Vote findFirstOrThrow
    */
-  export type Vote_v2FindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
     /**
-     * Filter, which Vote_v2 to fetch.
+     * Filter, which Vote to fetch.
      */
-    where?: Vote_v2WhereInput
+    where?: VoteWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Vote_v2s to fetch.
+     * Determine the order of Votes to fetch.
      */
-    orderBy?: Vote_v2OrderByWithRelationInput | Vote_v2OrderByWithRelationInput[]
+    orderBy?: VoteOrderByWithRelationInput | VoteOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for searching for Vote_v2s.
+     * Sets the position for searching for Votes.
      */
-    cursor?: Vote_v2WhereUniqueInput
+    cursor?: VoteWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Vote_v2s from the position of the cursor.
+     * Take `±n` Votes from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Vote_v2s.
+     * Skip the first `n` Votes.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      * 
-     * Filter by unique combinations of Vote_v2s.
+     * Filter by unique combinations of Votes.
      */
-    distinct?: Vote_v2ScalarFieldEnum | Vote_v2ScalarFieldEnum[]
+    distinct?: VoteScalarFieldEnum | VoteScalarFieldEnum[]
   }
 
   /**
-   * Vote_v2 findMany
+   * Vote findMany
    */
-  export type Vote_v2FindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
     /**
-     * Filter, which Vote_v2s to fetch.
+     * Filter, which Votes to fetch.
      */
-    where?: Vote_v2WhereInput
+    where?: VoteWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      * 
-     * Determine the order of Vote_v2s to fetch.
+     * Determine the order of Votes to fetch.
      */
-    orderBy?: Vote_v2OrderByWithRelationInput | Vote_v2OrderByWithRelationInput[]
+    orderBy?: VoteOrderByWithRelationInput | VoteOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      * 
-     * Sets the position for listing Vote_v2s.
+     * Sets the position for listing Votes.
      */
-    cursor?: Vote_v2WhereUniqueInput
+    cursor?: VoteWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Take `±n` Vote_v2s from the position of the cursor.
+     * Take `±n` Votes from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      * 
-     * Skip the first `n` Vote_v2s.
+     * Skip the first `n` Votes.
      */
     skip?: number
-    distinct?: Vote_v2ScalarFieldEnum | Vote_v2ScalarFieldEnum[]
+    distinct?: VoteScalarFieldEnum | VoteScalarFieldEnum[]
   }
 
   /**
-   * Vote_v2 create
+   * Vote create
    */
-  export type Vote_v2CreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
     /**
-     * The data needed to create a Vote_v2.
+     * The data needed to create a Vote.
      */
-    data: XOR<Vote_v2CreateInput, Vote_v2UncheckedCreateInput>
+    data: XOR<VoteCreateInput, VoteUncheckedCreateInput>
   }
 
   /**
-   * Vote_v2 createMany
+   * Vote createMany
    */
-  export type Vote_v2CreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many Vote_v2s.
+     * The data used to create many Votes.
      */
-    data: Vote_v2CreateManyInput | Vote_v2CreateManyInput[]
+    data: VoteCreateManyInput | VoteCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * Vote_v2 createManyAndReturn
+   * Vote createManyAndReturn
    */
-  export type Vote_v2CreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2SelectCreateManyAndReturn<ExtArgs> | null
+    select?: VoteSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
-     * The data used to create many Vote_v2s.
+     * The data used to create many Votes.
      */
-    data: Vote_v2CreateManyInput | Vote_v2CreateManyInput[]
+    data: VoteCreateManyInput | VoteCreateManyInput[]
     skipDuplicates?: boolean
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2IncludeCreateManyAndReturn<ExtArgs> | null
+    include?: VoteIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * Vote_v2 update
+   * Vote update
    */
-  export type Vote_v2UpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
     /**
-     * The data needed to update a Vote_v2.
+     * The data needed to update a Vote.
      */
-    data: XOR<Vote_v2UpdateInput, Vote_v2UncheckedUpdateInput>
+    data: XOR<VoteUpdateInput, VoteUncheckedUpdateInput>
     /**
-     * Choose, which Vote_v2 to update.
+     * Choose, which Vote to update.
      */
-    where: Vote_v2WhereUniqueInput
+    where: VoteWhereUniqueInput
   }
 
   /**
-   * Vote_v2 updateMany
+   * Vote updateMany
    */
-  export type Vote_v2UpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update Vote_v2s.
+     * The data used to update Votes.
      */
-    data: XOR<Vote_v2UpdateManyMutationInput, Vote_v2UncheckedUpdateManyInput>
+    data: XOR<VoteUpdateManyMutationInput, VoteUncheckedUpdateManyInput>
     /**
-     * Filter which Vote_v2s to update
+     * Filter which Votes to update
      */
-    where?: Vote_v2WhereInput
+    where?: VoteWhereInput
     /**
-     * Limit how many Vote_v2s to update.
+     * Limit how many Votes to update.
      */
     limit?: number
   }
 
   /**
-   * Vote_v2 updateManyAndReturn
+   * Vote updateManyAndReturn
    */
-  export type Vote_v2UpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2SelectUpdateManyAndReturn<ExtArgs> | null
+    select?: VoteSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
-     * The data used to update Vote_v2s.
+     * The data used to update Votes.
      */
-    data: XOR<Vote_v2UpdateManyMutationInput, Vote_v2UncheckedUpdateManyInput>
+    data: XOR<VoteUpdateManyMutationInput, VoteUncheckedUpdateManyInput>
     /**
-     * Filter which Vote_v2s to update
+     * Filter which Votes to update
      */
-    where?: Vote_v2WhereInput
+    where?: VoteWhereInput
     /**
-     * Limit how many Vote_v2s to update.
+     * Limit how many Votes to update.
      */
     limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2IncludeUpdateManyAndReturn<ExtArgs> | null
+    include?: VoteIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * Vote_v2 upsert
+   * Vote upsert
    */
-  export type Vote_v2UpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
     /**
-     * The filter to search for the Vote_v2 to update in case it exists.
+     * The filter to search for the Vote to update in case it exists.
      */
-    where: Vote_v2WhereUniqueInput
+    where: VoteWhereUniqueInput
     /**
-     * In case the Vote_v2 found by the `where` argument doesn't exist, create a new Vote_v2 with this data.
+     * In case the Vote found by the `where` argument doesn't exist, create a new Vote with this data.
      */
-    create: XOR<Vote_v2CreateInput, Vote_v2UncheckedCreateInput>
+    create: XOR<VoteCreateInput, VoteUncheckedCreateInput>
     /**
-     * In case the Vote_v2 was found with the provided `where` argument, update it with this data.
+     * In case the Vote was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<Vote_v2UpdateInput, Vote_v2UncheckedUpdateInput>
+    update: XOR<VoteUpdateInput, VoteUncheckedUpdateInput>
   }
 
   /**
-   * Vote_v2 delete
+   * Vote delete
    */
-  export type Vote_v2DeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
     /**
-     * Filter which Vote_v2 to delete.
+     * Filter which Vote to delete.
      */
-    where: Vote_v2WhereUniqueInput
+    where: VoteWhereUniqueInput
   }
 
   /**
-   * Vote_v2 deleteMany
+   * Vote deleteMany
    */
-  export type Vote_v2DeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which Vote_v2s to delete
+     * Filter which Votes to delete
      */
-    where?: Vote_v2WhereInput
+    where?: VoteWhereInput
     /**
-     * Limit how many Vote_v2s to delete.
+     * Limit how many Votes to delete.
      */
     limit?: number
   }
 
   /**
-   * Vote_v2 without action
+   * Vote without action
    */
-  export type Vote_v2DefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type VoteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Vote_v2
+     * Select specific fields to fetch from the Vote
      */
-    select?: Vote_v2Select<ExtArgs> | null
+    select?: VoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Vote_v2
+     * Omit specific fields from the Vote
      */
-    omit?: Vote_v2Omit<ExtArgs> | null
+    omit?: VoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Vote_v2Include<ExtArgs> | null
+    include?: VoteInclude<ExtArgs> | null
   }
 
 
@@ -15254,7 +16403,9 @@ export namespace Prisma {
   export const TierScalarFieldEnum: {
     id: 'id',
     modelIds: 'modelIds',
-    maxMessagesPerDay: 'maxMessagesPerDay'
+    bucketCapacity: 'bucketCapacity',
+    bucketRefillAmount: 'bucketRefillAmount',
+    bucketRefillIntervalSeconds: 'bucketRefillIntervalSeconds'
   };
 
   export type TierScalarFieldEnum = (typeof TierScalarFieldEnum)[keyof typeof TierScalarFieldEnum]
@@ -15266,6 +16417,15 @@ export namespace Prisma {
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+  export const UserRateLimitScalarFieldEnum: {
+    userId: 'userId',
+    tokens: 'tokens',
+    lastRefill: 'lastRefill'
+  };
+
+  export type UserRateLimitScalarFieldEnum = (typeof UserRateLimitScalarFieldEnum)[keyof typeof UserRateLimitScalarFieldEnum]
 
 
   export const ChatScalarFieldEnum: {
@@ -15283,30 +16443,25 @@ export namespace Prisma {
   export type ChatScalarFieldEnum = (typeof ChatScalarFieldEnum)[keyof typeof ChatScalarFieldEnum]
 
 
-  export const Message_v2ScalarFieldEnum: {
+  export const MessageScalarFieldEnum: {
     id: 'id',
     chatId: 'chatId',
     role: 'role',
     parts: 'parts',
     attachments: 'attachments',
-    createdAt: 'createdAt',
-    baseId: 'baseId',
-    previousVersionId: 'previousVersionId',
-    supersededById: 'supersededById',
-    regenerationGroupId: 'regenerationGroupId',
-    parentBaseId: 'parentBaseId'
+    createdAt: 'createdAt'
   };
 
-  export type Message_v2ScalarFieldEnum = (typeof Message_v2ScalarFieldEnum)[keyof typeof Message_v2ScalarFieldEnum]
+  export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
 
 
-  export const Vote_v2ScalarFieldEnum: {
+  export const VoteScalarFieldEnum: {
     chatId: 'chatId',
     messageId: 'messageId',
     isUpvoted: 'isUpvoted'
   };
 
-  export type Vote_v2ScalarFieldEnum = (typeof Vote_v2ScalarFieldEnum)[keyof typeof Vote_v2ScalarFieldEnum]
+  export type VoteScalarFieldEnum = (typeof VoteScalarFieldEnum)[keyof typeof VoteScalarFieldEnum]
 
 
   export const DocumentScalarFieldEnum: {
@@ -15558,13 +16713,17 @@ export namespace Prisma {
     NOT?: TierWhereInput | TierWhereInput[]
     id?: StringFilter<"Tier"> | string
     modelIds?: StringNullableListFilter<"Tier">
-    maxMessagesPerDay?: IntFilter<"Tier"> | number
+    bucketCapacity?: IntFilter<"Tier"> | number
+    bucketRefillAmount?: IntFilter<"Tier"> | number
+    bucketRefillIntervalSeconds?: IntFilter<"Tier"> | number
   }
 
   export type TierOrderByWithRelationInput = {
     id?: SortOrder
     modelIds?: SortOrder
-    maxMessagesPerDay?: SortOrder
+    bucketCapacity?: SortOrder
+    bucketRefillAmount?: SortOrder
+    bucketRefillIntervalSeconds?: SortOrder
   }
 
   export type TierWhereUniqueInput = Prisma.AtLeast<{
@@ -15573,13 +16732,17 @@ export namespace Prisma {
     OR?: TierWhereInput[]
     NOT?: TierWhereInput | TierWhereInput[]
     modelIds?: StringNullableListFilter<"Tier">
-    maxMessagesPerDay?: IntFilter<"Tier"> | number
+    bucketCapacity?: IntFilter<"Tier"> | number
+    bucketRefillAmount?: IntFilter<"Tier"> | number
+    bucketRefillIntervalSeconds?: IntFilter<"Tier"> | number
   }, "id">
 
   export type TierOrderByWithAggregationInput = {
     id?: SortOrder
     modelIds?: SortOrder
-    maxMessagesPerDay?: SortOrder
+    bucketCapacity?: SortOrder
+    bucketRefillAmount?: SortOrder
+    bucketRefillIntervalSeconds?: SortOrder
     _count?: TierCountOrderByAggregateInput
     _avg?: TierAvgOrderByAggregateInput
     _max?: TierMaxOrderByAggregateInput
@@ -15593,7 +16756,9 @@ export namespace Prisma {
     NOT?: TierScalarWhereWithAggregatesInput | TierScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Tier"> | string
     modelIds?: StringNullableListFilter<"Tier">
-    maxMessagesPerDay?: IntWithAggregatesFilter<"Tier"> | number
+    bucketCapacity?: IntWithAggregatesFilter<"Tier"> | number
+    bucketRefillAmount?: IntWithAggregatesFilter<"Tier"> | number
+    bucketRefillIntervalSeconds?: IntWithAggregatesFilter<"Tier"> | number
   }
 
   export type UserWhereInput = {
@@ -15607,6 +16772,7 @@ export namespace Prisma {
     suggestions?: SuggestionListRelationFilter
     archiveEntries?: ArchiveEntryListRelationFilter
     pinnedArchiveEntries?: ChatPinnedArchiveEntryListRelationFilter
+    rateLimit?: XOR<UserRateLimitNullableScalarRelationFilter, UserRateLimitWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -15617,6 +16783,7 @@ export namespace Prisma {
     suggestions?: SuggestionOrderByRelationAggregateInput
     archiveEntries?: ArchiveEntryOrderByRelationAggregateInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryOrderByRelationAggregateInput
+    rateLimit?: UserRateLimitOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -15630,6 +16797,7 @@ export namespace Prisma {
     suggestions?: SuggestionListRelationFilter
     archiveEntries?: ArchiveEntryListRelationFilter
     pinnedArchiveEntries?: ChatPinnedArchiveEntryListRelationFilter
+    rateLimit?: XOR<UserRateLimitNullableScalarRelationFilter, UserRateLimitWhereInput> | null
   }, "id">
 
   export type UserOrderByWithAggregationInput = {
@@ -15648,6 +16816,53 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"User"> | string
   }
 
+  export type UserRateLimitWhereInput = {
+    AND?: UserRateLimitWhereInput | UserRateLimitWhereInput[]
+    OR?: UserRateLimitWhereInput[]
+    NOT?: UserRateLimitWhereInput | UserRateLimitWhereInput[]
+    userId?: StringFilter<"UserRateLimit"> | string
+    tokens?: IntFilter<"UserRateLimit"> | number
+    lastRefill?: DateTimeFilter<"UserRateLimit"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type UserRateLimitOrderByWithRelationInput = {
+    userId?: SortOrder
+    tokens?: SortOrder
+    lastRefill?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type UserRateLimitWhereUniqueInput = Prisma.AtLeast<{
+    userId?: string
+    AND?: UserRateLimitWhereInput | UserRateLimitWhereInput[]
+    OR?: UserRateLimitWhereInput[]
+    NOT?: UserRateLimitWhereInput | UserRateLimitWhereInput[]
+    tokens?: IntFilter<"UserRateLimit"> | number
+    lastRefill?: DateTimeFilter<"UserRateLimit"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "userId">
+
+  export type UserRateLimitOrderByWithAggregationInput = {
+    userId?: SortOrder
+    tokens?: SortOrder
+    lastRefill?: SortOrder
+    _count?: UserRateLimitCountOrderByAggregateInput
+    _avg?: UserRateLimitAvgOrderByAggregateInput
+    _max?: UserRateLimitMaxOrderByAggregateInput
+    _min?: UserRateLimitMinOrderByAggregateInput
+    _sum?: UserRateLimitSumOrderByAggregateInput
+  }
+
+  export type UserRateLimitScalarWhereWithAggregatesInput = {
+    AND?: UserRateLimitScalarWhereWithAggregatesInput | UserRateLimitScalarWhereWithAggregatesInput[]
+    OR?: UserRateLimitScalarWhereWithAggregatesInput[]
+    NOT?: UserRateLimitScalarWhereWithAggregatesInput | UserRateLimitScalarWhereWithAggregatesInput[]
+    userId?: StringWithAggregatesFilter<"UserRateLimit"> | string
+    tokens?: IntWithAggregatesFilter<"UserRateLimit"> | number
+    lastRefill?: DateTimeWithAggregatesFilter<"UserRateLimit"> | Date | string
+  }
+
   export type ChatWhereInput = {
     AND?: ChatWhereInput | ChatWhereInput[]
     OR?: ChatWhereInput[]
@@ -15662,8 +16877,8 @@ export namespace Prisma {
     forkedFromMessageId?: UuidNullableFilter<"Chat"> | string | null
     forkDepth?: IntFilter<"Chat"> | number
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    messages?: Message_v2ListRelationFilter
-    votes?: Vote_v2ListRelationFilter
+    messages?: MessageListRelationFilter
+    votes?: VoteListRelationFilter
     streams?: StreamListRelationFilter
     pinnedArchiveEntries?: ChatPinnedArchiveEntryListRelationFilter
   }
@@ -15679,8 +16894,8 @@ export namespace Prisma {
     forkedFromMessageId?: SortOrderInput | SortOrder
     forkDepth?: SortOrder
     user?: UserOrderByWithRelationInput
-    messages?: Message_v2OrderByRelationAggregateInput
-    votes?: Vote_v2OrderByRelationAggregateInput
+    messages?: MessageOrderByRelationAggregateInput
+    votes?: VoteOrderByRelationAggregateInput
     streams?: StreamOrderByRelationAggregateInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryOrderByRelationAggregateInput
   }
@@ -15699,8 +16914,8 @@ export namespace Prisma {
     forkedFromMessageId?: UuidNullableFilter<"Chat"> | string | null
     forkDepth?: IntFilter<"Chat"> | number
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    messages?: Message_v2ListRelationFilter
-    votes?: Vote_v2ListRelationFilter
+    messages?: MessageListRelationFilter
+    votes?: VoteListRelationFilter
     streams?: StreamListRelationFilter
     pinnedArchiveEntries?: ChatPinnedArchiveEntryListRelationFilter
   }, "id">
@@ -15737,141 +16952,116 @@ export namespace Prisma {
     forkDepth?: IntWithAggregatesFilter<"Chat"> | number
   }
 
-  export type Message_v2WhereInput = {
-    AND?: Message_v2WhereInput | Message_v2WhereInput[]
-    OR?: Message_v2WhereInput[]
-    NOT?: Message_v2WhereInput | Message_v2WhereInput[]
-    id?: UuidFilter<"Message_v2"> | string
-    chatId?: UuidFilter<"Message_v2"> | string
-    role?: StringFilter<"Message_v2"> | string
-    parts?: JsonFilter<"Message_v2">
-    attachments?: JsonFilter<"Message_v2">
-    createdAt?: DateTimeFilter<"Message_v2"> | Date | string
-    baseId?: UuidNullableFilter<"Message_v2"> | string | null
-    previousVersionId?: UuidNullableFilter<"Message_v2"> | string | null
-    supersededById?: UuidNullableFilter<"Message_v2"> | string | null
-    regenerationGroupId?: UuidNullableFilter<"Message_v2"> | string | null
-    parentBaseId?: UuidNullableFilter<"Message_v2"> | string | null
+  export type MessageWhereInput = {
+    AND?: MessageWhereInput | MessageWhereInput[]
+    OR?: MessageWhereInput[]
+    NOT?: MessageWhereInput | MessageWhereInput[]
+    id?: UuidFilter<"Message"> | string
+    chatId?: UuidFilter<"Message"> | string
+    role?: StringFilter<"Message"> | string
+    parts?: JsonFilter<"Message">
+    attachments?: JsonFilter<"Message">
+    createdAt?: DateTimeFilter<"Message"> | Date | string
     chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
-    votes?: Vote_v2ListRelationFilter
+    votes?: VoteListRelationFilter
   }
 
-  export type Message_v2OrderByWithRelationInput = {
+  export type MessageOrderByWithRelationInput = {
     id?: SortOrder
     chatId?: SortOrder
     role?: SortOrder
     parts?: SortOrder
     attachments?: SortOrder
     createdAt?: SortOrder
-    baseId?: SortOrderInput | SortOrder
-    previousVersionId?: SortOrderInput | SortOrder
-    supersededById?: SortOrderInput | SortOrder
-    regenerationGroupId?: SortOrderInput | SortOrder
-    parentBaseId?: SortOrderInput | SortOrder
     chat?: ChatOrderByWithRelationInput
-    votes?: Vote_v2OrderByRelationAggregateInput
+    votes?: VoteOrderByRelationAggregateInput
   }
 
-  export type Message_v2WhereUniqueInput = Prisma.AtLeast<{
+  export type MessageWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    AND?: Message_v2WhereInput | Message_v2WhereInput[]
-    OR?: Message_v2WhereInput[]
-    NOT?: Message_v2WhereInput | Message_v2WhereInput[]
-    chatId?: UuidFilter<"Message_v2"> | string
-    role?: StringFilter<"Message_v2"> | string
-    parts?: JsonFilter<"Message_v2">
-    attachments?: JsonFilter<"Message_v2">
-    createdAt?: DateTimeFilter<"Message_v2"> | Date | string
-    baseId?: UuidNullableFilter<"Message_v2"> | string | null
-    previousVersionId?: UuidNullableFilter<"Message_v2"> | string | null
-    supersededById?: UuidNullableFilter<"Message_v2"> | string | null
-    regenerationGroupId?: UuidNullableFilter<"Message_v2"> | string | null
-    parentBaseId?: UuidNullableFilter<"Message_v2"> | string | null
+    AND?: MessageWhereInput | MessageWhereInput[]
+    OR?: MessageWhereInput[]
+    NOT?: MessageWhereInput | MessageWhereInput[]
+    chatId?: UuidFilter<"Message"> | string
+    role?: StringFilter<"Message"> | string
+    parts?: JsonFilter<"Message">
+    attachments?: JsonFilter<"Message">
+    createdAt?: DateTimeFilter<"Message"> | Date | string
     chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
-    votes?: Vote_v2ListRelationFilter
+    votes?: VoteListRelationFilter
   }, "id">
 
-  export type Message_v2OrderByWithAggregationInput = {
+  export type MessageOrderByWithAggregationInput = {
     id?: SortOrder
     chatId?: SortOrder
     role?: SortOrder
     parts?: SortOrder
     attachments?: SortOrder
     createdAt?: SortOrder
-    baseId?: SortOrderInput | SortOrder
-    previousVersionId?: SortOrderInput | SortOrder
-    supersededById?: SortOrderInput | SortOrder
-    regenerationGroupId?: SortOrderInput | SortOrder
-    parentBaseId?: SortOrderInput | SortOrder
-    _count?: Message_v2CountOrderByAggregateInput
-    _max?: Message_v2MaxOrderByAggregateInput
-    _min?: Message_v2MinOrderByAggregateInput
+    _count?: MessageCountOrderByAggregateInput
+    _max?: MessageMaxOrderByAggregateInput
+    _min?: MessageMinOrderByAggregateInput
   }
 
-  export type Message_v2ScalarWhereWithAggregatesInput = {
-    AND?: Message_v2ScalarWhereWithAggregatesInput | Message_v2ScalarWhereWithAggregatesInput[]
-    OR?: Message_v2ScalarWhereWithAggregatesInput[]
-    NOT?: Message_v2ScalarWhereWithAggregatesInput | Message_v2ScalarWhereWithAggregatesInput[]
-    id?: UuidWithAggregatesFilter<"Message_v2"> | string
-    chatId?: UuidWithAggregatesFilter<"Message_v2"> | string
-    role?: StringWithAggregatesFilter<"Message_v2"> | string
-    parts?: JsonWithAggregatesFilter<"Message_v2">
-    attachments?: JsonWithAggregatesFilter<"Message_v2">
-    createdAt?: DateTimeWithAggregatesFilter<"Message_v2"> | Date | string
-    baseId?: UuidNullableWithAggregatesFilter<"Message_v2"> | string | null
-    previousVersionId?: UuidNullableWithAggregatesFilter<"Message_v2"> | string | null
-    supersededById?: UuidNullableWithAggregatesFilter<"Message_v2"> | string | null
-    regenerationGroupId?: UuidNullableWithAggregatesFilter<"Message_v2"> | string | null
-    parentBaseId?: UuidNullableWithAggregatesFilter<"Message_v2"> | string | null
+  export type MessageScalarWhereWithAggregatesInput = {
+    AND?: MessageScalarWhereWithAggregatesInput | MessageScalarWhereWithAggregatesInput[]
+    OR?: MessageScalarWhereWithAggregatesInput[]
+    NOT?: MessageScalarWhereWithAggregatesInput | MessageScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"Message"> | string
+    chatId?: UuidWithAggregatesFilter<"Message"> | string
+    role?: StringWithAggregatesFilter<"Message"> | string
+    parts?: JsonWithAggregatesFilter<"Message">
+    attachments?: JsonWithAggregatesFilter<"Message">
+    createdAt?: DateTimeWithAggregatesFilter<"Message"> | Date | string
   }
 
-  export type Vote_v2WhereInput = {
-    AND?: Vote_v2WhereInput | Vote_v2WhereInput[]
-    OR?: Vote_v2WhereInput[]
-    NOT?: Vote_v2WhereInput | Vote_v2WhereInput[]
-    chatId?: UuidFilter<"Vote_v2"> | string
-    messageId?: UuidFilter<"Vote_v2"> | string
-    isUpvoted?: BoolFilter<"Vote_v2"> | boolean
-    message?: XOR<Message_v2ScalarRelationFilter, Message_v2WhereInput>
+  export type VoteWhereInput = {
+    AND?: VoteWhereInput | VoteWhereInput[]
+    OR?: VoteWhereInput[]
+    NOT?: VoteWhereInput | VoteWhereInput[]
+    chatId?: UuidFilter<"Vote"> | string
+    messageId?: UuidFilter<"Vote"> | string
+    isUpvoted?: BoolFilter<"Vote"> | boolean
+    message?: XOR<MessageScalarRelationFilter, MessageWhereInput>
     chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
   }
 
-  export type Vote_v2OrderByWithRelationInput = {
+  export type VoteOrderByWithRelationInput = {
     chatId?: SortOrder
     messageId?: SortOrder
     isUpvoted?: SortOrder
-    message?: Message_v2OrderByWithRelationInput
+    message?: MessageOrderByWithRelationInput
     chat?: ChatOrderByWithRelationInput
   }
 
-  export type Vote_v2WhereUniqueInput = Prisma.AtLeast<{
-    chatId_messageId?: Vote_v2ChatIdMessageIdCompoundUniqueInput
-    AND?: Vote_v2WhereInput | Vote_v2WhereInput[]
-    OR?: Vote_v2WhereInput[]
-    NOT?: Vote_v2WhereInput | Vote_v2WhereInput[]
-    chatId?: UuidFilter<"Vote_v2"> | string
-    messageId?: UuidFilter<"Vote_v2"> | string
-    isUpvoted?: BoolFilter<"Vote_v2"> | boolean
-    message?: XOR<Message_v2ScalarRelationFilter, Message_v2WhereInput>
+  export type VoteWhereUniqueInput = Prisma.AtLeast<{
+    chatId_messageId?: VoteChatIdMessageIdCompoundUniqueInput
+    AND?: VoteWhereInput | VoteWhereInput[]
+    OR?: VoteWhereInput[]
+    NOT?: VoteWhereInput | VoteWhereInput[]
+    chatId?: UuidFilter<"Vote"> | string
+    messageId?: UuidFilter<"Vote"> | string
+    isUpvoted?: BoolFilter<"Vote"> | boolean
+    message?: XOR<MessageScalarRelationFilter, MessageWhereInput>
     chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
   }, "chatId_messageId">
 
-  export type Vote_v2OrderByWithAggregationInput = {
+  export type VoteOrderByWithAggregationInput = {
     chatId?: SortOrder
     messageId?: SortOrder
     isUpvoted?: SortOrder
-    _count?: Vote_v2CountOrderByAggregateInput
-    _max?: Vote_v2MaxOrderByAggregateInput
-    _min?: Vote_v2MinOrderByAggregateInput
+    _count?: VoteCountOrderByAggregateInput
+    _max?: VoteMaxOrderByAggregateInput
+    _min?: VoteMinOrderByAggregateInput
   }
 
-  export type Vote_v2ScalarWhereWithAggregatesInput = {
-    AND?: Vote_v2ScalarWhereWithAggregatesInput | Vote_v2ScalarWhereWithAggregatesInput[]
-    OR?: Vote_v2ScalarWhereWithAggregatesInput[]
-    NOT?: Vote_v2ScalarWhereWithAggregatesInput | Vote_v2ScalarWhereWithAggregatesInput[]
-    chatId?: UuidWithAggregatesFilter<"Vote_v2"> | string
-    messageId?: UuidWithAggregatesFilter<"Vote_v2"> | string
-    isUpvoted?: BoolWithAggregatesFilter<"Vote_v2"> | boolean
+  export type VoteScalarWhereWithAggregatesInput = {
+    AND?: VoteScalarWhereWithAggregatesInput | VoteScalarWhereWithAggregatesInput[]
+    OR?: VoteScalarWhereWithAggregatesInput[]
+    NOT?: VoteScalarWhereWithAggregatesInput | VoteScalarWhereWithAggregatesInput[]
+    chatId?: UuidWithAggregatesFilter<"Vote"> | string
+    messageId?: UuidWithAggregatesFilter<"Vote"> | string
+    isUpvoted?: BoolWithAggregatesFilter<"Vote"> | boolean
   }
 
   export type DocumentWhereInput = {
@@ -16304,43 +17494,57 @@ export namespace Prisma {
   export type TierCreateInput = {
     id: string
     modelIds?: TierCreatemodelIdsInput | string[]
-    maxMessagesPerDay: number
+    bucketCapacity: number
+    bucketRefillAmount: number
+    bucketRefillIntervalSeconds: number
   }
 
   export type TierUncheckedCreateInput = {
     id: string
     modelIds?: TierCreatemodelIdsInput | string[]
-    maxMessagesPerDay: number
+    bucketCapacity: number
+    bucketRefillAmount: number
+    bucketRefillIntervalSeconds: number
   }
 
   export type TierUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     modelIds?: TierUpdatemodelIdsInput | string[]
-    maxMessagesPerDay?: IntFieldUpdateOperationsInput | number
+    bucketCapacity?: IntFieldUpdateOperationsInput | number
+    bucketRefillAmount?: IntFieldUpdateOperationsInput | number
+    bucketRefillIntervalSeconds?: IntFieldUpdateOperationsInput | number
   }
 
   export type TierUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     modelIds?: TierUpdatemodelIdsInput | string[]
-    maxMessagesPerDay?: IntFieldUpdateOperationsInput | number
+    bucketCapacity?: IntFieldUpdateOperationsInput | number
+    bucketRefillAmount?: IntFieldUpdateOperationsInput | number
+    bucketRefillIntervalSeconds?: IntFieldUpdateOperationsInput | number
   }
 
   export type TierCreateManyInput = {
     id: string
     modelIds?: TierCreatemodelIdsInput | string[]
-    maxMessagesPerDay: number
+    bucketCapacity: number
+    bucketRefillAmount: number
+    bucketRefillIntervalSeconds: number
   }
 
   export type TierUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     modelIds?: TierUpdatemodelIdsInput | string[]
-    maxMessagesPerDay?: IntFieldUpdateOperationsInput | number
+    bucketCapacity?: IntFieldUpdateOperationsInput | number
+    bucketRefillAmount?: IntFieldUpdateOperationsInput | number
+    bucketRefillIntervalSeconds?: IntFieldUpdateOperationsInput | number
   }
 
   export type TierUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     modelIds?: TierUpdatemodelIdsInput | string[]
-    maxMessagesPerDay?: IntFieldUpdateOperationsInput | number
+    bucketCapacity?: IntFieldUpdateOperationsInput | number
+    bucketRefillAmount?: IntFieldUpdateOperationsInput | number
+    bucketRefillIntervalSeconds?: IntFieldUpdateOperationsInput | number
   }
 
   export type UserCreateInput = {
@@ -16351,6 +17555,7 @@ export namespace Prisma {
     suggestions?: SuggestionCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -16361,6 +17566,7 @@ export namespace Prisma {
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -16371,6 +17577,7 @@ export namespace Prisma {
     suggestions?: SuggestionUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -16381,6 +17588,7 @@ export namespace Prisma {
     suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -16398,6 +17606,47 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
   }
 
+  export type UserRateLimitCreateInput = {
+    tokens: number
+    lastRefill: Date | string
+    user: UserCreateNestedOneWithoutRateLimitInput
+  }
+
+  export type UserRateLimitUncheckedCreateInput = {
+    userId: string
+    tokens: number
+    lastRefill: Date | string
+  }
+
+  export type UserRateLimitUpdateInput = {
+    tokens?: IntFieldUpdateOperationsInput | number
+    lastRefill?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutRateLimitNestedInput
+  }
+
+  export type UserRateLimitUncheckedUpdateInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    tokens?: IntFieldUpdateOperationsInput | number
+    lastRefill?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserRateLimitCreateManyInput = {
+    userId: string
+    tokens: number
+    lastRefill: Date | string
+  }
+
+  export type UserRateLimitUpdateManyMutationInput = {
+    tokens?: IntFieldUpdateOperationsInput | number
+    lastRefill?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserRateLimitUncheckedUpdateManyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    tokens?: IntFieldUpdateOperationsInput | number
+    lastRefill?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ChatCreateInput = {
     id?: string
     createdAt: Date | string
@@ -16408,8 +17657,8 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
-    messages?: Message_v2CreateNestedManyWithoutChatInput
-    votes?: Vote_v2CreateNestedManyWithoutChatInput
+    messages?: MessageCreateNestedManyWithoutChatInput
+    votes?: VoteCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
@@ -16424,8 +17673,8 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
-    messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
-    votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
+    messages?: MessageUncheckedCreateNestedManyWithoutChatInput
+    votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
@@ -16440,8 +17689,8 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
-    messages?: Message_v2UpdateManyWithoutChatNestedInput
-    votes?: Vote_v2UpdateManyWithoutChatNestedInput
+    messages?: MessageUpdateManyWithoutChatNestedInput
+    votes?: VoteUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
@@ -16456,8 +17705,8 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
-    messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
-    votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
+    votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
   }
@@ -16497,142 +17746,107 @@ export namespace Prisma {
     forkDepth?: IntFieldUpdateOperationsInput | number
   }
 
-  export type Message_v2CreateInput = {
+  export type MessageCreateInput = {
     id?: string
     role: string
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
-    baseId?: string | null
-    previousVersionId?: string | null
-    supersededById?: string | null
-    regenerationGroupId?: string | null
-    parentBaseId?: string | null
     chat: ChatCreateNestedOneWithoutMessagesInput
-    votes?: Vote_v2CreateNestedManyWithoutMessageInput
+    votes?: VoteCreateNestedManyWithoutMessageInput
   }
 
-  export type Message_v2UncheckedCreateInput = {
+  export type MessageUncheckedCreateInput = {
     id?: string
     chatId: string
     role: string
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
-    baseId?: string | null
-    previousVersionId?: string | null
-    supersededById?: string | null
-    regenerationGroupId?: string | null
-    parentBaseId?: string | null
-    votes?: Vote_v2UncheckedCreateNestedManyWithoutMessageInput
+    votes?: VoteUncheckedCreateNestedManyWithoutMessageInput
   }
 
-  export type Message_v2UpdateInput = {
+  export type MessageUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    baseId?: NullableStringFieldUpdateOperationsInput | string | null
-    previousVersionId?: NullableStringFieldUpdateOperationsInput | string | null
-    supersededById?: NullableStringFieldUpdateOperationsInput | string | null
-    regenerationGroupId?: NullableStringFieldUpdateOperationsInput | string | null
-    parentBaseId?: NullableStringFieldUpdateOperationsInput | string | null
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
-    votes?: Vote_v2UpdateManyWithoutMessageNestedInput
+    votes?: VoteUpdateManyWithoutMessageNestedInput
   }
 
-  export type Message_v2UncheckedUpdateInput = {
+  export type MessageUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     chatId?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    baseId?: NullableStringFieldUpdateOperationsInput | string | null
-    previousVersionId?: NullableStringFieldUpdateOperationsInput | string | null
-    supersededById?: NullableStringFieldUpdateOperationsInput | string | null
-    regenerationGroupId?: NullableStringFieldUpdateOperationsInput | string | null
-    parentBaseId?: NullableStringFieldUpdateOperationsInput | string | null
-    votes?: Vote_v2UncheckedUpdateManyWithoutMessageNestedInput
+    votes?: VoteUncheckedUpdateManyWithoutMessageNestedInput
   }
 
-  export type Message_v2CreateManyInput = {
+  export type MessageCreateManyInput = {
     id?: string
     chatId: string
     role: string
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
-    baseId?: string | null
-    previousVersionId?: string | null
-    supersededById?: string | null
-    regenerationGroupId?: string | null
-    parentBaseId?: string | null
   }
 
-  export type Message_v2UpdateManyMutationInput = {
+  export type MessageUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    baseId?: NullableStringFieldUpdateOperationsInput | string | null
-    previousVersionId?: NullableStringFieldUpdateOperationsInput | string | null
-    supersededById?: NullableStringFieldUpdateOperationsInput | string | null
-    regenerationGroupId?: NullableStringFieldUpdateOperationsInput | string | null
-    parentBaseId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type Message_v2UncheckedUpdateManyInput = {
+  export type MessageUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     chatId?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    baseId?: NullableStringFieldUpdateOperationsInput | string | null
-    previousVersionId?: NullableStringFieldUpdateOperationsInput | string | null
-    supersededById?: NullableStringFieldUpdateOperationsInput | string | null
-    regenerationGroupId?: NullableStringFieldUpdateOperationsInput | string | null
-    parentBaseId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type Vote_v2CreateInput = {
+  export type VoteCreateInput = {
     isUpvoted: boolean
-    message: Message_v2CreateNestedOneWithoutVotesInput
+    message: MessageCreateNestedOneWithoutVotesInput
     chat: ChatCreateNestedOneWithoutVotesInput
   }
 
-  export type Vote_v2UncheckedCreateInput = {
+  export type VoteUncheckedCreateInput = {
     chatId: string
     messageId: string
     isUpvoted: boolean
   }
 
-  export type Vote_v2UpdateInput = {
+  export type VoteUpdateInput = {
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
-    message?: Message_v2UpdateOneRequiredWithoutVotesNestedInput
+    message?: MessageUpdateOneRequiredWithoutVotesNestedInput
     chat?: ChatUpdateOneRequiredWithoutVotesNestedInput
   }
 
-  export type Vote_v2UncheckedUpdateInput = {
+  export type VoteUncheckedUpdateInput = {
     chatId?: StringFieldUpdateOperationsInput | string
     messageId?: StringFieldUpdateOperationsInput | string
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type Vote_v2CreateManyInput = {
+  export type VoteCreateManyInput = {
     chatId: string
     messageId: string
     isUpvoted: boolean
   }
 
-  export type Vote_v2UpdateManyMutationInput = {
+  export type VoteUpdateManyMutationInput = {
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type Vote_v2UncheckedUpdateManyInput = {
+  export type VoteUncheckedUpdateManyInput = {
     chatId?: StringFieldUpdateOperationsInput | string
     messageId?: StringFieldUpdateOperationsInput | string
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
@@ -17096,25 +18310,35 @@ export namespace Prisma {
   export type TierCountOrderByAggregateInput = {
     id?: SortOrder
     modelIds?: SortOrder
-    maxMessagesPerDay?: SortOrder
+    bucketCapacity?: SortOrder
+    bucketRefillAmount?: SortOrder
+    bucketRefillIntervalSeconds?: SortOrder
   }
 
   export type TierAvgOrderByAggregateInput = {
-    maxMessagesPerDay?: SortOrder
+    bucketCapacity?: SortOrder
+    bucketRefillAmount?: SortOrder
+    bucketRefillIntervalSeconds?: SortOrder
   }
 
   export type TierMaxOrderByAggregateInput = {
     id?: SortOrder
-    maxMessagesPerDay?: SortOrder
+    bucketCapacity?: SortOrder
+    bucketRefillAmount?: SortOrder
+    bucketRefillIntervalSeconds?: SortOrder
   }
 
   export type TierMinOrderByAggregateInput = {
     id?: SortOrder
-    maxMessagesPerDay?: SortOrder
+    bucketCapacity?: SortOrder
+    bucketRefillAmount?: SortOrder
+    bucketRefillIntervalSeconds?: SortOrder
   }
 
   export type TierSumOrderByAggregateInput = {
-    maxMessagesPerDay?: SortOrder
+    bucketCapacity?: SortOrder
+    bucketRefillAmount?: SortOrder
+    bucketRefillIntervalSeconds?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -17163,6 +18387,11 @@ export namespace Prisma {
     none?: ChatPinnedArchiveEntryWhereInput
   }
 
+  export type UserRateLimitNullableScalarRelationFilter = {
+    is?: UserRateLimitWhereInput | null
+    isNot?: UserRateLimitWhereInput | null
+  }
+
   export type ChatOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -17198,6 +18427,62 @@ export namespace Prisma {
     email?: SortOrder
   }
 
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type UserScalarRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
+  }
+
+  export type UserRateLimitCountOrderByAggregateInput = {
+    userId?: SortOrder
+    tokens?: SortOrder
+    lastRefill?: SortOrder
+  }
+
+  export type UserRateLimitAvgOrderByAggregateInput = {
+    tokens?: SortOrder
+  }
+
+  export type UserRateLimitMaxOrderByAggregateInput = {
+    userId?: SortOrder
+    tokens?: SortOrder
+    lastRefill?: SortOrder
+  }
+
+  export type UserRateLimitMinOrderByAggregateInput = {
+    userId?: SortOrder
+    tokens?: SortOrder
+    lastRefill?: SortOrder
+  }
+
+  export type UserRateLimitSumOrderByAggregateInput = {
+    tokens?: SortOrder
+  }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
   export type UuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -17208,17 +18493,6 @@ export namespace Prisma {
     gte?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
     not?: NestedUuidFilter<$PrismaModel> | string
-  }
-
-  export type DateTimeFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -17256,21 +18530,16 @@ export namespace Prisma {
     not?: NestedUuidNullableFilter<$PrismaModel> | string | null
   }
 
-  export type UserScalarRelationFilter = {
-    is?: UserWhereInput
-    isNot?: UserWhereInput
+  export type MessageListRelationFilter = {
+    every?: MessageWhereInput
+    some?: MessageWhereInput
+    none?: MessageWhereInput
   }
 
-  export type Message_v2ListRelationFilter = {
-    every?: Message_v2WhereInput
-    some?: Message_v2WhereInput
-    none?: Message_v2WhereInput
-  }
-
-  export type Vote_v2ListRelationFilter = {
-    every?: Vote_v2WhereInput
-    some?: Vote_v2WhereInput
-    none?: Vote_v2WhereInput
+  export type VoteListRelationFilter = {
+    every?: VoteWhereInput
+    some?: VoteWhereInput
+    none?: VoteWhereInput
   }
 
   export type StreamListRelationFilter = {
@@ -17284,11 +18553,11 @@ export namespace Prisma {
     nulls?: NullsOrder
   }
 
-  export type Message_v2OrderByRelationAggregateInput = {
+  export type MessageOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type Vote_v2OrderByRelationAggregateInput = {
+  export type VoteOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -17351,20 +18620,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
-  }
-
-  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
   }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -17436,42 +18691,27 @@ export namespace Prisma {
     isNot?: ChatWhereInput
   }
 
-  export type Message_v2CountOrderByAggregateInput = {
+  export type MessageCountOrderByAggregateInput = {
     id?: SortOrder
     chatId?: SortOrder
     role?: SortOrder
     parts?: SortOrder
     attachments?: SortOrder
     createdAt?: SortOrder
-    baseId?: SortOrder
-    previousVersionId?: SortOrder
-    supersededById?: SortOrder
-    regenerationGroupId?: SortOrder
-    parentBaseId?: SortOrder
   }
 
-  export type Message_v2MaxOrderByAggregateInput = {
+  export type MessageMaxOrderByAggregateInput = {
     id?: SortOrder
     chatId?: SortOrder
     role?: SortOrder
     createdAt?: SortOrder
-    baseId?: SortOrder
-    previousVersionId?: SortOrder
-    supersededById?: SortOrder
-    regenerationGroupId?: SortOrder
-    parentBaseId?: SortOrder
   }
 
-  export type Message_v2MinOrderByAggregateInput = {
+  export type MessageMinOrderByAggregateInput = {
     id?: SortOrder
     chatId?: SortOrder
     role?: SortOrder
     createdAt?: SortOrder
-    baseId?: SortOrder
-    previousVersionId?: SortOrder
-    supersededById?: SortOrder
-    regenerationGroupId?: SortOrder
-    parentBaseId?: SortOrder
   }
   export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -17505,29 +18745,29 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
-  export type Message_v2ScalarRelationFilter = {
-    is?: Message_v2WhereInput
-    isNot?: Message_v2WhereInput
+  export type MessageScalarRelationFilter = {
+    is?: MessageWhereInput
+    isNot?: MessageWhereInput
   }
 
-  export type Vote_v2ChatIdMessageIdCompoundUniqueInput = {
+  export type VoteChatIdMessageIdCompoundUniqueInput = {
     chatId: string
     messageId: string
   }
 
-  export type Vote_v2CountOrderByAggregateInput = {
+  export type VoteCountOrderByAggregateInput = {
     chatId?: SortOrder
     messageId?: SortOrder
     isUpvoted?: SortOrder
   }
 
-  export type Vote_v2MaxOrderByAggregateInput = {
+  export type VoteMaxOrderByAggregateInput = {
     chatId?: SortOrder
     messageId?: SortOrder
     isUpvoted?: SortOrder
   }
 
-  export type Vote_v2MinOrderByAggregateInput = {
+  export type VoteMinOrderByAggregateInput = {
     chatId?: SortOrder
     messageId?: SortOrder
     isUpvoted?: SortOrder
@@ -17828,6 +19068,12 @@ export namespace Prisma {
     connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
   }
 
+  export type UserRateLimitCreateNestedOneWithoutUserInput = {
+    create?: XOR<UserRateLimitCreateWithoutUserInput, UserRateLimitUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserRateLimitCreateOrConnectWithoutUserInput
+    connect?: UserRateLimitWhereUniqueInput
+  }
+
   export type ChatUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<ChatCreateWithoutUserInput, ChatUncheckedCreateWithoutUserInput> | ChatCreateWithoutUserInput[] | ChatUncheckedCreateWithoutUserInput[]
     connectOrCreate?: ChatCreateOrConnectWithoutUserInput | ChatCreateOrConnectWithoutUserInput[]
@@ -17861,6 +19107,12 @@ export namespace Prisma {
     connectOrCreate?: ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput | ChatPinnedArchiveEntryCreateOrConnectWithoutUserInput[]
     createMany?: ChatPinnedArchiveEntryCreateManyUserInputEnvelope
     connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
+  }
+
+  export type UserRateLimitUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<UserRateLimitCreateWithoutUserInput, UserRateLimitUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserRateLimitCreateOrConnectWithoutUserInput
+    connect?: UserRateLimitWhereUniqueInput
   }
 
   export type ChatUpdateManyWithoutUserNestedInput = {
@@ -17933,6 +19185,16 @@ export namespace Prisma {
     deleteMany?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
   }
 
+  export type UserRateLimitUpdateOneWithoutUserNestedInput = {
+    create?: XOR<UserRateLimitCreateWithoutUserInput, UserRateLimitUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserRateLimitCreateOrConnectWithoutUserInput
+    upsert?: UserRateLimitUpsertWithoutUserInput
+    disconnect?: UserRateLimitWhereInput | boolean
+    delete?: UserRateLimitWhereInput | boolean
+    connect?: UserRateLimitWhereUniqueInput
+    update?: XOR<XOR<UserRateLimitUpdateToOneWithWhereWithoutUserInput, UserRateLimitUpdateWithoutUserInput>, UserRateLimitUncheckedUpdateWithoutUserInput>
+  }
+
   export type ChatUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<ChatCreateWithoutUserInput, ChatUncheckedCreateWithoutUserInput> | ChatCreateWithoutUserInput[] | ChatUncheckedCreateWithoutUserInput[]
     connectOrCreate?: ChatCreateOrConnectWithoutUserInput | ChatCreateOrConnectWithoutUserInput[]
@@ -18003,24 +19265,52 @@ export namespace Prisma {
     deleteMany?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
   }
 
+  export type UserRateLimitUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<UserRateLimitCreateWithoutUserInput, UserRateLimitUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserRateLimitCreateOrConnectWithoutUserInput
+    upsert?: UserRateLimitUpsertWithoutUserInput
+    disconnect?: UserRateLimitWhereInput | boolean
+    delete?: UserRateLimitWhereInput | boolean
+    connect?: UserRateLimitWhereUniqueInput
+    update?: XOR<XOR<UserRateLimitUpdateToOneWithWhereWithoutUserInput, UserRateLimitUpdateWithoutUserInput>, UserRateLimitUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserCreateNestedOneWithoutRateLimitInput = {
+    create?: XOR<UserCreateWithoutRateLimitInput, UserUncheckedCreateWithoutRateLimitInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRateLimitInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
+  }
+
+  export type UserUpdateOneRequiredWithoutRateLimitNestedInput = {
+    create?: XOR<UserCreateWithoutRateLimitInput, UserUncheckedCreateWithoutRateLimitInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRateLimitInput
+    upsert?: UserUpsertWithoutRateLimitInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRateLimitInput, UserUpdateWithoutRateLimitInput>, UserUncheckedUpdateWithoutRateLimitInput>
+  }
+
   export type UserCreateNestedOneWithoutChatsInput = {
     create?: XOR<UserCreateWithoutChatsInput, UserUncheckedCreateWithoutChatsInput>
     connectOrCreate?: UserCreateOrConnectWithoutChatsInput
     connect?: UserWhereUniqueInput
   }
 
-  export type Message_v2CreateNestedManyWithoutChatInput = {
-    create?: XOR<Message_v2CreateWithoutChatInput, Message_v2UncheckedCreateWithoutChatInput> | Message_v2CreateWithoutChatInput[] | Message_v2UncheckedCreateWithoutChatInput[]
-    connectOrCreate?: Message_v2CreateOrConnectWithoutChatInput | Message_v2CreateOrConnectWithoutChatInput[]
-    createMany?: Message_v2CreateManyChatInputEnvelope
-    connect?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
+  export type MessageCreateNestedManyWithoutChatInput = {
+    create?: XOR<MessageCreateWithoutChatInput, MessageUncheckedCreateWithoutChatInput> | MessageCreateWithoutChatInput[] | MessageUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: MessageCreateOrConnectWithoutChatInput | MessageCreateOrConnectWithoutChatInput[]
+    createMany?: MessageCreateManyChatInputEnvelope
+    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
   }
 
-  export type Vote_v2CreateNestedManyWithoutChatInput = {
-    create?: XOR<Vote_v2CreateWithoutChatInput, Vote_v2UncheckedCreateWithoutChatInput> | Vote_v2CreateWithoutChatInput[] | Vote_v2UncheckedCreateWithoutChatInput[]
-    connectOrCreate?: Vote_v2CreateOrConnectWithoutChatInput | Vote_v2CreateOrConnectWithoutChatInput[]
-    createMany?: Vote_v2CreateManyChatInputEnvelope
-    connect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
+  export type VoteCreateNestedManyWithoutChatInput = {
+    create?: XOR<VoteCreateWithoutChatInput, VoteUncheckedCreateWithoutChatInput> | VoteCreateWithoutChatInput[] | VoteUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutChatInput | VoteCreateOrConnectWithoutChatInput[]
+    createMany?: VoteCreateManyChatInputEnvelope
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
   }
 
   export type StreamCreateNestedManyWithoutChatInput = {
@@ -18037,18 +19327,18 @@ export namespace Prisma {
     connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
   }
 
-  export type Message_v2UncheckedCreateNestedManyWithoutChatInput = {
-    create?: XOR<Message_v2CreateWithoutChatInput, Message_v2UncheckedCreateWithoutChatInput> | Message_v2CreateWithoutChatInput[] | Message_v2UncheckedCreateWithoutChatInput[]
-    connectOrCreate?: Message_v2CreateOrConnectWithoutChatInput | Message_v2CreateOrConnectWithoutChatInput[]
-    createMany?: Message_v2CreateManyChatInputEnvelope
-    connect?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
+  export type MessageUncheckedCreateNestedManyWithoutChatInput = {
+    create?: XOR<MessageCreateWithoutChatInput, MessageUncheckedCreateWithoutChatInput> | MessageCreateWithoutChatInput[] | MessageUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: MessageCreateOrConnectWithoutChatInput | MessageCreateOrConnectWithoutChatInput[]
+    createMany?: MessageCreateManyChatInputEnvelope
+    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
   }
 
-  export type Vote_v2UncheckedCreateNestedManyWithoutChatInput = {
-    create?: XOR<Vote_v2CreateWithoutChatInput, Vote_v2UncheckedCreateWithoutChatInput> | Vote_v2CreateWithoutChatInput[] | Vote_v2UncheckedCreateWithoutChatInput[]
-    connectOrCreate?: Vote_v2CreateOrConnectWithoutChatInput | Vote_v2CreateOrConnectWithoutChatInput[]
-    createMany?: Vote_v2CreateManyChatInputEnvelope
-    connect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
+  export type VoteUncheckedCreateNestedManyWithoutChatInput = {
+    create?: XOR<VoteCreateWithoutChatInput, VoteUncheckedCreateWithoutChatInput> | VoteCreateWithoutChatInput[] | VoteUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutChatInput | VoteCreateOrConnectWithoutChatInput[]
+    createMany?: VoteCreateManyChatInputEnvelope
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
   }
 
   export type StreamUncheckedCreateNestedManyWithoutChatInput = {
@@ -18065,10 +19355,6 @@ export namespace Prisma {
     connect?: ChatPinnedArchiveEntryWhereUniqueInput | ChatPinnedArchiveEntryWhereUniqueInput[]
   }
 
-  export type DateTimeFieldUpdateOperationsInput = {
-    set?: Date | string
-  }
-
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
   }
@@ -18081,32 +19367,32 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutChatsInput, UserUpdateWithoutChatsInput>, UserUncheckedUpdateWithoutChatsInput>
   }
 
-  export type Message_v2UpdateManyWithoutChatNestedInput = {
-    create?: XOR<Message_v2CreateWithoutChatInput, Message_v2UncheckedCreateWithoutChatInput> | Message_v2CreateWithoutChatInput[] | Message_v2UncheckedCreateWithoutChatInput[]
-    connectOrCreate?: Message_v2CreateOrConnectWithoutChatInput | Message_v2CreateOrConnectWithoutChatInput[]
-    upsert?: Message_v2UpsertWithWhereUniqueWithoutChatInput | Message_v2UpsertWithWhereUniqueWithoutChatInput[]
-    createMany?: Message_v2CreateManyChatInputEnvelope
-    set?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
-    disconnect?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
-    delete?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
-    connect?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
-    update?: Message_v2UpdateWithWhereUniqueWithoutChatInput | Message_v2UpdateWithWhereUniqueWithoutChatInput[]
-    updateMany?: Message_v2UpdateManyWithWhereWithoutChatInput | Message_v2UpdateManyWithWhereWithoutChatInput[]
-    deleteMany?: Message_v2ScalarWhereInput | Message_v2ScalarWhereInput[]
+  export type MessageUpdateManyWithoutChatNestedInput = {
+    create?: XOR<MessageCreateWithoutChatInput, MessageUncheckedCreateWithoutChatInput> | MessageCreateWithoutChatInput[] | MessageUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: MessageCreateOrConnectWithoutChatInput | MessageCreateOrConnectWithoutChatInput[]
+    upsert?: MessageUpsertWithWhereUniqueWithoutChatInput | MessageUpsertWithWhereUniqueWithoutChatInput[]
+    createMany?: MessageCreateManyChatInputEnvelope
+    set?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    disconnect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    delete?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    update?: MessageUpdateWithWhereUniqueWithoutChatInput | MessageUpdateWithWhereUniqueWithoutChatInput[]
+    updateMany?: MessageUpdateManyWithWhereWithoutChatInput | MessageUpdateManyWithWhereWithoutChatInput[]
+    deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
   }
 
-  export type Vote_v2UpdateManyWithoutChatNestedInput = {
-    create?: XOR<Vote_v2CreateWithoutChatInput, Vote_v2UncheckedCreateWithoutChatInput> | Vote_v2CreateWithoutChatInput[] | Vote_v2UncheckedCreateWithoutChatInput[]
-    connectOrCreate?: Vote_v2CreateOrConnectWithoutChatInput | Vote_v2CreateOrConnectWithoutChatInput[]
-    upsert?: Vote_v2UpsertWithWhereUniqueWithoutChatInput | Vote_v2UpsertWithWhereUniqueWithoutChatInput[]
-    createMany?: Vote_v2CreateManyChatInputEnvelope
-    set?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    disconnect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    delete?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    connect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    update?: Vote_v2UpdateWithWhereUniqueWithoutChatInput | Vote_v2UpdateWithWhereUniqueWithoutChatInput[]
-    updateMany?: Vote_v2UpdateManyWithWhereWithoutChatInput | Vote_v2UpdateManyWithWhereWithoutChatInput[]
-    deleteMany?: Vote_v2ScalarWhereInput | Vote_v2ScalarWhereInput[]
+  export type VoteUpdateManyWithoutChatNestedInput = {
+    create?: XOR<VoteCreateWithoutChatInput, VoteUncheckedCreateWithoutChatInput> | VoteCreateWithoutChatInput[] | VoteUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutChatInput | VoteCreateOrConnectWithoutChatInput[]
+    upsert?: VoteUpsertWithWhereUniqueWithoutChatInput | VoteUpsertWithWhereUniqueWithoutChatInput[]
+    createMany?: VoteCreateManyChatInputEnvelope
+    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    update?: VoteUpdateWithWhereUniqueWithoutChatInput | VoteUpdateWithWhereUniqueWithoutChatInput[]
+    updateMany?: VoteUpdateManyWithWhereWithoutChatInput | VoteUpdateManyWithWhereWithoutChatInput[]
+    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
   }
 
   export type StreamUpdateManyWithoutChatNestedInput = {
@@ -18137,32 +19423,32 @@ export namespace Prisma {
     deleteMany?: ChatPinnedArchiveEntryScalarWhereInput | ChatPinnedArchiveEntryScalarWhereInput[]
   }
 
-  export type Message_v2UncheckedUpdateManyWithoutChatNestedInput = {
-    create?: XOR<Message_v2CreateWithoutChatInput, Message_v2UncheckedCreateWithoutChatInput> | Message_v2CreateWithoutChatInput[] | Message_v2UncheckedCreateWithoutChatInput[]
-    connectOrCreate?: Message_v2CreateOrConnectWithoutChatInput | Message_v2CreateOrConnectWithoutChatInput[]
-    upsert?: Message_v2UpsertWithWhereUniqueWithoutChatInput | Message_v2UpsertWithWhereUniqueWithoutChatInput[]
-    createMany?: Message_v2CreateManyChatInputEnvelope
-    set?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
-    disconnect?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
-    delete?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
-    connect?: Message_v2WhereUniqueInput | Message_v2WhereUniqueInput[]
-    update?: Message_v2UpdateWithWhereUniqueWithoutChatInput | Message_v2UpdateWithWhereUniqueWithoutChatInput[]
-    updateMany?: Message_v2UpdateManyWithWhereWithoutChatInput | Message_v2UpdateManyWithWhereWithoutChatInput[]
-    deleteMany?: Message_v2ScalarWhereInput | Message_v2ScalarWhereInput[]
+  export type MessageUncheckedUpdateManyWithoutChatNestedInput = {
+    create?: XOR<MessageCreateWithoutChatInput, MessageUncheckedCreateWithoutChatInput> | MessageCreateWithoutChatInput[] | MessageUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: MessageCreateOrConnectWithoutChatInput | MessageCreateOrConnectWithoutChatInput[]
+    upsert?: MessageUpsertWithWhereUniqueWithoutChatInput | MessageUpsertWithWhereUniqueWithoutChatInput[]
+    createMany?: MessageCreateManyChatInputEnvelope
+    set?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    disconnect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    delete?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    connect?: MessageWhereUniqueInput | MessageWhereUniqueInput[]
+    update?: MessageUpdateWithWhereUniqueWithoutChatInput | MessageUpdateWithWhereUniqueWithoutChatInput[]
+    updateMany?: MessageUpdateManyWithWhereWithoutChatInput | MessageUpdateManyWithWhereWithoutChatInput[]
+    deleteMany?: MessageScalarWhereInput | MessageScalarWhereInput[]
   }
 
-  export type Vote_v2UncheckedUpdateManyWithoutChatNestedInput = {
-    create?: XOR<Vote_v2CreateWithoutChatInput, Vote_v2UncheckedCreateWithoutChatInput> | Vote_v2CreateWithoutChatInput[] | Vote_v2UncheckedCreateWithoutChatInput[]
-    connectOrCreate?: Vote_v2CreateOrConnectWithoutChatInput | Vote_v2CreateOrConnectWithoutChatInput[]
-    upsert?: Vote_v2UpsertWithWhereUniqueWithoutChatInput | Vote_v2UpsertWithWhereUniqueWithoutChatInput[]
-    createMany?: Vote_v2CreateManyChatInputEnvelope
-    set?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    disconnect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    delete?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    connect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    update?: Vote_v2UpdateWithWhereUniqueWithoutChatInput | Vote_v2UpdateWithWhereUniqueWithoutChatInput[]
-    updateMany?: Vote_v2UpdateManyWithWhereWithoutChatInput | Vote_v2UpdateManyWithWhereWithoutChatInput[]
-    deleteMany?: Vote_v2ScalarWhereInput | Vote_v2ScalarWhereInput[]
+  export type VoteUncheckedUpdateManyWithoutChatNestedInput = {
+    create?: XOR<VoteCreateWithoutChatInput, VoteUncheckedCreateWithoutChatInput> | VoteCreateWithoutChatInput[] | VoteUncheckedCreateWithoutChatInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutChatInput | VoteCreateOrConnectWithoutChatInput[]
+    upsert?: VoteUpsertWithWhereUniqueWithoutChatInput | VoteUpsertWithWhereUniqueWithoutChatInput[]
+    createMany?: VoteCreateManyChatInputEnvelope
+    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    update?: VoteUpdateWithWhereUniqueWithoutChatInput | VoteUpdateWithWhereUniqueWithoutChatInput[]
+    updateMany?: VoteUpdateManyWithWhereWithoutChatInput | VoteUpdateManyWithWhereWithoutChatInput[]
+    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
   }
 
   export type StreamUncheckedUpdateManyWithoutChatNestedInput = {
@@ -18199,18 +19485,18 @@ export namespace Prisma {
     connect?: ChatWhereUniqueInput
   }
 
-  export type Vote_v2CreateNestedManyWithoutMessageInput = {
-    create?: XOR<Vote_v2CreateWithoutMessageInput, Vote_v2UncheckedCreateWithoutMessageInput> | Vote_v2CreateWithoutMessageInput[] | Vote_v2UncheckedCreateWithoutMessageInput[]
-    connectOrCreate?: Vote_v2CreateOrConnectWithoutMessageInput | Vote_v2CreateOrConnectWithoutMessageInput[]
-    createMany?: Vote_v2CreateManyMessageInputEnvelope
-    connect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
+  export type VoteCreateNestedManyWithoutMessageInput = {
+    create?: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput> | VoteCreateWithoutMessageInput[] | VoteUncheckedCreateWithoutMessageInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutMessageInput | VoteCreateOrConnectWithoutMessageInput[]
+    createMany?: VoteCreateManyMessageInputEnvelope
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
   }
 
-  export type Vote_v2UncheckedCreateNestedManyWithoutMessageInput = {
-    create?: XOR<Vote_v2CreateWithoutMessageInput, Vote_v2UncheckedCreateWithoutMessageInput> | Vote_v2CreateWithoutMessageInput[] | Vote_v2UncheckedCreateWithoutMessageInput[]
-    connectOrCreate?: Vote_v2CreateOrConnectWithoutMessageInput | Vote_v2CreateOrConnectWithoutMessageInput[]
-    createMany?: Vote_v2CreateManyMessageInputEnvelope
-    connect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
+  export type VoteUncheckedCreateNestedManyWithoutMessageInput = {
+    create?: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput> | VoteCreateWithoutMessageInput[] | VoteUncheckedCreateWithoutMessageInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutMessageInput | VoteCreateOrConnectWithoutMessageInput[]
+    createMany?: VoteCreateManyMessageInputEnvelope
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
   }
 
   export type ChatUpdateOneRequiredWithoutMessagesNestedInput = {
@@ -18221,38 +19507,38 @@ export namespace Prisma {
     update?: XOR<XOR<ChatUpdateToOneWithWhereWithoutMessagesInput, ChatUpdateWithoutMessagesInput>, ChatUncheckedUpdateWithoutMessagesInput>
   }
 
-  export type Vote_v2UpdateManyWithoutMessageNestedInput = {
-    create?: XOR<Vote_v2CreateWithoutMessageInput, Vote_v2UncheckedCreateWithoutMessageInput> | Vote_v2CreateWithoutMessageInput[] | Vote_v2UncheckedCreateWithoutMessageInput[]
-    connectOrCreate?: Vote_v2CreateOrConnectWithoutMessageInput | Vote_v2CreateOrConnectWithoutMessageInput[]
-    upsert?: Vote_v2UpsertWithWhereUniqueWithoutMessageInput | Vote_v2UpsertWithWhereUniqueWithoutMessageInput[]
-    createMany?: Vote_v2CreateManyMessageInputEnvelope
-    set?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    disconnect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    delete?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    connect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    update?: Vote_v2UpdateWithWhereUniqueWithoutMessageInput | Vote_v2UpdateWithWhereUniqueWithoutMessageInput[]
-    updateMany?: Vote_v2UpdateManyWithWhereWithoutMessageInput | Vote_v2UpdateManyWithWhereWithoutMessageInput[]
-    deleteMany?: Vote_v2ScalarWhereInput | Vote_v2ScalarWhereInput[]
+  export type VoteUpdateManyWithoutMessageNestedInput = {
+    create?: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput> | VoteCreateWithoutMessageInput[] | VoteUncheckedCreateWithoutMessageInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutMessageInput | VoteCreateOrConnectWithoutMessageInput[]
+    upsert?: VoteUpsertWithWhereUniqueWithoutMessageInput | VoteUpsertWithWhereUniqueWithoutMessageInput[]
+    createMany?: VoteCreateManyMessageInputEnvelope
+    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    update?: VoteUpdateWithWhereUniqueWithoutMessageInput | VoteUpdateWithWhereUniqueWithoutMessageInput[]
+    updateMany?: VoteUpdateManyWithWhereWithoutMessageInput | VoteUpdateManyWithWhereWithoutMessageInput[]
+    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
   }
 
-  export type Vote_v2UncheckedUpdateManyWithoutMessageNestedInput = {
-    create?: XOR<Vote_v2CreateWithoutMessageInput, Vote_v2UncheckedCreateWithoutMessageInput> | Vote_v2CreateWithoutMessageInput[] | Vote_v2UncheckedCreateWithoutMessageInput[]
-    connectOrCreate?: Vote_v2CreateOrConnectWithoutMessageInput | Vote_v2CreateOrConnectWithoutMessageInput[]
-    upsert?: Vote_v2UpsertWithWhereUniqueWithoutMessageInput | Vote_v2UpsertWithWhereUniqueWithoutMessageInput[]
-    createMany?: Vote_v2CreateManyMessageInputEnvelope
-    set?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    disconnect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    delete?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    connect?: Vote_v2WhereUniqueInput | Vote_v2WhereUniqueInput[]
-    update?: Vote_v2UpdateWithWhereUniqueWithoutMessageInput | Vote_v2UpdateWithWhereUniqueWithoutMessageInput[]
-    updateMany?: Vote_v2UpdateManyWithWhereWithoutMessageInput | Vote_v2UpdateManyWithWhereWithoutMessageInput[]
-    deleteMany?: Vote_v2ScalarWhereInput | Vote_v2ScalarWhereInput[]
+  export type VoteUncheckedUpdateManyWithoutMessageNestedInput = {
+    create?: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput> | VoteCreateWithoutMessageInput[] | VoteUncheckedCreateWithoutMessageInput[]
+    connectOrCreate?: VoteCreateOrConnectWithoutMessageInput | VoteCreateOrConnectWithoutMessageInput[]
+    upsert?: VoteUpsertWithWhereUniqueWithoutMessageInput | VoteUpsertWithWhereUniqueWithoutMessageInput[]
+    createMany?: VoteCreateManyMessageInputEnvelope
+    set?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    disconnect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    delete?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    connect?: VoteWhereUniqueInput | VoteWhereUniqueInput[]
+    update?: VoteUpdateWithWhereUniqueWithoutMessageInput | VoteUpdateWithWhereUniqueWithoutMessageInput[]
+    updateMany?: VoteUpdateManyWithWhereWithoutMessageInput | VoteUpdateManyWithWhereWithoutMessageInput[]
+    deleteMany?: VoteScalarWhereInput | VoteScalarWhereInput[]
   }
 
-  export type Message_v2CreateNestedOneWithoutVotesInput = {
-    create?: XOR<Message_v2CreateWithoutVotesInput, Message_v2UncheckedCreateWithoutVotesInput>
-    connectOrCreate?: Message_v2CreateOrConnectWithoutVotesInput
-    connect?: Message_v2WhereUniqueInput
+  export type MessageCreateNestedOneWithoutVotesInput = {
+    create?: XOR<MessageCreateWithoutVotesInput, MessageUncheckedCreateWithoutVotesInput>
+    connectOrCreate?: MessageCreateOrConnectWithoutVotesInput
+    connect?: MessageWhereUniqueInput
   }
 
   export type ChatCreateNestedOneWithoutVotesInput = {
@@ -18265,12 +19551,12 @@ export namespace Prisma {
     set?: boolean
   }
 
-  export type Message_v2UpdateOneRequiredWithoutVotesNestedInput = {
-    create?: XOR<Message_v2CreateWithoutVotesInput, Message_v2UncheckedCreateWithoutVotesInput>
-    connectOrCreate?: Message_v2CreateOrConnectWithoutVotesInput
-    upsert?: Message_v2UpsertWithoutVotesInput
-    connect?: Message_v2WhereUniqueInput
-    update?: XOR<XOR<Message_v2UpdateToOneWithWhereWithoutVotesInput, Message_v2UpdateWithoutVotesInput>, Message_v2UncheckedUpdateWithoutVotesInput>
+  export type MessageUpdateOneRequiredWithoutVotesNestedInput = {
+    create?: XOR<MessageCreateWithoutVotesInput, MessageUncheckedCreateWithoutVotesInput>
+    connectOrCreate?: MessageCreateOrConnectWithoutVotesInput
+    upsert?: MessageUpsertWithoutVotesInput
+    connect?: MessageWhereUniqueInput
+    update?: XOR<XOR<MessageUpdateToOneWithWhereWithoutVotesInput, MessageUpdateWithoutVotesInput>, MessageUncheckedUpdateWithoutVotesInput>
   }
 
   export type ChatUpdateOneRequiredWithoutVotesNestedInput = {
@@ -18667,17 +19953,6 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
-  export type NestedUuidFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[] | ListStringFieldRefInput<$PrismaModel>
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedUuidFilter<$PrismaModel> | string
-  }
-
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -18687,6 +19962,31 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedUuidFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidFilter<$PrismaModel> | string
   }
 
   export type NestedUuidNullableFilter<$PrismaModel = never> = {
@@ -18712,20 +20012,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
-  }
-
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type NestedIntNullableFilter<$PrismaModel = never> = {
@@ -18852,8 +20138,8 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
-    messages?: Message_v2CreateNestedManyWithoutChatInput
-    votes?: Vote_v2CreateNestedManyWithoutChatInput
+    messages?: MessageCreateNestedManyWithoutChatInput
+    votes?: VoteCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
@@ -18867,8 +20153,8 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
-    messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
-    votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
+    messages?: MessageUncheckedCreateNestedManyWithoutChatInput
+    votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
@@ -19000,6 +20286,21 @@ export namespace Prisma {
   export type ChatPinnedArchiveEntryCreateManyUserInputEnvelope = {
     data: ChatPinnedArchiveEntryCreateManyUserInput | ChatPinnedArchiveEntryCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type UserRateLimitCreateWithoutUserInput = {
+    tokens: number
+    lastRefill: Date | string
+  }
+
+  export type UserRateLimitUncheckedCreateWithoutUserInput = {
+    tokens: number
+    lastRefill: Date | string
+  }
+
+  export type UserRateLimitCreateOrConnectWithoutUserInput = {
+    where: UserRateLimitWhereUniqueInput
+    create: XOR<UserRateLimitCreateWithoutUserInput, UserRateLimitUncheckedCreateWithoutUserInput>
   }
 
   export type ChatUpsertWithWhereUniqueWithoutUserInput = {
@@ -19149,6 +20450,83 @@ export namespace Prisma {
     pinnedAt?: DateTimeFilter<"ChatPinnedArchiveEntry"> | Date | string
   }
 
+  export type UserRateLimitUpsertWithoutUserInput = {
+    update: XOR<UserRateLimitUpdateWithoutUserInput, UserRateLimitUncheckedUpdateWithoutUserInput>
+    create: XOR<UserRateLimitCreateWithoutUserInput, UserRateLimitUncheckedCreateWithoutUserInput>
+    where?: UserRateLimitWhereInput
+  }
+
+  export type UserRateLimitUpdateToOneWithWhereWithoutUserInput = {
+    where?: UserRateLimitWhereInput
+    data: XOR<UserRateLimitUpdateWithoutUserInput, UserRateLimitUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserRateLimitUpdateWithoutUserInput = {
+    tokens?: IntFieldUpdateOperationsInput | number
+    lastRefill?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserRateLimitUncheckedUpdateWithoutUserInput = {
+    tokens?: IntFieldUpdateOperationsInput | number
+    lastRefill?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserCreateWithoutRateLimitInput = {
+    id: string
+    email: string
+    chats?: ChatCreateNestedManyWithoutUserInput
+    documents?: DocumentCreateNestedManyWithoutUserInput
+    suggestions?: SuggestionCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutRateLimitInput = {
+    id: string
+    email: string
+    chats?: ChatUncheckedCreateNestedManyWithoutUserInput
+    documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
+    suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
+    archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutRateLimitInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutRateLimitInput, UserUncheckedCreateWithoutRateLimitInput>
+  }
+
+  export type UserUpsertWithoutRateLimitInput = {
+    update: XOR<UserUpdateWithoutRateLimitInput, UserUncheckedUpdateWithoutRateLimitInput>
+    create: XOR<UserCreateWithoutRateLimitInput, UserUncheckedCreateWithoutRateLimitInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutRateLimitInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutRateLimitInput, UserUncheckedUpdateWithoutRateLimitInput>
+  }
+
+  export type UserUpdateWithoutRateLimitInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    chats?: ChatUpdateManyWithoutUserNestedInput
+    documents?: DocumentUpdateManyWithoutUserNestedInput
+    suggestions?: SuggestionUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutRateLimitInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    chats?: ChatUncheckedUpdateManyWithoutUserNestedInput
+    documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
+    suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
+    archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+  }
+
   export type UserCreateWithoutChatsInput = {
     id: string
     email: string
@@ -19156,6 +20534,7 @@ export namespace Prisma {
     suggestions?: SuggestionCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutChatsInput = {
@@ -19165,6 +20544,7 @@ export namespace Prisma {
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutChatsInput = {
@@ -19172,61 +20552,51 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutChatsInput, UserUncheckedCreateWithoutChatsInput>
   }
 
-  export type Message_v2CreateWithoutChatInput = {
+  export type MessageCreateWithoutChatInput = {
     id?: string
     role: string
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
-    baseId?: string | null
-    previousVersionId?: string | null
-    supersededById?: string | null
-    regenerationGroupId?: string | null
-    parentBaseId?: string | null
-    votes?: Vote_v2CreateNestedManyWithoutMessageInput
+    votes?: VoteCreateNestedManyWithoutMessageInput
   }
 
-  export type Message_v2UncheckedCreateWithoutChatInput = {
+  export type MessageUncheckedCreateWithoutChatInput = {
     id?: string
     role: string
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
-    baseId?: string | null
-    previousVersionId?: string | null
-    supersededById?: string | null
-    regenerationGroupId?: string | null
-    parentBaseId?: string | null
-    votes?: Vote_v2UncheckedCreateNestedManyWithoutMessageInput
+    votes?: VoteUncheckedCreateNestedManyWithoutMessageInput
   }
 
-  export type Message_v2CreateOrConnectWithoutChatInput = {
-    where: Message_v2WhereUniqueInput
-    create: XOR<Message_v2CreateWithoutChatInput, Message_v2UncheckedCreateWithoutChatInput>
+  export type MessageCreateOrConnectWithoutChatInput = {
+    where: MessageWhereUniqueInput
+    create: XOR<MessageCreateWithoutChatInput, MessageUncheckedCreateWithoutChatInput>
   }
 
-  export type Message_v2CreateManyChatInputEnvelope = {
-    data: Message_v2CreateManyChatInput | Message_v2CreateManyChatInput[]
+  export type MessageCreateManyChatInputEnvelope = {
+    data: MessageCreateManyChatInput | MessageCreateManyChatInput[]
     skipDuplicates?: boolean
   }
 
-  export type Vote_v2CreateWithoutChatInput = {
+  export type VoteCreateWithoutChatInput = {
     isUpvoted: boolean
-    message: Message_v2CreateNestedOneWithoutVotesInput
+    message: MessageCreateNestedOneWithoutVotesInput
   }
 
-  export type Vote_v2UncheckedCreateWithoutChatInput = {
+  export type VoteUncheckedCreateWithoutChatInput = {
     messageId: string
     isUpvoted: boolean
   }
 
-  export type Vote_v2CreateOrConnectWithoutChatInput = {
-    where: Vote_v2WhereUniqueInput
-    create: XOR<Vote_v2CreateWithoutChatInput, Vote_v2UncheckedCreateWithoutChatInput>
+  export type VoteCreateOrConnectWithoutChatInput = {
+    where: VoteWhereUniqueInput
+    create: XOR<VoteCreateWithoutChatInput, VoteUncheckedCreateWithoutChatInput>
   }
 
-  export type Vote_v2CreateManyChatInputEnvelope = {
-    data: Vote_v2CreateManyChatInput | Vote_v2CreateManyChatInput[]
+  export type VoteCreateManyChatInputEnvelope = {
+    data: VoteCreateManyChatInput | VoteCreateManyChatInput[]
     skipDuplicates?: boolean
   }
 
@@ -19292,6 +20662,7 @@ export namespace Prisma {
     suggestions?: SuggestionUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutChatsInput = {
@@ -19301,64 +20672,60 @@ export namespace Prisma {
     suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUncheckedUpdateOneWithoutUserNestedInput
   }
 
-  export type Message_v2UpsertWithWhereUniqueWithoutChatInput = {
-    where: Message_v2WhereUniqueInput
-    update: XOR<Message_v2UpdateWithoutChatInput, Message_v2UncheckedUpdateWithoutChatInput>
-    create: XOR<Message_v2CreateWithoutChatInput, Message_v2UncheckedCreateWithoutChatInput>
+  export type MessageUpsertWithWhereUniqueWithoutChatInput = {
+    where: MessageWhereUniqueInput
+    update: XOR<MessageUpdateWithoutChatInput, MessageUncheckedUpdateWithoutChatInput>
+    create: XOR<MessageCreateWithoutChatInput, MessageUncheckedCreateWithoutChatInput>
   }
 
-  export type Message_v2UpdateWithWhereUniqueWithoutChatInput = {
-    where: Message_v2WhereUniqueInput
-    data: XOR<Message_v2UpdateWithoutChatInput, Message_v2UncheckedUpdateWithoutChatInput>
+  export type MessageUpdateWithWhereUniqueWithoutChatInput = {
+    where: MessageWhereUniqueInput
+    data: XOR<MessageUpdateWithoutChatInput, MessageUncheckedUpdateWithoutChatInput>
   }
 
-  export type Message_v2UpdateManyWithWhereWithoutChatInput = {
-    where: Message_v2ScalarWhereInput
-    data: XOR<Message_v2UpdateManyMutationInput, Message_v2UncheckedUpdateManyWithoutChatInput>
+  export type MessageUpdateManyWithWhereWithoutChatInput = {
+    where: MessageScalarWhereInput
+    data: XOR<MessageUpdateManyMutationInput, MessageUncheckedUpdateManyWithoutChatInput>
   }
 
-  export type Message_v2ScalarWhereInput = {
-    AND?: Message_v2ScalarWhereInput | Message_v2ScalarWhereInput[]
-    OR?: Message_v2ScalarWhereInput[]
-    NOT?: Message_v2ScalarWhereInput | Message_v2ScalarWhereInput[]
-    id?: UuidFilter<"Message_v2"> | string
-    chatId?: UuidFilter<"Message_v2"> | string
-    role?: StringFilter<"Message_v2"> | string
-    parts?: JsonFilter<"Message_v2">
-    attachments?: JsonFilter<"Message_v2">
-    createdAt?: DateTimeFilter<"Message_v2"> | Date | string
-    baseId?: UuidNullableFilter<"Message_v2"> | string | null
-    previousVersionId?: UuidNullableFilter<"Message_v2"> | string | null
-    supersededById?: UuidNullableFilter<"Message_v2"> | string | null
-    regenerationGroupId?: UuidNullableFilter<"Message_v2"> | string | null
-    parentBaseId?: UuidNullableFilter<"Message_v2"> | string | null
+  export type MessageScalarWhereInput = {
+    AND?: MessageScalarWhereInput | MessageScalarWhereInput[]
+    OR?: MessageScalarWhereInput[]
+    NOT?: MessageScalarWhereInput | MessageScalarWhereInput[]
+    id?: UuidFilter<"Message"> | string
+    chatId?: UuidFilter<"Message"> | string
+    role?: StringFilter<"Message"> | string
+    parts?: JsonFilter<"Message">
+    attachments?: JsonFilter<"Message">
+    createdAt?: DateTimeFilter<"Message"> | Date | string
   }
 
-  export type Vote_v2UpsertWithWhereUniqueWithoutChatInput = {
-    where: Vote_v2WhereUniqueInput
-    update: XOR<Vote_v2UpdateWithoutChatInput, Vote_v2UncheckedUpdateWithoutChatInput>
-    create: XOR<Vote_v2CreateWithoutChatInput, Vote_v2UncheckedCreateWithoutChatInput>
+  export type VoteUpsertWithWhereUniqueWithoutChatInput = {
+    where: VoteWhereUniqueInput
+    update: XOR<VoteUpdateWithoutChatInput, VoteUncheckedUpdateWithoutChatInput>
+    create: XOR<VoteCreateWithoutChatInput, VoteUncheckedCreateWithoutChatInput>
   }
 
-  export type Vote_v2UpdateWithWhereUniqueWithoutChatInput = {
-    where: Vote_v2WhereUniqueInput
-    data: XOR<Vote_v2UpdateWithoutChatInput, Vote_v2UncheckedUpdateWithoutChatInput>
+  export type VoteUpdateWithWhereUniqueWithoutChatInput = {
+    where: VoteWhereUniqueInput
+    data: XOR<VoteUpdateWithoutChatInput, VoteUncheckedUpdateWithoutChatInput>
   }
 
-  export type Vote_v2UpdateManyWithWhereWithoutChatInput = {
-    where: Vote_v2ScalarWhereInput
-    data: XOR<Vote_v2UpdateManyMutationInput, Vote_v2UncheckedUpdateManyWithoutChatInput>
+  export type VoteUpdateManyWithWhereWithoutChatInput = {
+    where: VoteScalarWhereInput
+    data: XOR<VoteUpdateManyMutationInput, VoteUncheckedUpdateManyWithoutChatInput>
   }
 
-  export type Vote_v2ScalarWhereInput = {
-    AND?: Vote_v2ScalarWhereInput | Vote_v2ScalarWhereInput[]
-    OR?: Vote_v2ScalarWhereInput[]
-    NOT?: Vote_v2ScalarWhereInput | Vote_v2ScalarWhereInput[]
-    chatId?: UuidFilter<"Vote_v2"> | string
-    messageId?: UuidFilter<"Vote_v2"> | string
-    isUpvoted?: BoolFilter<"Vote_v2"> | boolean
+  export type VoteScalarWhereInput = {
+    AND?: VoteScalarWhereInput | VoteScalarWhereInput[]
+    OR?: VoteScalarWhereInput[]
+    NOT?: VoteScalarWhereInput | VoteScalarWhereInput[]
+    chatId?: UuidFilter<"Vote"> | string
+    messageId?: UuidFilter<"Vote"> | string
+    isUpvoted?: BoolFilter<"Vote"> | boolean
   }
 
   export type StreamUpsertWithWhereUniqueWithoutChatInput = {
@@ -19412,7 +20779,7 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
-    votes?: Vote_v2CreateNestedManyWithoutChatInput
+    votes?: VoteCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
@@ -19427,7 +20794,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
-    votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
+    votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
@@ -19437,23 +20804,23 @@ export namespace Prisma {
     create: XOR<ChatCreateWithoutMessagesInput, ChatUncheckedCreateWithoutMessagesInput>
   }
 
-  export type Vote_v2CreateWithoutMessageInput = {
+  export type VoteCreateWithoutMessageInput = {
     isUpvoted: boolean
     chat: ChatCreateNestedOneWithoutVotesInput
   }
 
-  export type Vote_v2UncheckedCreateWithoutMessageInput = {
+  export type VoteUncheckedCreateWithoutMessageInput = {
     chatId: string
     isUpvoted: boolean
   }
 
-  export type Vote_v2CreateOrConnectWithoutMessageInput = {
-    where: Vote_v2WhereUniqueInput
-    create: XOR<Vote_v2CreateWithoutMessageInput, Vote_v2UncheckedCreateWithoutMessageInput>
+  export type VoteCreateOrConnectWithoutMessageInput = {
+    where: VoteWhereUniqueInput
+    create: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput>
   }
 
-  export type Vote_v2CreateManyMessageInputEnvelope = {
-    data: Vote_v2CreateManyMessageInput | Vote_v2CreateManyMessageInput[]
+  export type VoteCreateManyMessageInputEnvelope = {
+    data: VoteCreateManyMessageInput | VoteCreateManyMessageInput[]
     skipDuplicates?: boolean
   }
 
@@ -19478,7 +20845,7 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
-    votes?: Vote_v2UpdateManyWithoutChatNestedInput
+    votes?: VoteUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
@@ -19493,58 +20860,48 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
-    votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
+    votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
   }
 
-  export type Vote_v2UpsertWithWhereUniqueWithoutMessageInput = {
-    where: Vote_v2WhereUniqueInput
-    update: XOR<Vote_v2UpdateWithoutMessageInput, Vote_v2UncheckedUpdateWithoutMessageInput>
-    create: XOR<Vote_v2CreateWithoutMessageInput, Vote_v2UncheckedCreateWithoutMessageInput>
+  export type VoteUpsertWithWhereUniqueWithoutMessageInput = {
+    where: VoteWhereUniqueInput
+    update: XOR<VoteUpdateWithoutMessageInput, VoteUncheckedUpdateWithoutMessageInput>
+    create: XOR<VoteCreateWithoutMessageInput, VoteUncheckedCreateWithoutMessageInput>
   }
 
-  export type Vote_v2UpdateWithWhereUniqueWithoutMessageInput = {
-    where: Vote_v2WhereUniqueInput
-    data: XOR<Vote_v2UpdateWithoutMessageInput, Vote_v2UncheckedUpdateWithoutMessageInput>
+  export type VoteUpdateWithWhereUniqueWithoutMessageInput = {
+    where: VoteWhereUniqueInput
+    data: XOR<VoteUpdateWithoutMessageInput, VoteUncheckedUpdateWithoutMessageInput>
   }
 
-  export type Vote_v2UpdateManyWithWhereWithoutMessageInput = {
-    where: Vote_v2ScalarWhereInput
-    data: XOR<Vote_v2UpdateManyMutationInput, Vote_v2UncheckedUpdateManyWithoutMessageInput>
+  export type VoteUpdateManyWithWhereWithoutMessageInput = {
+    where: VoteScalarWhereInput
+    data: XOR<VoteUpdateManyMutationInput, VoteUncheckedUpdateManyWithoutMessageInput>
   }
 
-  export type Message_v2CreateWithoutVotesInput = {
+  export type MessageCreateWithoutVotesInput = {
     id?: string
     role: string
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
-    baseId?: string | null
-    previousVersionId?: string | null
-    supersededById?: string | null
-    regenerationGroupId?: string | null
-    parentBaseId?: string | null
     chat: ChatCreateNestedOneWithoutMessagesInput
   }
 
-  export type Message_v2UncheckedCreateWithoutVotesInput = {
+  export type MessageUncheckedCreateWithoutVotesInput = {
     id?: string
     chatId: string
     role: string
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
-    baseId?: string | null
-    previousVersionId?: string | null
-    supersededById?: string | null
-    regenerationGroupId?: string | null
-    parentBaseId?: string | null
   }
 
-  export type Message_v2CreateOrConnectWithoutVotesInput = {
-    where: Message_v2WhereUniqueInput
-    create: XOR<Message_v2CreateWithoutVotesInput, Message_v2UncheckedCreateWithoutVotesInput>
+  export type MessageCreateOrConnectWithoutVotesInput = {
+    where: MessageWhereUniqueInput
+    create: XOR<MessageCreateWithoutVotesInput, MessageUncheckedCreateWithoutVotesInput>
   }
 
   export type ChatCreateWithoutVotesInput = {
@@ -19557,7 +20914,7 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
-    messages?: Message_v2CreateNestedManyWithoutChatInput
+    messages?: MessageCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
@@ -19572,7 +20929,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
-    messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
+    messages?: MessageUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
@@ -19582,43 +20939,33 @@ export namespace Prisma {
     create: XOR<ChatCreateWithoutVotesInput, ChatUncheckedCreateWithoutVotesInput>
   }
 
-  export type Message_v2UpsertWithoutVotesInput = {
-    update: XOR<Message_v2UpdateWithoutVotesInput, Message_v2UncheckedUpdateWithoutVotesInput>
-    create: XOR<Message_v2CreateWithoutVotesInput, Message_v2UncheckedCreateWithoutVotesInput>
-    where?: Message_v2WhereInput
+  export type MessageUpsertWithoutVotesInput = {
+    update: XOR<MessageUpdateWithoutVotesInput, MessageUncheckedUpdateWithoutVotesInput>
+    create: XOR<MessageCreateWithoutVotesInput, MessageUncheckedCreateWithoutVotesInput>
+    where?: MessageWhereInput
   }
 
-  export type Message_v2UpdateToOneWithWhereWithoutVotesInput = {
-    where?: Message_v2WhereInput
-    data: XOR<Message_v2UpdateWithoutVotesInput, Message_v2UncheckedUpdateWithoutVotesInput>
+  export type MessageUpdateToOneWithWhereWithoutVotesInput = {
+    where?: MessageWhereInput
+    data: XOR<MessageUpdateWithoutVotesInput, MessageUncheckedUpdateWithoutVotesInput>
   }
 
-  export type Message_v2UpdateWithoutVotesInput = {
+  export type MessageUpdateWithoutVotesInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    baseId?: NullableStringFieldUpdateOperationsInput | string | null
-    previousVersionId?: NullableStringFieldUpdateOperationsInput | string | null
-    supersededById?: NullableStringFieldUpdateOperationsInput | string | null
-    regenerationGroupId?: NullableStringFieldUpdateOperationsInput | string | null
-    parentBaseId?: NullableStringFieldUpdateOperationsInput | string | null
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
   }
 
-  export type Message_v2UncheckedUpdateWithoutVotesInput = {
+  export type MessageUncheckedUpdateWithoutVotesInput = {
     id?: StringFieldUpdateOperationsInput | string
     chatId?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    baseId?: NullableStringFieldUpdateOperationsInput | string | null
-    previousVersionId?: NullableStringFieldUpdateOperationsInput | string | null
-    supersededById?: NullableStringFieldUpdateOperationsInput | string | null
-    regenerationGroupId?: NullableStringFieldUpdateOperationsInput | string | null
-    parentBaseId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ChatUpsertWithoutVotesInput = {
@@ -19642,7 +20989,7 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
-    messages?: Message_v2UpdateManyWithoutChatNestedInput
+    messages?: MessageUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
@@ -19657,7 +21004,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
-    messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
   }
@@ -19669,6 +21016,7 @@ export namespace Prisma {
     suggestions?: SuggestionCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDocumentsInput = {
@@ -19678,6 +21026,7 @@ export namespace Prisma {
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDocumentsInput = {
@@ -19733,6 +21082,7 @@ export namespace Prisma {
     suggestions?: SuggestionUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDocumentsInput = {
@@ -19742,6 +21092,7 @@ export namespace Prisma {
     suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type SuggestionUpsertWithWhereUniqueWithoutDocumentInput = {
@@ -19767,6 +21118,7 @@ export namespace Prisma {
     documents?: DocumentCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSuggestionsInput = {
@@ -19776,6 +21128,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSuggestionsInput = {
@@ -19824,6 +21177,7 @@ export namespace Prisma {
     documents?: DocumentUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSuggestionsInput = {
@@ -19833,6 +21187,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type DocumentUpsertWithoutSuggestionsInput = {
@@ -19874,8 +21229,8 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
-    messages?: Message_v2CreateNestedManyWithoutChatInput
-    votes?: Vote_v2CreateNestedManyWithoutChatInput
+    messages?: MessageCreateNestedManyWithoutChatInput
+    votes?: VoteCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
   }
 
@@ -19889,8 +21244,8 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
-    messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
-    votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
+    messages?: MessageUncheckedCreateNestedManyWithoutChatInput
+    votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
   }
 
@@ -19920,8 +21275,8 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
-    messages?: Message_v2UpdateManyWithoutChatNestedInput
-    votes?: Vote_v2UpdateManyWithoutChatNestedInput
+    messages?: MessageUpdateManyWithoutChatNestedInput
+    votes?: VoteUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
 
@@ -19935,8 +21290,8 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
-    messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
-    votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
+    votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
   }
 
@@ -19947,6 +21302,7 @@ export namespace Prisma {
     documents?: DocumentCreateNestedManyWithoutUserInput
     suggestions?: SuggestionCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutArchiveEntriesInput = {
@@ -19956,6 +21312,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutArchiveEntriesInput = {
@@ -20057,6 +21414,7 @@ export namespace Prisma {
     documents?: DocumentUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutArchiveEntriesInput = {
@@ -20066,6 +21424,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ArchiveLinkUpsertWithWhereUniqueWithoutSourceInput = {
@@ -20138,8 +21497,8 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
-    messages?: Message_v2CreateNestedManyWithoutChatInput
-    votes?: Vote_v2CreateNestedManyWithoutChatInput
+    messages?: MessageCreateNestedManyWithoutChatInput
+    votes?: VoteCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
   }
 
@@ -20153,8 +21512,8 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
-    messages?: Message_v2UncheckedCreateNestedManyWithoutChatInput
-    votes?: Vote_v2UncheckedCreateNestedManyWithoutChatInput
+    messages?: MessageUncheckedCreateNestedManyWithoutChatInput
+    votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
   }
 
@@ -20201,6 +21560,7 @@ export namespace Prisma {
     documents?: DocumentCreateNestedManyWithoutUserInput
     suggestions?: SuggestionCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPinnedArchiveEntriesInput = {
@@ -20210,6 +21570,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedCreateNestedManyWithoutUserInput
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutUserInput
     archiveEntries?: ArchiveEntryUncheckedCreateNestedManyWithoutUserInput
+    rateLimit?: UserRateLimitUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPinnedArchiveEntriesInput = {
@@ -20238,8 +21599,8 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
-    messages?: Message_v2UpdateManyWithoutChatNestedInput
-    votes?: Vote_v2UpdateManyWithoutChatNestedInput
+    messages?: MessageUpdateManyWithoutChatNestedInput
+    votes?: VoteUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
   }
 
@@ -20253,8 +21614,8 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
-    messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
-    votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
+    votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
   }
 
@@ -20313,6 +21674,7 @@ export namespace Prisma {
     documents?: DocumentUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPinnedArchiveEntriesInput = {
@@ -20322,6 +21684,7 @@ export namespace Prisma {
     documents?: DocumentUncheckedUpdateManyWithoutUserNestedInput
     suggestions?: SuggestionUncheckedUpdateManyWithoutUserNestedInput
     archiveEntries?: ArchiveEntryUncheckedUpdateManyWithoutUserNestedInput
+    rateLimit?: UserRateLimitUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ArchiveEntryCreateWithoutOutgoingLinksInput = {
@@ -20516,8 +21879,8 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
-    messages?: Message_v2UpdateManyWithoutChatNestedInput
-    votes?: Vote_v2UpdateManyWithoutChatNestedInput
+    messages?: MessageUpdateManyWithoutChatNestedInput
+    votes?: VoteUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
   }
@@ -20531,8 +21894,8 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
-    messages?: Message_v2UncheckedUpdateManyWithoutChatNestedInput
-    votes?: Vote_v2UncheckedUpdateManyWithoutChatNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
+    votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
   }
@@ -20663,20 +22026,15 @@ export namespace Prisma {
     pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type Message_v2CreateManyChatInput = {
+  export type MessageCreateManyChatInput = {
     id?: string
     role: string
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
-    baseId?: string | null
-    previousVersionId?: string | null
-    supersededById?: string | null
-    regenerationGroupId?: string | null
-    parentBaseId?: string | null
   }
 
-  export type Vote_v2CreateManyChatInput = {
+  export type VoteCreateManyChatInput = {
     messageId: string
     isUpvoted: boolean
   }
@@ -20693,58 +22051,43 @@ export namespace Prisma {
     pinnedAt?: Date | string
   }
 
-  export type Message_v2UpdateWithoutChatInput = {
+  export type MessageUpdateWithoutChatInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    baseId?: NullableStringFieldUpdateOperationsInput | string | null
-    previousVersionId?: NullableStringFieldUpdateOperationsInput | string | null
-    supersededById?: NullableStringFieldUpdateOperationsInput | string | null
-    regenerationGroupId?: NullableStringFieldUpdateOperationsInput | string | null
-    parentBaseId?: NullableStringFieldUpdateOperationsInput | string | null
-    votes?: Vote_v2UpdateManyWithoutMessageNestedInput
+    votes?: VoteUpdateManyWithoutMessageNestedInput
   }
 
-  export type Message_v2UncheckedUpdateWithoutChatInput = {
+  export type MessageUncheckedUpdateWithoutChatInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    baseId?: NullableStringFieldUpdateOperationsInput | string | null
-    previousVersionId?: NullableStringFieldUpdateOperationsInput | string | null
-    supersededById?: NullableStringFieldUpdateOperationsInput | string | null
-    regenerationGroupId?: NullableStringFieldUpdateOperationsInput | string | null
-    parentBaseId?: NullableStringFieldUpdateOperationsInput | string | null
-    votes?: Vote_v2UncheckedUpdateManyWithoutMessageNestedInput
+    votes?: VoteUncheckedUpdateManyWithoutMessageNestedInput
   }
 
-  export type Message_v2UncheckedUpdateManyWithoutChatInput = {
+  export type MessageUncheckedUpdateManyWithoutChatInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    baseId?: NullableStringFieldUpdateOperationsInput | string | null
-    previousVersionId?: NullableStringFieldUpdateOperationsInput | string | null
-    supersededById?: NullableStringFieldUpdateOperationsInput | string | null
-    regenerationGroupId?: NullableStringFieldUpdateOperationsInput | string | null
-    parentBaseId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type Vote_v2UpdateWithoutChatInput = {
+  export type VoteUpdateWithoutChatInput = {
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
-    message?: Message_v2UpdateOneRequiredWithoutVotesNestedInput
+    message?: MessageUpdateOneRequiredWithoutVotesNestedInput
   }
 
-  export type Vote_v2UncheckedUpdateWithoutChatInput = {
+  export type VoteUncheckedUpdateWithoutChatInput = {
     messageId?: StringFieldUpdateOperationsInput | string
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type Vote_v2UncheckedUpdateManyWithoutChatInput = {
+  export type VoteUncheckedUpdateManyWithoutChatInput = {
     messageId?: StringFieldUpdateOperationsInput | string
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
   }
@@ -20785,22 +22128,22 @@ export namespace Prisma {
     pinnedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type Vote_v2CreateManyMessageInput = {
+  export type VoteCreateManyMessageInput = {
     chatId: string
     isUpvoted: boolean
   }
 
-  export type Vote_v2UpdateWithoutMessageInput = {
+  export type VoteUpdateWithoutMessageInput = {
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
     chat?: ChatUpdateOneRequiredWithoutVotesNestedInput
   }
 
-  export type Vote_v2UncheckedUpdateWithoutMessageInput = {
+  export type VoteUncheckedUpdateWithoutMessageInput = {
     chatId?: StringFieldUpdateOperationsInput | string
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type Vote_v2UncheckedUpdateManyWithoutMessageInput = {
+  export type VoteUncheckedUpdateManyWithoutMessageInput = {
     chatId?: StringFieldUpdateOperationsInput | string
     isUpvoted?: BoolFieldUpdateOperationsInput | boolean
   }

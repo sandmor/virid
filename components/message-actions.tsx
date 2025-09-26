@@ -7,9 +7,7 @@ import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { Action, Actions } from "./elements/actions";
 import { CopyIcon, PencilEditIcon, ThumbDownIcon, ThumbUpIcon } from "./icons";
-import dynamic from "next/dynamic";
-
-const AssistantVariantHistory = dynamic(() => import("./assistant-variant-history").then(m => m.AssistantVariantHistory), { ssr: false });
+// Variant history removed with simplified message model
 
 export function PureMessageActions({
   chatId,
@@ -18,6 +16,7 @@ export function PureMessageActions({
   isLoading,
   setMode,
   onRegenerate,
+  disableRegenerate,
 }: {
   chatId: string;
   message: ChatMessage;
@@ -25,6 +24,7 @@ export function PureMessageActions({
   isLoading: boolean;
   setMode?: (mode: "view" | "edit") => void;
   onRegenerate?: (assistantMessageId: string) => void;
+  disableRegenerate?: boolean;
 }) {
   const queryClient = useQueryClient();
   const voteQueryKey = ["chat","votes", chatId];
@@ -132,21 +132,14 @@ export function PureMessageActions({
     <Actions className="-ml-0.5">
       {onRegenerate && message.role === "assistant" && (
         <Action
-          onClick={() => onRegenerate(message.id)}
-          tooltip="Regenerate"
+          onClick={() => !disableRegenerate && onRegenerate(message.id)}
+          tooltip={disableRegenerate ? "Regenerating…" : "Regenerate"}
+          disabled={disableRegenerate}
         >
           <PencilEditIcon />
         </Action>
       )}
-      {message.role === "assistant" && (
-        <AssistantVariantHistory
-          chatId={chatId}
-          messageId={message.id}
-          onSelectVariant={() => {
-            // For now we only display variants; selecting could in future replace visible content.
-          }}
-        />
-      )}
+      {/* Variant history action removed */}
       <Action onClick={handleCopy} tooltip="Copy">
         <CopyIcon />
       </Action>

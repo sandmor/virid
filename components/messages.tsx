@@ -21,6 +21,7 @@ type MessagesProps = {
   isArtifactVisible: boolean;
   selectedModelId: string;
   onRegenerateAssistant?: (assistantMessageId: string) => void;
+  disableRegenerate?: boolean;
 };
 
 function PureMessages({
@@ -33,6 +34,7 @@ function PureMessages({
   isReadonly,
   selectedModelId,
   onRegenerateAssistant,
+  disableRegenerate,
 }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
@@ -90,6 +92,7 @@ function PureMessages({
                   ? votes.find((vote) => vote.messageId === message.id)
                   : undefined
               }
+              disableRegenerate={disableRegenerate}
             />
           ))}
 

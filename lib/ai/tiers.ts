@@ -5,7 +5,9 @@ import type { UserType } from "@/lib/auth/types";
 export type TierRecord = {
   id: string;
   modelIds: string[];
-  maxMessagesPerDay: number;
+  bucketCapacity: number;
+  bucketRefillAmount: number;
+  bucketRefillIntervalSeconds: number;
 };
 
 // Fallback definitions used if the DB rows are missing (e.g. before migrations run or during first boot)
@@ -17,7 +19,9 @@ const FALLBACK_TIERS: Record<UserType, TierRecord> = {
       "openrouter:x-ai/grok-4-fast:free",
       "openrouter:moonshotai/kimi-k2:free",
     ],
-    maxMessagesPerDay: 20,
+    bucketCapacity: 60, // allow bursts up to 60 messages
+    bucketRefillAmount: 20, // refill 20 per hour
+    bucketRefillIntervalSeconds: 3600,
   },
   regular: {
     id: "regular",
@@ -30,7 +34,9 @@ const FALLBACK_TIERS: Record<UserType, TierRecord> = {
       "openrouter:x-ai/grok-4-fast:free",
       "openrouter:moonshotai/kimi-k2:free",
     ],
-    maxMessagesPerDay: 100,
+    bucketCapacity: 300,
+    bucketRefillAmount: 100,
+    bucketRefillIntervalSeconds: 3600,
   },
 };
 
@@ -56,10 +62,13 @@ async function fetchTier(id: string): Promise<TierRecord> {
     throw new Error(`Tier '${id}' not found and no fallback available`);
   }
 
+  const r: any = row as any;
   return {
-    id: row.id,
-    modelIds: row.modelIds,
-    maxMessagesPerDay: row.maxMessagesPerDay,
+    id: r.id,
+    modelIds: r.modelIds,
+    bucketCapacity: r.bucketCapacity ?? FALLBACK_TIERS[id as UserType].bucketCapacity,
+    bucketRefillAmount: r.bucketRefillAmount ?? FALLBACK_TIERS[id as UserType].bucketRefillAmount,
+    bucketRefillIntervalSeconds: r.bucketRefillIntervalSeconds ?? FALLBACK_TIERS[id as UserType].bucketRefillIntervalSeconds,
   };
 }
 

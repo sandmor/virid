@@ -18,8 +18,8 @@ export type Stream = Prisma.StreamGetPayload<{}>;
 export type ArchiveEntry = Prisma.ArchiveEntryGetPayload<{}>;
 export type ArchiveLink = Prisma.ArchiveLinkGetPayload<{}>;
 
-// Message_v2 is the current message table used by the app
-export type DBMessage = Prisma.Message_v2GetPayload<{}>;
+// Message is the current message table used by the app
+export type DBMessage = Prisma.MessageGetPayload<{}>;
 
 // Current vote type used by UI components
-export type Vote = Prisma.Vote_v2GetPayload<{}>;
+export type Vote = Prisma.VoteGetPayload<{}>;

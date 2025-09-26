@@ -42,16 +42,15 @@ import {
   createStreamId,
   deleteChatById,
   getChatById,
-  getMessageCountByUserId,
   getMessagesByChatId,
   getActiveMessagesByChatId,
   saveChat,
   saveMessages,
   updateChatLastContextById,
-  insertAssistantVariant,
-  saveAssistantInitialMessage,
+  saveAssistantMessage,
   getPinnedArchiveEntriesForChat,
 } from "@/lib/db/queries";
+import { consumeTokens } from "@/lib/rate-limit/token-bucket";
 import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
@@ -115,14 +114,12 @@ export async function POST(request: Request) {
       message,
       selectedChatModel,
       selectedVisibilityType,
-      regeneratingMessageId,
       initialPinnedSlugs,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel["id"];
       selectedVisibilityType: VisibilityType;
-      regeneratingMessageId?: string;
       initialPinnedSlugs?: string[];
     } = requestBody;
 
@@ -135,20 +132,29 @@ export async function POST(request: Request) {
     const userType: UserType = session.user.type;
 
     // Enforce model entitlement server-side (guards against tampered client requests)
-  const { modelIds: allowedModels, maxMessagesPerDay } = await getTierForUserType(userType);
+  const { modelIds: allowedModels, bucketCapacity, bucketRefillAmount, bucketRefillIntervalSeconds } = await getTierForUserType(userType);
     if (!isModelIdAllowed(selectedChatModel, allowedModels)) {
       return new ChatSDKError(
         userType === "guest" ? "forbidden:model" : "forbidden:model"
       ).toResponse();
     }
 
-    const messageCount = await getMessageCountByUserId({
-      id: session.user.id,
-      differenceInHours: 24,
-    });
-
-  if (messageCount > maxMessagesPerDay) {
-      return new ChatSDKError("rate_limit:chat").toResponse();
+    // Token bucket consumption: cost = 1 user message per invocation
+    try {
+      await consumeTokens({
+        userId: session.user.id,
+        cost: 1,
+        config: {
+          capacity: bucketCapacity,
+          refillAmount: bucketRefillAmount,
+          refillIntervalSeconds: bucketRefillIntervalSeconds,
+        },
+      });
+    } catch (e) {
+      if (e instanceof ChatSDKError && e.type === "rate_limit" && e.surface === "chat") {
+        return e.toResponse();
+      }
+      throw e;
     }
 
   const chat = await getChatById({ id });
@@ -203,6 +209,10 @@ export async function POST(request: Request) {
       country,
     };
 
+    // For a regeneration request we do NOT persist the user message again
+    // (same id) – otherwise we'd trigger a unique key violation. The
+    // downstream logic only needs the existing persisted user message plus
+    // the previous assistant message id for lineage mutation.
     await saveMessages({
       messages: [
         {
@@ -323,23 +333,12 @@ export async function POST(request: Request) {
         // messages includes the newly streamed assistant response as the last element
         const assistantMessage = messages.findLast((m) => m.role === "assistant");
         if (assistantMessage) {
-          if (requestBody.regeneratingMessageId) {
-            // Create variant and mark previous superseded
-            await insertAssistantVariant({
-              chatId: id,
-              previousAssistantMessageId: requestBody.regeneratingMessageId,
-              parts: assistantMessage.parts,
-              attachments: [],
-            });
-          } else {
-            // First generation path: save assistant message with lineage root fields
-            await saveAssistantInitialMessage({
-              id: assistantMessage.id,
-              chatId: id,
-              parts: assistantMessage.parts,
-              attachments: [],
-            });
-          }
+          await saveAssistantMessage({
+            id: assistantMessage.id,
+            chatId: id,
+            parts: assistantMessage.parts,
+            attachments: [],
+          });
         }
 
         if (finalMergedUsage) {

@@ -21,9 +21,12 @@ model Provider {
 }
 
 model Tier {
-  id                String   @id @db.VarChar(32)
-  modelIds          String[]
-  maxMessagesPerDay Int
+  id                          String   @id @db.VarChar(32)
+  modelIds                    String[]
+  // Token bucket configuration (per user for this tier)
+  bucketCapacity              Int // Maximum tokens that can accumulate
+  bucketRefillAmount          Int // Tokens added each interval
+  bucketRefillIntervalSeconds Int // Interval length in seconds
 
   @@map("Tier")
 }
@@ -37,8 +40,20 @@ model User {
   suggestions          Suggestion[]
   archiveEntries       ArchiveEntry[]
   pinnedArchiveEntries ChatPinnedArchiveEntry[]
+  rateLimit            UserRateLimit?
 
   @@map("User")
+}
+
+// Per-user token bucket runtime state for rate limiting
+model UserRateLimit {
+  userId     String   @id @db.VarChar(191)
+  tokens     Int
+  lastRefill DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("UserRateLimit")
 }
 
 model Chat {
@@ -55,8 +70,8 @@ model Chat {
   forkDepth           Int     @default(0)
 
   user                 User                     @relation(fields: [userId], references: [id])
-  messages             Message_v2[]
-  votes                Vote_v2[]
+  messages             Message[]
+  votes                Vote[]
   streams              Stream[]
   pinnedArchiveEntries ChatPinnedArchiveEntry[]
 
@@ -64,7 +79,7 @@ model Chat {
   @@map("Chat")
 }
 
-model Message_v2 {
+model Message {
   id          String   @id @default(uuid()) @db.Uuid
   chatId      String   @db.Uuid
   role        String
@@ -72,33 +87,23 @@ model Message_v2 {
   attachments Json
   createdAt   DateTime
 
-  // Versioning / regeneration lineage
-  baseId              String? @db.Uuid // Stable logical slot id across versions (first version id if null previously)
-  previousVersionId   String? @db.Uuid // Points to prior version in same chat
-  supersededById      String? @db.Uuid // Filled when a newer version replaces this version
-  regenerationGroupId String? @db.Uuid // Group multiple assistant variants from a single user turn
-  parentBaseId        String? @db.Uuid // BaseId of previous logical message (sequence helper)
+  chat  Chat   @relation(fields: [chatId], references: [id])
+  votes Vote[]
 
-  chat  Chat      @relation(fields: [chatId], references: [id])
-  votes Vote_v2[]
-
-  @@index([chatId, baseId])
-  @@index([previousVersionId])
-  @@index([supersededById])
-  @@index([regenerationGroupId])
-  @@map("Message_v2")
+  @@index([chatId])
+  @@map("Message")
 }
 
-model Vote_v2 {
+model Vote {
   chatId    String  @db.Uuid
   messageId String  @db.Uuid
   isUpvoted Boolean
 
-  message Message_v2 @relation(fields: [messageId], references: [id])
-  chat    Chat       @relation(fields: [chatId], references: [id])
+  message Message @relation(fields: [messageId], references: [id])
+  chat    Chat    @relation(fields: [chatId], references: [id])
 
   @@id([chatId, messageId])
-  @@map("Vote_v2")
+  @@map("Vote")
 }
 
 model Document {

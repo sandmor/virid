@@ -10,7 +10,9 @@ CREATE TABLE "public"."Provider" (
 CREATE TABLE "public"."Tier" (
     "id" VARCHAR(32) NOT NULL,
     "modelIds" TEXT[],
-    "maxMessagesPerDay" INTEGER NOT NULL,
+    "bucketCapacity" INTEGER NOT NULL,
+    "bucketRefillAmount" INTEGER NOT NULL,
+    "bucketRefillIntervalSeconds" INTEGER NOT NULL,
 
     CONSTRAINT "Tier_pkey" PRIMARY KEY ("id")
 );
@@ -21,6 +23,15 @@ CREATE TABLE "public"."User" (
     "email" VARCHAR(128) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."UserRateLimit" (
+    "userId" VARCHAR(191) NOT NULL,
+    "tokens" INTEGER NOT NULL,
+    "lastRefill" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserRateLimit_pkey" PRIMARY KEY ("userId")
 );
 
 -- CreateTable
@@ -39,29 +50,24 @@ CREATE TABLE "public"."Chat" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Message_v2" (
+CREATE TABLE "public"."Message" (
     "id" UUID NOT NULL,
     "chatId" UUID NOT NULL,
     "role" TEXT NOT NULL,
     "parts" JSONB NOT NULL,
     "attachments" JSONB NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL,
-    "baseId" UUID,
-    "previousVersionId" UUID,
-    "supersededById" UUID,
-    "regenerationGroupId" UUID,
-    "parentBaseId" UUID,
 
-    CONSTRAINT "Message_v2_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "public"."Vote_v2" (
+CREATE TABLE "public"."Vote" (
     "chatId" UUID NOT NULL,
     "messageId" UUID NOT NULL,
     "isUpvoted" BOOLEAN NOT NULL,
 
-    CONSTRAINT "Vote_v2_pkey" PRIMARY KEY ("chatId","messageId")
+    CONSTRAINT "Vote_pkey" PRIMARY KEY ("chatId","messageId")
 );
 
 -- CreateTable
@@ -141,16 +147,7 @@ CREATE TABLE "public"."ArchiveLink" (
 CREATE INDEX "Chat_parentChatId_idx" ON "public"."Chat"("parentChatId");
 
 -- CreateIndex
-CREATE INDEX "Message_v2_chatId_baseId_idx" ON "public"."Message_v2"("chatId", "baseId");
-
--- CreateIndex
-CREATE INDEX "Message_v2_previousVersionId_idx" ON "public"."Message_v2"("previousVersionId");
-
--- CreateIndex
-CREATE INDEX "Message_v2_supersededById_idx" ON "public"."Message_v2"("supersededById");
-
--- CreateIndex
-CREATE INDEX "Message_v2_regenerationGroupId_idx" ON "public"."Message_v2"("regenerationGroupId");
+CREATE INDEX "Message_chatId_idx" ON "public"."Message"("chatId");
 
 -- CreateIndex
 CREATE INDEX "ArchiveEntry_userId_slug_idx" ON "public"."ArchiveEntry"("userId", "slug");
@@ -180,16 +177,19 @@ CREATE INDEX "ArchiveLink_targetId_idx" ON "public"."ArchiveLink"("targetId");
 CREATE INDEX "ArchiveLink_type_idx" ON "public"."ArchiveLink"("type");
 
 -- AddForeignKey
+ALTER TABLE "public"."UserRateLimit" ADD CONSTRAINT "UserRateLimit_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "public"."Chat" ADD CONSTRAINT "Chat_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Message_v2" ADD CONSTRAINT "Message_v2_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "public"."Chat"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Message" ADD CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "public"."Chat"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Vote_v2" ADD CONSTRAINT "Vote_v2_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "public"."Message_v2"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Vote" ADD CONSTRAINT "Vote_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "public"."Message"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Vote_v2" ADD CONSTRAINT "Vote_v2_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "public"."Chat"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Vote" ADD CONSTRAINT "Vote_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "public"."Chat"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Document" ADD CONSTRAINT "Document_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -13,14 +13,16 @@ async function UpdateTierForm({ id }: { id: "guest" | "regular" }) {
       className="rounded-md border p-3 space-y-3"
       action={async (formData: FormData) => {
         "use server";
-        const maxMessagesPerDay = Number(formData.get("maxMessagesPerDay"));
+        const bucketCapacity = Number(formData.get("bucketCapacity"));
+        const bucketRefillAmount = Number(formData.get("bucketRefillAmount"));
+        const bucketRefillIntervalSeconds = Number(formData.get("bucketRefillIntervalSeconds"));
         const selected = (formData.getAll("modelIds") as string[]) || [];
         const modelIds = selected.map((s) => s.trim()).filter(Boolean);
-        if (!Number.isFinite(maxMessagesPerDay) || modelIds.length === 0) return;
-        await prisma.tier.upsert({
+        if ([bucketCapacity, bucketRefillAmount, bucketRefillIntervalSeconds].some(v => !Number.isFinite(v) || v <= 0) || modelIds.length === 0) return;
+        await (prisma.tier as any).upsert({
           where: { id },
-          create: { id, modelIds, maxMessagesPerDay },
-          update: { modelIds, maxMessagesPerDay },
+          create: { id, modelIds, bucketCapacity, bucketRefillAmount, bucketRefillIntervalSeconds },
+          update: { modelIds, bucketCapacity, bucketRefillAmount, bucketRefillIntervalSeconds },
         });
         invalidateTierCache(id);
         revalidatePath("/settings");
@@ -30,13 +32,20 @@ async function UpdateTierForm({ id }: { id: "guest" | "regular" }) {
         <span className="font-medium capitalize">{id} tier</span>
       </div>
       <ModelPickerFormFields name="modelIds" defaultValue={tier.modelIds} />
-      <Input
-        name="maxMessagesPerDay"
-        type="number"
-        min={1}
-        defaultValue={tier.maxMessagesPerDay}
-        required
-      />
+      <div className="grid grid-cols-3 gap-2">
+        <div className="space-y-1">
+          <label className="block text-[10px] uppercase tracking-wide text-muted-foreground">Capacity</label>
+          <Input name="bucketCapacity" type="number" min={1} defaultValue={tier.bucketCapacity} required />
+        </div>
+        <div className="space-y-1">
+          <label className="block text-[10px] uppercase tracking-wide text-muted-foreground">Refill Amt</label>
+          <Input name="bucketRefillAmount" type="number" min={1} defaultValue={tier.bucketRefillAmount} required />
+        </div>
+        <div className="space-y-1">
+          <label className="block text-[10px] uppercase tracking-wide text-muted-foreground">Refill (s)</label>
+          <Input name="bucketRefillIntervalSeconds" type="number" min={1} defaultValue={tier.bucketRefillIntervalSeconds} required />
+        </div>
+      </div>
       <input type="hidden" name="id" value={id} />
       <Button type="submit" className="self-start">Save {id}</Button>
     </form>

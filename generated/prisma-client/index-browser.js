@@ -128,12 +128,20 @@ exports.Prisma.ProviderScalarFieldEnum = {
 exports.Prisma.TierScalarFieldEnum = {
   id: 'id',
   modelIds: 'modelIds',
-  maxMessagesPerDay: 'maxMessagesPerDay'
+  bucketCapacity: 'bucketCapacity',
+  bucketRefillAmount: 'bucketRefillAmount',
+  bucketRefillIntervalSeconds: 'bucketRefillIntervalSeconds'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email'
+};
+
+exports.Prisma.UserRateLimitScalarFieldEnum = {
+  userId: 'userId',
+  tokens: 'tokens',
+  lastRefill: 'lastRefill'
 };
 
 exports.Prisma.ChatScalarFieldEnum = {
@@ -148,21 +156,16 @@ exports.Prisma.ChatScalarFieldEnum = {
   forkDepth: 'forkDepth'
 };
 
-exports.Prisma.Message_v2ScalarFieldEnum = {
+exports.Prisma.MessageScalarFieldEnum = {
   id: 'id',
   chatId: 'chatId',
   role: 'role',
   parts: 'parts',
   attachments: 'attachments',
-  createdAt: 'createdAt',
-  baseId: 'baseId',
-  previousVersionId: 'previousVersionId',
-  supersededById: 'supersededById',
-  regenerationGroupId: 'regenerationGroupId',
-  parentBaseId: 'parentBaseId'
+  createdAt: 'createdAt'
 };
 
-exports.Prisma.Vote_v2ScalarFieldEnum = {
+exports.Prisma.VoteScalarFieldEnum = {
   chatId: 'chatId',
   messageId: 'messageId',
   isUpvoted: 'isUpvoted'
@@ -258,9 +261,10 @@ exports.Prisma.ModelName = {
   Provider: 'Provider',
   Tier: 'Tier',
   User: 'User',
+  UserRateLimit: 'UserRateLimit',
   Chat: 'Chat',
-  Message_v2: 'Message_v2',
-  Vote_v2: 'Vote_v2',
+  Message: 'Message',
+  Vote: 'Vote',
   Document: 'Document',
   Suggestion: 'Suggestion',
   Stream: 'Stream',
