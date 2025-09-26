@@ -23,7 +23,10 @@ import { getTierForUserType } from "@/lib/ai/tiers";
 import type { ChatModel } from "@/lib/ai/models";
 import { isModelIdAllowed } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
-import { getLanguageModel, getResolvedProviderModelId } from "@/lib/ai/providers";
+import {
+  getLanguageModel,
+  getResolvedProviderModelId,
+} from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { archiveCreateEntry } from "@/lib/ai/tools/archive-create-entry";
 import { archiveReadEntry } from "@/lib/ai/tools/archive-read-entry";
@@ -56,6 +59,7 @@ import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
+import { updateChatTitleById } from "@/lib/db/queries";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;
@@ -114,16 +118,16 @@ export async function POST(request: Request) {
       message,
       selectedChatModel,
       selectedVisibilityType,
-      initialPinnedSlugs,
+      pinnedSlugs,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel["id"];
       selectedVisibilityType: VisibilityType;
-      initialPinnedSlugs?: string[];
+      pinnedSlugs?: string[];
     } = requestBody;
 
-  const session = await getAppSession();
+    const session = await getAppSession();
 
     if (!session?.user) {
       return new ChatSDKError("unauthorized:chat").toResponse();
@@ -132,7 +136,12 @@ export async function POST(request: Request) {
     const userType: UserType = session.user.type;
 
     // Enforce model entitlement server-side (guards against tampered client requests)
-  const { modelIds: allowedModels, bucketCapacity, bucketRefillAmount, bucketRefillIntervalSeconds } = await getTierForUserType(userType);
+    const {
+      modelIds: allowedModels,
+      bucketCapacity,
+      bucketRefillAmount,
+      bucketRefillIntervalSeconds,
+    } = await getTierForUserType(userType);
     if (!isModelIdAllowed(selectedChatModel, allowedModels)) {
       return new ChatSDKError(
         userType === "guest" ? "forbidden:model" : "forbidden:model"
@@ -151,54 +160,89 @@ export async function POST(request: Request) {
         },
       });
     } catch (e) {
-      if (e instanceof ChatSDKError && e.type === "rate_limit" && e.surface === "chat") {
+      if (
+        e instanceof ChatSDKError &&
+        e.type === "rate_limit" &&
+        e.surface === "chat"
+      ) {
         return e.toResponse();
       }
       throw e;
     }
 
-  const chat = await getChatById({ id });
-  let createdNewChat = false;
+    // Fetch chat + any other needed data concurrently where possible
+    const chat = await getChatById({ id });
+    let createdNewChat = false;
 
     if (chat) {
       if (chat.userId !== session.user.id) {
         return new ChatSDKError("forbidden:chat").toResponse();
       }
     } else {
-      const title = await generateTitleFromUserMessage({
-        message,
-      });
+      // Fast placeholder title from user text (avoid model call latency)
+      const placeholder = (() => {
+        try {
+          const textParts = message.parts
+            .filter((p: any) => p.type === "text" && typeof p.text === "string")
+            .map((p: any) => p.text)
+            .join(" ")
+            .trim();
+          if (!textParts) return "New Chat";
+          return textParts.slice(0, 60);
+        } catch {
+          return "New Chat";
+        }
+      })();
 
       await saveChat({
         id,
         userId: session.user.id,
-        title,
+        title: placeholder,
         visibility: selectedVisibilityType,
       });
       createdNewChat = true;
-      // If UI provided initialPinnedSlugs, attempt to pin them now (best-effort, ignore individual failures)
-      if (initialPinnedSlugs && initialPinnedSlugs.length) {
-        // De-duplicate slugs client may have repeated
-        const unique = Array.from(new Set(initialPinnedSlugs)).slice(0, 12);
-        // Lazy import pin helper to avoid expanding top-level import surface
-        const { pinArchiveEntryToChat } = await import("@/lib/db/queries");
-        await Promise.all(
-          unique.map(async (slug) => {
-            try {
-              await pinArchiveEntryToChat({ userId: session.user.id, chatId: id, slug });
-            } catch (e) {
-              // Swallow errors – individual pin failure shouldn't abort first message send
-              console.warn("Initial pin failed", { chatId: id, slug, error: e });
-            }
-          })
-        );
+
+      // Fire-and-forget real title generation (no await)
+      (async () => {
+        try {
+          const realTitle = await generateTitleFromUserMessage({ message });
+          if (realTitle && realTitle !== placeholder) {
+            await updateChatTitleById({ chatId: id, title: realTitle });
+          }
+        } catch (e) {
+          console.warn("Deferred title generation failed", e);
+        }
+      })();
+
+      // Initial pinning executes in background; we don't block stream start.
+      if (pinnedSlugs && pinnedSlugs.length) {
+        (async () => {
+          const unique = Array.from(new Set(pinnedSlugs)).slice(0, 12);
+          try {
+            const { pinArchiveEntryToChat } = await import("@/lib/db/queries");
+            await Promise.all(
+              unique.map(async (slug) => {
+                try {
+                  await pinArchiveEntryToChat({
+                    userId: session.user.id,
+                    chatId: id,
+                    slug,
+                  });
+                } catch (e) {
+                  console.warn("Initial pin failed", {
+                    chatId: id,
+                    slug,
+                    error: e,
+                  });
+                }
+              })
+            );
+          } catch (e) {
+            console.warn("Pin helper import failed", e);
+          }
+        })();
       }
     }
-
-  // Use only active (non-superseded) versions for context
-  const messagesFromDb = await getActiveMessagesByChatId({ id });
-  // For regeneration, we still send the full active path + new user message (handled client side presently)
-  const uiMessages = [...convertToUIMessages(messagesFromDb), message];
 
     const { longitude, latitude, city, country } = geolocation(request);
 
@@ -213,42 +257,92 @@ export async function POST(request: Request) {
     // (same id) – otherwise we'd trigger a unique key violation. The
     // downstream logic only needs the existing persisted user message plus
     // the previous assistant message id for lineage mutation.
-    await saveMessages({
-      messages: [
-        {
-          chatId: id,
-          id: message.id,
-          role: "user",
-          parts: message.parts,
-          attachments: [],
-          createdAt: new Date(),
-        },
-      ],
-    });
-
-    const streamId = generateUUID();
-    await createStreamId({ streamId, chatId: id });
-
     let finalMergedUsage: AppUsage | undefined;
 
     const stream = createUIMessageStream({
       execute: async ({ writer: dataStream }) => {
-        const model = await getLanguageModel(selectedChatModel);
-        // Load pinned archive entries for this chat (if any) to enrich system prompt
-        let pinnedForPrompt: { slug: string; entity: string; body: string }[] | undefined;
-        try {
-          const pinned = await getPinnedArchiveEntriesForChat({ userId: session.user.id, chatId: id });
-          if (pinned.length) {
-            // Only include body if reasonably small; large bodies trimmed inside systemPrompt
-            pinnedForPrompt = pinned.map(p => ({ slug: p.slug, entity: p.entity, body: p.body }));
+        // Immediately send init event to flush headers early
+        dataStream.write({
+          type: "data-init",
+          data: { chatId: id, createdNewChat },
+        });
+        // Kick off persistence & context gathering in parallel.
+        const streamId = generateUUID();
+        const persistUserMessagePromise = saveMessages({
+          messages: [
+            {
+              chatId: id,
+              id: message.id,
+              role: "user",
+              parts: message.parts,
+              attachments: [],
+              createdAt: new Date(),
+            },
+          ],
+        }).catch((e) => {
+          console.warn("Failed to persist user message (non-fatal)", e);
+        });
+        const streamIdPromise = createStreamId({ streamId, chatId: id }).catch(
+          (e) => console.warn("Failed to persist stream id (non-fatal)", e)
+        );
+
+        const messagesPromise = getActiveMessagesByChatId({ id }).catch((e) => {
+          console.warn(
+            "Failed to load messages, proceeding with only user message",
+            e
+          );
+          return [] as any[];
+        });
+        const modelPromise = getLanguageModel(selectedChatModel);
+        const pinnedPromise = (async () => {
+          try {
+            const dbPinned = createdNewChat
+              ? []
+              : await getPinnedArchiveEntriesForChat({
+                  userId: session.user.id,
+                  chatId: id,
+                });
+            const supplied = pinnedSlugs
+              ? Array.from(new Set(pinnedSlugs))
+              : [];
+            if (!dbPinned.length && !supplied.length) return undefined;
+            // Merge: db first (stable order by pinnedAt asc), then any supplied not already present
+            const existingSlugSet = new Set(dbPinned.map((p) => p.slug));
+            const merged = [
+              ...dbPinned.map((p) => ({
+                slug: p.slug,
+                entity: p.entity,
+                body: p.body,
+              })),
+              ...supplied
+                .filter((slug) => !existingSlugSet.has(slug))
+                .map((slug) => ({ slug, entity: "archive", body: "" })), // body blank; model prompt handler can trim / request body later if needed
+            ];
+            return merged;
+          } catch (e) {
+            console.warn("Failed to load/merge pinned entries for chat", id, e);
+            return undefined;
           }
-        } catch (e) {
-          console.warn("Failed to load pinned entries for chat", id, e);
-        }
+        })();
+
+        const [messagesFromDb, model, pinnedForPrompt] = await Promise.all([
+          messagesPromise,
+          modelPromise,
+          pinnedPromise,
+        ]);
+
+        const uiMessages = [
+          ...convertToUIMessages(messagesFromDb as any),
+          message,
+        ];
 
         const result = streamText({
           model,
-          system: systemPrompt({ selectedChatModel, requestHints, pinnedEntries: pinnedForPrompt }),
+          system: systemPrompt({
+            selectedChatModel,
+            requestHints,
+            pinnedEntries: pinnedForPrompt,
+          }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools: [
@@ -320,6 +414,11 @@ export async function POST(request: Request) {
           },
         });
 
+        // Ensure persistence tasks complete, but don't block model start
+        Promise.all([persistUserMessagePromise, streamIdPromise]).catch(() => {
+          /* already logged individually */
+        });
+
         result.consumeStream();
 
         dataStream.merge(
@@ -331,7 +430,9 @@ export async function POST(request: Request) {
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
         // messages includes the newly streamed assistant response as the last element
-        const assistantMessage = messages.findLast((m) => m.role === "assistant");
+        const assistantMessage = messages.findLast(
+          (m) => m.role === "assistant"
+        );
         if (assistantMessage) {
           await saveAssistantMessage({
             id: assistantMessage.id,
@@ -367,14 +468,20 @@ export async function POST(request: Request) {
     //   );
     // }
 
-    return new Response(stream.pipeThrough(new JsonToSseTransformStream()));
+    return new Response(stream.pipeThrough(new JsonToSseTransformStream()), {
+      headers: {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-store",
+        "X-Accel-Buffering": "no",
+        Connection: "keep-alive",
+      },
+    });
   } catch (error) {
     const vercelId = request.headers.get("x-vercel-id");
 
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
-
 
     console.error("Unhandled error in chat API:", error, { vercelId });
     return new ChatSDKError("offline:chat").toResponse();
@@ -390,7 +497,6 @@ export async function DELETE(request: Request) {
   }
 
   // Unified session (Clerk or guest)
-  const { getAppSession } = await import("@/lib/auth/session");
   const session = await getAppSession();
 
   if (!session?.user) {

@@ -56,8 +56,10 @@ export function Chat({
 
   // Provisional pinning (allow selecting archive entries before first message creates backend chat row)
   const [stagedPinnedSlugs, setStagedPinnedSlugs] = useState<string[]>([]);
+  const stagedPinnedSlugsRef = useRef<string[]>(stagedPinnedSlugs);
   const chatHasStartedRef = useRef(initialMessages.length > 0);
   useEffect(() => { if (initialMessages.length > 0) chatHasStartedRef.current = true; }, [initialMessages.length]);
+  useEffect(() => { stagedPinnedSlugsRef.current = stagedPinnedSlugs; }, [stagedPinnedSlugs]);
 
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
@@ -80,7 +82,7 @@ export function Chat({
       api: "/api/chat",
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest(request) {
-        const includeInitialPins = !chatHasStartedRef.current && stagedPinnedSlugs.length > 0;
+        const staged = stagedPinnedSlugsRef.current;
         return {
           body: {
             ...request.body,
@@ -88,7 +90,7 @@ export function Chat({
             message: request.messages.at(-1),
             selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibilityType,
-            initialPinnedSlugs: includeInitialPins ? stagedPinnedSlugs : undefined,
+            pinnedSlugs: staged.length > 0 ? staged : undefined,
           },
         };
       },
@@ -102,7 +104,12 @@ export function Chat({
     onFinish: () => {
       // Invalidate chat history infinite query (new message might affect ordering)
       queryClient.invalidateQueries({ queryKey: ["chat","history"] });
-      chatHasStartedRef.current = true; // lock-in; subsequent sends won't include initialPinnedSlugs
+      if (!chatHasStartedRef.current) {
+        chatHasStartedRef.current = true;
+        // After first message, pins are persisted or merged; clear staged state & ref
+        setStagedPinnedSlugs([]);
+        stagedPinnedSlugsRef.current = [];
+      }
     },
     onError: (error) => {
       if (error instanceof ChatSDKError) {
@@ -110,8 +117,6 @@ export function Chat({
       }
     },
   });
-
-  // Regeneration now handled by chat fork redirect; no inline state needed
 
   const searchParams = useSearchParams();
   const query = searchParams.get("query");
@@ -171,12 +176,17 @@ export function Chat({
           chatId={id}
           isReadonly={isReadonly}
           selectedVisibilityType={initialVisibilityType}
-            stagedPinnedSlugs={stagedPinnedSlugs}
-            onAddStagedPin={(slug) => setStagedPinnedSlugs((prev) => prev.includes(slug) ? prev : [...prev, slug])}
-            onRemoveStagedPin={(slug) => setStagedPinnedSlugs((prev) => prev.filter(s => s !== slug))}
-            chatHasStarted={chatHasStartedRef.current}
+          stagedPinnedSlugs={stagedPinnedSlugs}
+          onAddStagedPin={(slug) =>
+            setStagedPinnedSlugs((prev) =>
+              prev.includes(slug) ? prev : [...prev, slug]
+            )
+          }
+          onRemoveStagedPin={(slug) =>
+            setStagedPinnedSlugs((prev) => prev.filter((s) => s !== slug))
+          }
+          chatHasStarted={chatHasStartedRef.current}
         />
-
 
         <Messages
           chatId={id}
@@ -204,13 +214,16 @@ export function Chat({
               const qp = result.previousUserText
                 ? `?query=${encodeURIComponent(result.previousUserText)}`
                 : "";
-              // Optimistic UX: delay a tick to allow toast to render
               requestAnimationFrame(() => {
                 router.push(`/chat/${result.newChatId}${qp}`);
               });
             } catch (e) {
               console.error("Regenerate fork failed", e);
-              toast({ type: "error", description: (e as Error).message || "Failed to fork chat" });
+              toast({
+                type: "error",
+                description:
+                  (e as Error).message || "Failed to fork chat",
+              });
               setIsForking(false);
             }
           }}

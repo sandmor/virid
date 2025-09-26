@@ -28,18 +28,21 @@ export const postRequestBodySchema = z.object({
     .min(3)
     .max(200)
     .refine((v) => v.includes(":"), {
-      message: "selectedChatModel must be a composite id of the form 'provider:model'",
+      message:
+        "selectedChatModel must be a composite id of the form 'provider:model'",
     }),
   selectedVisibilityType: z.enum(["public", "private"]),
-  // Optional list of archive entry slugs to pin atomically when a brand new chat is created
-  // This allows the UI to stage memory pins before the first message is sent (chat row does not yet exist)
-  initialPinnedSlugs: z
+  // Optional list of archive entry slugs to include immediately (will also be persisted if chat is new).
+  // These are additive to whatever is already pinned in the database.
+  pinnedSlugs: z
     .array(
       z
         .string()
         .min(1)
         .max(128)
-        .regex(/^[a-zA-Z0-9._:-]+$/, { message: "Slug contains invalid characters" })
+        .regex(/^[a-zA-Z0-9._:-]+$/, {
+          message: "Slug contains invalid characters",
+        })
     )
     .max(12)
     .optional(),
