@@ -207,7 +207,6 @@ const PurePreviewMessage = ({
               );
             }
 
-            // Archive tools visibility similar to weather tool
             if (
               type === "tool-archiveCreateEntry" ||
               type === "tool-archiveReadEntry" ||
