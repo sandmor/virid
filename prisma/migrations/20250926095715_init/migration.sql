@@ -42,6 +42,7 @@ CREATE TABLE "public"."Chat" (
     "userId" VARCHAR(191) NOT NULL,
     "visibility" TEXT NOT NULL DEFAULT 'private',
     "lastContext" JSONB,
+    "settings" JSONB,
     "parentChatId" UUID,
     "forkedFromMessageId" UUID,
     "forkDepth" INTEGER NOT NULL DEFAULT 0,

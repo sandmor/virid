@@ -9,6 +9,7 @@ import { Plus } from "lucide-react";
 import { ChatPinnedArchive } from "./chat-pinned-archive";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
+import { ChatToolSelector } from "./chat-tool-selector";
 
 function PureChatHeader({
   chatId,
@@ -18,6 +19,8 @@ function PureChatHeader({
   onAddStagedPin,
   onRemoveStagedPin,
   chatHasStarted,
+  stagedAllowedTools,
+  onUpdateStagedAllowedTools,
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
@@ -26,6 +29,8 @@ function PureChatHeader({
   onAddStagedPin: (slug: string) => void;
   onRemoveStagedPin: (slug: string) => void;
   chatHasStarted: boolean;
+  stagedAllowedTools?: string[] | undefined;
+  onUpdateStagedAllowedTools?: (tools: string[] | undefined) => void;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -64,16 +69,27 @@ function PureChatHeader({
             onRemoveStagedPin={onRemoveStagedPin}
             chatHasStarted={chatHasStarted}
           />
+          <ChatToolSelector
+            chatId={chatId}
+            chatHasStarted={chatHasStarted}
+            stagedAllowedTools={stagedAllowedTools}
+            onUpdateStagedAllowedTools={onUpdateStagedAllowedTools}
+          />
         </div>
       )}
     </header>
   );
 }
 
-export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) =>
-  prevProps.chatId === nextProps.chatId &&
-  prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
-  prevProps.isReadonly === nextProps.isReadonly &&
-  prevProps.chatHasStarted === nextProps.chatHasStarted &&
-  prevProps.stagedPinnedSlugs.join("|") === nextProps.stagedPinnedSlugs.join("|")
+export const ChatHeader = memo(
+  PureChatHeader,
+  (prevProps, nextProps) =>
+    prevProps.chatId === nextProps.chatId &&
+    prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
+    prevProps.isReadonly === nextProps.isReadonly &&
+    prevProps.chatHasStarted === nextProps.chatHasStarted &&
+    prevProps.stagedPinnedSlugs.join("|") ===
+      nextProps.stagedPinnedSlugs.join("|") &&
+    (prevProps.stagedAllowedTools?.join("|") ?? "__all__") ===
+      (nextProps.stagedAllowedTools?.join("|") ?? "__all__")
 );

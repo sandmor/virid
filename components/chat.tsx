@@ -57,9 +57,23 @@ export function Chat({
   // Provisional pinning (allow selecting archive entries before first message creates backend chat row)
   const [stagedPinnedSlugs, setStagedPinnedSlugs] = useState<string[]>([]);
   const stagedPinnedSlugsRef = useRef<string[]>(stagedPinnedSlugs);
+  // Provisional tool allow list (undefined => all, subset array => restrict)
+  const [stagedAllowedTools, setStagedAllowedTools] = useState<
+    string[] | undefined
+  >(undefined);
+  const stagedAllowedToolsRef = useRef<string[] | undefined>(
+    stagedAllowedTools
+  );
   const chatHasStartedRef = useRef(initialMessages.length > 0);
-  useEffect(() => { if (initialMessages.length > 0) chatHasStartedRef.current = true; }, [initialMessages.length]);
-  useEffect(() => { stagedPinnedSlugsRef.current = stagedPinnedSlugs; }, [stagedPinnedSlugs]);
+  useEffect(() => {
+    if (initialMessages.length > 0) chatHasStartedRef.current = true;
+  }, [initialMessages.length]);
+  useEffect(() => {
+    stagedPinnedSlugsRef.current = stagedPinnedSlugs;
+  }, [stagedPinnedSlugs]);
+  useEffect(() => {
+    stagedAllowedToolsRef.current = stagedAllowedTools;
+  }, [stagedAllowedTools]);
 
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
@@ -83,6 +97,7 @@ export function Chat({
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest(request) {
         const staged = stagedPinnedSlugsRef.current;
+        const stagedTools = stagedAllowedToolsRef.current;
         return {
           body: {
             ...request.body,
@@ -91,6 +106,7 @@ export function Chat({
             selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibilityType,
             pinnedSlugs: staged.length > 0 ? staged : undefined,
+            allowedTools: !chatHasStartedRef.current ? stagedTools : undefined,
           },
         };
       },
@@ -103,12 +119,14 @@ export function Chat({
     },
     onFinish: () => {
       // Invalidate chat history infinite query (new message might affect ordering)
-      queryClient.invalidateQueries({ queryKey: ["chat","history"] });
+      queryClient.invalidateQueries({ queryKey: ["chat", "history"] });
       if (!chatHasStartedRef.current) {
         chatHasStartedRef.current = true;
         // After first message, pins are persisted or merged; clear staged state & ref
         setStagedPinnedSlugs([]);
         stagedPinnedSlugsRef.current = [];
+        setStagedAllowedTools(undefined);
+        stagedAllowedToolsRef.current = undefined;
       }
     },
     onError: (error) => {
@@ -130,7 +148,9 @@ export function Chat({
     if (initialQueryHandledRef.current) return;
     // Avoid duplicate if a user message with same text already exists
     const existingSame = messages.some(
-      (m) => m.role === "user" && m.parts.some((p) => p.type === "text" && p.text === query)
+      (m) =>
+        m.role === "user" &&
+        m.parts.some((p) => p.type === "text" && p.text === query)
     );
     if (existingSame) {
       initialQueryHandledRef.current = true;
@@ -149,7 +169,7 @@ export function Chat({
   }, [query, messages, sendMessage, id]);
 
   const { data: votes } = useQuery<Vote[] | undefined>({
-    queryKey: ["chat","votes", id],
+    queryKey: ["chat", "votes", id],
     queryFn: async () => fetcher(`/api/vote?chatId=${id}`),
     enabled: messages.length >= 2,
     staleTime: 30_000,
@@ -159,7 +179,8 @@ export function Chat({
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
 
   // Suppress auto-resume when a query injection is pending to avoid duplicate stream starts
-  const effectiveAutoResume = autoResume && !query && !initialQueryHandledRef.current;
+  const effectiveAutoResume =
+    autoResume && !query && !initialQueryHandledRef.current;
   useAutoResume({
     autoResume: effectiveAutoResume,
     initialMessages,
@@ -186,6 +207,8 @@ export function Chat({
             setStagedPinnedSlugs((prev) => prev.filter((s) => s !== slug))
           }
           chatHasStarted={chatHasStartedRef.current}
+          stagedAllowedTools={stagedAllowedTools}
+          onUpdateStagedAllowedTools={(tools) => setStagedAllowedTools(tools)}
         />
 
         <Messages
@@ -221,8 +244,7 @@ export function Chat({
               console.error("Regenerate fork failed", e);
               toast({
                 type: "error",
-                description:
-                  (e as Error).message || "Failed to fork chat",
+                description: (e as Error).message || "Failed to fork chat",
               });
               setIsForking(false);
             }
@@ -287,7 +309,6 @@ export function Chat({
         votes={votes}
         allowedModelIds={allowedModelIds}
       />
-
     </>
   );
 }

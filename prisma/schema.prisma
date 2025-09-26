@@ -63,6 +63,9 @@ model Chat {
   userId      String   @db.VarChar(191)
   visibility  String   @default("private")
   lastContext Json?
+  // Aggregated future-proof chat settings bucket (pinnedEntries, tool allow list, etc.)
+  // Shape is managed in application code; left unvalidated at the DB level for forward compatibility.
+  settings    Json?
 
   // Fork / lineage metadata
   parentChatId        String?  @db.Uuid

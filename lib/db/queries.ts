@@ -8,6 +8,7 @@ import { ChatSDKError } from "../errors";
 import type { AppUsage } from "../usage";
 import { generateUUID } from "../utils";
 import { type Chat, type Suggestion, type User, type Document } from "./schema";
+import { refreshPinnedEntriesCache } from "./chat-settings";
 
 // Optionally, if not using email/pass login, you can use an Auth.js adapter.
 
@@ -60,6 +61,7 @@ export async function deleteChatById({ id }: { id: string }): Promise<Chat> {
       ...rest,
       visibility: visibility as Chat["visibility"],
       lastContext: lastContext as unknown as Chat["lastContext"],
+      settings: (deleted as any).settings ?? null,
     };
   } catch (_error) {
     throw new ChatSDKError(
@@ -111,7 +113,8 @@ export async function getChatsByUserId({
         parentChatId: (c as any).parentChatId ?? null,
         forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
         forkDepth: (c as any).forkDepth ?? 0,
-      }));
+        settings: ((c as any).settings as any) ?? null,
+      })) as unknown as Chat[];
     } else if (endingBefore) {
       const selectedChat = await prisma.chat.findUnique({
         where: { id: endingBefore },
@@ -138,7 +141,8 @@ export async function getChatsByUserId({
         parentChatId: (c as any).parentChatId ?? null,
         forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
         forkDepth: (c as any).forkDepth ?? 0,
-      }));
+        settings: ((c as any).settings as any) ?? null,
+      })) as unknown as Chat[];
     } else {
       const rows = await prisma.chat.findMany({
         where: { userId: id },
@@ -155,7 +159,8 @@ export async function getChatsByUserId({
         parentChatId: (c as any).parentChatId ?? null,
         forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
         forkDepth: (c as any).forkDepth ?? 0,
-      }));
+        settings: ((c as any).settings as any) ?? null,
+      })) as unknown as Chat[];
     }
 
     const hasMore = filteredChats.length > limit;
@@ -183,13 +188,17 @@ export async function getChatById({
       return null;
     }
 
-    const { lastContext, visibility, ...rest } =
-      selectedChat as typeof selectedChat & { visibility: string };
+    const { lastContext, visibility, settings, ...rest } =
+      selectedChat as typeof selectedChat & {
+        visibility: string;
+        settings: any;
+      };
     return {
       ...rest,
       visibility: visibility as Chat["visibility"],
       lastContext: lastContext as unknown as Chat["lastContext"],
-    };
+      settings: (settings as any) ?? null,
+    } as Chat;
   } catch (_error) {
     throw new ChatSDKError("bad_request:database", "Failed to get chat by id");
   }
@@ -991,6 +1000,20 @@ export async function pinArchiveEntryToChat({
     await prisma.chatPinnedArchiveEntry.create({
       data: { chatId, archiveEntryId: entry.id, userId },
     });
+    // Update settings cache (best-effort, non-blocking errors)
+    try {
+      const all = await prisma.chatPinnedArchiveEntry.findMany({
+        where: { chatId },
+        include: { archiveEntry: { select: { slug: true } } },
+        orderBy: { pinnedAt: "asc" },
+      });
+      await refreshPinnedEntriesCache(
+        chatId,
+        all.map((r: any) => r.archiveEntry.slug)
+      );
+    } catch (e) {
+      console.warn("Failed to refresh pinnedEntries cache", { chatId, e });
+    }
     return { pinned: true, already: false } as const;
   } catch (e) {
     if (e instanceof ChatSDKError) throw e;
@@ -1018,6 +1041,24 @@ export async function unpinArchiveEntryFromChat({
     const removed = await prisma.chatPinnedArchiveEntry.deleteMany({
       where: { chatId, archiveEntryId: entry.id },
     });
+    if (removed.count > 0) {
+      try {
+        const all = await prisma.chatPinnedArchiveEntry.findMany({
+          where: { chatId },
+          include: { archiveEntry: { select: { slug: true } } },
+          orderBy: { pinnedAt: "asc" },
+        });
+        await refreshPinnedEntriesCache(
+          chatId,
+          all.map((r: any) => r.archiveEntry.slug)
+        );
+      } catch (e) {
+        console.warn("Failed to refresh pinnedEntries cache after unpin", {
+          chatId,
+          e,
+        });
+      }
+    }
     return { removed: removed.count } as const;
   } catch (e) {
     throw new ChatSDKError(

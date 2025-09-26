@@ -151,6 +151,7 @@ exports.Prisma.ChatScalarFieldEnum = {
   userId: 'userId',
   visibility: 'visibility',
   lastContext: 'lastContext',
+  settings: 'settings',
   parentChatId: 'parentChatId',
   forkedFromMessageId: 'forkedFromMessageId',
   forkDepth: 'forkDepth'

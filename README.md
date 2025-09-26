@@ -1,169 +1,335 @@
 <h1 align="center">Virid Chat</h1>
 
-Multimodal AI chat application built with Next.js (App Router), the AI SDK, Clerk authentication, and Postgres persistence. This fork removes public deployment calls-to-action and restricts non-free models to authenticated users.
+Advanced multimodal AI chat application built with Next.js 15, React 19, and the AI SDK. Features a sophisticated artifact system, persistent memory archive, and comprehensive admin controls.
 
 <p align="center">
   <a href="#features"><strong>Features</strong></a> ·
+  <a href="#artifacts"><strong>Artifacts</strong></a> ·
+  <a href="#archive"><strong>Archive</strong></a> ·
   <a href="#models"><strong>Models</strong></a> ·
   <a href="#auth"><strong>Auth</strong></a> ·
   <a href="#admin"><strong>Admin</strong></a> ·
+  <a href="#tech-stack"><strong>Tech Stack</strong></a> ·
   <a href="#running-locally"><strong>Running locally</strong></a>
 </p>
 <br />
 
 ## Features
 
-- [Next.js](https://nextjs.org) App Router
-  - Advanced routing for seamless navigation and performance
-  - React Server Components (RSCs) and Server Actions for server-side rendering and increased performance
-- [AI SDK](https://ai-sdk.dev/docs/introduction)
-  - Unified API for generating text, structured objects, and tool calls with LLMs
-  - Hooks for building dynamic chat and generative user interfaces
-  - Supports OpenRouter (default), OpenAI-compatible providers, Fireworks, and others
-- [shadcn/ui](https://ui.shadcn.com)
-  - Styling with [Tailwind CSS](https://tailwindcss.com)
-  - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
-- Data Persistence
-  - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
-- Authentication
-  - Clerk as IdP with custom minimal forms (email/password) + guest fallback
+### Core Chat Experience
+
+- **Multimodal Conversations**: Support for text, images, and file attachments
+- **Real-time Streaming**: Live response streaming with AI SDK
+- **Chat Management**: Fork conversations, track message lineage, vote on responses
+- **Auto-resume**: Continue conversations seamlessly across sessions
+- **Rate Limiting**: Token bucket system with configurable refill rates
+
+### Advanced AI Integration
+
+- **Unified Provider API**: Single interface for multiple AI providers (OpenRouter, OpenAI, Google Gemini)
+- **Dynamic Model Selection**: Choose from various models based on user tier
+- **Tool Calling**: AI can use specialized tools for enhanced capabilities
+- **Context Preservation**: Maintains conversation context and user preferences
+
+### Artifacts System
+
+AI-generated collaborative documents that enhance conversations:
+
+- **Text Artifacts**: Rich text documents with editing and suggestions
+- **Code Artifacts**: Syntax-highlighted code with live editing and execution
+- **Image Artifacts**: AI-generated images with editing capabilities
+- **Sheet Artifacts**: CSV data with interactive data grid visualization
+
+### Archive Memory System
+
+Persistent, searchable knowledge base for long-term memory:
+
+- **Knowledge Entries**: Store facts, preferences, and relationships
+- **Semantic Linking**: Connect related concepts with bidirectional relationships
+- **AI Integration**: Archive tools allow AI to remember and retrieve information
+- **Search & Discovery**: Full-text search with tag-based filtering
+
+### Authentication & Security
+
+- **Clerk Integration**: Enterprise-grade authentication with SSO support
+- **Guest Mode**: Anonymous access with limited model availability
+- **Session Management**: Secure cookie-based sessions for guests
+- **Model Entitlements**: Tier-based access control for AI models
+
+### Admin Dashboard
+
+Comprehensive administrative controls:
+
+- **Provider Management**: Override API keys per provider
+- **Tier Configuration**: Manage user tiers, rate limits, and model access
+- **Usage Monitoring**: Track API usage and system performance
+- **Model Catalog**: Curate available models and their capabilities
+
+## Artifacts
+
+The artifact system enables AI to create and manipulate structured content during conversations:
+
+### Text Artifacts
+
+- Rich text editing with ProseMirror
+- AI-powered suggestions for improvements
+- Version history and diff viewing
+- Collaborative editing capabilities
+
+### Code Artifacts
+
+- Syntax highlighting with CodeMirror
+- Multiple language support
+- Live code execution and validation
+- Code completion and refactoring suggestions
+
+### Image Artifacts
+
+- AI-generated images from text prompts
+- Image editing and manipulation tools
+- Multiple format support (PNG, JPEG, WebP)
+- Integration with multimodal conversations
+
+### Sheet Artifacts
+
+- CSV data generation and editing
+- Interactive data grid with React Data Grid
+- Data visualization and analysis
+- Export capabilities
+
+## Archive
+
+The archive serves as a persistent memory system for both users and AI:
+
+### Core Concepts
+
+- **Entries**: Individual knowledge units with titles, content, and tags
+- **Links**: Semantic relationships between entries (related, parent/child, etc.)
+- **Search**: Full-text search across all entries with tag filtering
+- **Ownership**: Per-user isolation with secure access controls
+
+### AI Integration
+
+The archive provides tools for AI assistants to:
+
+- Create new memories from conversations
+- Retrieve relevant information for context
+- Link related concepts automatically
+- Update existing knowledge as new information emerges
+
+### User Interface
+
+- **Explorer View**: Browse and search archive entries
+- **Detail View**: Read and edit individual entries
+- **Link Visualization**: See relationships between entries
+- **Bulk Operations**: Import/export and batch management
 
 ## Models
 
-Provider integration now uses a lightweight registry (OpenRouter + direct Google Gemini) in `lib/ai/providers.ts`.
+Provider-agnostic model registry supporting multiple AI providers:
 
-Default model: `GPT-5` (`openai/gpt-5`).
+### Supported Models
 
-Guest users (unauthenticated) are restricted to free-tier models only:
+- **GPT-5**: OpenAI's latest flagship model
+- **Gemini 2.5 Pro/Flash**: Google's advanced multimodal models
+- **Grok 4**: xAI's reasoning-focused model
+- **Kimi K2**: Moonshot's multilingual model
 
-- Grok 4 Fast (Free)
-- Kimi K2 (Free)
+### Provider Integration
 
-Signed-in users (Clerk) gain access to all configured models including:
+- **OpenRouter**: Primary provider with model aggregation
+- **Direct OpenAI**: Native OpenAI API integration
+- **Google Gemini**: Direct Google AI API access
+- **Configurable Registry**: Easy addition of new providers
 
-- GPT‑5
-- Gemini 2.5 Flash Image Preview
-- Gemini 2.5 Flash
-- Gemini 2.5 Pro
-- Grok 4
+### Entitlement System
 
-Add/remove models by editing:
-
-1. `lib/ai/models.ts` (metadata: name + description)
-2. `lib/ai/providers.ts` (registry mapping model id → provider model string)
-3. `lib/ai/entitlements.ts` (which user types can see each model)
-
-Changing availability involves editing `lib/ai/entitlements.ts` (server + UI respect the same source of truth) and optionally updating `lib/ai/models.ts`.
+- **Guest Tier**: Free models only (Grok 4 Fast, Kimi K2)
+- **Authenticated Tier**: Full model access with rate limiting
+- **Admin Override**: Custom tier configurations per user type
 
 ## Auth
 
-The app uses Clerk. If Clerk env vars are absent (local / CI), a guest session cookie is used. Server routes enforce model entitlements; attempts by guests to use non-free models return `unauthorized:chat`.
+Flexible authentication system with enterprise and guest support:
 
-Email is obtained from the Clerk user profile to support SSO providers that don’t include an email claim in the session token. We resolve it from `user.primaryEmailAddress` (or first `emailAddresses`) and persist to the `User` row.
+### Clerk Integration
 
-If you ever need to inspect your Clerk user id for admin gating, it looks like `user_XXXXXXXX`. Use that in `ADMIN_USER_ID`.
+- **SSO Support**: Google, GitHub, and enterprise providers
+- **User Management**: Profile management and session handling
+- **Admin Controls**: User administration and access management
+- **Webhook Integration**: Real-time user event processing
+
+### Guest Mode
+
+- **Cookie Sessions**: Secure anonymous access
+- **Fallback Authentication**: Seamless upgrade to full accounts
+- **Limited Access**: Free-tier models and basic features
+- **Data Isolation**: Separate handling for guest data
 
 ## Admin
 
-An internal admin dashboard exists at `/admin` to manage:
+Administrative interface for system management:
 
-- Provider API key overrides (DB takes precedence over env for those providers)
-- Usage tiers (model lists and per-day message limits)
+### Provider Management
 
-Access is gated by one of the following environment variables (set in `.env.local`):
+- **API Key Overrides**: Database-stored keys override environment variables
+- **Provider Status**: Monitor provider health and usage
+- **Key Rotation**: Secure key management and rotation
 
-- `ADMIN_USER_ID` — the Clerk user id (preferred; stable across email changes)
-- `ADMIN_EMAIL` — fallback, case-insensitive match against signed-in user’s email
+### Tier Management
 
-If both are set, `ADMIN_USER_ID` takes precedence.
+- **User Tiers**: Configure model access and rate limits
+- **Rate Limiting**: Token bucket configuration per tier
+- **Model Lists**: Curate available models per user type
+- **Usage Tracking**: Monitor and analyze system usage
+
+## Tech Stack
+
+### Frontend
+
+- **Next.js 15**: App Router with React 19
+- **TypeScript**: Full type safety and developer experience
+- **Tailwind CSS v4**: Utility-first styling with modern features
+- **shadcn/ui**: High-quality component library
+- **Radix UI**: Accessible, unstyled UI primitives
+- **Framer Motion**: Smooth animations and transitions
+
+### Backend & Data
+
+- **AI SDK**: Unified interface for AI providers
+- **Prisma**: Type-safe database ORM
+- **PostgreSQL**: Primary data store (Neon Serverless)
+- **Redis**: Caching and rate limiting (Upstash)
+- **Vercel Blob**: File storage and CDN
+
+### Development & Deployment
+
+- **Bun**: Fast package manager and runtime
+- **Biome**: Lightning-fast linter and formatter
+- **Playwright**: End-to-end testing
+- **Vercel**: Deployment platform with edge functions
+- **OpenTelemetry**: Observability and monitoring
+
+### Key Libraries
+
+- **@ai-sdk/react**: React hooks for AI conversations
+- **@clerk/nextjs**: Authentication and user management
+- **@tanstack/react-query**: Data fetching and caching
+- **react-hook-form**: Form management with validation
+- **zod**: Runtime type validation
+- **date-fns**: Date manipulation utilities
 
 ## Running locally
 
-Copy `.env.example` to `.env.local` and populate required keys (Clerk, database, OpenRouter API key, etc.). Do NOT commit the populated file.
+### Prerequisites
+
+- Node.js 18+ or Bun
+- PostgreSQL database
+- Redis (optional, for rate limiting)
+
+### Setup
 
 ```bash
+# Install dependencies
 bun install
+
+# Set up database
+bun run db:migrate
+
+# Generate Prisma client
+bun run db:generate
+
+# Start development server
 bun run dev
 ```
 
 Navigate to http://localhost:3000.
 
-If you don't configure Clerk keys you'll operate in guest mode; only free models will appear.
-
 ### Environment Variables
 
-Essential (minimum to enable full auth + models):
+Create `.env.local` with required configuration:
 
-| Variable                                                 | Purpose                                                                        |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `AUTH_SECRET`                                            | Session secret for Next.js / edge crypto helpers.                              |
-| `GUEST_SECRET`                                           | Optional; cookie signing secret for guest sessions (falls back to AUTH_SECRET) |
-| `NEXT_PUBLIC_APP_BASE_URL`                               | Absolute base URL used for metadata + OAuth redirects.                         |
-| `NEXT_PUBLIC_APP_URL`                                    | Alias used in a few routes; keep in sync with base URL above.                  |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` | Clerk authentication (publishable + backend).                                  |
-| `OPENROUTER_API_KEY`                                     | LLM provider key for OpenRouter.                                               |
-| `DATABASE_URL`                                           | Primary Postgres connection string (pooled).                                   |
-| `BLOB_READ_WRITE_TOKEN`                                  | Vercel Blob storage token (RW).                                                |
-| `REDIS_URL`                                              | Upstash / Redis for transient data & rate limiting (optional but recommended). |
+#### Essential
 
-Optional:
+| Variable                   | Purpose                             |
+| -------------------------- | ----------------------------------- |
+| `AUTH_SECRET`              | Session encryption key              |
+| `NEXT_PUBLIC_APP_BASE_URL` | Base URL for metadata and redirects |
+| `DATABASE_URL`             | PostgreSQL connection string        |
+| `OPENROUTER_API_KEY`       | OpenRouter API key for AI models    |
 
-| Variable                                               | Purpose                                             |
-| ------------------------------------------------------ | --------------------------------------------------- |
-| `NEXT_PUBLIC_DISABLE_SOCIAL_AUTH`                      | Set to `1` to hide Google/social buttons.           |
-| `DATABASE_URL_UNPOOLED`                                | Alternate non-pooled DSN if needed.                 |
-| `VERCEL_OIDC_TOKEN`                                    | Provided automatically in Vercel build environment. |
-| `OPENAI_API_KEY`                                       | Optional; direct OpenAI calls.                      |
-| `GOOGLE_GENERATIVE_AI_API_KEY` / `GOOGLE_API_KEY`      | Optional; direct Gemini calls.                      |
-| `TITLE_GENERATION_MODEL` / `ARTIFACT_GENERATION_MODEL` | Optional overrides for internal tasks.              |
-| `ADMIN_USER_ID` / `ADMIN_EMAIL`                        | Admin dashboard access (ID preferred).              |
+#### Authentication (Clerk)
 
-### Social Authentication (Google)
+| Variable                            | Purpose          |
+| ----------------------------------- | ---------------- |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk client key |
+| `CLERK_SECRET_KEY`                  | Clerk server key |
 
-Google OAuth is enabled automatically when Clerk is configured and `NEXT_PUBLIC_DISABLE_SOCIAL_AUTH` is not set to `1`.
+#### Optional
 
-1. In Clerk Dashboard → OAuth Providers → Enable Google.
-2. Add an authorized redirect URL: `http://localhost:3000/sso-callback` (and production equivalent).
-3. Deploy with the same base URL in `NEXT_PUBLIC_APP_BASE_URL`.
+| Variable                       | Purpose                            |
+| ------------------------------ | ---------------------------------- |
+| `REDIS_URL`                    | Redis connection for rate limiting |
+| `BLOB_READ_WRITE_TOKEN`        | Vercel Blob storage token          |
+| `OPENAI_API_KEY`               | Direct OpenAI API access           |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Direct Gemini API access           |
+| `ADMIN_USER_ID`                | Admin user ID for dashboard access |
+| `ADMIN_EMAIL`                  | Admin email fallback               |
 
-The unified component `SocialAuthButtons` lives in `components/social-auth-buttons.tsx` and can be extended with additional providers (GitHub, etc.) by adding strategy constants and rendering more buttons.
+### Database Setup
 
-Playwright tests retain existing email/password flows; a helper exists to trigger Google sign-in (`loginWithGoogle`) but real OAuth is typically mocked or skipped in CI.
+```bash
+# Create database and run migrations
+bun run db:push
 
-In CI (detected via `PLAYWRIGHT` / `CI_PLAYWRIGHT`) social auth buttons are suppressed automatically to prevent flaky external redirects.
+# (Optional) Seed with initial data
+bun run db:seed
+```
 
-## Updating Model Entitlements
+### Testing
 
-1. Edit `lib/ai/entitlements.ts` for per-user-type model IDs and quota.
-2. Ensure any newly added model has a corresponding entry in `lib/ai/models.ts` and provider mapping in `lib/ai/providers.ts` (both OpenRouter aliases and direct providers like Google are supported).
-3. (Optional) Adjust UI copy if adding/removing major capabilities.
+```bash
+# Run Playwright tests
+bun run test:e2e
 
-Both the client selector and server API use the same entitlement source, preventing privilege escalation via crafted requests.
+# Run linting
+bun run lint
 
-## Archive Memory System (Developer)
+# Run type checking
+bun run type-check
+```
 
-The archive is a per-user durable memory store surfaced only to the model via tool calls (no UI yet). It enables the assistant to remember entities, preferences, and relationships.
+## Deployment
 
-Data models (`ArchiveEntry`, `ArchiveLink`) are defined in `prisma/schema.prisma`:
+### Vercel (Recommended)
 
-- Entry: `slug` (user-unique), `entity`, `tags[]`, `body`, timestamps.
-- Link: semantic relationship between two entries with `type` label and optional bidirectionality.
+1. Connect GitHub repository to Vercel
+2. Configure environment variables
+3. Enable Vercel integrations:
+   - Neon for PostgreSQL
+   - Upstash for Redis
+   - Vercel Blob for file storage
+4. Deploy automatically on push
 
-Implemented database queries live in `lib/db/queries.ts` (create, update, delete, link, search). Slug uniqueness is enforced per user with auto-suffixing on collisions.
+### Manual Deployment
 
-Available tools (registered in chat route):
+The application is designed to run on any platform supporting Node.js:
 
-- `archiveCreateEntry`
-- `archiveReadEntry`
-- `archiveUpdateEntry`
-- `archiveDeleteEntry`
-- `archiveLinkEntries`
-- `archiveSearchEntries`
+```bash
+# Build for production
+bun run build
 
-Model guidance is appended to the system prompt to encourage concise, non-duplicative entries and appropriate linking.
+# Start production server
+bun run start
+```
 
-Future enhancements (not yet implemented): semantic vector search, summarization/compaction, richer graph traversal.
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes with proper TypeScript types
+4. Add tests for new functionality
+5. Submit a pull request
 
 ## License
 

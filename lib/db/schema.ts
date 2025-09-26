@@ -6,12 +6,27 @@ import type { ArtifactKind } from "@/components/artifact";
 // Re-export Prisma model types with the same names previously used across the app
 export type User = Prisma.UserGetPayload<{}>;
 // Override Chat type to narrow JSON lastContext to our runtime shape
-export type Chat = Omit<Prisma.ChatGetPayload<{}>, "lastContext" | "visibility"> & {
-	lastContext: AppUsage | null;
-	visibility: VisibilityType;
+// ChatSettings: forward-compatible container for per-chat configuration.
+// pinnedEntries: cached list of currently pinned archive entry slugs (authoritative source remains junction table)
+// tools.allow: optional allow-list of tool identifiers; if absent => all tools enabled.
+export interface ChatSettings {
+  pinnedEntries?: string[]; // denormalized convenience cache
+  tools?: {
+    allow?: string[]; // tool ids
+  };
+  // Future fields: tokenBudget?: number; etc.
+}
+
+export type Chat = Omit<
+  Prisma.ChatGetPayload<{}>,
+  "lastContext" | "visibility" | "settings"
+> & {
+  lastContext: AppUsage | null;
+  visibility: VisibilityType;
+  settings: ChatSettings | null;
 };
 export type Document = Omit<Prisma.DocumentGetPayload<{}>, "kind"> & {
-	kind: ArtifactKind;
+  kind: ArtifactKind;
 };
 export type Suggestion = Prisma.SuggestionGetPayload<{}>;
 export type Stream = Prisma.StreamGetPayload<{}>;

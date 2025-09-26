@@ -7,7 +7,6 @@ import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { Action, Actions } from "./elements/actions";
 import { Copy, Pencil, ThumbsUp, ThumbsDown, RotateCcw } from "lucide-react";
-// Variant history removed with simplified message model
 
 export function PureMessageActions({
   chatId,

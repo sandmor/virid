@@ -6457,6 +6457,7 @@ export namespace Prisma {
     userId: number
     visibility: number
     lastContext: number
+    settings: number
     parentChatId: number
     forkedFromMessageId: number
     forkDepth: number
@@ -6501,6 +6502,7 @@ export namespace Prisma {
     userId?: true
     visibility?: true
     lastContext?: true
+    settings?: true
     parentChatId?: true
     forkedFromMessageId?: true
     forkDepth?: true
@@ -6600,6 +6602,7 @@ export namespace Prisma {
     userId: string
     visibility: string
     lastContext: JsonValue | null
+    settings: JsonValue | null
     parentChatId: string | null
     forkedFromMessageId: string | null
     forkDepth: number
@@ -6631,6 +6634,7 @@ export namespace Prisma {
     userId?: boolean
     visibility?: boolean
     lastContext?: boolean
+    settings?: boolean
     parentChatId?: boolean
     forkedFromMessageId?: boolean
     forkDepth?: boolean
@@ -6649,6 +6653,7 @@ export namespace Prisma {
     userId?: boolean
     visibility?: boolean
     lastContext?: boolean
+    settings?: boolean
     parentChatId?: boolean
     forkedFromMessageId?: boolean
     forkDepth?: boolean
@@ -6662,6 +6667,7 @@ export namespace Prisma {
     userId?: boolean
     visibility?: boolean
     lastContext?: boolean
+    settings?: boolean
     parentChatId?: boolean
     forkedFromMessageId?: boolean
     forkDepth?: boolean
@@ -6675,12 +6681,13 @@ export namespace Prisma {
     userId?: boolean
     visibility?: boolean
     lastContext?: boolean
+    settings?: boolean
     parentChatId?: boolean
     forkedFromMessageId?: boolean
     forkDepth?: boolean
   }
 
-  export type ChatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "title" | "userId" | "visibility" | "lastContext" | "parentChatId" | "forkedFromMessageId" | "forkDepth", ExtArgs["result"]["chat"]>
+  export type ChatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "title" | "userId" | "visibility" | "lastContext" | "settings" | "parentChatId" | "forkedFromMessageId" | "forkDepth", ExtArgs["result"]["chat"]>
   export type ChatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     messages?: boolean | Chat$messagesArgs<ExtArgs>
@@ -6712,6 +6719,7 @@ export namespace Prisma {
       userId: string
       visibility: string
       lastContext: Prisma.JsonValue | null
+      settings: Prisma.JsonValue | null
       parentChatId: string | null
       forkedFromMessageId: string | null
       forkDepth: number
@@ -7149,6 +7157,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"Chat", 'String'>
     readonly visibility: FieldRef<"Chat", 'String'>
     readonly lastContext: FieldRef<"Chat", 'Json'>
+    readonly settings: FieldRef<"Chat", 'Json'>
     readonly parentChatId: FieldRef<"Chat", 'String'>
     readonly forkedFromMessageId: FieldRef<"Chat", 'String'>
     readonly forkDepth: FieldRef<"Chat", 'Int'>
@@ -16435,6 +16444,7 @@ export namespace Prisma {
     userId: 'userId',
     visibility: 'visibility',
     lastContext: 'lastContext',
+    settings: 'settings',
     parentChatId: 'parentChatId',
     forkedFromMessageId: 'forkedFromMessageId',
     forkDepth: 'forkDepth'
@@ -16873,6 +16883,7 @@ export namespace Prisma {
     userId?: StringFilter<"Chat"> | string
     visibility?: StringFilter<"Chat"> | string
     lastContext?: JsonNullableFilter<"Chat">
+    settings?: JsonNullableFilter<"Chat">
     parentChatId?: UuidNullableFilter<"Chat"> | string | null
     forkedFromMessageId?: UuidNullableFilter<"Chat"> | string | null
     forkDepth?: IntFilter<"Chat"> | number
@@ -16890,6 +16901,7 @@ export namespace Prisma {
     userId?: SortOrder
     visibility?: SortOrder
     lastContext?: SortOrderInput | SortOrder
+    settings?: SortOrderInput | SortOrder
     parentChatId?: SortOrderInput | SortOrder
     forkedFromMessageId?: SortOrderInput | SortOrder
     forkDepth?: SortOrder
@@ -16910,6 +16922,7 @@ export namespace Prisma {
     userId?: StringFilter<"Chat"> | string
     visibility?: StringFilter<"Chat"> | string
     lastContext?: JsonNullableFilter<"Chat">
+    settings?: JsonNullableFilter<"Chat">
     parentChatId?: UuidNullableFilter<"Chat"> | string | null
     forkedFromMessageId?: UuidNullableFilter<"Chat"> | string | null
     forkDepth?: IntFilter<"Chat"> | number
@@ -16927,6 +16940,7 @@ export namespace Prisma {
     userId?: SortOrder
     visibility?: SortOrder
     lastContext?: SortOrderInput | SortOrder
+    settings?: SortOrderInput | SortOrder
     parentChatId?: SortOrderInput | SortOrder
     forkedFromMessageId?: SortOrderInput | SortOrder
     forkDepth?: SortOrder
@@ -16947,6 +16961,7 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"Chat"> | string
     visibility?: StringWithAggregatesFilter<"Chat"> | string
     lastContext?: JsonNullableWithAggregatesFilter<"Chat">
+    settings?: JsonNullableWithAggregatesFilter<"Chat">
     parentChatId?: UuidNullableWithAggregatesFilter<"Chat"> | string | null
     forkedFromMessageId?: UuidNullableWithAggregatesFilter<"Chat"> | string | null
     forkDepth?: IntWithAggregatesFilter<"Chat"> | number
@@ -17653,6 +17668,7 @@ export namespace Prisma {
     title: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -17670,6 +17686,7 @@ export namespace Prisma {
     userId: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -17685,6 +17702,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -17702,6 +17720,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -17718,6 +17737,7 @@ export namespace Prisma {
     userId: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -17729,6 +17749,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -17741,6 +17762,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -18572,6 +18594,7 @@ export namespace Prisma {
     userId?: SortOrder
     visibility?: SortOrder
     lastContext?: SortOrder
+    settings?: SortOrder
     parentChatId?: SortOrder
     forkedFromMessageId?: SortOrder
     forkDepth?: SortOrder
@@ -20135,6 +20158,7 @@ export namespace Prisma {
     title: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -20150,6 +20174,7 @@ export namespace Prisma {
     title: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -20329,6 +20354,7 @@ export namespace Prisma {
     userId?: StringFilter<"Chat"> | string
     visibility?: StringFilter<"Chat"> | string
     lastContext?: JsonNullableFilter<"Chat">
+    settings?: JsonNullableFilter<"Chat">
     parentChatId?: UuidNullableFilter<"Chat"> | string | null
     forkedFromMessageId?: UuidNullableFilter<"Chat"> | string | null
     forkDepth?: IntFilter<"Chat"> | number
@@ -20775,6 +20801,7 @@ export namespace Prisma {
     title: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -20791,6 +20818,7 @@ export namespace Prisma {
     userId: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -20841,6 +20869,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -20857,6 +20886,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -20910,6 +20940,7 @@ export namespace Prisma {
     title: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -20926,6 +20957,7 @@ export namespace Prisma {
     userId: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -20985,6 +21017,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -21001,6 +21034,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -21225,6 +21259,7 @@ export namespace Prisma {
     title: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -21241,6 +21276,7 @@ export namespace Prisma {
     userId: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -21271,6 +21307,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -21287,6 +21324,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -21493,6 +21531,7 @@ export namespace Prisma {
     title: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -21509,6 +21548,7 @@ export namespace Prisma {
     userId: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -21595,6 +21635,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -21611,6 +21652,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -21829,6 +21871,7 @@ export namespace Prisma {
     title: string
     visibility?: string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
@@ -21876,6 +21919,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -21891,6 +21935,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
@@ -21906,6 +21951,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     visibility?: StringFieldUpdateOperationsInput | string
     lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number

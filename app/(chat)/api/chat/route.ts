@@ -40,6 +40,7 @@ import { archiveUnpinEntry } from "@/lib/ai/tools/archive-unpin-entry";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
+import { getChatSettings } from "@/lib/db/chat-settings";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -119,12 +120,14 @@ export async function POST(request: Request) {
       selectedChatModel,
       selectedVisibilityType,
       pinnedSlugs,
+      allowedTools,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel["id"];
       selectedVisibilityType: VisibilityType;
       pinnedSlugs?: string[];
+      allowedTools?: string[];
     } = requestBody;
 
     const session = await getAppSession();
@@ -201,6 +204,19 @@ export async function POST(request: Request) {
         visibility: selectedVisibilityType,
       });
       createdNewChat = true;
+      // Persist initial allowed tools with new semantics:
+      // undefined => all tools (store nothing)
+      // [] => no tools allowed (store empty array)
+      // [..] => subset
+      if (allowedTools !== undefined && allowedTools.length < 64) {
+        try {
+          const { setAllowedTools } = await import("@/lib/db/chat-settings");
+          const unique = Array.from(new Set(allowedTools));
+          await setAllowedTools(id, unique);
+        } catch (e) {
+          console.warn("Failed to persist initial allowedTools", e);
+        }
+      }
 
       // Fire-and-forget real title generation (no await)
       (async () => {
@@ -336,6 +352,35 @@ export async function POST(request: Request) {
           message,
         ];
 
+        // Determine allowed tools (chat settings allow-list or default = all)
+        const settings = await getChatSettings(id);
+        // If chat just created and we received a provisional allowedTools list, prefer it over settings
+        const effectiveAllowedTools =
+          createdNewChat && allowedTools !== undefined
+            ? allowedTools // could be [] meaning no tools
+            : settings.tools?.allow;
+        const allToolFactories: Record<string, any> = {
+          getWeather,
+          createDocument: createDocument({ session, dataStream }),
+          updateDocument: updateDocument({ session, dataStream }),
+          requestSuggestions: requestSuggestions({ session, dataStream }),
+          archiveCreateEntry: archiveCreateEntry({ session }),
+          archiveReadEntry: archiveReadEntry({ session }),
+          archiveUpdateEntry: archiveUpdateEntry({ session }),
+          archiveDeleteEntry: archiveDeleteEntry({ session }),
+          archiveLinkEntries: archiveLinkEntries({ session }),
+          archiveSearchEntries: archiveSearchEntries({ session }),
+          archiveApplyEdits: archiveApplyEdits({ session }),
+          archivePinEntry: archivePinEntry({ session, chatId: id }),
+          archiveUnpinEntry: archiveUnpinEntry({ session, chatId: id }),
+        };
+        const allowedToolIds =
+          effectiveAllowedTools === undefined
+            ? Object.keys(allToolFactories) // undefined => all tools
+            : effectiveAllowedTools.filter((k) => k in allToolFactories); // [] => none
+        const activeTools: Record<string, any> = {};
+        for (const k of allowedToolIds) activeTools[k] = allToolFactories[k];
+
         const result = streamText({
           model,
           system: systemPrompt({
@@ -345,37 +390,9 @@ export async function POST(request: Request) {
           }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
-          experimental_activeTools: [
-            "getWeather",
-            "createDocument",
-            "updateDocument",
-            "requestSuggestions",
-            "archiveCreateEntry",
-            "archiveReadEntry",
-            "archiveUpdateEntry",
-            "archiveDeleteEntry",
-            "archiveLinkEntries",
-            "archiveSearchEntries",
-            "archiveApplyEdits",
-            "archivePinEntry",
-            "archiveUnpinEntry",
-          ],
+          experimental_activeTools: allowedToolIds,
           experimental_transform: smoothStream({ chunking: "word" }),
-          tools: {
-            getWeather,
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
-            requestSuggestions: requestSuggestions({ session, dataStream }),
-            archiveCreateEntry: archiveCreateEntry({ session }),
-            archiveReadEntry: archiveReadEntry({ session }),
-            archiveUpdateEntry: archiveUpdateEntry({ session }),
-            archiveDeleteEntry: archiveDeleteEntry({ session }),
-            archiveLinkEntries: archiveLinkEntries({ session }),
-            archiveSearchEntries: archiveSearchEntries({ session }),
-            archiveApplyEdits: archiveApplyEdits({ session }),
-            archivePinEntry: archivePinEntry({ session, chatId: id }),
-            archiveUnpinEntry: archiveUnpinEntry({ session, chatId: id }),
-          },
+          tools: activeTools,
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",

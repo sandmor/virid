@@ -18,7 +18,7 @@ import {
   ToolInput,
   ToolOutput,
 } from "./elements/tool";
-import { Sparkles } from "lucide-react";
+import { Sparkle } from "lucide-react";
 import { MessageActions } from "./message-actions";
 import { MessageEditor } from "./message-editor";
 import { MessageReasoning } from "./message-reasoning";
@@ -73,7 +73,7 @@ const PurePreviewMessage = ({
       >
         {message.role === "assistant" && (
           <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-            <Sparkles size={14} />
+            <Sparkle size={14} />
           </div>
         )}
 
@@ -178,17 +178,25 @@ const PurePreviewMessage = ({
                   <ToolHeader state={state} type="tool-getWeather" />
                   <ToolContent>
                     <ToolInput input={part.input ?? {}} />
-                    {(state === "output-available" || state === "output-error") && (
+                    {(state === "output-available" ||
+                      state === "output-error") && (
                       <ToolOutput
                         errorText={
                           state === "output-error"
                             ? part.errorText
-                            : part.output && typeof part.output === 'object' && 'error' in (part.output as any)
-                              ? String((part.output as any).error)
-                              : undefined
+                            : part.output &&
+                              typeof part.output === "object" &&
+                              "error" in (part.output as any)
+                            ? String((part.output as any).error)
+                            : undefined
                         }
                         output={
-                          state === "output-available" && part.output && !(typeof part.output === 'object' && 'error' in (part.output as any)) ? (
+                          state === "output-available" &&
+                          part.output &&
+                          !(
+                            typeof part.output === "object" &&
+                            "error" in (part.output as any)
+                          ) ? (
                             <Weather weatherAtLocation={part.output} />
                           ) : null
                         }
@@ -200,14 +208,16 @@ const PurePreviewMessage = ({
             }
 
             // Archive tools visibility similar to weather tool
-            if (type === "tool-archiveCreateEntry" ||
-                type === "tool-archiveReadEntry" ||
-                type === "tool-archiveUpdateEntry" ||
-                type === "tool-archiveDeleteEntry" ||
-                type === "tool-archiveLinkEntries" ||
-                type === "tool-archiveSearchEntries" ||
-                type === "tool-archivePinEntry" ||
-                type === "tool-archiveUnpinEntry") {
+            if (
+              type === "tool-archiveCreateEntry" ||
+              type === "tool-archiveReadEntry" ||
+              type === "tool-archiveUpdateEntry" ||
+              type === "tool-archiveDeleteEntry" ||
+              type === "tool-archiveLinkEntries" ||
+              type === "tool-archiveSearchEntries" ||
+              type === "tool-archivePinEntry" ||
+              type === "tool-archiveUnpinEntry"
+            ) {
               const { toolCallId, state } = part;
               const output = part.output as any;
               return (
@@ -215,17 +225,22 @@ const PurePreviewMessage = ({
                   <ToolHeader state={state} type={type} />
                   <ToolContent>
                     <ToolInput input={part.input ?? {}} />
-                    {(state === "output-available" || state === "output-error") && (
+                    {(state === "output-available" ||
+                      state === "output-error") && (
                       <ToolOutput
                         errorText={
                           state === "output-error"
                             ? part.errorText
-                            : output && typeof output === 'object' && 'error' in output
-                              ? String(output.error)
-                              : undefined
+                            : output &&
+                              typeof output === "object" &&
+                              "error" in output
+                            ? String(output.error)
+                            : undefined
                         }
                         output={
-                          state === "output-available" && output && !(typeof output === 'object' && 'error' in output) ? (
+                          state === "output-available" &&
+                          output &&
+                          !(typeof output === "object" && "error" in output) ? (
                             <div className="space-y-2 text-xs">
                               <pre className="whitespace-pre-wrap break-words">
                                 {JSON.stringify(output, null, 2)}
@@ -248,28 +263,42 @@ const PurePreviewMessage = ({
                   <ToolHeader state={state} type={type} />
                   <ToolContent>
                     <ToolInput input={part.input ?? {}} />
-                    {(state === "output-available" || state === "output-error") && (
+                    {(state === "output-available" ||
+                      state === "output-error") && (
                       <ToolOutput
                         errorText={
                           state === "output-error"
                             ? part.errorText
-                            : output && typeof output === 'object' && 'error' in output
-                              ? String(output.error)
-                              : undefined
+                            : output &&
+                              typeof output === "object" &&
+                              "error" in output
+                            ? String(output.error)
+                            : undefined
                         }
                         output={
-                          state === "output-available" && output && !(typeof output === 'object' && 'error' in output) ? (
+                          state === "output-available" &&
+                          output &&
+                          !(typeof output === "object" && "error" in output) ? (
                             <div className="space-y-4">
-                              {output.oldBody !== undefined && output.newBody !== undefined && output.oldBody !== output.newBody ? (
+                              {output.oldBody !== undefined &&
+                              output.newBody !== undefined &&
+                              output.oldBody !== output.newBody ? (
                                 <div>
-                                  <h5 className="mb-2 font-medium text-xs uppercase tracking-wide text-muted-foreground">Body Diff</h5>
+                                  <h5 className="mb-2 font-medium text-xs uppercase tracking-wide text-muted-foreground">
+                                    Body Diff
+                                  </h5>
                                   <div className="rounded-md border bg-background p-2">
-                                    <DiffView oldContent={output.oldBody} newContent={output.newBody} />
+                                    <DiffView
+                                      oldContent={output.oldBody}
+                                      newContent={output.newBody}
+                                    />
                                   </div>
                                 </div>
                               ) : null}
                               <div className="space-y-2">
-                                <h5 className="font-medium text-xs uppercase tracking-wide text-muted-foreground">Summary</h5>
+                                <h5 className="font-medium text-xs uppercase tracking-wide text-muted-foreground">
+                                  Summary
+                                </h5>
                                 <ul className="list-inside list-disc text-xs">
                                   <li>Applied: {output.appliedEdits}</li>
                                   <li>Skipped: {output.skippedEdits}</li>
@@ -279,7 +308,9 @@ const PurePreviewMessage = ({
                               </div>
                               {Array.isArray(output.edits) && (
                                 <div className="space-y-2">
-                                  <h5 className="font-medium text-xs uppercase tracking-wide text-muted-foreground">Edits</h5>
+                                  <h5 className="font-medium text-xs uppercase tracking-wide text-muted-foreground">
+                                    Edits
+                                  </h5>
                                   <div className="max-h-64 overflow-auto rounded-md bg-muted/50 p-2 text-xs">
                                     <table className="w-full text-left">
                                       <thead className="sticky top-0 bg-muted/70 backdrop-blur">
@@ -293,12 +324,28 @@ const PurePreviewMessage = ({
                                       </thead>
                                       <tbody>
                                         {output.edits.map((e: any) => (
-                                          <tr key={e.index} className="border-t border-border/50">
-                                            <td className="px-1 py-1 align-top text-muted-foreground">{e.index}</td>
-                                            <td className="px-1 py-1 align-top font-mono text-[11px]">{e.mode}</td>
-                                            <td className="px-1 py-1 align-top max-w-[220px] truncate" title={e.target}>{e.target}</td>
-                                            <td className="px-1 py-1 align-top">{e.status}</td>
-                                            <td className="px-1 py-1 align-top text-muted-foreground">{e.reason || ''}</td>
+                                          <tr
+                                            key={e.index}
+                                            className="border-t border-border/50"
+                                          >
+                                            <td className="px-1 py-1 align-top text-muted-foreground">
+                                              {e.index}
+                                            </td>
+                                            <td className="px-1 py-1 align-top font-mono text-[11px]">
+                                              {e.mode}
+                                            </td>
+                                            <td
+                                              className="px-1 py-1 align-top max-w-[220px] truncate"
+                                              title={e.target}
+                                            >
+                                              {e.target}
+                                            </td>
+                                            <td className="px-1 py-1 align-top">
+                                              {e.status}
+                                            </td>
+                                            <td className="px-1 py-1 align-top text-muted-foreground">
+                                              {e.reason || ""}
+                                            </td>
                                           </tr>
                                         ))}
                                       </tbody>
@@ -342,7 +389,11 @@ const PurePreviewMessage = ({
             if (type === "tool-updateDocument") {
               const { toolCallId } = part;
 
-              if (part.output && typeof part.output === 'object' && 'error' in part.output) {
+              if (
+                part.output &&
+                typeof part.output === "object" &&
+                "error" in part.output
+              ) {
                 return (
                   <div
                     className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:bg-red-950/50"
@@ -356,9 +407,25 @@ const PurePreviewMessage = ({
               return (
                 <div className="relative" key={toolCallId}>
                   <DocumentPreview
-                    args={part.output ? { title: (part.output as any).title, kind: (part.output as any).kind, isUpdate: true } : undefined}
+                    args={
+                      part.output
+                        ? {
+                            title: (part.output as any).title,
+                            kind: (part.output as any).kind,
+                            isUpdate: true,
+                          }
+                        : undefined
+                    }
                     isReadonly={isReadonly}
-                    result={part.output ? { id: (part.output as any).id, title: (part.output as any).title, kind: (part.output as any).kind } : undefined}
+                    result={
+                      part.output
+                        ? {
+                            id: (part.output as any).id,
+                            title: (part.output as any).title,
+                            kind: (part.output as any).kind,
+                          }
+                        : undefined
+                    }
                   />
                 </div>
               );
@@ -372,20 +439,35 @@ const PurePreviewMessage = ({
                   <ToolHeader state={state} type="tool-requestSuggestions" />
                   <ToolContent>
                     <ToolInput input={part.input ?? {}} />
-                    {(state === "output-available" || state === "output-error") && (
+                    {(state === "output-available" ||
+                      state === "output-error") && (
                       <ToolOutput
                         errorText={
                           state === "output-error"
                             ? part.errorText
-                            : part.output && typeof part.output === 'object' && 'error' in (part.output as any)
-                              ? String((part.output as any).error)
-                              : undefined
+                            : part.output &&
+                              typeof part.output === "object" &&
+                              "error" in (part.output as any)
+                            ? String((part.output as any).error)
+                            : undefined
                         }
                         output={
-                          state === "output-available" && part.output && !(typeof part.output === 'object' && 'error' in (part.output as any)) && (part.output as any).id && (part.output as any).title && (part.output as any).kind ? (
+                          state === "output-available" &&
+                          part.output &&
+                          !(
+                            typeof part.output === "object" &&
+                            "error" in (part.output as any)
+                          ) &&
+                          (part.output as any).id &&
+                          (part.output as any).title &&
+                          (part.output as any).kind ? (
                             <DocumentToolResult
                               isReadonly={isReadonly}
-                              result={{ id: (part.output as any).id, title: (part.output as any).title, kind: (part.output as any).kind }}
+                              result={{
+                                id: (part.output as any).id,
+                                title: (part.output as any).title,
+                                kind: (part.output as any).kind,
+                              }}
                               type="request-suggestions"
                             />
                           ) : null
@@ -454,7 +536,7 @@ export const ThinkingMessage = () => {
     >
       <div className="flex items-start justify-start gap-3">
         <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-          <Sparkles size={14} />
+          <Sparkle size={14} />
         </div>
 
         <div className="flex w-full flex-col gap-2 md:gap-4">
