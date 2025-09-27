@@ -144,6 +144,16 @@ exports.Prisma.UserRateLimitScalarFieldEnum = {
   lastRefill: 'lastRefill'
 };
 
+exports.Prisma.AgentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  description: 'description',
+  settings: 'settings',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ChatScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -263,6 +273,7 @@ exports.Prisma.ModelName = {
   Tier: 'Tier',
   User: 'User',
   UserRateLimit: 'UserRateLimit',
+  Agent: 'Agent',
   Chat: 'Chat',
   Message: 'Message',
   Vote: 'Vote',

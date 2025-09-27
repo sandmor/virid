@@ -10,6 +10,7 @@ import { ChatPinnedArchive } from "./chat-pinned-archive";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
 import { ChatToolSelector } from "./chat-tool-selector";
+import { ChatAgentSelector, type AgentPreset } from "./chat-agent-selector";
 
 function PureChatHeader({
   chatId,
@@ -21,6 +22,9 @@ function PureChatHeader({
   chatHasStarted,
   stagedAllowedTools,
   onUpdateStagedAllowedTools,
+  selectedAgentId,
+  selectedAgentLabel,
+  onSelectAgent,
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
@@ -31,6 +35,9 @@ function PureChatHeader({
   chatHasStarted: boolean;
   stagedAllowedTools?: string[] | undefined;
   onUpdateStagedAllowedTools?: (tools: string[] | undefined) => void;
+  selectedAgentId?: string;
+  selectedAgentLabel?: string | null;
+  onSelectAgent?: (agent: AgentPreset | null) => void;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -62,6 +69,12 @@ function PureChatHeader({
             className="order-1 md:order-2"
             selectedVisibilityType={selectedVisibilityType}
           />
+          <ChatAgentSelector
+            chatHasStarted={chatHasStarted}
+            selectedAgentId={selectedAgentId}
+            selectedAgentLabel={selectedAgentLabel ?? undefined}
+            onSelectAgent={onSelectAgent}
+          />
           <ChatPinnedArchive
             chatId={chatId}
             stagedPinnedSlugs={stagedPinnedSlugs}
@@ -91,5 +104,9 @@ export const ChatHeader = memo(
     prevProps.stagedPinnedSlugs.join("|") ===
       nextProps.stagedPinnedSlugs.join("|") &&
     (prevProps.stagedAllowedTools?.join("|") ?? "__all__") ===
-      (nextProps.stagedAllowedTools?.join("|") ?? "__all__")
+      (nextProps.stagedAllowedTools?.join("|") ?? "__all__") &&
+    (prevProps.selectedAgentId ?? "__none__") ===
+      (nextProps.selectedAgentId ?? "__none__") &&
+    (prevProps.selectedAgentLabel ?? "") ===
+      (nextProps.selectedAgentLabel ?? "")
 );

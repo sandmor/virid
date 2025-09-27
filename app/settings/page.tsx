@@ -16,9 +16,12 @@ export const metadata: Metadata = {
 async function prefetchArchive() {
   const qc = new QueryClient();
   await qc.prefetchInfiniteQuery({
-    queryKey: ["archive","search", { q: undefined, tags: undefined }],
+    queryKey: ["archive", "search", { q: undefined, tags: undefined }],
     queryFn: async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/archive/search?limit=20`, { cache: 'no-store' });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/archive/search?limit=20`,
+        { cache: "no-store" }
+      );
       if (!res.ok) return { entries: [], hasMore: false, nextCursor: null };
       return res.json();
     },
@@ -27,24 +30,65 @@ async function prefetchArchive() {
   return dehydrate(qc);
 }
 
-export default async function SettingsPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
+// Server helper to prefetch agents list when agents tab is active.
+async function prefetchAgents() {
+  const qc = new QueryClient();
+  await qc.prefetchQuery({
+    queryKey: ["agents"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/agents`,
+        { cache: "no-store" }
+      );
+      if (!res.ok) return { agents: [] };
+      return res.json();
+    },
+  });
+  return dehydrate(qc);
+}
+
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const session = await getAppSession();
   if (!session?.user) redirect("/login");
-  const tabParam = typeof searchParams?.tab === 'string' ? searchParams!.tab : undefined;
+  const tabParam =
+    typeof searchParams?.tab === "string" ? searchParams!.tab : undefined;
   const adminAllowed = await isAdmin();
-  const defaultTab = tabParam === 'admin' && adminAllowed ? 'admin' : 'archive';
-  const dehydrated = defaultTab === 'archive' ? await prefetchArchive() : undefined;
+  const defaultTab =
+    tabParam === "admin" && adminAllowed
+      ? "admin"
+      : tabParam === "agents"
+      ? "agents"
+      : "archive";
+  const dehydrated =
+    defaultTab === "archive"
+      ? await prefetchArchive()
+      : defaultTab === "agents"
+      ? await prefetchAgents()
+      : undefined;
   const adminContent = adminAllowed ? <AdminSections /> : null;
   return (
-  <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col">
       <header className="px-6 pt-6 space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Account Settings</h1>
-        <p className="text-sm text-muted-foreground">Manage your knowledge archive{adminAllowed ? ' and administrative configuration' : ''}.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Account Settings
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Manage your knowledge archive, AI agents, and administrative
+          configuration.
+        </p>
       </header>
-  <div className="flex-1 flex flex-col min-h-0 px-4 pb-4">
+      <div className="flex-1 flex flex-col min-h-0 px-4 pb-4">
         <HydrationBoundary state={dehydrated}>
-          <Suspense fallback={<div className="flex-1 rounded-md border" />}> 
-            <SettingsView defaultTab={defaultTab} isAdmin={adminAllowed} adminContent={adminContent} />
+          <Suspense fallback={<div className="flex-1 rounded-md border" />}>
+            <SettingsView
+              defaultTab={defaultTab}
+              isAdmin={adminAllowed}
+              adminContent={adminContent}
+            />
           </Suspense>
         </HydrationBoundary>
       </div>

@@ -25,6 +25,7 @@ export type Chat = Omit<
   visibility: VisibilityType;
   settings: ChatSettings | null;
 };
+export type Agent = Prisma.AgentGetPayload<{}>;
 export type Document = Omit<Prisma.DocumentGetPayload<{}>, "kind"> & {
   kind: ArtifactKind;
 };

@@ -9,13 +9,6 @@ import {
 } from "ai";
 import { unstable_cache as cache } from "next/cache";
 import { after } from "next/server";
-import {
-  createResumableStreamContext,
-  type ResumableStreamContext,
-} from "resumable-stream";
-import type { ModelCatalog } from "tokenlens/core";
-import { fetchModels } from "tokenlens/fetch";
-import { getUsage } from "tokenlens/helpers";
 import { getAppSession } from "@/lib/auth/session";
 import type { UserType } from "@/lib/auth/types";
 import type { VisibilityType } from "@/components/visibility-selector";
@@ -24,9 +17,14 @@ import type { ChatModel } from "@/lib/ai/models";
 import { isModelIdAllowed } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import {
-  getLanguageModel,
-  getResolvedProviderModelId,
-} from "@/lib/ai/providers";
+  createResumableStreamContext,
+  type ResumableStreamContext,
+} from "resumable-stream";
+import type { ModelCatalog } from "tokenlens/core";
+import { fetchModels } from "tokenlens/fetch";
+import { getUsage } from "tokenlens/helpers";
+import { getLanguageModel } from "@/lib/ai/providers";
+import { getResolvedProviderModelId } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { archiveCreateEntry } from "@/lib/ai/tools/archive-create-entry";
 import { archiveReadEntry } from "@/lib/ai/tools/archive-read-entry";
@@ -62,6 +60,7 @@ import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
 import { updateChatTitleById } from "@/lib/db/queries";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
+import { prisma } from "@/lib/db/prisma";
 
 export const maxDuration = 60;
 
@@ -121,6 +120,7 @@ export async function POST(request: Request) {
       selectedVisibilityType,
       pinnedSlugs,
       allowedTools,
+      agentId,
     }: {
       id: string;
       message: ChatMessage;
@@ -128,6 +128,7 @@ export async function POST(request: Request) {
       selectedVisibilityType: VisibilityType;
       pinnedSlugs?: string[];
       allowedTools?: string[];
+      agentId?: string;
     } = requestBody;
 
     const session = await getAppSession();
@@ -204,18 +205,41 @@ export async function POST(request: Request) {
         visibility: selectedVisibilityType,
       });
       createdNewChat = true;
-      // Persist initial allowed tools with new semantics:
-      // undefined => all tools (store nothing)
-      // [] => no tools allowed (store empty array)
-      // [..] => subset
-      if (allowedTools !== undefined && allowedTools.length < 64) {
-        try {
-          const { setAllowedTools } = await import("@/lib/db/chat-settings");
-          const unique = Array.from(new Set(allowedTools));
-          await setAllowedTools(id, unique);
-        } catch (e) {
-          console.warn("Failed to persist initial allowedTools", e);
+
+      // Apply initial settings preset (agent base + user overrides) in one place.
+      try {
+        const { applyInitialSettingsPreset } = await import(
+          "@/lib/db/chat-settings"
+        );
+        let base: any | null = null;
+        if (agentId) {
+          try {
+            const agent = await prisma.agent.findFirst({
+              where: { id: agentId, userId: session.user.id },
+            });
+            base = agent?.settings || null;
+          } catch (e) {
+            console.warn("Agent fetch failed during initialization", e);
+          }
         }
+        // Deduplicate allowedTools if present before passing down
+        const normalizedAllowed = allowedTools
+          ? Array.from(new Set(allowedTools)).slice(0, 64)
+          : allowedTools;
+        await applyInitialSettingsPreset({
+          chatId: id,
+          base,
+          overrides: {
+            allowedTools: normalizedAllowed,
+            // pinnedSlugs are applied to settings cache only; join creation handled below asynchronously.
+            pinnedSlugs:
+              pinnedSlugs && pinnedSlugs.length
+                ? pinnedSlugs.slice(0, 12)
+                : undefined,
+          },
+        });
+      } catch (e) {
+        console.warn("Failed to apply initial settings preset", e);
       }
 
       // Fire-and-forget real title generation (no await)

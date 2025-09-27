@@ -50,6 +50,8 @@ export const postRequestBodySchema = z.object({
   // Semantics: omitted (undefined) => ALL tools allowed (no restriction stored)
   //            empty array []     => NO tools allowed
   allowedTools: z.array(z.string().min(1).max(64)).max(64).optional(),
+  // Optional agent ID to initialize chat settings from
+  agentId: z.string().uuid().optional(),
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

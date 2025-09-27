@@ -61,3 +61,50 @@ export async function refreshPinnedEntriesCache(
 ) {
   return updateChatSettings(chatId, (prev) => ({ pinnedEntries: pinnedSlugs }));
 }
+
+// Merge agent (base) settings with runtime overrides (allowedTools, pinnedSlugs, future fields).
+// Precedence order (highest last): base <- overrides
+// - base: agent.settings (or existing chat settings if we later support cloning chats)
+// - overrides.allowedTools -> maps to tools.allow semantics
+// - overrides.pinnedSlugs -> sets pinnedEntries cache (does not create join rows itself)
+// Input semantics mirror chat creation API semantics.
+export interface SettingsOverrideInput {
+  allowedTools?: string[]; // undefined => no restriction stored, [] => explicit empty allow list, [...]
+  pinnedSlugs?: string[]; // optional initial pinned slugs (cache only); join table insert handled separately
+}
+
+export async function applyInitialSettingsPreset({
+  chatId,
+  base,
+  overrides,
+}: {
+  chatId: string;
+  base: any | null | undefined; // agent.settings JSON stored
+  overrides: SettingsOverrideInput;
+}) {
+  // Start from a safe normalized object
+  const merged: any = base && typeof base === "object" ? { ...base } : {};
+
+  // Apply allowedTools override semantics
+  if (Object.prototype.hasOwnProperty.call(overrides, "allowedTools")) {
+    const list = overrides.allowedTools;
+    if (list === undefined) {
+      // leave merged.tools.allow undefined (no restriction)
+      if (merged.tools && "allow" in merged.tools) delete merged.tools.allow;
+    } else {
+      merged.tools = { ...(merged.tools || {}), allow: list };
+    }
+  }
+
+  if (overrides.pinnedSlugs) {
+    // Cache - actual pin join rows are handled elsewhere (route logic already handles pinning asynchronously)
+    merged.pinnedEntries = overrides.pinnedSlugs.slice(0, 64); // guard size
+  }
+
+  await prisma.chat.update({
+    where: { id: chatId },
+    data: { settings: merged },
+  });
+
+  return merged as ChatSettings;
+}

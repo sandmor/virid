@@ -9,7 +9,7 @@ import { ChatHeader } from "@/components/chat-header";
 import { useArtifactSelector } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import type { Vote } from "@/lib/db/schema";
+import type { ChatSettings, Vote } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
@@ -20,6 +20,11 @@ import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
+import type { AgentPreset } from "./chat-agent-selector";
+import {
+  normalizeAllowedTools,
+  normalizePinnedEntries,
+} from "@/lib/agent-settings";
 
 export function Chat({
   id,
@@ -30,6 +35,8 @@ export function Chat({
   autoResume,
   initialLastContext,
   allowedModelIds,
+  agentId,
+  initialAgent,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -39,6 +46,8 @@ export function Chat({
   autoResume: boolean;
   initialLastContext?: AppUsage;
   allowedModelIds: string[];
+  agentId?: string;
+  initialAgent?: AgentPreset | null;
 }) {
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -54,13 +63,26 @@ export function Chat({
   const [currentModelId, setCurrentModelId] = useState(initialChatModel);
   const currentModelIdRef = useRef(currentModelId);
 
+  const resolvedInitialAgent = initialAgent ?? null;
+  const initialAgentSettings = (resolvedInitialAgent?.settings ??
+    null) as ChatSettings | null;
+  const [selectedAgent, setSelectedAgent] = useState<AgentPreset | null>(
+    resolvedInitialAgent
+  );
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(
+    resolvedInitialAgent?.id ?? agentId
+  );
+  const stagedAgentIdRef = useRef<string | undefined>(selectedAgentId);
+
   // Provisional pinning (allow selecting archive entries before first message creates backend chat row)
-  const [stagedPinnedSlugs, setStagedPinnedSlugs] = useState<string[]>([]);
+  const [stagedPinnedSlugs, setStagedPinnedSlugs] = useState<string[]>(() =>
+    normalizePinnedEntries(initialAgentSettings?.pinnedEntries ?? [])
+  );
   const stagedPinnedSlugsRef = useRef<string[]>(stagedPinnedSlugs);
   // Provisional tool allow list (undefined => all, subset array => restrict)
   const [stagedAllowedTools, setStagedAllowedTools] = useState<
     string[] | undefined
-  >(undefined);
+  >(() => normalizeAllowedTools(initialAgentSettings?.tools?.allow));
   const stagedAllowedToolsRef = useRef<string[] | undefined>(
     stagedAllowedTools
   );
@@ -76,8 +98,56 @@ export function Chat({
   }, [stagedAllowedTools]);
 
   useEffect(() => {
+    stagedAgentIdRef.current = selectedAgentId;
+  }, [selectedAgentId]);
+
+  useEffect(() => {
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
+
+  useEffect(() => {
+    if (chatHasStartedRef.current) return;
+    const settings = (selectedAgent?.settings ?? null) as ChatSettings | null;
+    if (selectedAgent) {
+      setStagedPinnedSlugs(
+        normalizePinnedEntries(settings?.pinnedEntries ?? [])
+      );
+      setStagedAllowedTools(normalizeAllowedTools(settings?.tools?.allow));
+    } else {
+      setStagedPinnedSlugs([]);
+      setStagedAllowedTools(undefined);
+    }
+  }, [selectedAgent?.id]);
+
+  const handleSelectAgent = (agent: AgentPreset | null) => {
+    if (chatHasStartedRef.current) return;
+    if (agent) {
+      setSelectedAgent({
+        id: agent.id,
+        name: agent.name,
+        description: agent.description,
+        settings: agent.settings,
+      });
+      setSelectedAgentId(agent.id);
+    } else {
+      setSelectedAgent(null);
+      setSelectedAgentId(undefined);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (chatHasStartedRef.current) return;
+    const url = new URL(window.location.href);
+    if (selectedAgentId) {
+      url.searchParams.set("agentId", selectedAgentId);
+    } else {
+      url.searchParams.delete("agentId");
+    }
+    const search = url.searchParams.toString();
+    const next = `${url.pathname}${search ? `?${search}` : ""}${url.hash}`;
+    window.history.replaceState({}, "", next);
+  }, [selectedAgentId]);
 
   const {
     messages,
@@ -107,6 +177,9 @@ export function Chat({
             selectedVisibilityType: visibilityType,
             pinnedSlugs: staged.length > 0 ? staged : undefined,
             allowedTools: !chatHasStartedRef.current ? stagedTools : undefined,
+            agentId: !chatHasStartedRef.current
+              ? stagedAgentIdRef.current
+              : undefined,
           },
         };
       },
@@ -209,6 +282,9 @@ export function Chat({
           chatHasStarted={chatHasStartedRef.current}
           stagedAllowedTools={stagedAllowedTools}
           onUpdateStagedAllowedTools={(tools) => setStagedAllowedTools(tools)}
+          selectedAgentId={selectedAgentId}
+          selectedAgentLabel={selectedAgent?.name}
+          onSelectAgent={handleSelectAgent}
         />
 
         <Messages
