@@ -70,11 +70,7 @@ let dynamicModelsCache: Record<string, { model: any; fetchedAt: number }> = {};
 
 async function buildModels(): Promise<Record<string, any>> {
   if (isTestEnvironment) {
-    const {
-      artifactModel,
-      chatModel,
-      reasoningModel,
-    } = require('./models.mock');
+    const { chatModel, reasoningModel } = require('./models.mock');
     return {
       'openai:gpt-5': chatModel,
       'google:gemini-2.5-flash-image-preview': reasoningModel,

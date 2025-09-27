@@ -44,7 +44,6 @@ import {
   createStreamId,
   deleteChatById,
   getChatById,
-  getMessagesByChatId,
   getActiveMessagesByChatId,
   saveChat,
   saveMessages,
@@ -408,7 +407,6 @@ export async function POST(request: Request) {
         const result = streamText({
           model,
           system: systemPrompt({
-            selectedChatModel,
             requestHints,
             pinnedEntries: pinnedForPrompt,
           }),

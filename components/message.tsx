@@ -1,5 +1,4 @@
 'use client';
-import type { UseChatHelpers } from '@ai-sdk/react';
 import equal from 'fast-deep-equal';
 import { motion } from 'framer-motion';
 import { memo, useState } from 'react';
@@ -31,8 +30,6 @@ const PurePreviewMessage = ({
   message,
   vote,
   isLoading,
-  setMessages,
-  regenerate,
   isReadonly,
   requiresScrollPadding,
   onRegenerateAssistant,
@@ -42,8 +39,6 @@ const PurePreviewMessage = ({
   message: ChatMessage;
   vote: Vote | undefined;
   isLoading: boolean;
-  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
-  regenerate: UseChatHelpers<ChatMessage>['regenerate'];
   isReadonly: boolean;
   requiresScrollPadding: boolean;
   onRegenerateAssistant?: (assistantMessageId: string) => void;
@@ -160,8 +155,6 @@ const PurePreviewMessage = ({
                       <MessageEditor
                         key={message.id}
                         message={message}
-                        regenerate={regenerate}
-                        setMessages={setMessages}
                         setMode={setMode}
                       />
                     </div>

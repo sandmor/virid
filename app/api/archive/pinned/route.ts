@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
         bodyPreview: r.body.slice(0, 600),
       }))
     );
-  } catch (e) {
+  } catch (_error) {
     return new ChatSDKError(
       'bad_request:api',
       'Failed to load pinned entries'

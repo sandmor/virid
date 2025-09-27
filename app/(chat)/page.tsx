@@ -61,7 +61,7 @@ export default async function Page({
           settings: agent.settings,
         };
       }
-    } catch (error) {
+    } catch {
       // Ignore errors; fall back to default selections
     }
   }

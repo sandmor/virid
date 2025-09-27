@@ -57,7 +57,7 @@ export const archiveCreateEntry = ({ session }: { session: AppSession }) =>
               bidirectional: l.bidirectional ?? true,
             });
             linkResults.push({ targetSlug: l.targetSlug, ...res });
-          } catch (e) {
+          } catch (_error) {
             linkResults.push({
               targetSlug: l.targetSlug,
               error: 'Failed to create link',

@@ -15,8 +15,6 @@ type MessagesProps = {
   status: UseChatHelpers<ChatMessage>['status'];
   votes: Vote[] | undefined;
   messages: ChatMessage[];
-  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
-  regenerate: UseChatHelpers<ChatMessage>['regenerate'];
   isReadonly: boolean;
   isArtifactVisible: boolean;
   selectedModelId: string;
@@ -29,10 +27,7 @@ function PureMessages({
   status,
   votes,
   messages,
-  setMessages,
-  regenerate,
   isReadonly,
-  selectedModelId,
   onRegenerateAssistant,
   disableRegenerate,
 }: MessagesProps) {
@@ -81,11 +76,9 @@ function PureMessages({
               isReadonly={isReadonly}
               key={message.id}
               message={message}
-              regenerate={regenerate}
               requiresScrollPadding={
                 hasSentMessage && index === messages.length - 1
               }
-              setMessages={setMessages}
               onRegenerateAssistant={onRegenerateAssistant}
               vote={
                 votes

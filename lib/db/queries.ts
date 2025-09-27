@@ -1060,7 +1060,7 @@ export async function unpinArchiveEntryFromChat({
       }
     }
     return { removed: removed.count } as const;
-  } catch (e) {
+  } catch (_error) {
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to unpin archive entry'
@@ -1092,7 +1092,7 @@ export async function getPinnedArchiveEntriesForChat({
       updatedAt: r.archiveEntry.updatedAt,
       pinnedAt: r.pinnedAt,
     }));
-  } catch (e) {
+  } catch (_error) {
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to load pinned archive entries'

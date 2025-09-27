@@ -125,11 +125,9 @@ PINNED MEMORY (Chat-Scoped Context Injection)
 `;
 
 export const systemPrompt = ({
-  selectedChatModel,
   requestHints,
   pinnedEntries,
 }: {
-  selectedChatModel: string;
   requestHints: RequestHints;
   pinnedEntries?: { slug: string; entity: string; body: string }[];
 }) => {

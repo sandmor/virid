@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { clerkClient } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/db/prisma';
 import { getUser } from '@/lib/db/queries';
-import { generateHashedPassword } from '@/lib/db/utils';
 
 const authFormSchema = z.object({
   email: z.string().email(),
@@ -29,7 +28,7 @@ export const login = async (
   formData: FormData
 ): Promise<LoginActionState> => {
   try {
-    const validatedData = authFormSchema.parse({
+    authFormSchema.parse({
       email: formData.get('email'),
       password: formData.get('password'),
     });

@@ -213,8 +213,6 @@ export function Chat({
   const query = searchParams.get('query');
   const initialQueryHandledRef = useRef(false);
 
-  const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
-
   // Single-run initial query injection (forked edit path)
   useEffect(() => {
     if (!query) return;
@@ -227,12 +225,10 @@ export function Chat({
     );
     if (existingSame) {
       initialQueryHandledRef.current = true;
-      setHasAppendedQuery(true);
       window.history.replaceState({}, '', `/chat/${id}`);
       return;
     }
     initialQueryHandledRef.current = true;
-    setHasAppendedQuery(true);
     sendMessage({
       role: 'user' as const,
       parts: [{ type: 'text', text: query }],
@@ -292,7 +288,6 @@ export function Chat({
           isArtifactVisible={isArtifactVisible}
           isReadonly={isReadonly}
           messages={messages}
-          regenerate={regenerate}
           onRegenerateAssistant={async (assistantMessageId: string) => {
             if (isForking) return; // guard against double clicks
             setIsForking(true);
@@ -326,7 +321,6 @@ export function Chat({
             }
           }}
           selectedModelId={initialChatModel}
-          setMessages={setMessages}
           status={status}
           votes={votes}
           disableRegenerate={isForking}

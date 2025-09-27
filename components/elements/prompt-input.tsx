@@ -46,6 +46,7 @@ export const PromptInputTextarea = ({
   maxHeight = 164,
   disableAutoResize = false,
   resizeOnNewLinesOnly = false,
+  style,
   ...props
 }: PromptInputTextareaProps) => {
   const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
@@ -69,6 +70,12 @@ export const PromptInputTextarea = ({
     }
   };
 
+  const mergedStyle = {
+    minHeight,
+    ...(typeof maxHeight === 'number' ? { maxHeight } : {}),
+    ...style,
+  } as const;
+
   return (
     <Textarea
       className={cn(
@@ -88,6 +95,7 @@ export const PromptInputTextarea = ({
       }}
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
+      style={mergedStyle}
       {...props}
     />
   );

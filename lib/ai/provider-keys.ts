@@ -17,7 +17,7 @@ export const getProviderApiKey = cache(
         where: { id: providerId },
       });
       if (record?.apiKey) return record.apiKey;
-    } catch (err) {
+    } catch {
       // Swallow to avoid cascading failure if migration not yet applied; callers can handle missing keys.
     }
     const envCandidates = ENV_MAP[providerId] || [];

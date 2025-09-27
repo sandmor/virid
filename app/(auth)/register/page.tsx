@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useSignUp } from '@clerk/nextjs';
 import { AuthForm } from '@/components/auth-form';
 import { SubmitButton } from '@/components/submit-button';
@@ -56,22 +56,6 @@ export default function Page() {
       toast({ type: 'error', description: normalized });
     }
   };
-
-  const handleGoogle = useCallback(async () => {
-    if (!isLoaded) return;
-    try {
-      await signUp.authenticateWithRedirect({
-        strategy: 'oauth_google',
-        redirectUrl: '/sso-callback',
-        redirectUrlComplete: '/',
-      });
-    } catch (e: any) {
-      toast({
-        type: 'error',
-        description: e?.errors?.[0]?.message || 'Google sign-up failed',
-      });
-    }
-  }, [isLoaded, signUp]);
 
   return (
     <div className="flex h-dvh w-screen items-start justify-center bg-background pt-12 md:items-center md:pt-0">

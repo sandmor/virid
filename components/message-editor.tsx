@@ -1,6 +1,5 @@
 'use client';
 
-import type { UseChatHelpers } from '@ai-sdk/react';
 import {
   type Dispatch,
   type SetStateAction,
@@ -19,16 +18,9 @@ import { Textarea } from './ui/textarea';
 export type MessageEditorProps = {
   message: ChatMessage;
   setMode: Dispatch<SetStateAction<'view' | 'edit'>>;
-  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
-  regenerate: UseChatHelpers<ChatMessage>['regenerate'];
 };
 
-export function MessageEditor({
-  message,
-  setMode,
-  setMessages,
-  regenerate,
-}: MessageEditorProps) {
+export function MessageEditor({ message, setMode }: MessageEditorProps) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [draftContent, setDraftContent] = useState<string>(

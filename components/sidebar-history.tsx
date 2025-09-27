@@ -90,7 +90,6 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
   const {
     data: paginatedChatHistories,
     fetchNextPage,
-    hasNextPage,
     isFetchingNextPage,
     isLoading,
     isFetching,

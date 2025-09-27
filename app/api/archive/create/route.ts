@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       updatedAt: entry.updatedAt,
       note: adjusted ? `Slug '${base}' adjusted to '${entry.slug}'` : undefined,
     });
-  } catch (e) {
+  } catch (_error) {
     return new ChatSDKError(
       'bad_request:api',
       'Failed to create entry'

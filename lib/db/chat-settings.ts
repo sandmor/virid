@@ -33,7 +33,7 @@ export async function updateChatSettings(
       where: { id: chatId },
       data: { settings: next as unknown as Prisma.InputJsonValue },
     });
-  } catch (e) {
+  } catch (_error) {
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to update chat settings'
@@ -59,7 +59,7 @@ export async function refreshPinnedEntriesCache(
   chatId: string,
   pinnedSlugs: string[]
 ) {
-  return updateChatSettings(chatId, (prev) => ({ pinnedEntries: pinnedSlugs }));
+  return updateChatSettings(chatId, () => ({ pinnedEntries: pinnedSlugs }));
 }
 
 // Merge agent (base) settings with runtime overrides (allowedTools, pinnedSlugs, future fields).
