@@ -149,65 +149,60 @@ export function Chat({
     window.history.replaceState({}, '', next);
   }, [selectedAgentId]);
 
-  const {
-    messages,
-    setMessages,
-    sendMessage,
-    status,
-    stop,
-    regenerate,
-    resumeStream,
-  } = useChat<ChatMessage>({
-    id,
-    messages: initialMessages,
-    experimental_throttle: 100,
-    generateId: generateUUID,
-    transport: new DefaultChatTransport({
-      api: '/api/chat',
-      fetch: fetchWithErrorHandlers,
-      prepareSendMessagesRequest(request) {
-        const staged = stagedPinnedSlugsRef.current;
-        const stagedTools = stagedAllowedToolsRef.current;
-        return {
-          body: {
-            ...request.body,
-            id: request.id,
-            message: request.messages.at(-1),
-            selectedChatModel: currentModelIdRef.current,
-            selectedVisibilityType: visibilityType,
-            pinnedSlugs: staged.length > 0 ? staged : undefined,
-            allowedTools: !chatHasStartedRef.current ? stagedTools : undefined,
-            agentId: !chatHasStartedRef.current
-              ? stagedAgentIdRef.current
-              : undefined,
-          },
-        };
+  const { messages, setMessages, sendMessage, status, stop, resumeStream } =
+    useChat<ChatMessage>({
+      id,
+      messages: initialMessages,
+      experimental_throttle: 100,
+      generateId: generateUUID,
+      transport: new DefaultChatTransport({
+        api: '/api/chat',
+        fetch: fetchWithErrorHandlers,
+        prepareSendMessagesRequest(request) {
+          const staged = stagedPinnedSlugsRef.current;
+          const stagedTools = stagedAllowedToolsRef.current;
+          return {
+            body: {
+              ...request.body,
+              id: request.id,
+              message: request.messages.at(-1),
+              selectedChatModel: currentModelIdRef.current,
+              selectedVisibilityType: visibilityType,
+              pinnedSlugs: staged.length > 0 ? staged : undefined,
+              allowedTools: !chatHasStartedRef.current
+                ? stagedTools
+                : undefined,
+              agentId: !chatHasStartedRef.current
+                ? stagedAgentIdRef.current
+                : undefined,
+            },
+          };
+        },
+      }),
+      onData: (dataPart) => {
+        setDataStream((ds) => (ds ? [...ds, dataPart] : []));
+        if (dataPart.type === 'data-usage') {
+          setUsage(dataPart.data);
+        }
       },
-    }),
-    onData: (dataPart) => {
-      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-      if (dataPart.type === 'data-usage') {
-        setUsage(dataPart.data);
-      }
-    },
-    onFinish: () => {
-      // Invalidate chat history infinite query (new message might affect ordering)
-      queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
-      if (!chatHasStartedRef.current) {
-        chatHasStartedRef.current = true;
-        // After first message, pins are persisted or merged; clear staged state & ref
-        setStagedPinnedSlugs([]);
-        stagedPinnedSlugsRef.current = [];
-        setStagedAllowedTools(undefined);
-        stagedAllowedToolsRef.current = undefined;
-      }
-    },
-    onError: (error) => {
-      if (error instanceof ChatSDKError) {
-        toast({ type: 'error', description: error.message });
-      }
-    },
-  });
+      onFinish: () => {
+        // Invalidate chat history infinite query (new message might affect ordering)
+        queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
+        if (!chatHasStartedRef.current) {
+          chatHasStartedRef.current = true;
+          // After first message, pins are persisted or merged; clear staged state & ref
+          setStagedPinnedSlugs([]);
+          stagedPinnedSlugsRef.current = [];
+          setStagedAllowedTools(undefined);
+          stagedAllowedToolsRef.current = undefined;
+        }
+      },
+      onError: (error) => {
+        if (error instanceof ChatSDKError) {
+          toast({ type: 'error', description: error.message });
+        }
+      },
+    });
 
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
@@ -367,7 +362,6 @@ export function Chat({
         input={input}
         isReadonly={isReadonly}
         messages={messages}
-        regenerate={regenerate}
         selectedModelId={currentModelId}
         selectedVisibilityType={visibilityType}
         sendMessage={sendMessage}

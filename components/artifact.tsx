@@ -63,7 +63,6 @@ function PureArtifact({
   sendMessage,
   messages,
   setMessages,
-  regenerate,
   votes,
   isReadonly,
   selectedVisibilityType,
@@ -81,7 +80,6 @@ function PureArtifact({
   setMessages: UseChatHelpers<ChatMessage>['setMessages'];
   votes: Vote[] | undefined;
   sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
-  regenerate: UseChatHelpers<ChatMessage>['regenerate'];
   isReadonly: boolean;
   selectedVisibilityType: VisibilityType;
   selectedModelId: string;
@@ -326,8 +324,6 @@ function PureArtifact({
                   chatId={chatId}
                   isReadonly={isReadonly}
                   messages={messages}
-                  regenerate={regenerate}
-                  setMessages={setMessages}
                   status={status}
                   votes={votes}
                 />
