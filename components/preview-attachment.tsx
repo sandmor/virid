@@ -1,7 +1,7 @@
-import Image from "next/image";
-import { useState } from "react";
-import type { Attachment } from "@/lib/types";
-import { Loader } from "./elements/loader";
+import Image from 'next/image';
+import { useState } from 'react';
+import type { Attachment } from '@/lib/types';
+import { Loader } from './elements/loader';
 import {
   X,
   File,
@@ -10,17 +10,17 @@ import {
   FileSpreadsheet,
   FileVideo,
   FileAudio,
-} from "lucide-react";
-import { Button } from "./ui/button";
-import { ImageViewer } from "./image-viewer";
+} from 'lucide-react';
+import { Button } from './ui/button';
+import { ImageViewer } from './image-viewer';
 
 const getFileIcon = (contentType: string) => {
-  if (contentType?.startsWith("image/")) return FileImage;
-  if (contentType?.startsWith("video/")) return FileVideo;
-  if (contentType?.startsWith("audio/")) return FileAudio;
-  if (contentType === "application/pdf" || contentType?.includes("document"))
+  if (contentType?.startsWith('image/')) return FileImage;
+  if (contentType?.startsWith('video/')) return FileVideo;
+  if (contentType?.startsWith('audio/')) return FileAudio;
+  if (contentType === 'application/pdf' || contentType?.includes('document'))
     return FileText;
-  if (contentType?.includes("spreadsheet") || contentType?.includes("excel"))
+  if (contentType?.includes('spreadsheet') || contentType?.includes('excel'))
     return FileSpreadsheet;
   return File;
 };
@@ -35,8 +35,8 @@ export const PreviewAttachment = ({
   onRemove?: () => void;
 }) => {
   const { name, url, contentType } = attachment;
-  const isImage = contentType?.startsWith("image");
-  const FileIcon = getFileIcon(contentType || "");
+  const isImage = contentType?.startsWith('image');
+  const FileIcon = getFileIcon(contentType || '');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleImageClick = () => {
@@ -53,13 +53,13 @@ export const PreviewAttachment = ({
       >
         <div
           className={`aspect-square size-20 overflow-hidden ${
-            isImage && !isUploading ? "cursor-pointer" : ""
+            isImage && !isUploading ? 'cursor-pointer' : ''
           }`}
           onClick={handleImageClick}
         >
           {isImage ? (
             <Image
-              alt={name ?? "An image attachment"}
+              alt={name ?? 'An image attachment'}
               className="size-full object-cover"
               height={80}
               src={url}
@@ -96,7 +96,7 @@ export const PreviewAttachment = ({
 
       <ImageViewer
         src={url}
-        alt={name ?? "Full-size image"}
+        alt={name ?? 'Full-size image'}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />

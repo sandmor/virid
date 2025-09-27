@@ -1,13 +1,13 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { Chat } from "@/components/chat";
-import { DataStreamHandler } from "@/components/data-stream-handler";
-import { DEFAULT_CHAT_MODEL, isModelIdAllowed } from "@/lib/ai/models";
-import { getTierForUserType } from "@/lib/ai/tiers";
-import { generateUUID } from "@/lib/utils";
-import { getAppSession } from "@/lib/auth/session";
-import { prisma } from "@/lib/db/prisma";
-import type { Agent as AgentModel } from "@/lib/db/schema";
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { Chat } from '@/components/chat';
+import { DataStreamHandler } from '@/components/data-stream-handler';
+import { DEFAULT_CHAT_MODEL, isModelIdAllowed } from '@/lib/ai/models';
+import { getTierForUserType } from '@/lib/ai/tiers';
+import { generateUUID } from '@/lib/utils';
+import { getAppSession } from '@/lib/auth/session';
+import { prisma } from '@/lib/db/prisma';
+import type { Agent as AgentModel } from '@/lib/db/schema';
 
 export default async function Page({
   searchParams,
@@ -17,13 +17,13 @@ export default async function Page({
   const session = await getAppSession();
 
   if (!session) {
-    redirect("/api/auth/guest");
+    redirect('/api/auth/guest');
   }
 
   const id = generateUUID();
 
   const cookieStore = await cookies();
-  const modelIdFromCookie = cookieStore.get("chat-model");
+  const modelIdFromCookie = cookieStore.get('chat-model');
 
   const { modelIds: allowedModels } = await getTierForUserType(
     session.user.type
@@ -41,12 +41,12 @@ export default async function Page({
 
   // Check for agentId
   const agentId =
-    typeof searchParams?.agentId === "string"
+    typeof searchParams?.agentId === 'string'
       ? searchParams.agentId
       : undefined;
   let initialAgent: Pick<
     AgentModel,
-    "id" | "name" | "description" | "settings"
+    'id' | 'name' | 'description' | 'settings'
   > | null = null;
   if (agentId) {
     try {

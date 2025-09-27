@@ -1,46 +1,55 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
-import { useSignIn } from "@clerk/nextjs";
-import { AuthForm } from "@/components/auth-form";
-import { SubmitButton } from "@/components/submit-button";
-import { toast } from "@/components/toast";
-import { SocialAuthButtons } from "@/components/social-auth-buttons";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+import { useSignIn } from '@clerk/nextjs';
+import { AuthForm } from '@/components/auth-form';
+import { SubmitButton } from '@/components/submit-button';
+import { toast } from '@/components/toast';
+import { SocialAuthButtons } from '@/components/social-auth-buttons';
 
 export default function Page() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [isSuccessful, setIsSuccessful] = useState(false);
 
   const { isLoaded, signIn, setActive } = useSignIn();
 
   useEffect(() => {
     if (isSuccessful) {
-      const timeout = setTimeout(() => router.push("/"), 300);
+      const timeout = setTimeout(() => router.push('/'), 300);
       return () => clearTimeout(timeout);
     }
   }, [isSuccessful, router]);
 
   const handleSubmit = async (formData: FormData) => {
     if (!isLoaded) return;
-    const emailVal = formData.get("email") as string;
-    const passwordVal = formData.get("password") as string;
+    const emailVal = formData.get('email') as string;
+    const passwordVal = formData.get('password') as string;
     setEmail(emailVal);
     try {
-      const result = await signIn.create({ identifier: emailVal, password: passwordVal });
-      if (result.status === "complete") {
+      const result = await signIn.create({
+        identifier: emailVal,
+        password: passwordVal,
+      });
+      if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
         setIsSuccessful(true);
-        toast({ type: "success", description: "Signed in successfully" });
+        toast({ type: 'success', description: 'Signed in successfully' });
         router.refresh();
       } else {
-        toast({ type: "error", description: "Additional verification required" });
+        toast({
+          type: 'error',
+          description: 'Additional verification required',
+        });
       }
     } catch (e: any) {
-      toast({ type: "error", description: e?.errors?.[0]?.message || "Invalid credentials" });
+      toast({
+        type: 'error',
+        description: e?.errors?.[0]?.message || 'Invalid credentials',
+      });
     }
   };
 
@@ -49,12 +58,15 @@ export default function Page() {
     if (!isLoaded) return;
     try {
       await signIn.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: "/sso-callback",
-  redirectUrlComplete: "/",
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/',
       });
     } catch (e: any) {
-      toast({ type: "error", description: e?.errors?.[0]?.message || "Google sign-in failed" });
+      toast({
+        type: 'error',
+        description: e?.errors?.[0]?.message || 'Google sign-in failed',
+      });
     }
   }, [isLoaded, signIn]);
 
@@ -69,7 +81,7 @@ export default function Page() {
         </div>
         <AuthForm action={handleSubmit} defaultEmail={email}>
           <SubmitButton isSuccessful={isSuccessful}>
-            {isLoaded ? "Sign in" : "Loading"}
+            {isLoaded ? 'Sign in' : 'Loading'}
           </SubmitButton>
           <SocialAuthDivider />
           <SocialAuthButtons mode="sign-in" />
@@ -81,7 +93,7 @@ export default function Page() {
             >
               Sign up
             </Link>
-            {" for free."}
+            {' for free.'}
           </p>
         </AuthForm>
       </div>

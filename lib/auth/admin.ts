@@ -1,12 +1,17 @@
-import { getAppSession } from "./session";
-import { adminEmail, adminUserId } from "@/lib/constants";
+import { getAppSession } from './session';
+import { adminEmail, adminUserId } from '@/lib/constants';
 
-export async function requireAdmin(): Promise<ReturnType<typeof getAppSession>> {
+export async function requireAdmin(): Promise<
+  ReturnType<typeof getAppSession>
+> {
   const session = await getAppSession();
   const isIdMatch = !!adminUserId && session?.user.id === adminUserId;
-  const isEmailMatch = !!adminEmail && !!session?.user.email && session.user.email.toLowerCase() === adminEmail.toLowerCase();
+  const isEmailMatch =
+    !!adminEmail &&
+    !!session?.user.email &&
+    session.user.email.toLowerCase() === adminEmail.toLowerCase();
   if (!session || !(isIdMatch || isEmailMatch)) {
-    throw new Error("Not authorized");
+    throw new Error('Not authorized');
   }
   return session;
 }

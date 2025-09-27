@@ -3,7 +3,7 @@ export const LogoOpenAI = ({ size = 16 }: { size?: number }) => {
     <svg
       height={size}
       strokeLinejoin="round"
-      style={{ color: "currentcolor" }}
+      style={{ color: 'currentcolor' }}
       viewBox="0 0 16 16"
       width={size}
     >
@@ -21,7 +21,7 @@ export const LogoGoogle = ({ size = 16 }: { size?: number }) => {
       data-testid="geist-icon"
       height={size}
       strokeLinejoin="round"
-      style={{ color: "currentcolor" }}
+      style={{ color: 'currentcolor' }}
       viewBox="0 0 16 16"
       width={size}
     >
@@ -52,7 +52,7 @@ export const LogoOpenRouter = ({ size = 16 }: { size?: number }) => {
       height={size}
       viewBox="0 0 24 24"
       fill="currentColor"
-      style={{ color: "currentcolor", flex: "none", lineHeight: 1 }}
+      style={{ color: 'currentcolor', flex: 'none', lineHeight: 1 }}
       xmlns="http://www.w3.org/2000/svg"
     >
       <title>OpenRouter</title>
@@ -63,4 +63,3 @@ export const LogoOpenRouter = ({ size = 16 }: { size?: number }) => {
     </svg>
   );
 };
-

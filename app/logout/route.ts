@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { clearGuestSession } from "@/lib/auth/guest";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { NextResponse } from 'next/server';
+import { clearGuestSession } from '@/lib/auth/guest';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 
 export async function GET() {
   try {
@@ -14,5 +14,7 @@ export async function GET() {
       await clearGuestSession();
     }
   } catch {}
-  return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
+  return NextResponse.redirect(
+    new URL('/', process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+  );
 }

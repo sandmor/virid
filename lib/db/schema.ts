@@ -1,7 +1,7 @@
-import type { Prisma } from "../../generated/prisma-client";
-import type { AppUsage } from "../usage";
-import type { VisibilityType } from "@/components/visibility-selector";
-import type { ArtifactKind } from "@/components/artifact";
+import type { Prisma } from '../../generated/prisma-client';
+import type { AppUsage } from '../usage';
+import type { VisibilityType } from '@/components/visibility-selector';
+import type { ArtifactKind } from '@/components/artifact';
 
 // Re-export Prisma model types with the same names previously used across the app
 export type User = Prisma.UserGetPayload<{}>;
@@ -19,14 +19,14 @@ export interface ChatSettings {
 
 export type Chat = Omit<
   Prisma.ChatGetPayload<{}>,
-  "lastContext" | "visibility" | "settings"
+  'lastContext' | 'visibility' | 'settings'
 > & {
   lastContext: AppUsage | null;
   visibility: VisibilityType;
   settings: ChatSettings | null;
 };
 export type Agent = Prisma.AgentGetPayload<{}>;
-export type Document = Omit<Prisma.DocumentGetPayload<{}>, "kind"> & {
+export type Document = Omit<Prisma.DocumentGetPayload<{}>, 'kind'> & {
   kind: ArtifactKind;
 };
 export type Suggestion = Prisma.SuggestionGetPayload<{}>;

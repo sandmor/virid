@@ -1,12 +1,12 @@
-import equal from "fast-deep-equal";
-import { memo } from "react";
-import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCopyToClipboard } from "usehooks-ts";
-import type { Vote } from "@/lib/db/schema";
-import type { ChatMessage } from "@/lib/types";
-import { Action, Actions } from "./elements/actions";
-import { Copy, Pencil, ThumbsUp, ThumbsDown, RotateCcw } from "lucide-react";
+import equal from 'fast-deep-equal';
+import { memo } from 'react';
+import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCopyToClipboard } from 'usehooks-ts';
+import type { Vote } from '@/lib/db/schema';
+import type { ChatMessage } from '@/lib/types';
+import { Action, Actions } from './elements/actions';
+import { Copy, Pencil, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
 
 export function PureMessageActions({
   chatId,
@@ -21,20 +21,20 @@ export function PureMessageActions({
   message: ChatMessage;
   vote: Vote | undefined;
   isLoading: boolean;
-  setMode?: (mode: "view" | "edit") => void;
+  setMode?: (mode: 'view' | 'edit') => void;
   onRegenerate?: (assistantMessageId: string) => void;
   disableRegenerate?: boolean;
 }) {
   const queryClient = useQueryClient();
-  const voteQueryKey = ["chat", "votes", chatId];
+  const voteQueryKey = ['chat', 'votes', chatId];
 
   const upvoteMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch("/api/vote", {
-        method: "PATCH",
-        body: JSON.stringify({ chatId, messageId: message.id, type: "up" }),
+      const res = await fetch('/api/vote', {
+        method: 'PATCH',
+        body: JSON.stringify({ chatId, messageId: message.id, type: 'up' }),
       });
-      if (!res.ok) throw new Error("Failed to upvote");
+      if (!res.ok) throw new Error('Failed to upvote');
       return res.json().catch(() => ({}));
     },
     onMutate: async () => {
@@ -52,20 +52,20 @@ export function PureMessageActions({
     },
     onError: (_e, _v, ctx) => {
       if (ctx?.prev) queryClient.setQueryData(voteQueryKey, ctx.prev);
-      toast.error("Failed to upvote response.");
+      toast.error('Failed to upvote response.');
     },
     onSuccess: () => {
-      toast.success("Upvoted Response!");
+      toast.success('Upvoted Response!');
     },
   });
 
   const downvoteMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch("/api/vote", {
-        method: "PATCH",
-        body: JSON.stringify({ chatId, messageId: message.id, type: "down" }),
+      const res = await fetch('/api/vote', {
+        method: 'PATCH',
+        body: JSON.stringify({ chatId, messageId: message.id, type: 'down' }),
       });
-      if (!res.ok) throw new Error("Failed to downvote");
+      if (!res.ok) throw new Error('Failed to downvote');
       return res.json().catch(() => ({}));
     },
     onMutate: async () => {
@@ -83,10 +83,10 @@ export function PureMessageActions({
     },
     onError: (_e, _v, ctx) => {
       if (ctx?.prev) queryClient.setQueryData(voteQueryKey, ctx.prev);
-      toast.error("Failed to downvote response.");
+      toast.error('Failed to downvote response.');
     },
     onSuccess: () => {
-      toast.success("Downvoted Response!");
+      toast.success('Downvoted Response!');
     },
   });
   const [_, copyToClipboard] = useCopyToClipboard();
@@ -96,9 +96,9 @@ export function PureMessageActions({
   }
 
   const textFromParts = message.parts
-    ?.filter((part) => part.type === "text")
+    ?.filter((part) => part.type === 'text')
     .map((part) => part.text)
-    .join("\n")
+    .join('\n')
     .trim();
 
   const handleCopy = async () => {
@@ -108,18 +108,18 @@ export function PureMessageActions({
     }
 
     await copyToClipboard(textFromParts);
-    toast.success("Copied to clipboard!");
+    toast.success('Copied to clipboard!');
   };
 
   // User messages get edit (on hover) and copy actions
-  if (message.role === "user") {
+  if (message.role === 'user') {
     return (
       <Actions className="-mr-0.5 justify-end">
         <div className="relative">
           {setMode && (
             <Action
               className="-left-10 absolute top-0 opacity-0 transition-opacity group-hover/message:opacity-100"
-              onClick={() => setMode("edit")}
+              onClick={() => setMode('edit')}
               tooltip="Edit"
             >
               <Pencil size={16} />
@@ -135,10 +135,10 @@ export function PureMessageActions({
 
   return (
     <Actions className="-ml-0.5">
-      {onRegenerate && message.role === "assistant" && (
+      {onRegenerate && message.role === 'assistant' && (
         <Action
           onClick={() => !disableRegenerate && onRegenerate(message.id)}
-          tooltip={disableRegenerate ? "Regenerating…" : "Regenerate"}
+          tooltip={disableRegenerate ? 'Regenerating…' : 'Regenerate'}
           disabled={disableRegenerate}
         >
           <RotateCcw size={16} />

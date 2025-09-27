@@ -1,64 +1,64 @@
-"use client";
-import { useState, useEffect } from "react";
-import { CHAT_TOOL_IDS, type ChatToolId } from "@/lib/ai/tool-ids";
+'use client';
+import { useState, useEffect } from 'react';
+import { CHAT_TOOL_IDS, type ChatToolId } from '@/lib/ai/tool-ids';
 import {
   useChatSettings,
   useUpdateAllowedTools,
-} from "@/hooks/use-chat-settings";
-import { Button } from "@/components/ui/button";
+} from '@/hooks/use-chat-settings';
+import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@/components/ui/popover";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { Loader } from "lucide-react";
+} from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Loader } from 'lucide-react';
 
 // Human friendly labels (fallback to id if not present)
 const LABELS: Record<ChatToolId, string> = {
-  getWeather: "Weather",
-  createDocument: "Create Doc",
-  updateDocument: "Update Doc",
-  requestSuggestions: "Suggestions",
-  archiveCreateEntry: "Archive Create",
-  archiveReadEntry: "Archive Read",
-  archiveUpdateEntry: "Archive Update",
-  archiveDeleteEntry: "Archive Delete",
-  archiveLinkEntries: "Archive Link",
-  archiveSearchEntries: "Archive Search",
-  archiveApplyEdits: "Archive Apply",
-  archivePinEntry: "Archive Pin",
-  archiveUnpinEntry: "Archive Unpin",
+  getWeather: 'Weather',
+  createDocument: 'Create Doc',
+  updateDocument: 'Update Doc',
+  requestSuggestions: 'Suggestions',
+  archiveCreateEntry: 'Archive Create',
+  archiveReadEntry: 'Archive Read',
+  archiveUpdateEntry: 'Archive Update',
+  archiveDeleteEntry: 'Archive Delete',
+  archiveLinkEntries: 'Archive Link',
+  archiveSearchEntries: 'Archive Search',
+  archiveApplyEdits: 'Archive Apply',
+  archivePinEntry: 'Archive Pin',
+  archiveUnpinEntry: 'Archive Unpin',
 };
 
 // Define logical groups (order preserved)
 const TOOL_GROUPS: { id: string; label: string; tools: ChatToolId[] }[] = [
   {
-    id: "documents",
-    label: "Documents",
-    tools: ["createDocument", "updateDocument", "requestSuggestions"],
+    id: 'documents',
+    label: 'Documents',
+    tools: ['createDocument', 'updateDocument', 'requestSuggestions'],
   },
   {
-    id: "archive",
-    label: "Archive",
+    id: 'archive',
+    label: 'Archive',
     tools: [
-      "archiveCreateEntry",
-      "archiveReadEntry",
-      "archiveUpdateEntry",
-      "archiveDeleteEntry",
-      "archiveLinkEntries",
-      "archiveSearchEntries",
-      "archiveApplyEdits",
-      "archivePinEntry",
-      "archiveUnpinEntry",
+      'archiveCreateEntry',
+      'archiveReadEntry',
+      'archiveUpdateEntry',
+      'archiveDeleteEntry',
+      'archiveLinkEntries',
+      'archiveSearchEntries',
+      'archiveApplyEdits',
+      'archivePinEntry',
+      'archiveUnpinEntry',
     ],
   },
   {
-    id: "other",
-    label: "Other",
-    tools: ["getWeather"],
+    id: 'other',
+    label: 'Other',
+    tools: ['getWeather'],
   },
 ];
 
@@ -101,7 +101,7 @@ export function ChatToolSelector({
 
   const isAllSelected = selectedTools === undefined;
   const selectedSet = new Set<ChatToolId>(
-    isAllSelected ? CHAT_TOOL_IDS : selectedTools ?? []
+    isAllSelected ? CHAT_TOOL_IDS : (selectedTools ?? [])
   );
   const count = isAllSelected ? CHAT_TOOL_IDS.length : selectedSet.size;
   const isBusy = mutation.isPending || (chatHasStarted && isLoading);
@@ -163,7 +163,7 @@ export function ChatToolSelector({
         <Button
           size="sm"
           variant="outline"
-          className={cn("h-8 gap-1", className)}
+          className={cn('h-8 gap-1', className)}
           disabled={isBusy}
         >
           <span className="text-xs font-medium">Tools</span>
@@ -171,7 +171,7 @@ export function ChatToolSelector({
             variant="secondary"
             className="text-[10px] px-1 py-0 leading-none"
           >
-            {isBusy ? "…" : count}
+            {isBusy ? '…' : count}
           </Badge>
           {isBusy && (
             <span className="animate-spin">
@@ -185,7 +185,7 @@ export function ChatToolSelector({
           <span>Allowed Tools</span>
           {isBusy && (
             <span className="text-[10px] text-muted-foreground">
-              {chatHasStarted && isLoading ? "Loading…" : "Saving…"}
+              {chatHasStarted && isLoading ? 'Loading…' : 'Saving…'}
             </span>
           )}
         </div>
@@ -205,8 +205,8 @@ export function ChatToolSelector({
                 <div key={group.id} className="flex flex-col gap-1">
                   <button
                     className={cn(
-                      "flex items-center gap-2 rounded-md border px-2 py-1 text-[11px] font-medium hover:bg-accent disabled:opacity-50",
-                      state.checked ? "bg-accent/60" : "bg-background"
+                      'flex items-center gap-2 rounded-md border px-2 py-1 text-[11px] font-medium hover:bg-accent disabled:opacity-50',
+                      state.checked ? 'bg-accent/60' : 'bg-background'
                     )}
                     onClick={() => toggleGroup(group.tools)}
                     disabled={isBusy}
@@ -227,8 +227,8 @@ export function ChatToolSelector({
                         <button
                           key={tid}
                           className={cn(
-                            "flex items-center gap-2 rounded-md border px-2 py-1 text-[11px] text-left hover:bg-accent disabled:opacity-50",
-                            checked ? "bg-accent/60" : "bg-background"
+                            'flex items-center gap-2 rounded-md border px-2 py-1 text-[11px] text-left hover:bg-accent disabled:opacity-50',
+                            checked ? 'bg-accent/60' : 'bg-background'
                           )}
                           onClick={() => toggleTool(tid)}
                           disabled={isBusy}

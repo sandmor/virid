@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { useState, useMemo, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { useAgents } from "@/hooks/use-agents";
-import type { Agent } from "@/lib/db/schema";
-import { Badge } from "@/components/ui/badge";
-import { Check, Loader, Sparkles } from "lucide-react";
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { useAgents } from '@/hooks/use-agents';
+import type { Agent } from '@/lib/db/schema';
+import { Badge } from '@/components/ui/badge';
+import { Check, Loader, Sparkles } from 'lucide-react';
 
 export type AgentPreset = Pick<
   Agent,
-  "id" | "name" | "description" | "settings"
+  'id' | 'name' | 'description' | 'settings'
 >;
 
 interface ChatAgentSelectorProps {
@@ -51,7 +51,7 @@ export function ChatAgentSelector({
   }, [agents, selectedAgentId]);
 
   const displayLabel =
-    effectiveSelected?.name ?? selectedAgentLabel ?? "Default";
+    effectiveSelected?.name ?? selectedAgentLabel ?? 'Default';
 
   const canModify = Boolean(onSelectAgent) && !chatHasStarted;
   const buttonDisabled = !canModify;
@@ -122,8 +122,8 @@ export function ChatAgentSelector({
           <button
             type="button"
             className={cn(
-              "flex items-center justify-between gap-3 rounded-md border px-2 py-1 text-xs hover:bg-accent",
-              !selectedAgentId ? "bg-accent/60" : "bg-background"
+              'flex items-center justify-between gap-3 rounded-md border px-2 py-1 text-xs hover:bg-accent',
+              !selectedAgentId ? 'bg-accent/60' : 'bg-background'
             )}
             onClick={() => chooseAgent(null)}
           >
@@ -145,8 +145,8 @@ export function ChatAgentSelector({
                   key={agent.id}
                   type="button"
                   className={cn(
-                    "flex flex-col gap-1 rounded-md border px-3 py-2 text-left text-xs hover:bg-accent",
-                    isActive ? "bg-accent/60" : "bg-background"
+                    'flex flex-col gap-1 rounded-md border px-3 py-2 text-left text-xs hover:bg-accent',
+                    isActive ? 'bg-accent/60' : 'bg-background'
                   )}
                   onClick={() => chooseAgent(agent)}
                 >

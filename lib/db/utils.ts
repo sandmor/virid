@@ -4,9 +4,9 @@
 // unused crypto dependencies.
 
 export function generateHashedPassword(_password: string) {
-  return "clerk-managed"; // marker value
+  return 'clerk-managed'; // marker value
 }
 
 export function generateDummyPassword() {
-  return "clerk-managed";
+  return 'clerk-managed';
 }

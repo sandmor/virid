@@ -1,14 +1,14 @@
-import { generateUUID } from "../utils";
+import { generateUUID } from '../utils';
 
 // Basic slugify: lowercase, trim, replace spaces/underscores with hyphen, remove invalid chars, collapse dashes.
 export function slugify(input: string): string {
   return input
     .toLowerCase()
     .trim()
-    .replace(/[_\s]+/g, "-")
-    .replace(/[^a-z0-9-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "")
+    .replace(/[_\s]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
     .slice(0, 120); // keep headroom below 128
 }
 

@@ -1,5 +1,5 @@
-import type { Geo } from "@vercel/functions";
-import type { ArtifactKind } from "@/components/artifact";
+import type { Geo } from '@vercel/functions';
+import type { ArtifactKind } from '@/components/artifact';
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
@@ -33,13 +33,13 @@ Do not update document right after creating it. Wait for user feedback or reques
 `;
 
 export const regularPrompt =
-  "You are a friendly assistant! Keep your responses concise and helpful.";
+  'You are a friendly assistant! Keep your responses concise and helpful.';
 
 export type RequestHints = {
-  latitude: Geo["latitude"];
-  longitude: Geo["longitude"];
-  city: Geo["city"];
-  country: Geo["country"];
+  latitude: Geo['latitude'];
+  longitude: Geo['longitude'];
+  city: Geo['city'];
+  country: Geo['country'];
 };
 
 export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
@@ -134,18 +134,19 @@ export const systemPrompt = ({
   pinnedEntries?: { slug: string; entity: string; body: string }[];
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
-  let pinnedSection = "";
+  let pinnedSection = '';
   if (pinnedEntries && pinnedEntries.length) {
     // Basic size guard: cap total chars of pinned bodies to ~20k to stay safe.
     let remaining = 20_000;
     const included: { slug: string; entity: string; body: string }[] = [];
     for (const p of pinnedEntries) {
       if (remaining <= 0) break;
-      const trimmedBody = p.body.length > remaining ? p.body.slice(0, remaining) : p.body;
+      const trimmedBody =
+        p.body.length > remaining ? p.body.slice(0, remaining) : p.body;
       included.push({ ...p, body: trimmedBody });
       remaining -= trimmedBody.length;
     }
-    pinnedSection = `\n\nPinned Memory Files (Authoritative context – treat as already read; update only via tools when user indicates changes)\n${included.map(p => `\n=== ${p.slug} — ${p.entity} ===\n${p.body}`).join("\n")}`;
+    pinnedSection = `\n\nPinned Memory Files (Authoritative context – treat as already read; update only via tools when user indicates changes)\n${included.map((p) => `\n=== ${p.slug} — ${p.entity} ===\n${p.body}`).join('\n')}`;
   }
   return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}${archivePrompt}${pinnedSection}`;
 };
@@ -184,12 +185,12 @@ export const updateDocumentPrompt = (
   currentContent: string | null,
   type: ArtifactKind
 ) => {
-  let mediaType = "document";
+  let mediaType = 'document';
 
-  if (type === "code") {
-    mediaType = "code snippet";
-  } else if (type === "sheet") {
-    mediaType = "spreadsheet";
+  if (type === 'code') {
+    mediaType = 'code snippet';
+  } else if (type === 'sheet') {
+    mediaType = 'spreadsheet';
   }
 
   return `Improve the following contents of the ${mediaType} based on the given prompt.

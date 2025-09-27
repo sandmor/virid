@@ -1,1 +1,1 @@
-export type UserType = "guest" | "regular"; 
+export type UserType = 'guest' | 'regular';

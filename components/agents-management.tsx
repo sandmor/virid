@@ -1,42 +1,42 @@
-"use client";
-import { useState } from "react";
+'use client';
+import { useState } from 'react';
 import {
   useAgents,
   useCreateAgent,
   useUpdateAgent,
   useDeleteAgent,
-} from "@/hooks/use-agents";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/hooks/use-agents';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit, Plus, Play, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import type { Agent, ChatSettings } from "@/lib/db/schema";
-import { ChatPinnedArchive } from "@/components/chat-pinned-archive";
-import { ChatToolSelector } from "@/components/chat-tool-selector";
-import { CHAT_TOOL_IDS, type ChatToolId } from "@/lib/ai/tool-ids";
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Edit, Plus, Play, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import type { Agent, ChatSettings } from '@/lib/db/schema';
+import { ChatPinnedArchive } from '@/components/chat-pinned-archive';
+import { ChatToolSelector } from '@/components/chat-tool-selector';
+import { CHAT_TOOL_IDS, type ChatToolId } from '@/lib/ai/tool-ids';
 import {
   DEFAULT_AGENT_SETTINGS,
   agentSettingsFromChatSettings,
   agentSettingsIsDefault,
   agentSettingsToChatSettings,
   type AgentSettingsValue,
-} from "@/lib/agent-settings";
+} from '@/lib/agent-settings';
 
 interface AgentFormState {
   name: string;
@@ -62,16 +62,16 @@ export function AgentsManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [formData, setFormData] = useState<AgentFormState>(() => ({
-    name: "",
-    description: "",
+    name: '',
+    description: '',
     settings: cloneAgentSettings(),
   }));
   const [deletingAgentId, setDeletingAgentId] = useState<string | null>(null);
 
   const resetFormState = () => {
     setFormData({
-      name: "",
-      description: "",
+      name: '',
+      description: '',
       settings: cloneAgentSettings(),
     });
   };
@@ -105,7 +105,7 @@ export function AgentsManagement() {
     const normalized = tools
       ? tools.filter(
           (t): t is ChatToolId =>
-            typeof t === "string" && CHAT_TOOL_IDS.includes(t as ChatToolId)
+            typeof t === 'string' && CHAT_TOOL_IDS.includes(t as ChatToolId)
         )
       : undefined;
     const deduped = normalized ? Array.from(new Set(normalized)) : undefined;
@@ -132,12 +132,12 @@ export function AgentsManagement() {
           ? undefined
           : settingsPayload,
       });
-      toast.success("Agent created successfully");
+      toast.success('Agent created successfully');
       setIsCreateDialogOpen(false);
       resetFormState();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to create agent";
+        error instanceof Error ? error.message : 'Failed to create agent';
       toast.error(message);
     }
   };
@@ -157,12 +157,12 @@ export function AgentsManagement() {
           settings: settingsPayload,
         },
       });
-      toast.success("Agent updated successfully");
+      toast.success('Agent updated successfully');
       setEditingAgent(null);
       resetFormState();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to update agent";
+        error instanceof Error ? error.message : 'Failed to update agent';
       toast.error(message);
     }
   };
@@ -174,10 +174,10 @@ export function AgentsManagement() {
     setDeletingAgentId(agent.id);
     try {
       await deleteAgent.mutateAsync(agent.id);
-      toast.success("Agent deleted successfully");
+      toast.success('Agent deleted successfully');
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to delete agent";
+        error instanceof Error ? error.message : 'Failed to delete agent';
       toast.error(message);
     } finally {
       setDeletingAgentId(null);
@@ -188,7 +188,7 @@ export function AgentsManagement() {
     setEditingAgent(agent);
     setFormData({
       name: agent.name,
-      description: agent.description || "",
+      description: agent.description || '',
       settings: cloneAgentSettings(
         agentSettingsFromChatSettings(
           agent.settings as ChatSettings | null | undefined
@@ -227,7 +227,7 @@ export function AgentsManagement() {
               Retrying…
             </>
           ) : (
-            "Retry"
+            'Retry'
           )}
         </Button>
       </div>
@@ -386,7 +386,7 @@ export function AgentsManagement() {
                       Creating…
                     </>
                   ) : (
-                    "Create"
+                    'Create'
                   )}
                 </Button>
               </div>
@@ -585,8 +585,8 @@ export function AgentsManagement() {
               </div>
               <div className="mt-2">
                 <ChatPinnedArchive
-                  key={`agent-edit-pins-${editingAgent?.id ?? "unknown"}`}
-                  chatId={editingAgent?.id ?? "__agent_edit__"}
+                  key={`agent-edit-pins-${editingAgent?.id ?? 'unknown'}`}
+                  chatId={editingAgent?.id ?? '__agent_edit__'}
                   chatHasStarted={false}
                   stagedPinnedSlugs={formData.settings.pinnedEntries}
                   onAddStagedPin={addPinnedEntry}
@@ -623,8 +623,8 @@ export function AgentsManagement() {
               </div>
               <div className="mt-2">
                 <ChatToolSelector
-                  key={`agent-edit-tools-${editingAgent?.id ?? "unknown"}`}
-                  chatId={editingAgent?.id ?? "__agent_edit__"}
+                  key={`agent-edit-tools-${editingAgent?.id ?? 'unknown'}`}
+                  chatId={editingAgent?.id ?? '__agent_edit__'}
                   chatHasStarted={false}
                   stagedAllowedTools={formData.settings.allowedTools}
                   onUpdateStagedAllowedTools={updateAllowedTools}
@@ -653,7 +653,7 @@ export function AgentsManagement() {
                     Saving…
                   </>
                 ) : (
-                  "Update"
+                  'Update'
                 )}
               </Button>
             </div>

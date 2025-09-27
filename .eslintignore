@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+build
+dist
+components/ui
+lib/utils.ts
+hooks/use-mobile.ts
+_.min.js
+_.min.css

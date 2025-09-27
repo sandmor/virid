@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { ChevronDown, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { ChevronDown, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { toast } from "@/components/toast";
-import { SUPPORTED_PROVIDERS, displayProviderName } from "@/lib/ai/registry";
+} from '@/components/ui/collapsible';
+import { toast } from '@/components/toast';
+import { SUPPORTED_PROVIDERS, displayProviderName } from '@/lib/ai/registry';
 
 export function ProvidersEditor({
   initialKeys,
@@ -25,7 +25,7 @@ export function ProvidersEditor({
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [keys, setKeys] = useState<Record<string, string>>(
     Object.fromEntries(
-      SUPPORTED_PROVIDERS.map((p) => [p, initialKeys[p] || ""]) as Array<
+      SUPPORTED_PROVIDERS.map((p) => [p, initialKeys[p] || '']) as Array<
         [string, string]
       >
     )
@@ -33,29 +33,29 @@ export function ProvidersEditor({
 
   const saveMutation = useMutation({
     mutationFn: async ({ id, apiKey }: { id: string; apiKey: string }) => {
-      const response = await fetch("/api/admin/providers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/admin/providers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, apiKey }),
       });
 
       if (!response.ok) {
         const message = await response.text();
-        throw new Error(message || "Failed to save provider override");
+        throw new Error(message || 'Failed to save provider override');
       }
 
       return { id };
     },
     onSuccess: (_, variables) => {
       toast({
-        type: "success",
+        type: 'success',
         description: `${displayProviderName(variables.id)} saved`,
       });
       router.refresh();
     },
     onError: (error, variables) => {
       toast({
-        type: "error",
+        type: 'error',
         description:
           error instanceof Error
             ? error.message
@@ -69,28 +69,28 @@ export function ProvidersEditor({
       const response = await fetch(
         `/api/admin/providers?id=${encodeURIComponent(id)}`,
         {
-          method: "DELETE",
+          method: 'DELETE',
         }
       );
 
       if (!response.ok) {
         const message = await response.text();
-        throw new Error(message || "Failed to delete provider override");
+        throw new Error(message || 'Failed to delete provider override');
       }
 
       return { id };
     },
     onSuccess: (_, variables) => {
-      setKeys((k) => ({ ...k, [variables.id]: "" }));
+      setKeys((k) => ({ ...k, [variables.id]: '' }));
       toast({
-        type: "success",
+        type: 'success',
         description: `${displayProviderName(variables.id)} removed`,
       });
       router.refresh();
     },
     onError: (error, variables) => {
       toast({
-        type: "error",
+        type: 'error',
         description:
           error instanceof Error
             ? error.message
@@ -103,7 +103,7 @@ export function ProvidersEditor({
     const apiKey = keys[id]?.trim();
 
     if (!apiKey) {
-      toast({ type: "error", description: "Enter an API key before saving." });
+      toast({ type: 'error', description: 'Enter an API key before saving.' });
       return;
     }
 
@@ -125,7 +125,7 @@ export function ProvidersEditor({
   return (
     <div className="space-y-2">
       {SUPPORTED_PROVIDERS.map((p) => {
-        const trimmedValue = keys[p]?.trim() ?? "";
+        const trimmedValue = keys[p]?.trim() ?? '';
         const isSaving =
           saveMutation.isPending && saveMutation.variables?.id === p;
         const isDeleting =
@@ -148,7 +148,7 @@ export function ProvidersEditor({
                 <Input
                   type="password"
                   placeholder={`${displayProviderName(p)} API key`}
-                  value={keys[p] || ""}
+                  value={keys[p] || ''}
                   onChange={(e) =>
                     setKeys((k) => ({ ...k, [p]: e.target.value }))
                   }

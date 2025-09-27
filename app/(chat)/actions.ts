@@ -1,21 +1,21 @@
-"use server";
+'use server';
 
-import { generateText, type UIMessage } from "ai";
-import { cookies } from "next/headers";
-import type { VisibilityType } from "@/components/visibility-selector";
-import { getLanguageModel } from "@/lib/ai/providers";
-import { TITLE_GENERATION_MODEL } from "@/lib/ai/models";
+import { generateText, type UIMessage } from 'ai';
+import { cookies } from 'next/headers';
+import type { VisibilityType } from '@/components/visibility-selector';
+import { getLanguageModel } from '@/lib/ai/providers';
+import { TITLE_GENERATION_MODEL } from '@/lib/ai/models';
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
   forkChatSimplified,
   updateChatVisiblityById,
-} from "@/lib/db/queries";
-import { getAppSession } from "@/lib/auth/session";
+} from '@/lib/db/queries';
+import { getAppSession } from '@/lib/auth/session';
 
 export async function saveChatModelAsCookie(model: string) {
   const cookieStore = await cookies();
-  cookieStore.set("chat-model", model);
+  cookieStore.set('chat-model', model);
 }
 
 export async function generateTitleFromUserMessage({
@@ -64,11 +64,11 @@ export async function forkChatAction({
 }: {
   sourceChatId: string;
   pivotMessageId: string; // assistant id (regenerate) or user id (edit)
-  mode: "regenerate" | "edit";
+  mode: 'regenerate' | 'edit';
   editedText?: string;
 }) {
   const session = await getAppSession();
-  if (!session?.user) throw new Error("Unauthorized");
+  if (!session?.user) throw new Error('Unauthorized');
   const result = await forkChatSimplified({
     sourceChatId,
     pivotMessageId,

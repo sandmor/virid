@@ -1,4 +1,4 @@
-import { geolocation } from "@vercel/functions";
+import { geolocation } from '@vercel/functions';
 import {
   convertToModelMessages,
   createUIMessageStream,
@@ -6,40 +6,40 @@ import {
   smoothStream,
   stepCountIs,
   streamText,
-} from "ai";
-import { unstable_cache as cache } from "next/cache";
-import { after } from "next/server";
-import { getAppSession } from "@/lib/auth/session";
-import type { UserType } from "@/lib/auth/types";
-import type { VisibilityType } from "@/components/visibility-selector";
-import { getTierForUserType } from "@/lib/ai/tiers";
-import type { ChatModel } from "@/lib/ai/models";
-import { isModelIdAllowed } from "@/lib/ai/models";
-import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
+} from 'ai';
+import { unstable_cache as cache } from 'next/cache';
+import { after } from 'next/server';
+import { getAppSession } from '@/lib/auth/session';
+import type { UserType } from '@/lib/auth/types';
+import type { VisibilityType } from '@/components/visibility-selector';
+import { getTierForUserType } from '@/lib/ai/tiers';
+import type { ChatModel } from '@/lib/ai/models';
+import { isModelIdAllowed } from '@/lib/ai/models';
+import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import {
   createResumableStreamContext,
   type ResumableStreamContext,
-} from "resumable-stream";
-import type { ModelCatalog } from "tokenlens/core";
-import { fetchModels } from "tokenlens/fetch";
-import { getUsage } from "tokenlens/helpers";
-import { getLanguageModel } from "@/lib/ai/providers";
-import { getResolvedProviderModelId } from "@/lib/ai/providers";
-import { createDocument } from "@/lib/ai/tools/create-document";
-import { archiveCreateEntry } from "@/lib/ai/tools/archive-create-entry";
-import { archiveReadEntry } from "@/lib/ai/tools/archive-read-entry";
-import { archiveUpdateEntry } from "@/lib/ai/tools/archive-update-entry";
-import { archiveDeleteEntry } from "@/lib/ai/tools/archive-delete-entry";
-import { archiveLinkEntries } from "@/lib/ai/tools/archive-link-entries";
-import { archiveSearchEntries } from "@/lib/ai/tools/archive-search-entries";
-import { archiveApplyEdits } from "@/lib/ai/tools/archive-apply-edits";
-import { archivePinEntry } from "@/lib/ai/tools/archive-pin-entry";
-import { archiveUnpinEntry } from "@/lib/ai/tools/archive-unpin-entry";
-import { getWeather } from "@/lib/ai/tools/get-weather";
-import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
-import { updateDocument } from "@/lib/ai/tools/update-document";
-import { getChatSettings } from "@/lib/db/chat-settings";
-import { isProductionEnvironment } from "@/lib/constants";
+} from 'resumable-stream';
+import type { ModelCatalog } from 'tokenlens/core';
+import { fetchModels } from 'tokenlens/fetch';
+import { getUsage } from 'tokenlens/helpers';
+import { getLanguageModel } from '@/lib/ai/providers';
+import { getResolvedProviderModelId } from '@/lib/ai/providers';
+import { createDocument } from '@/lib/ai/tools/create-document';
+import { archiveCreateEntry } from '@/lib/ai/tools/archive-create-entry';
+import { archiveReadEntry } from '@/lib/ai/tools/archive-read-entry';
+import { archiveUpdateEntry } from '@/lib/ai/tools/archive-update-entry';
+import { archiveDeleteEntry } from '@/lib/ai/tools/archive-delete-entry';
+import { archiveLinkEntries } from '@/lib/ai/tools/archive-link-entries';
+import { archiveSearchEntries } from '@/lib/ai/tools/archive-search-entries';
+import { archiveApplyEdits } from '@/lib/ai/tools/archive-apply-edits';
+import { archivePinEntry } from '@/lib/ai/tools/archive-pin-entry';
+import { archiveUnpinEntry } from '@/lib/ai/tools/archive-unpin-entry';
+import { getWeather } from '@/lib/ai/tools/get-weather';
+import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
+import { updateDocument } from '@/lib/ai/tools/update-document';
+import { getChatSettings } from '@/lib/db/chat-settings';
+import { isProductionEnvironment } from '@/lib/constants';
 import {
   createStreamId,
   deleteChatById,
@@ -51,16 +51,16 @@ import {
   updateChatLastContextById,
   saveAssistantMessage,
   getPinnedArchiveEntriesForChat,
-} from "@/lib/db/queries";
-import { consumeTokens } from "@/lib/rate-limit/token-bucket";
-import { ChatSDKError } from "@/lib/errors";
-import type { ChatMessage } from "@/lib/types";
-import type { AppUsage } from "@/lib/usage";
-import { convertToUIMessages, generateUUID } from "@/lib/utils";
-import { generateTitleFromUserMessage } from "../../actions";
-import { updateChatTitleById } from "@/lib/db/queries";
-import { type PostRequestBody, postRequestBodySchema } from "./schema";
-import { prisma } from "@/lib/db/prisma";
+} from '@/lib/db/queries';
+import { consumeTokens } from '@/lib/rate-limit/token-bucket';
+import { ChatSDKError } from '@/lib/errors';
+import type { ChatMessage } from '@/lib/types';
+import type { AppUsage } from '@/lib/usage';
+import { convertToUIMessages, generateUUID } from '@/lib/utils';
+import { generateTitleFromUserMessage } from '../../actions';
+import { updateChatTitleById } from '@/lib/db/queries';
+import { type PostRequestBody, postRequestBodySchema } from './schema';
+import { prisma } from '@/lib/db/prisma';
 
 export const maxDuration = 60;
 
@@ -72,13 +72,13 @@ const getTokenlensCatalog = cache(
       return await fetchModels();
     } catch (err) {
       console.warn(
-        "TokenLens: catalog fetch failed, using default catalog",
+        'TokenLens: catalog fetch failed, using default catalog',
         err
       );
       return; // tokenlens helpers will fall back to defaultCatalog
     }
   },
-  ["tokenlens-catalog"],
+  ['tokenlens-catalog'],
   { revalidate: 60 * 60 }
 );
 
@@ -89,9 +89,9 @@ export function getStreamContext() {
         waitUntil: after,
       });
     } catch (error: any) {
-      if (error.message.includes("REDIS_URL")) {
+      if (error.message.includes('REDIS_URL')) {
         console.log(
-          " > Resumable streams are disabled due to missing REDIS_URL"
+          ' > Resumable streams are disabled due to missing REDIS_URL'
         );
       } else {
         console.error(error);
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
   } catch (_) {
-    return new ChatSDKError("bad_request:api").toResponse();
+    return new ChatSDKError('bad_request:api').toResponse();
   }
 
   try {
@@ -124,7 +124,7 @@ export async function POST(request: Request) {
     }: {
       id: string;
       message: ChatMessage;
-      selectedChatModel: ChatModel["id"];
+      selectedChatModel: ChatModel['id'];
       selectedVisibilityType: VisibilityType;
       pinnedSlugs?: string[];
       allowedTools?: string[];
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
     const session = await getAppSession();
 
     if (!session?.user) {
-      return new ChatSDKError("unauthorized:chat").toResponse();
+      return new ChatSDKError('unauthorized:chat').toResponse();
     }
 
     const userType: UserType = session.user.type;
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
     } = await getTierForUserType(userType);
     if (!isModelIdAllowed(selectedChatModel, allowedModels)) {
       return new ChatSDKError(
-        userType === "guest" ? "forbidden:model" : "forbidden:model"
+        userType === 'guest' ? 'forbidden:model' : 'forbidden:model'
       ).toResponse();
     }
 
@@ -166,8 +166,8 @@ export async function POST(request: Request) {
     } catch (e) {
       if (
         e instanceof ChatSDKError &&
-        e.type === "rate_limit" &&
-        e.surface === "chat"
+        e.type === 'rate_limit' &&
+        e.surface === 'chat'
       ) {
         return e.toResponse();
       }
@@ -180,21 +180,21 @@ export async function POST(request: Request) {
 
     if (chat) {
       if (chat.userId !== session.user.id) {
-        return new ChatSDKError("forbidden:chat").toResponse();
+        return new ChatSDKError('forbidden:chat').toResponse();
       }
     } else {
       // Fast placeholder title from user text (avoid model call latency)
       const placeholder = (() => {
         try {
           const textParts = message.parts
-            .filter((p: any) => p.type === "text" && typeof p.text === "string")
+            .filter((p: any) => p.type === 'text' && typeof p.text === 'string')
             .map((p: any) => p.text)
-            .join(" ")
+            .join(' ')
             .trim();
-          if (!textParts) return "New Chat";
+          if (!textParts) return 'New Chat';
           return textParts.slice(0, 60);
         } catch {
-          return "New Chat";
+          return 'New Chat';
         }
       })();
 
@@ -209,7 +209,7 @@ export async function POST(request: Request) {
       // Apply initial settings preset (agent base + user overrides) in one place.
       try {
         const { applyInitialSettingsPreset } = await import(
-          "@/lib/db/chat-settings"
+          '@/lib/db/chat-settings'
         );
         let base: any | null = null;
         if (agentId) {
@@ -219,7 +219,7 @@ export async function POST(request: Request) {
             });
             base = agent?.settings || null;
           } catch (e) {
-            console.warn("Agent fetch failed during initialization", e);
+            console.warn('Agent fetch failed during initialization', e);
           }
         }
         // Deduplicate allowedTools if present before passing down
@@ -239,7 +239,7 @@ export async function POST(request: Request) {
           },
         });
       } catch (e) {
-        console.warn("Failed to apply initial settings preset", e);
+        console.warn('Failed to apply initial settings preset', e);
       }
 
       // Fire-and-forget real title generation (no await)
@@ -250,7 +250,7 @@ export async function POST(request: Request) {
             await updateChatTitleById({ chatId: id, title: realTitle });
           }
         } catch (e) {
-          console.warn("Deferred title generation failed", e);
+          console.warn('Deferred title generation failed', e);
         }
       })();
 
@@ -259,7 +259,7 @@ export async function POST(request: Request) {
         (async () => {
           const unique = Array.from(new Set(pinnedSlugs)).slice(0, 12);
           try {
-            const { pinArchiveEntryToChat } = await import("@/lib/db/queries");
+            const { pinArchiveEntryToChat } = await import('@/lib/db/queries');
             await Promise.all(
               unique.map(async (slug) => {
                 try {
@@ -269,7 +269,7 @@ export async function POST(request: Request) {
                     slug,
                   });
                 } catch (e) {
-                  console.warn("Initial pin failed", {
+                  console.warn('Initial pin failed', {
                     chatId: id,
                     slug,
                     error: e,
@@ -278,7 +278,7 @@ export async function POST(request: Request) {
               })
             );
           } catch (e) {
-            console.warn("Pin helper import failed", e);
+            console.warn('Pin helper import failed', e);
           }
         })();
       }
@@ -303,7 +303,7 @@ export async function POST(request: Request) {
       execute: async ({ writer: dataStream }) => {
         // Immediately send init event to flush headers early
         dataStream.write({
-          type: "data-init",
+          type: 'data-init',
           data: { chatId: id, createdNewChat },
         });
         // Kick off persistence & context gathering in parallel.
@@ -313,22 +313,22 @@ export async function POST(request: Request) {
             {
               chatId: id,
               id: message.id,
-              role: "user",
+              role: 'user',
               parts: message.parts,
               attachments: [],
               createdAt: new Date(),
             },
           ],
         }).catch((e) => {
-          console.warn("Failed to persist user message (non-fatal)", e);
+          console.warn('Failed to persist user message (non-fatal)', e);
         });
         const streamIdPromise = createStreamId({ streamId, chatId: id }).catch(
-          (e) => console.warn("Failed to persist stream id (non-fatal)", e)
+          (e) => console.warn('Failed to persist stream id (non-fatal)', e)
         );
 
         const messagesPromise = getActiveMessagesByChatId({ id }).catch((e) => {
           console.warn(
-            "Failed to load messages, proceeding with only user message",
+            'Failed to load messages, proceeding with only user message',
             e
           );
           return [] as any[];
@@ -356,11 +356,11 @@ export async function POST(request: Request) {
               })),
               ...supplied
                 .filter((slug) => !existingSlugSet.has(slug))
-                .map((slug) => ({ slug, entity: "archive", body: "" })), // body blank; model prompt handler can trim / request body later if needed
+                .map((slug) => ({ slug, entity: 'archive', body: '' })), // body blank; model prompt handler can trim / request body later if needed
             ];
             return merged;
           } catch (e) {
-            console.warn("Failed to load/merge pinned entries for chat", id, e);
+            console.warn('Failed to load/merge pinned entries for chat', id, e);
             return undefined;
           }
         })();
@@ -415,11 +415,11 @@ export async function POST(request: Request) {
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools: allowedToolIds,
-          experimental_transform: smoothStream({ chunking: "word" }),
+          experimental_transform: smoothStream({ chunking: 'word' }),
           tools: activeTools,
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
-            functionId: "stream-text",
+            functionId: 'stream-text',
           },
           onFinish: async ({ usage }) => {
             try {
@@ -429,7 +429,7 @@ export async function POST(request: Request) {
               if (!modelId) {
                 finalMergedUsage = usage;
                 dataStream.write({
-                  type: "data-usage",
+                  type: 'data-usage',
                   data: finalMergedUsage,
                 });
                 return;
@@ -438,7 +438,7 @@ export async function POST(request: Request) {
               if (!providers) {
                 finalMergedUsage = usage;
                 dataStream.write({
-                  type: "data-usage",
+                  type: 'data-usage',
                   data: finalMergedUsage,
                 });
                 return;
@@ -446,11 +446,11 @@ export async function POST(request: Request) {
 
               const summary = getUsage({ modelId, usage, providers });
               finalMergedUsage = { ...usage, ...summary, modelId } as AppUsage;
-              dataStream.write({ type: "data-usage", data: finalMergedUsage });
+              dataStream.write({ type: 'data-usage', data: finalMergedUsage });
             } catch (err) {
-              console.warn("TokenLens enrichment failed", err);
+              console.warn('TokenLens enrichment failed', err);
               finalMergedUsage = usage;
-              dataStream.write({ type: "data-usage", data: finalMergedUsage });
+              dataStream.write({ type: 'data-usage', data: finalMergedUsage });
             }
           },
         });
@@ -472,7 +472,7 @@ export async function POST(request: Request) {
       onFinish: async ({ messages }) => {
         // messages includes the newly streamed assistant response as the last element
         const assistantMessage = messages.findLast(
-          (m) => m.role === "assistant"
+          (m) => m.role === 'assistant'
         );
         if (assistantMessage) {
           await saveAssistantMessage({
@@ -490,12 +490,12 @@ export async function POST(request: Request) {
               context: finalMergedUsage,
             });
           } catch (err) {
-            console.warn("Unable to persist last usage for chat", id, err);
+            console.warn('Unable to persist last usage for chat', id, err);
           }
         }
       },
       onError: () => {
-        return "Oops, an error occurred!";
+        return 'Oops, an error occurred!';
       },
     });
 
@@ -511,43 +511,43 @@ export async function POST(request: Request) {
 
     return new Response(stream.pipeThrough(new JsonToSseTransformStream()), {
       headers: {
-        "Content-Type": "text/event-stream; charset=utf-8",
-        "Cache-Control": "no-store",
-        "X-Accel-Buffering": "no",
-        Connection: "keep-alive",
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'X-Accel-Buffering': 'no',
+        Connection: 'keep-alive',
       },
     });
   } catch (error) {
-    const vercelId = request.headers.get("x-vercel-id");
+    const vercelId = request.headers.get('x-vercel-id');
 
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
 
-    console.error("Unhandled error in chat API:", error, { vercelId });
-    return new ChatSDKError("offline:chat").toResponse();
+    console.error('Unhandled error in chat API:', error, { vercelId });
+    return new ChatSDKError('offline:chat').toResponse();
   }
 }
 
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
+  const id = searchParams.get('id');
 
   if (!id) {
-    return new ChatSDKError("bad_request:api").toResponse();
+    return new ChatSDKError('bad_request:api').toResponse();
   }
 
   // Unified session (Clerk or guest)
   const session = await getAppSession();
 
   if (!session?.user) {
-    return new ChatSDKError("unauthorized:chat").toResponse();
+    return new ChatSDKError('unauthorized:chat').toResponse();
   }
 
   const chat = await getChatById({ id });
 
   if (chat?.userId !== session.user.id) {
-    return new ChatSDKError("forbidden:chat").toResponse();
+    return new ChatSDKError('forbidden:chat').toResponse();
   }
 
   const deletedChat = await deleteChatById({ id });

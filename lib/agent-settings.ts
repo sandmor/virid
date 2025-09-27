@@ -1,5 +1,5 @@
-import type { ChatSettings } from "@/lib/db/schema";
-import type { ChatToolId } from "@/lib/ai/tool-ids";
+import type { ChatSettings } from '@/lib/db/schema';
+import type { ChatToolId } from '@/lib/ai/tool-ids';
 
 export interface AgentSettingsValue {
   pinnedEntries: string[];
@@ -17,7 +17,7 @@ export function normalizePinnedEntries(raw: unknown): string[] {
     new Set(
       raw.filter(
         (item): item is string =>
-          typeof item === "string" && item.trim().length > 0
+          typeof item === 'string' && item.trim().length > 0
       )
     )
   );
@@ -31,7 +31,7 @@ export function normalizeAllowedTools(raw: unknown): ChatToolId[] | undefined {
     new Set(
       raw.filter(
         (item): item is ChatToolId =>
-          typeof item === "string" && item.trim().length > 0
+          typeof item === 'string' && item.trim().length > 0
       )
     )
   );
@@ -77,7 +77,7 @@ export function agentSettingsIsDefault(value: AgentSettingsValue): boolean {
 }
 
 export function normalizeAgentSettingsPayload(input: unknown): ChatSettings {
-  if (!input || typeof input !== "object") {
+  if (!input || typeof input !== 'object') {
     return {};
   }
   const raw = input as Record<string, unknown>;

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useClerk, useAuth } from "@clerk/nextjs";
-import { Loader } from "lucide-react";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useClerk, useAuth } from '@clerk/nextjs';
+import { Loader } from 'lucide-react';
 
 // Generic OAuth callback landing page. Clerk will redirect here first, then to redirectUrlComplete.
 // We still attempt a defensive redirect if a session is already present but Clerk didn't auto-forward.
@@ -15,7 +15,7 @@ export default function SSOCallbackPage() {
   useEffect(() => {
     // If Clerk hasn't performed the final redirect yet but we have a session, push user onward.
     if (sessionId) {
-  const t = setTimeout(() => router.replace("/"), 300);
+      const t = setTimeout(() => router.replace('/'), 300);
       return () => clearTimeout(t);
     }
   }, [sessionId, router]);

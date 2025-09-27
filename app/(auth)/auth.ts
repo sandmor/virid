@@ -3,5 +3,8 @@
 export const auth = async () => null;
 export const signIn = async () => null;
 export const signOut = async () => null;
-export const handlers = { GET: () => new Response(null), POST: () => new Response(null) };
-export type UserType = "guest" | "regular";
+export const handlers = {
+  GET: () => new Response(null),
+  POST: () => new Response(null),
+};
+export type UserType = 'guest' | 'regular';

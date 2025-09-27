@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { isToday, isYesterday, subMonths, subWeeks } from "date-fns";
-import { motion } from "framer-motion";
-import { useParams, useRouter } from "next/navigation";
+import { isToday, isYesterday, subMonths, subWeeks } from 'date-fns';
+import { motion } from 'framer-motion';
+import { useParams, useRouter } from 'next/navigation';
 type SidebarUser = { id?: string; email?: string | null };
-import { useState } from "react";
-import { toast } from "sonner";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,17 +16,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
   useSidebar,
-} from "@/components/ui/sidebar";
-import type { Chat } from "@/lib/db/schema";
+} from '@/components/ui/sidebar';
+import type { Chat } from '@/lib/db/schema';
 // fetcher retained in utils for other components; not needed here
-import { Loader } from "lucide-react";
-import { ChatItem } from "./sidebar-history-item";
+import { Loader } from 'lucide-react';
+import { ChatItem } from './sidebar-history-item';
 
 type GroupedChats = {
   today: Chat[];
@@ -95,11 +95,11 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
     isLoading,
     isFetching,
   } = useInfiniteQuery<ChatHistory>({
-    queryKey: ["chat","history"],
+    queryKey: ['chat', 'history'],
     queryFn: async ({ pageParam }) => {
       const url = buildPageUrl(pageParam as string | undefined);
       const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch chat history");
+      if (!res.ok) throw new Error('Failed to fetch chat history');
       return res.json();
     },
     initialPageParam: undefined as string | undefined,
@@ -116,19 +116,21 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const pages = paginatedChatHistories?.pages || [];
-  const hasReachedEnd = pages.length > 0 ? pages.some((p) => p.hasMore === false) : false;
+  const hasReachedEnd =
+    pages.length > 0 ? pages.some((p) => p.hasMore === false) : false;
 
-  const hasEmptyChatHistory = pages.length > 0 ? pages.every((p) => p.chats.length === 0) : false;
+  const hasEmptyChatHistory =
+    pages.length > 0 ? pages.every((p) => p.chats.length === 0) : false;
 
   const handleDelete = () => {
     const deletePromise = fetch(`/api/chat?id=${deleteId}`, {
-      method: "DELETE",
+      method: 'DELETE',
     });
 
     toast.promise(deletePromise, {
-      loading: "Deleting chat...",
+      loading: 'Deleting chat...',
       success: () => {
-        queryClient.setQueryData(["chat","history"], (current: any) => {
+        queryClient.setQueryData(['chat', 'history'], (current: any) => {
           if (!current) return current;
           return {
             ...current,
@@ -139,15 +141,15 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
           };
         });
 
-        return "Chat deleted successfully";
+        return 'Chat deleted successfully';
       },
-      error: "Failed to delete chat",
+      error: 'Failed to delete chat',
     });
 
     setShowDeleteDialog(false);
 
     if (deleteId === id) {
-      router.push("/");
+      router.push('/');
     }
   };
 
@@ -180,7 +182,7 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
                   className="h-4 max-w-(--skeleton-width) flex-1 rounded-md bg-sidebar-accent-foreground/10"
                   style={
                     {
-                      "--skeleton-width": `${item}%`,
+                      '--skeleton-width': `${item}%`,
                     } as React.CSSProperties
                   }
                 />
@@ -338,7 +340,11 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
               <div className="animate-spin">
                 <Loader />
               </div>
-              <div>{isFetchingNextPage || isFetching ? "Loading Chats..." : "Load more"}</div>
+              <div>
+                {isFetchingNextPage || isFetching
+                  ? 'Loading Chats...'
+                  : 'Load more'}
+              </div>
             </div>
           )}
         </SidebarGroupContent>

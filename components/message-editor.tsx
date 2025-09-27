@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import type { UseChatHelpers } from "@ai-sdk/react";
+import type { UseChatHelpers } from '@ai-sdk/react';
 import {
   type Dispatch,
   type SetStateAction,
@@ -8,19 +8,19 @@ import {
   useEffect,
   useRef,
   useState,
-} from "react";
-import { forkChatAction } from "@/app/(chat)/actions";
-import { useRouter } from "next/navigation";
-import type { ChatMessage } from "@/lib/types";
-import { getTextFromMessage } from "@/lib/utils";
-import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
+} from 'react';
+import { forkChatAction } from '@/app/(chat)/actions';
+import { useRouter } from 'next/navigation';
+import type { ChatMessage } from '@/lib/types';
+import { getTextFromMessage } from '@/lib/utils';
+import { Button } from './ui/button';
+import { Textarea } from './ui/textarea';
 
 export type MessageEditorProps = {
   message: ChatMessage;
-  setMode: Dispatch<SetStateAction<"view" | "edit">>;
-  setMessages: UseChatHelpers<ChatMessage>["setMessages"];
-  regenerate: UseChatHelpers<ChatMessage>["regenerate"];
+  setMode: Dispatch<SetStateAction<'view' | 'edit'>>;
+  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
+  regenerate: UseChatHelpers<ChatMessage>['regenerate'];
 };
 
 export function MessageEditor({
@@ -38,7 +38,7 @@ export function MessageEditor({
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`;
     }
   }, []);
@@ -69,7 +69,7 @@ export function MessageEditor({
         <Button
           className="h-fit px-3 py-2"
           onClick={() => {
-            setMode("view");
+            setMode('view');
           }}
           variant="outline"
         >
@@ -81,25 +81,25 @@ export function MessageEditor({
           disabled={isSubmitting}
           onClick={async () => {
             setIsSubmitting(true);
-            setMode("view");
+            setMode('view');
             try {
               const match = window.location.pathname.match(/\/chat\/(.+)$/);
-              if (!match) throw new Error("Cannot infer chat id for fork");
+              if (!match) throw new Error('Cannot infer chat id for fork');
               const currentChatId = match[1];
               const { newChatId } = await forkChatAction({
                 sourceChatId: currentChatId,
                 pivotMessageId: message.id,
-                mode: "edit",
+                mode: 'edit',
                 editedText: draftContent,
               });
               router.push(`/chat/${newChatId}`);
             } catch (err) {
-              console.error("Fork failed", err);
+              console.error('Fork failed', err);
             }
           }}
           variant="default"
         >
-          {isSubmitting ? "Sending..." : "Send"}
+          {isSubmitting ? 'Sending...' : 'Send'}
         </Button>
       </div>
     </div>

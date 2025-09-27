@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 // Lightweight internal icon button to avoid high-contrast default button styling
 function IconButton({
   children,
   onClick,
   disabled,
-  className = "",
+  className = '',
   label,
 }: {
   children: React.ReactNode;
@@ -70,38 +70,38 @@ export function ImageViewer({ src, alt, isOpen, onClose }: ImageViewerProps) {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       setShowUI(true);
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         onClose();
-      } else if (e.key === "0") {
+      } else if (e.key === '0') {
         resetZoom();
-      } else if (e.key === "+" || e.key === "=") {
+      } else if (e.key === '+' || e.key === '=') {
         zoomIn();
-      } else if (e.key === "-" || e.key === "_") {
+      } else if (e.key === '-' || e.key === '_') {
         zoomOut();
       } else if (
-        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)
+        ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)
       ) {
         e.preventDefault();
         const delta = 40;
         setPosition((p) => ({
           x:
-            e.key === "ArrowLeft"
+            e.key === 'ArrowLeft'
               ? p.x + delta
-              : e.key === "ArrowRight"
-              ? p.x - delta
-              : p.x,
+              : e.key === 'ArrowRight'
+                ? p.x - delta
+                : p.x,
           y:
-            e.key === "ArrowUp"
+            e.key === 'ArrowUp'
               ? p.y + delta
-              : e.key === "ArrowDown"
-              ? p.y - delta
-              : p.y,
+              : e.key === 'ArrowDown'
+                ? p.y - delta
+                : p.y,
         }));
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
   // Zoom functions
@@ -254,7 +254,7 @@ export function ImageViewer({ src, alt, isOpen, onClose }: ImageViewerProps) {
       {/* Close Button */}
       <div
         className={`absolute right-4 top-4 z-20 transition-opacity ${
-          showUI ? "opacity-100" : "opacity-0"
+          showUI ? 'opacity-100' : 'opacity-0'
         } `}
       >
         <IconButton label="Close" onClick={() => onClose()}>
@@ -266,7 +266,7 @@ export function ImageViewer({ src, alt, isOpen, onClose }: ImageViewerProps) {
       <div
         className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-3 
         bg-gradient-to-t from-black/70 via-black/30 to-transparent pb-6 pt-24 transition-opacity ${
-          showUI ? "opacity-100" : "opacity-0"
+          showUI ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-3 py-1.5 backdrop-blur-sm">
@@ -312,7 +312,7 @@ export function ImageViewer({ src, alt, isOpen, onClose }: ImageViewerProps) {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         style={{
-          cursor: isDragging ? "grabbing" : scale > 1 ? "grab" : "default",
+          cursor: isDragging ? 'grabbing' : scale > 1 ? 'grab' : 'default',
         }}
       >
         <img
@@ -322,8 +322,8 @@ export function ImageViewer({ src, alt, isOpen, onClose }: ImageViewerProps) {
           className="select-none transition-transform duration-150 ease-out will-change-transform"
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-            maxWidth: scale === 1 ? "100%" : "none",
-            maxHeight: scale === 1 ? "100%" : "none",
+            maxWidth: scale === 1 ? '100%' : 'none',
+            maxHeight: scale === 1 ? '100%' : 'none',
           }}
           draggable={false}
         />

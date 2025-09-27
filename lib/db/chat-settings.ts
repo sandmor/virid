@@ -1,7 +1,7 @@
-import { prisma } from "./prisma";
-import type { ChatSettings } from "./schema";
-import type { Prisma } from "../../generated/prisma-client";
-import { ChatSDKError } from "../errors";
+import { prisma } from './prisma';
+import type { ChatSettings } from './schema';
+import type { Prisma } from '../../generated/prisma-client';
+import { ChatSDKError } from '../errors';
 
 // Default empty settings object (do not persist unless mutations occur)
 const EMPTY: ChatSettings = {};
@@ -13,7 +13,7 @@ export async function getChatSettings(chatId: string): Promise<ChatSettings> {
   });
   if (!chat) return EMPTY;
   try {
-    if (!chat.settings || typeof chat.settings !== "object") return EMPTY;
+    if (!chat.settings || typeof chat.settings !== 'object') return EMPTY;
     return chat.settings as ChatSettings;
   } catch {
     return EMPTY;
@@ -35,8 +35,8 @@ export async function updateChatSettings(
     });
   } catch (e) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to update chat settings"
+      'bad_request:database',
+      'Failed to update chat settings'
     );
   }
   return next;
@@ -83,14 +83,14 @@ export async function applyInitialSettingsPreset({
   overrides: SettingsOverrideInput;
 }) {
   // Start from a safe normalized object
-  const merged: any = base && typeof base === "object" ? { ...base } : {};
+  const merged: any = base && typeof base === 'object' ? { ...base } : {};
 
   // Apply allowedTools override semantics
-  if (Object.prototype.hasOwnProperty.call(overrides, "allowedTools")) {
+  if (Object.prototype.hasOwnProperty.call(overrides, 'allowedTools')) {
     const list = overrides.allowedTools;
     if (list === undefined) {
       // leave merged.tools.allow undefined (no restriction)
-      if (merged.tools && "allow" in merged.tools) delete merged.tools.allow;
+      if (merged.tools && 'allow' in merged.tools) delete merged.tools.allow;
     } else {
       merged.tools = { ...(merged.tools || {}), allow: list };
     }

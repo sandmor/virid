@@ -1,37 +1,38 @@
-"use client";
+'use client';
 
-import { ChevronUp } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from '@clerk/nextjs';
+import { ChevronUp } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
 type NavUser = { id?: string; email?: string | null; type?: string };
-import { useTheme } from "next-themes";
+
+import { useTheme } from 'next-themes';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { guestRegex } from "@/lib/constants";
-import { Loader } from "lucide-react";
-import { toast } from "./toast";
+} from '@/components/ui/sidebar';
+import { guestRegex } from '@/lib/constants';
 
 export function SidebarUserNav({ user }: { user: NavUser }) {
   const router = useRouter();
   const { signOut } = useClerk();
   const { isSignedIn, user: clerkUser } = useUser();
   // Prefer live Clerk user info if available
-  const effectiveEmail = clerkUser?.primaryEmailAddress?.emailAddress || user.email;
+  const effectiveEmail =
+    clerkUser?.primaryEmailAddress?.emailAddress || user.email;
   const data = { user: { ...user, email: effectiveEmail } } as any;
   const { setTheme, resolvedTheme } = useTheme();
 
-  const isGuest = !isSignedIn || guestRegex.test(data?.user?.email ?? "");
+  const isGuest = !isSignedIn || guestRegex.test(data?.user?.email ?? '');
 
   return (
     <SidebarMenu>
@@ -44,14 +45,14 @@ export function SidebarUserNav({ user }: { user: NavUser }) {
                 data-testid="user-nav-button"
               >
                 <Image
-                  alt={user.email ?? "User Avatar"}
+                  alt={user.email ?? 'User Avatar'}
                   className="rounded-full"
                   height={24}
                   src={`https://avatar.vercel.sh/${user.email}`}
                   width={24}
                 />
                 <span className="truncate" data-testid="user-email">
-                  {isGuest ? "Guest" : user?.email}
+                  {isGuest ? 'Guest' : user?.email}
                 </span>
                 <ChevronUp className="ml-auto" />
               </SidebarMenuButton>
@@ -65,7 +66,7 @@ export function SidebarUserNav({ user }: { user: NavUser }) {
             {!isGuest && (
               <DropdownMenuItem
                 className="cursor-pointer"
-                onSelect={() => router.push("/settings?tab=archive")}
+                onSelect={() => router.push('/settings?tab=archive')}
               >
                 Account & Settings
               </DropdownMenuItem>
@@ -74,10 +75,10 @@ export function SidebarUserNav({ user }: { user: NavUser }) {
               className="cursor-pointer"
               data-testid="user-nav-item-theme"
               onSelect={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
               }
             >
-              {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
+              {`Toggle ${resolvedTheme === 'light' ? 'dark' : 'light'} mode`}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
@@ -85,18 +86,18 @@ export function SidebarUserNav({ user }: { user: NavUser }) {
                 className="w-full cursor-pointer"
                 onClick={() => {
                   if (isGuest) {
-                    router.push("/login");
+                    router.push('/login');
                   } else {
                     // Invoke Clerk signOut to clear session, then fall back to server route
                     signOut().then(() => {
-                      router.push("/");
+                      router.push('/');
                       router.refresh();
                     });
                   }
                 }}
                 type="button"
               >
-                {isGuest ? "Login to your account" : "Sign out"}
+                {isGuest ? 'Login to your account' : 'Sign out'}
               </button>
             </DropdownMenuItem>
           </DropdownMenuContent>

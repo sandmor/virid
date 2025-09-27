@@ -1,13 +1,13 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 const textPartSchema = z.object({
-  type: z.enum(["text"]),
+  type: z.enum(['text']),
   text: z.string().min(1).max(2000),
 });
 
 const filePartSchema = z.object({
-  type: z.enum(["file"]),
-  mediaType: z.enum(["image/jpeg", "image/png"]),
+  type: z.enum(['file']),
+  mediaType: z.enum(['image/jpeg', 'image/png']),
   name: z.string().min(1).max(100),
   url: z.string().url(),
 });
@@ -18,7 +18,7 @@ export const postRequestBodySchema = z.object({
   id: z.string().uuid(),
   message: z.object({
     id: z.string().uuid(),
-    role: z.enum(["user"]),
+    role: z.enum(['user']),
     parts: z.array(partSchema),
   }),
   // Accept any composite provider:model id; entitlement check is enforced server-side.
@@ -27,11 +27,11 @@ export const postRequestBodySchema = z.object({
     .string()
     .min(3)
     .max(200)
-    .refine((v) => v.includes(":"), {
+    .refine((v) => v.includes(':'), {
       message:
         "selectedChatModel must be a composite id of the form 'provider:model'",
     }),
-  selectedVisibilityType: z.enum(["public", "private"]),
+  selectedVisibilityType: z.enum(['public', 'private']),
   // Optional list of archive entry slugs to include immediately (will also be persisted if chat is new).
   // These are additive to whatever is already pinned in the database.
   pinnedSlugs: z
@@ -41,7 +41,7 @@ export const postRequestBodySchema = z.object({
         .min(1)
         .max(128)
         .regex(/^[a-zA-Z0-9._:-]+$/, {
-          message: "Slug contains invalid characters",
+          message: 'Slug contains invalid characters',
         })
     )
     .max(12)

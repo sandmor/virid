@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 type AppSidebarUser = { id?: string; email?: string | null };
-import { Plus } from "lucide-react";
-import { SidebarHistory } from "@/components/sidebar-history";
-import { SidebarUserNav } from "@/components/sidebar-user-nav";
-import { Button } from "@/components/ui/button";
+import { Plus } from 'lucide-react';
+import { SidebarHistory } from '@/components/sidebar-history';
+import { SidebarUserNav } from '@/components/sidebar-user-nav';
+import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -14,8 +14,8 @@ import {
   SidebarHeader,
   SidebarMenu,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+} from '@/components/ui/sidebar';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export function AppSidebar({ user }: { user: AppSidebarUser | undefined }) {
   const router = useRouter();
@@ -43,7 +43,7 @@ export function AppSidebar({ user }: { user: AppSidebarUser | undefined }) {
                   className="h-8 p-1 md:h-fit md:p-2"
                   onClick={() => {
                     setOpenMobile(false);
-                    router.push("/");
+                    router.push('/');
                     router.refresh();
                   }}
                   type="button"

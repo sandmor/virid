@@ -1,15 +1,9 @@
-import Link from "next/link";
-import { memo } from "react";
-import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import type { Chat } from "@/lib/db/schema";
-import {
-  Globe,
-  Lock,
-  MoreHorizontal,
-  Share,
-  Trash2,
-} from "lucide-react";
-import { CheckCircle } from "lucide-react";
+import Link from 'next/link';
+import { memo } from 'react';
+import { useChatVisibility } from '@/hooks/use-chat-visibility';
+import type { Chat } from '@/lib/db/schema';
+import { Globe, Lock, MoreHorizontal, Share, Trash2 } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,12 +13,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from './ui/dropdown-menu';
 import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "./ui/sidebar";
+} from './ui/sidebar';
 
 const PureChatItem = ({
   chat,
@@ -72,28 +66,26 @@ const PureChatItem = ({
                 <DropdownMenuItem
                   className="cursor-pointer flex-row justify-between"
                   onClick={() => {
-                    setVisibilityType("private");
+                    setVisibilityType('private');
                   }}
                 >
                   <div className="flex flex-row items-center gap-2">
                     <Lock size={12} />
                     <span>Private</span>
                   </div>
-                  {visibilityType === "private" ? (
-                    <CheckCircle />
-                  ) : null}
+                  {visibilityType === 'private' ? <CheckCircle /> : null}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer flex-row justify-between"
                   onClick={() => {
-                    setVisibilityType("public");
+                    setVisibilityType('public');
                   }}
                 >
                   <div className="flex flex-row items-center gap-2">
                     <Globe />
                     <span>Public</span>
                   </div>
-                  {visibilityType === "public" ? <CheckCircle /> : null}
+                  {visibilityType === 'public' ? <CheckCircle /> : null}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>

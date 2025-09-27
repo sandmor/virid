@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { memo } from "react";
-import { useWindowSize } from "usehooks-ts";
-import { SidebarToggle } from "@/components/sidebar-toggle";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { ChatPinnedArchive } from "./chat-pinned-archive";
-import { useSidebar } from "./ui/sidebar";
-import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
-import { ChatToolSelector } from "./chat-tool-selector";
-import { ChatAgentSelector, type AgentPreset } from "./chat-agent-selector";
+import { useRouter } from 'next/navigation';
+import { memo } from 'react';
+import { useWindowSize } from 'usehooks-ts';
+import { SidebarToggle } from '@/components/sidebar-toggle';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { ChatPinnedArchive } from './chat-pinned-archive';
+import { useSidebar } from './ui/sidebar';
+import { VisibilitySelector, type VisibilityType } from './visibility-selector';
+import { ChatToolSelector } from './chat-tool-selector';
+import { ChatAgentSelector, type AgentPreset } from './chat-agent-selector';
 
 function PureChatHeader({
   chatId,
@@ -52,7 +52,7 @@ function PureChatHeader({
         <Button
           className="order-2 ml-auto h-8 px-2 md:order-1 md:ml-0 md:h-fit md:px-2"
           onClick={() => {
-            router.push("/");
+            router.push('/');
             router.refresh();
           }}
           variant="outline"
@@ -101,12 +101,12 @@ export const ChatHeader = memo(
     prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
     prevProps.isReadonly === nextProps.isReadonly &&
     prevProps.chatHasStarted === nextProps.chatHasStarted &&
-    prevProps.stagedPinnedSlugs.join("|") ===
-      nextProps.stagedPinnedSlugs.join("|") &&
-    (prevProps.stagedAllowedTools?.join("|") ?? "__all__") ===
-      (nextProps.stagedAllowedTools?.join("|") ?? "__all__") &&
-    (prevProps.selectedAgentId ?? "__none__") ===
-      (nextProps.selectedAgentId ?? "__none__") &&
-    (prevProps.selectedAgentLabel ?? "") ===
-      (nextProps.selectedAgentLabel ?? "")
+    prevProps.stagedPinnedSlugs.join('|') ===
+      nextProps.stagedPinnedSlugs.join('|') &&
+    (prevProps.stagedAllowedTools?.join('|') ?? '__all__') ===
+      (nextProps.stagedAllowedTools?.join('|') ?? '__all__') &&
+    (prevProps.selectedAgentId ?? '__none__') ===
+      (nextProps.selectedAgentId ?? '__none__') &&
+    (prevProps.selectedAgentLabel ?? '') ===
+      (nextProps.selectedAgentLabel ?? '')
 );

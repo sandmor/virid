@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChatHeader } from "@/components/chat-header";
-import { useArtifactSelector } from "@/hooks/use-artifact";
-import { useAutoResume } from "@/hooks/use-auto-resume";
-import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import type { ChatSettings, Vote } from "@/lib/db/schema";
-import { ChatSDKError } from "@/lib/errors";
-import type { Attachment, ChatMessage } from "@/lib/types";
-import type { AppUsage } from "@/lib/usage";
-import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
-import { Artifact } from "./artifact";
-import { useDataStream } from "./data-stream-provider";
-import { Messages } from "./messages";
-import { MultimodalInput } from "./multimodal-input";
-import { toast } from "./toast";
-import type { VisibilityType } from "./visibility-selector";
-import type { AgentPreset } from "./chat-agent-selector";
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ChatHeader } from '@/components/chat-header';
+import { useArtifactSelector } from '@/hooks/use-artifact';
+import { useAutoResume } from '@/hooks/use-auto-resume';
+import { useChatVisibility } from '@/hooks/use-chat-visibility';
+import type { ChatSettings, Vote } from '@/lib/db/schema';
+import { ChatSDKError } from '@/lib/errors';
+import type { Attachment, ChatMessage } from '@/lib/types';
+import type { AppUsage } from '@/lib/usage';
+import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
+import { Artifact } from './artifact';
+import { useDataStream } from './data-stream-provider';
+import { Messages } from './messages';
+import { MultimodalInput } from './multimodal-input';
+import { toast } from './toast';
+import type { VisibilityType } from './visibility-selector';
+import type { AgentPreset } from './chat-agent-selector';
 import {
   normalizeAllowedTools,
   normalizePinnedEntries,
-} from "@/lib/agent-settings";
+} from '@/lib/agent-settings';
 
 export function Chat({
   id,
@@ -58,7 +58,7 @@ export function Chat({
   const queryClient = useQueryClient();
   const { setDataStream } = useDataStream();
 
-  const [input, setInput] = useState<string>("");
+  const [input, setInput] = useState<string>('');
   const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
   const [currentModelId, setCurrentModelId] = useState(initialChatModel);
   const currentModelIdRef = useRef(currentModelId);
@@ -136,17 +136,17 @@ export function Chat({
   };
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     if (chatHasStartedRef.current) return;
     const url = new URL(window.location.href);
     if (selectedAgentId) {
-      url.searchParams.set("agentId", selectedAgentId);
+      url.searchParams.set('agentId', selectedAgentId);
     } else {
-      url.searchParams.delete("agentId");
+      url.searchParams.delete('agentId');
     }
     const search = url.searchParams.toString();
-    const next = `${url.pathname}${search ? `?${search}` : ""}${url.hash}`;
-    window.history.replaceState({}, "", next);
+    const next = `${url.pathname}${search ? `?${search}` : ''}${url.hash}`;
+    window.history.replaceState({}, '', next);
   }, [selectedAgentId]);
 
   const {
@@ -163,7 +163,7 @@ export function Chat({
     experimental_throttle: 100,
     generateId: generateUUID,
     transport: new DefaultChatTransport({
-      api: "/api/chat",
+      api: '/api/chat',
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest(request) {
         const staged = stagedPinnedSlugsRef.current;
@@ -186,13 +186,13 @@ export function Chat({
     }),
     onData: (dataPart) => {
       setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-      if (dataPart.type === "data-usage") {
+      if (dataPart.type === 'data-usage') {
         setUsage(dataPart.data);
       }
     },
     onFinish: () => {
       // Invalidate chat history infinite query (new message might affect ordering)
-      queryClient.invalidateQueries({ queryKey: ["chat", "history"] });
+      queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
       if (!chatHasStartedRef.current) {
         chatHasStartedRef.current = true;
         // After first message, pins are persisted or merged; clear staged state & ref
@@ -204,13 +204,13 @@ export function Chat({
     },
     onError: (error) => {
       if (error instanceof ChatSDKError) {
-        toast({ type: "error", description: error.message });
+        toast({ type: 'error', description: error.message });
       }
     },
   });
 
   const searchParams = useSearchParams();
-  const query = searchParams.get("query");
+  const query = searchParams.get('query');
   const initialQueryHandledRef = useRef(false);
 
   const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
@@ -222,27 +222,27 @@ export function Chat({
     // Avoid duplicate if a user message with same text already exists
     const existingSame = messages.some(
       (m) =>
-        m.role === "user" &&
-        m.parts.some((p) => p.type === "text" && p.text === query)
+        m.role === 'user' &&
+        m.parts.some((p) => p.type === 'text' && p.text === query)
     );
     if (existingSame) {
       initialQueryHandledRef.current = true;
       setHasAppendedQuery(true);
-      window.history.replaceState({}, "", `/chat/${id}`);
+      window.history.replaceState({}, '', `/chat/${id}`);
       return;
     }
     initialQueryHandledRef.current = true;
     setHasAppendedQuery(true);
     sendMessage({
-      role: "user" as const,
-      parts: [{ type: "text", text: query }],
+      role: 'user' as const,
+      parts: [{ type: 'text', text: query }],
     });
     // Strip query param immediately to prevent re-trigger on fast re-render
-    window.history.replaceState({}, "", `/chat/${id}`);
+    window.history.replaceState({}, '', `/chat/${id}`);
   }, [query, messages, sendMessage, id]);
 
   const { data: votes } = useQuery<Vote[] | undefined>({
-    queryKey: ["chat", "votes", id],
+    queryKey: ['chat', 'votes', id],
     queryFn: async () => fetcher(`/api/vote?chatId=${id}`),
     enabled: messages.length >= 2,
     staleTime: 30_000,
@@ -296,31 +296,31 @@ export function Chat({
           onRegenerateAssistant={async (assistantMessageId: string) => {
             if (isForking) return; // guard against double clicks
             setIsForking(true);
-            toast({ type: "success", description: "Forking chat…" });
+            toast({ type: 'success', description: 'Forking chat…' });
             try {
               const match = window.location.pathname.match(/\/chat\/(.+)$/);
-              if (!match) throw new Error("Cannot infer current chat id");
+              if (!match) throw new Error('Cannot infer current chat id');
               const currentChatId = match[1];
-              const { forkChatAction } = await import("@/app/(chat)/actions");
+              const { forkChatAction } = await import('@/app/(chat)/actions');
               const result: any = await forkChatAction({
                 sourceChatId: currentChatId,
                 pivotMessageId: assistantMessageId,
-                mode: "regenerate",
+                mode: 'regenerate',
               });
               if (!result?.newChatId) {
-                throw new Error("Fork action did not return newChatId");
+                throw new Error('Fork action did not return newChatId');
               }
               const qp = result.previousUserText
                 ? `?query=${encodeURIComponent(result.previousUserText)}`
-                : "";
+                : '';
               requestAnimationFrame(() => {
                 router.push(`/chat/${result.newChatId}${qp}`);
               });
             } catch (e) {
-              console.error("Regenerate fork failed", e);
+              console.error('Regenerate fork failed', e);
               toast({
-                type: "error",
-                description: (e as Error).message || "Failed to fork chat",
+                type: 'error',
+                description: (e as Error).message || 'Failed to fork chat',
               });
               setIsForking(false);
             }

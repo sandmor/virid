@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getAppSession } from "@/lib/auth/session";
-import { prisma } from "@/lib/db/prisma";
-import { normalizeAgentSettingsPayload } from "@/lib/agent-settings";
-import type { Prisma } from "@/generated/prisma-client";
+import { NextRequest, NextResponse } from 'next/server';
+import { getAppSession } from '@/lib/auth/session';
+import { prisma } from '@/lib/db/prisma';
+import { normalizeAgentSettingsPayload } from '@/lib/agent-settings';
+import type { Prisma } from '@/generated/prisma-client';
 
 export async function PUT(
   request: NextRequest,
@@ -10,12 +10,12 @@ export async function PUT(
 ) {
   const session = await getAppSession();
   if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { id } = params;
   if (!id) {
-    return NextResponse.json({ error: "Agent ID required" }, { status: 400 });
+    return NextResponse.json({ error: 'Agent ID required' }, { status: 400 });
   }
 
   try {
@@ -24,31 +24,31 @@ export async function PUT(
       where: { id, userId: session.user.id },
     });
     if (!existing) {
-      return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
     }
 
     const body = await request.json();
     const { name, description, settings } = body;
 
     if (name !== undefined) {
-      if (typeof name !== "string" || name.trim().length === 0) {
+      if (typeof name !== 'string' || name.trim().length === 0) {
         return NextResponse.json(
-          { error: "Name is required" },
+          { error: 'Name is required' },
           { status: 400 }
         );
       }
       if (name.length > 128) {
-        return NextResponse.json({ error: "Name too long" }, { status: 400 });
+        return NextResponse.json({ error: 'Name too long' }, { status: 400 });
       }
     }
 
     if (description !== undefined) {
       if (
         description &&
-        (typeof description !== "string" || description.length > 1000)
+        (typeof description !== 'string' || description.length > 1000)
       ) {
         return NextResponse.json(
-          { error: "Description too long" },
+          { error: 'Description too long' },
           { status: 400 }
         );
       }
@@ -73,9 +73,9 @@ export async function PUT(
 
     return NextResponse.json({ agent });
   } catch (error) {
-    console.error("Failed to update agent:", error);
+    console.error('Failed to update agent:', error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
@@ -87,12 +87,12 @@ export async function DELETE(
 ) {
   const session = await getAppSession();
   if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { id } = params;
   if (!id) {
-    return NextResponse.json({ error: "Agent ID required" }, { status: 400 });
+    return NextResponse.json({ error: 'Agent ID required' }, { status: 400 });
   }
 
   try {
@@ -101,7 +101,7 @@ export async function DELETE(
       where: { id, userId: session.user.id },
     });
     if (!existing) {
-      return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
     }
 
     await prisma.agent.delete({
@@ -110,9 +110,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete agent:", error);
+    console.error('Failed to delete agent:', error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

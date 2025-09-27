@@ -1,6 +1,5 @@
-import { prisma } from "../db/prisma";
-import { cache } from "react";
-import type { UserType } from "@/lib/auth/types";
+import type { UserType } from '@/lib/auth/types';
+import { prisma } from '../db/prisma';
 
 export type TierRecord = {
   id: string;
@@ -14,25 +13,25 @@ export type TierRecord = {
 // Keep these in sync with the migration seed. They guarantee the app remains functional.
 const FALLBACK_TIERS: Record<UserType, TierRecord> = {
   guest: {
-    id: "guest",
+    id: 'guest',
     modelIds: [
-      "openrouter:x-ai/grok-4-fast:free",
-      "openrouter:moonshotai/kimi-k2:free",
+      'openrouter:x-ai/grok-4-fast:free',
+      'openrouter:moonshotai/kimi-k2:free',
     ],
     bucketCapacity: 60, // allow bursts up to 60 messages
     bucketRefillAmount: 20, // refill 20 per hour
     bucketRefillIntervalSeconds: 3600,
   },
   regular: {
-    id: "regular",
+    id: 'regular',
     modelIds: [
-      "openai:gpt-5",
-      "google:gemini-2.5-flash-image-preview",
-      "google:gemini-2.5-flash",
-      "google:gemini-2.5-pro",
-      "openrouter:x-ai/grok-4",
-      "openrouter:x-ai/grok-4-fast:free",
-      "openrouter:moonshotai/kimi-k2:free",
+      'openai:gpt-5',
+      'google:gemini-2.5-flash-image-preview',
+      'google:gemini-2.5-flash',
+      'google:gemini-2.5-pro',
+      'openrouter:x-ai/grok-4',
+      'openrouter:x-ai/grok-4-fast:free',
+      'openrouter:moonshotai/kimi-k2:free',
     ],
     bucketCapacity: 300,
     bucketRefillAmount: 100,
@@ -47,7 +46,10 @@ let cacheStore: Record<string, { value: TierRecord; fetchedAt: number }> = {};
 async function fetchTier(id: string): Promise<TierRecord> {
   const row = await prisma.tier.findUnique({ where: { id } }).catch((err) => {
     // In rare cases (e.g., during migration) Prisma might throw before table exists.
-    console.warn("Tier lookup failed, attempting fallback:", err?.message || err);
+    console.warn(
+      'Tier lookup failed, attempting fallback:',
+      err?.message || err
+    );
     return null;
   });
 
@@ -66,9 +68,13 @@ async function fetchTier(id: string): Promise<TierRecord> {
   return {
     id: r.id,
     modelIds: r.modelIds,
-    bucketCapacity: r.bucketCapacity ?? FALLBACK_TIERS[id as UserType].bucketCapacity,
-    bucketRefillAmount: r.bucketRefillAmount ?? FALLBACK_TIERS[id as UserType].bucketRefillAmount,
-    bucketRefillIntervalSeconds: r.bucketRefillIntervalSeconds ?? FALLBACK_TIERS[id as UserType].bucketRefillIntervalSeconds,
+    bucketCapacity:
+      r.bucketCapacity ?? FALLBACK_TIERS[id as UserType].bucketCapacity,
+    bucketRefillAmount:
+      r.bucketRefillAmount ?? FALLBACK_TIERS[id as UserType].bucketRefillAmount,
+    bucketRefillIntervalSeconds:
+      r.bucketRefillIntervalSeconds ??
+      FALLBACK_TIERS[id as UserType].bucketRefillIntervalSeconds,
   };
 }
 
@@ -81,11 +87,14 @@ export async function getTier(id: string): Promise<TierRecord> {
   return value;
 }
 
-export async function getTierForUserType(userType: UserType): Promise<TierRecord> {
+export async function getTierForUserType(
+  userType: UserType
+): Promise<TierRecord> {
   // userType matches tier id currently (guest|regular)
   return getTier(userType);
 }
 
 export function invalidateTierCache(id?: string) {
-  if (id) delete cacheStore[id]; else cacheStore = {};
+  if (id) delete cacheStore[id];
+  else cacheStore = {};
 }

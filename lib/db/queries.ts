@@ -1,14 +1,14 @@
-import "server-only";
+import 'server-only';
 
-import { prisma } from "./prisma";
-import type { Prisma } from "../../generated/prisma-client";
-import type { ArtifactKind } from "@/components/artifact";
-import type { VisibilityType } from "@/components/visibility-selector";
-import { ChatSDKError } from "../errors";
-import type { AppUsage } from "../usage";
-import { generateUUID } from "../utils";
-import { type Chat, type Suggestion, type User, type Document } from "./schema";
-import { refreshPinnedEntriesCache } from "./chat-settings";
+import { prisma } from './prisma';
+import type { Prisma } from '../../generated/prisma-client';
+import type { ArtifactKind } from '@/components/artifact';
+import type { VisibilityType } from '@/components/visibility-selector';
+import { ChatSDKError } from '../errors';
+import type { AppUsage } from '../usage';
+import { generateUUID } from '../utils';
+import { type Chat, type Suggestion, type User, type Document } from './schema';
+import { refreshPinnedEntriesCache } from './chat-settings';
 
 // Optionally, if not using email/pass login, you can use an Auth.js adapter.
 
@@ -19,8 +19,8 @@ export async function getUser(email: string): Promise<User[]> {
     return await prisma.user.findMany({ where: { email } });
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get user by email"
+      'bad_request:database',
+      'Failed to get user by email'
     );
   }
 }
@@ -42,7 +42,7 @@ export async function saveChat({
     });
     return;
   } catch (_error) {
-    throw new ChatSDKError("bad_request:database", "Failed to save chat");
+    throw new ChatSDKError('bad_request:database', 'Failed to save chat');
   }
 }
 
@@ -59,14 +59,14 @@ export async function deleteChatById({ id }: { id: string }): Promise<Chat> {
     };
     return {
       ...rest,
-      visibility: visibility as Chat["visibility"],
-      lastContext: lastContext as unknown as Chat["lastContext"],
+      visibility: visibility as Chat['visibility'],
+      lastContext: lastContext as unknown as Chat['lastContext'],
       settings: (deleted as any).settings ?? null,
     };
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to delete chat by id"
+      'bad_request:database',
+      'Failed to delete chat by id'
     );
   }
 }
@@ -94,13 +94,13 @@ export async function getChatsByUserId({
 
       if (!selectedChat) {
         throw new ChatSDKError(
-          "not_found:database",
+          'not_found:database',
           `Chat with id ${startingAfter} not found`
         );
       }
       const rows = await prisma.chat.findMany({
         where: { userId: id, createdAt: { gt: selectedChat.createdAt } },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         take: extendedLimit,
       });
       filteredChats = rows.map((c) => ({
@@ -108,8 +108,8 @@ export async function getChatsByUserId({
         createdAt: c.createdAt,
         title: c.title,
         userId: c.userId,
-        visibility: c.visibility as Chat["visibility"],
-        lastContext: c.lastContext as unknown as Chat["lastContext"],
+        visibility: c.visibility as Chat['visibility'],
+        lastContext: c.lastContext as unknown as Chat['lastContext'],
         parentChatId: (c as any).parentChatId ?? null,
         forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
         forkDepth: (c as any).forkDepth ?? 0,
@@ -122,13 +122,13 @@ export async function getChatsByUserId({
 
       if (!selectedChat) {
         throw new ChatSDKError(
-          "not_found:database",
+          'not_found:database',
           `Chat with id ${endingBefore} not found`
         );
       }
       const rows = await prisma.chat.findMany({
         where: { userId: id, createdAt: { lt: selectedChat.createdAt } },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         take: extendedLimit,
       });
       filteredChats = rows.map((c) => ({
@@ -136,8 +136,8 @@ export async function getChatsByUserId({
         createdAt: c.createdAt,
         title: c.title,
         userId: c.userId,
-        visibility: c.visibility as Chat["visibility"],
-        lastContext: c.lastContext as unknown as Chat["lastContext"],
+        visibility: c.visibility as Chat['visibility'],
+        lastContext: c.lastContext as unknown as Chat['lastContext'],
         parentChatId: (c as any).parentChatId ?? null,
         forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
         forkDepth: (c as any).forkDepth ?? 0,
@@ -146,7 +146,7 @@ export async function getChatsByUserId({
     } else {
       const rows = await prisma.chat.findMany({
         where: { userId: id },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         take: extendedLimit,
       });
       filteredChats = rows.map((c) => ({
@@ -154,8 +154,8 @@ export async function getChatsByUserId({
         createdAt: c.createdAt,
         title: c.title,
         userId: c.userId,
-        visibility: c.visibility as Chat["visibility"],
-        lastContext: c.lastContext as unknown as Chat["lastContext"],
+        visibility: c.visibility as Chat['visibility'],
+        lastContext: c.lastContext as unknown as Chat['lastContext'],
         parentChatId: (c as any).parentChatId ?? null,
         forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
         forkDepth: (c as any).forkDepth ?? 0,
@@ -171,8 +171,8 @@ export async function getChatsByUserId({
     };
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get chats by user id"
+      'bad_request:database',
+      'Failed to get chats by user id'
     );
   }
 }
@@ -195,12 +195,12 @@ export async function getChatById({
       };
     return {
       ...rest,
-      visibility: visibility as Chat["visibility"],
-      lastContext: lastContext as unknown as Chat["lastContext"],
+      visibility: visibility as Chat['visibility'],
+      lastContext: lastContext as unknown as Chat['lastContext'],
       settings: (settings as any) ?? null,
     } as Chat;
   } catch (_error) {
-    throw new ChatSDKError("bad_request:database", "Failed to get chat by id");
+    throw new ChatSDKError('bad_request:database', 'Failed to get chat by id');
   }
 }
 
@@ -239,7 +239,7 @@ export async function saveMessages({
     });
     return;
   } catch (_error) {
-    throw new ChatSDKError("bad_request:database", "Failed to save messages");
+    throw new ChatSDKError('bad_request:database', 'Failed to save messages');
   }
 }
 
@@ -260,7 +260,7 @@ export async function saveAssistantMessage({
       data: {
         id,
         chatId,
-        role: "assistant",
+        role: 'assistant',
         parts: parts as Prisma.InputJsonValue,
         attachments: attachments as Prisma.InputJsonValue,
         createdAt: new Date(),
@@ -268,8 +268,8 @@ export async function saveAssistantMessage({
     });
   } catch {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to save assistant message"
+      'bad_request:database',
+      'Failed to save assistant message'
     );
   }
 }
@@ -278,12 +278,12 @@ export async function getMessagesByChatId({ id }: { id: string }) {
   try {
     return await prisma.message.findMany({
       where: { chatId: id },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
     });
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get messages by chat id"
+      'bad_request:database',
+      'Failed to get messages by chat id'
     );
   }
 }
@@ -294,12 +294,12 @@ export async function getActiveMessagesByChatId({ id }: { id: string }) {
   try {
     return await prisma.message.findMany({
       where: { chatId: id },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
     });
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get messages by chat id"
+      'bad_request:database',
+      'Failed to get messages by chat id'
     );
   }
 }
@@ -318,28 +318,28 @@ export async function forkChatSimplified({
   sourceChatId: string;
   pivotMessageId: string; // id of assistant being regenerated OR user being edited
   userId: string;
-  mode: "regenerate" | "edit";
+  mode: 'regenerate' | 'edit';
   editedText?: string; // required for edit mode (new user text)
 }) {
-  if (mode === "edit" && (!editedText || !editedText.trim())) {
-    throw new ChatSDKError("bad_request:database", "Edited text required");
+  if (mode === 'edit' && (!editedText || !editedText.trim())) {
+    throw new ChatSDKError('bad_request:database', 'Edited text required');
   }
   try {
     const sourceChat: any = await prisma.chat.findUnique({
       where: { id: sourceChatId },
     });
     if (!sourceChat)
-      throw new ChatSDKError("not_found:database", "Source chat not found");
+      throw new ChatSDKError('not_found:database', 'Source chat not found');
     if (sourceChat.userId !== userId)
-      throw new ChatSDKError("forbidden:database", "Ownership mismatch");
+      throw new ChatSDKError('forbidden:database', 'Ownership mismatch');
 
     const all = await prisma.message.findMany({
       where: { chatId: sourceChatId },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
     });
     const pivotIndex = all.findIndex((m: any) => m.id === pivotMessageId);
     if (pivotIndex === -1)
-      throw new ChatSDKError("not_found:database", "Pivot message not in chat");
+      throw new ChatSDKError('not_found:database', 'Pivot message not in chat');
 
     // For regeneration: pivot is assistant -> copy messages before it (exclude pivot)
     // For edit: pivot is user -> copy messages before it (exclude old user message)
@@ -352,7 +352,7 @@ export async function forkChatSimplified({
         id: newChatId,
         createdAt: new Date(),
         userId,
-        title: sourceChat.title + " (fork)",
+        title: sourceChat.title + ' (fork)',
         visibility: sourceChat.visibility as any,
         lastContext: sourceChat.lastContext as Prisma.InputJsonValue,
         parentChatId: sourceChat.parentChatId || sourceChat.id,
@@ -376,14 +376,14 @@ export async function forkChatSimplified({
 
     // For edit mode: insert the edited user message immediately so UI can stream assistant next
     let insertedEditedMessageId: string | undefined;
-    if (mode === "edit") {
+    if (mode === 'edit') {
       insertedEditedMessageId = generateUUID();
       await prisma.message.create({
         data: {
           id: insertedEditedMessageId,
           chatId: newChatId,
-          role: "user",
-          parts: [{ type: "text", text: editedText }] as Prisma.InputJsonValue,
+          role: 'user',
+          parts: [{ type: 'text', text: editedText }] as Prisma.InputJsonValue,
           attachments: [] as Prisma.InputJsonValue,
           createdAt: new Date(),
         },
@@ -392,17 +392,17 @@ export async function forkChatSimplified({
 
     // For regenerate mode we return the previous user message text so client can re-send it
     let previousUserText: string | undefined;
-    if (mode === "regenerate") {
+    if (mode === 'regenerate') {
       // Find the last user message in prefix (which should precede assistant pivot)
       for (let i = prefix.length - 1; i >= 0; i--) {
-        if (prefix[i].role === "user") {
+        if (prefix[i].role === 'user') {
           const textParts = Array.isArray(prefix[i].parts)
             ? (prefix[i].parts as any[])
-                .filter((p) => p && p.type === "text")
+                .filter((p) => p && p.type === 'text')
                 .map((p) => p.text)
-                .join("\n")
+                .join('\n')
             : undefined;
-          previousUserText = textParts || "";
+          previousUserText = textParts || '';
           break;
         }
       }
@@ -412,8 +412,8 @@ export async function forkChatSimplified({
   } catch (e) {
     if (e instanceof ChatSDKError) throw e;
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to fork chat (simplified)"
+      'bad_request:database',
+      'Failed to fork chat (simplified)'
     );
   }
 }
@@ -425,7 +425,7 @@ export async function voteMessage({
 }: {
   chatId: string;
   messageId: string;
-  type: "up" | "down";
+  type: 'up' | 'down';
 }) {
   try {
     const existingVote = await prisma.vote.findUnique({
@@ -435,16 +435,16 @@ export async function voteMessage({
     if (existingVote) {
       await prisma.vote.update({
         where: { chatId_messageId: { chatId, messageId } },
-        data: { isUpvoted: type === "up" },
+        data: { isUpvoted: type === 'up' },
       });
       return;
     }
     await prisma.vote.create({
-      data: { chatId, messageId, isUpvoted: type === "up" },
+      data: { chatId, messageId, isUpvoted: type === 'up' },
     });
     return;
   } catch (_error) {
-    throw new ChatSDKError("bad_request:database", "Failed to vote message");
+    throw new ChatSDKError('bad_request:database', 'Failed to vote message');
   }
 }
 
@@ -453,8 +453,8 @@ export async function getVotesByChatId({ id }: { id: string }) {
     return await prisma.vote.findMany({ where: { chatId: id } });
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get votes by chat id"
+      'bad_request:database',
+      'Failed to get votes by chat id'
     );
   }
 }
@@ -478,11 +478,11 @@ export async function saveDocument({
     });
     const mapped: Document = {
       ...created,
-      kind: created.kind as Document["kind"],
+      kind: created.kind as Document['kind'],
     };
     return [mapped as any];
   } catch (_error) {
-    throw new ChatSDKError("bad_request:database", "Failed to save document");
+    throw new ChatSDKError('bad_request:database', 'Failed to save document');
   }
 }
 
@@ -494,13 +494,13 @@ export async function getDocumentsById({
   try {
     const documents = await prisma.document.findMany({
       where: { id },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
     });
-    return documents.map((d) => ({ ...d, kind: d.kind as Document["kind"] }));
+    return documents.map((d) => ({ ...d, kind: d.kind as Document['kind'] }));
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get documents by id"
+      'bad_request:database',
+      'Failed to get documents by id'
     );
   }
 }
@@ -513,18 +513,18 @@ export async function getDocumentById({
   try {
     const selectedDocument = await prisma.document.findFirst({
       where: { id },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
     return selectedDocument
       ? ({
           ...selectedDocument,
-          kind: selectedDocument.kind as Document["kind"],
+          kind: selectedDocument.kind as Document['kind'],
         } as Document)
       : null;
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get document by id"
+      'bad_request:database',
+      'Failed to get document by id'
     );
   }
 }
@@ -540,11 +540,11 @@ export async function deleteDocumentsByIdAfterTimestamp({
     // Capture the documents we will delete so we can return them after deletion
     const toDeleteRaw = await prisma.document.findMany({
       where: { id, createdAt: { gt: timestamp } },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
     });
     const toDelete: Document[] = toDeleteRaw.map((d) => ({
       ...d,
-      kind: d.kind as Document["kind"],
+      kind: d.kind as Document['kind'],
     }));
 
     // Delete suggestions linked to documents after timestamp
@@ -561,8 +561,8 @@ export async function deleteDocumentsByIdAfterTimestamp({
     return toDelete;
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to delete documents by id after timestamp"
+      'bad_request:database',
+      'Failed to delete documents by id after timestamp'
     );
   }
 }
@@ -577,8 +577,8 @@ export async function saveSuggestions({
     return;
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to save suggestions"
+      'bad_request:database',
+      'Failed to save suggestions'
     );
   }
 }
@@ -592,8 +592,8 @@ export async function getSuggestionsByDocumentId({
     return await prisma.suggestion.findMany({ where: { documentId } });
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get suggestions by document id"
+      'bad_request:database',
+      'Failed to get suggestions by document id'
     );
   }
 }
@@ -604,8 +604,8 @@ export async function getMessageById({ id }: { id: string }) {
     return msg ? ([msg] as any) : ([] as any);
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get message by id"
+      'bad_request:database',
+      'Failed to get message by id'
     );
   }
 }
@@ -613,14 +613,14 @@ export async function getMessageById({ id }: { id: string }) {
 // getAssistantVariantsByMessageId removed (no longer applicable)
 
 // ===================== Archive (Memory) =====================
-import { slugify, appendSuffix, normalizeTags } from "../archive/utils";
-import { mapPrismaError } from "./prisma-error";
+import { slugify, appendSuffix, normalizeTags } from '../archive/utils';
+import { mapPrismaError } from './prisma-error';
 
 export async function createArchiveEntry({
   userId,
   entity,
   slug: requestedSlug,
-  body = "",
+  body = '',
   tags,
 }: {
   userId: string;
@@ -633,8 +633,8 @@ export async function createArchiveEntry({
     const base = slugify(requestedSlug || entity);
     if (!base) {
       throw new ChatSDKError(
-        "bad_request:database",
-        "Empty slug after normalization"
+        'bad_request:database',
+        'Empty slug after normalization'
       );
     }
     let slug = base;
@@ -647,8 +647,8 @@ export async function createArchiveEntry({
       collisions += 1;
       if (collisions > 100) {
         throw new ChatSDKError(
-          "bad_request:database",
-          "Too many slug collisions"
+          'bad_request:database',
+          'Too many slug collisions'
         );
       }
       slug = appendSuffix(base, collisions);
@@ -664,7 +664,7 @@ export async function createArchiveEntry({
     });
     return { entry: created, adjusted: collisions > 0, base };
   } catch (e) {
-    throw mapPrismaError(e, { model: "ArchiveEntry", operation: "create" });
+    throw mapPrismaError(e, { model: 'ArchiveEntry', operation: 'create' });
   }
 }
 
@@ -680,7 +680,7 @@ export async function getArchiveEntryBySlug({
       where: { userId_slug: { userId, slug } },
     });
   } catch (e) {
-    throw mapPrismaError(e, { model: "ArchiveEntry", operation: "read" });
+    throw mapPrismaError(e, { model: 'ArchiveEntry', operation: 'read' });
   }
 }
 
@@ -703,8 +703,8 @@ export async function updateArchiveEntry({
 }) {
   if (body && appendBody) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Provide body or appendBody, not both"
+      'bad_request:database',
+      'Provide body or appendBody, not both'
     );
   }
   try {
@@ -756,10 +756,10 @@ export async function updateArchiveEntry({
         data: { entity: nextEntity, body: nextBody, tags: nextTags },
       });
     } catch (err) {
-      throw mapPrismaError(err, { model: "ArchiveEntry", operation: "update" });
+      throw mapPrismaError(err, { model: 'ArchiveEntry', operation: 'update' });
     }
   } catch (outer) {
-    throw mapPrismaError(outer, { model: "ArchiveEntry", operation: "update" });
+    throw mapPrismaError(outer, { model: 'ArchiveEntry', operation: 'update' });
   }
 }
 
@@ -783,7 +783,7 @@ export async function deleteArchiveEntry({
     });
     return { deleted: true, removedLinks: removedLinks.count };
   } catch (e) {
-    throw mapPrismaError(e, { model: "ArchiveEntry", operation: "delete" });
+    throw mapPrismaError(e, { model: 'ArchiveEntry', operation: 'delete' });
   }
 }
 
@@ -802,8 +802,8 @@ export async function linkArchiveEntries({
 }) {
   if (sourceSlug === targetSlug) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Cannot link an entry to itself"
+      'bad_request:database',
+      'Cannot link an entry to itself'
     );
   }
   try {
@@ -816,7 +816,7 @@ export async function linkArchiveEntries({
       }),
     ]);
     if (!source || !target)
-      return { error: "One or both entries not found" } as const;
+      return { error: 'One or both entries not found' } as const;
     const existing = await prisma.archiveLink.findFirst({
       where: {
         OR: [
@@ -828,7 +828,7 @@ export async function linkArchiveEntries({
                 type,
                 bidirectional: true,
               }
-            : { id: "__skip__" },
+            : { id: '__skip__' },
         ],
       },
     });
@@ -855,7 +855,7 @@ export async function linkArchiveEntries({
       type: created.type,
     } as const;
   } catch (e) {
-    throw mapPrismaError(e, { model: "ArchiveLink", operation: "link" });
+    throw mapPrismaError(e, { model: 'ArchiveLink', operation: 'link' });
   }
 }
 
@@ -890,7 +890,7 @@ export async function unlinkArchiveEntries({
     });
     return { removed: removed.count } as const;
   } catch (e) {
-    throw mapPrismaError(e, { model: "ArchiveLink", operation: "unlink" });
+    throw mapPrismaError(e, { model: 'ArchiveLink', operation: 'unlink' });
   }
 }
 
@@ -904,20 +904,20 @@ export async function getLinksForEntry({ entryId }: { entryId: string }) {
     ]);
     return { outgoing, incoming };
   } catch (e) {
-    throw mapPrismaError(e, { model: "ArchiveLink", operation: "read" });
+    throw mapPrismaError(e, { model: 'ArchiveLink', operation: 'read' });
   }
 }
 
 export async function searchArchiveEntries({
   userId,
   tags,
-  matchMode = "any",
+  matchMode = 'any',
   query,
   limit = 10,
 }: {
   userId: string;
   tags?: string[];
-  matchMode?: "any" | "all";
+  matchMode?: 'any' | 'all';
   query?: string;
   limit?: number;
 }) {
@@ -927,7 +927,7 @@ export async function searchArchiveEntries({
       const normalized = normalizeTags(tags);
       if (normalized.length) {
         constraints.tags =
-          matchMode === "all"
+          matchMode === 'all'
             ? { hasEvery: normalized }
             : { hasSome: normalized };
       }
@@ -937,20 +937,20 @@ export async function searchArchiveEntries({
       where.AND = [
         {
           OR: [
-            { entity: { contains: query, mode: "insensitive" } },
-            { body: { contains: query, mode: "insensitive" } },
+            { entity: { contains: query, mode: 'insensitive' } },
+            { body: { contains: query, mode: 'insensitive' } },
           ],
         },
       ];
     }
     const rows = await prisma.archiveEntry.findMany({
       where,
-      orderBy: { updatedAt: "desc" },
+      orderBy: { updatedAt: 'desc' },
       take: Math.min(Math.max(limit, 1), 50),
     });
     return rows;
   } catch (e) {
-    throw mapPrismaError(e, { model: "ArchiveEntry", operation: "search" });
+    throw mapPrismaError(e, { model: 'ArchiveEntry', operation: 'search' });
   }
 }
 
@@ -964,8 +964,8 @@ export async function getArchiveEntriesByIds({ ids }: { ids: string[] }) {
     return rows;
   } catch (_) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to map archive entry ids"
+      'bad_request:database',
+      'Failed to map archive entry ids'
     );
   }
 }
@@ -987,11 +987,11 @@ export async function pinArchiveEntryToChat({
         where: { userId_slug: { userId, slug } },
       }),
     ]);
-    if (!chat) throw new ChatSDKError("not_found:database", "Chat not found");
+    if (!chat) throw new ChatSDKError('not_found:database', 'Chat not found');
     if (chat.userId !== userId)
-      throw new ChatSDKError("forbidden:database", "Chat ownership mismatch");
+      throw new ChatSDKError('forbidden:database', 'Chat ownership mismatch');
     if (!entry)
-      throw new ChatSDKError("not_found:database", "Archive entry not found");
+      throw new ChatSDKError('not_found:database', 'Archive entry not found');
     // Idempotent create
     const existing = await prisma.chatPinnedArchiveEntry.findFirst({
       where: { chatId, archiveEntryId: entry.id },
@@ -1005,21 +1005,21 @@ export async function pinArchiveEntryToChat({
       const all = await prisma.chatPinnedArchiveEntry.findMany({
         where: { chatId },
         include: { archiveEntry: { select: { slug: true } } },
-        orderBy: { pinnedAt: "asc" },
+        orderBy: { pinnedAt: 'asc' },
       });
       await refreshPinnedEntriesCache(
         chatId,
         all.map((r: any) => r.archiveEntry.slug)
       );
     } catch (e) {
-      console.warn("Failed to refresh pinnedEntries cache", { chatId, e });
+      console.warn('Failed to refresh pinnedEntries cache', { chatId, e });
     }
     return { pinned: true, already: false } as const;
   } catch (e) {
     if (e instanceof ChatSDKError) throw e;
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to pin archive entry"
+      'bad_request:database',
+      'Failed to pin archive entry'
     );
   }
 }
@@ -1046,14 +1046,14 @@ export async function unpinArchiveEntryFromChat({
         const all = await prisma.chatPinnedArchiveEntry.findMany({
           where: { chatId },
           include: { archiveEntry: { select: { slug: true } } },
-          orderBy: { pinnedAt: "asc" },
+          orderBy: { pinnedAt: 'asc' },
         });
         await refreshPinnedEntriesCache(
           chatId,
           all.map((r: any) => r.archiveEntry.slug)
         );
       } catch (e) {
-        console.warn("Failed to refresh pinnedEntries cache after unpin", {
+        console.warn('Failed to refresh pinnedEntries cache after unpin', {
           chatId,
           e,
         });
@@ -1062,8 +1062,8 @@ export async function unpinArchiveEntryFromChat({
     return { removed: removed.count } as const;
   } catch (e) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to unpin archive entry"
+      'bad_request:database',
+      'Failed to unpin archive entry'
     );
   }
 }
@@ -1082,7 +1082,7 @@ export async function getPinnedArchiveEntriesForChat({
     const rows: any[] = await prisma.chatPinnedArchiveEntry.findMany({
       where: { chatId },
       include: { archiveEntry: true },
-      orderBy: { pinnedAt: "asc" },
+      orderBy: { pinnedAt: 'asc' },
     });
     return rows.map((r: any) => ({
       slug: r.archiveEntry.slug,
@@ -1094,8 +1094,8 @@ export async function getPinnedArchiveEntriesForChat({
     }));
   } catch (e) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to load pinned archive entries"
+      'bad_request:database',
+      'Failed to load pinned archive entries'
     );
   }
 }
@@ -1128,8 +1128,8 @@ export async function deleteMessagesByChatIdAfterTimestamp({
     return;
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to delete messages by chat id after timestamp"
+      'bad_request:database',
+      'Failed to delete messages by chat id after timestamp'
     );
   }
 }
@@ -1139,15 +1139,15 @@ export async function updateChatVisiblityById({
   visibility,
 }: {
   chatId: string;
-  visibility: "private" | "public";
+  visibility: 'private' | 'public';
 }) {
   try {
     await prisma.chat.update({ where: { id: chatId }, data: { visibility } });
     return;
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to update chat visibility by id"
+      'bad_request:database',
+      'Failed to update chat visibility by id'
     );
   }
 }
@@ -1164,8 +1164,8 @@ export async function updateChatTitleById({
     return;
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to update chat title by id"
+      'bad_request:database',
+      'Failed to update chat title by id'
     );
   }
 }
@@ -1185,7 +1185,7 @@ export async function updateChatLastContextById({
     });
     return;
   } catch (error) {
-    console.warn("Failed to update lastContext for chat", chatId, error);
+    console.warn('Failed to update lastContext for chat', chatId, error);
     return;
   }
 }
@@ -1206,8 +1206,8 @@ export async function createStreamId({
     });
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to create stream id"
+      'bad_request:database',
+      'Failed to create stream id'
     );
   }
 }
@@ -1217,13 +1217,13 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
     const streamIds = await prisma.stream.findMany({
       where: { chatId },
       select: { id: true },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
     });
     return (streamIds as Array<{ id: string }>).map(({ id }) => id);
   } catch (_error) {
     throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get stream ids by chat id"
+      'bad_request:database',
+      'Failed to get stream ids by chat id'
     );
   }
 }

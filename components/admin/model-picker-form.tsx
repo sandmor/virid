@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ModelPicker } from "@/components/admin/model-picker";
+import { useState } from 'react';
+import { ModelPicker } from '@/components/admin/model-picker';
 
 export function ModelPickerFormFields({
   name,

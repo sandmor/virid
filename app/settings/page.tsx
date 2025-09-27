@@ -1,26 +1,26 @@
-import { Metadata } from "next";
-import { getAppSession } from "@/lib/auth/session";
-import { redirect } from "next/navigation";
-import { Suspense } from "react";
-import { dehydrate, QueryClient } from "@tanstack/react-query";
-import { HydrationBoundary } from "@tanstack/react-query";
-import { isAdmin } from "@/lib/auth/admin";
-import SettingsView from "./view";
-import AdminSections from "./AdminSections";
+import { Metadata } from 'next';
+import { getAppSession } from '@/lib/auth/session';
+import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
+import { dehydrate, QueryClient } from '@tanstack/react-query';
+import { HydrationBoundary } from '@tanstack/react-query';
+import { isAdmin } from '@/lib/auth/admin';
+import SettingsView from './view';
+import AdminSections from './AdminSections';
 
 export const metadata: Metadata = {
-  title: "Account Settings",
+  title: 'Account Settings',
 };
 
 // Server helper to prefetch archive list when archive tab is active so first paint is immediate.
 async function prefetchArchive() {
   const qc = new QueryClient();
   await qc.prefetchInfiniteQuery({
-    queryKey: ["archive", "search", { q: undefined, tags: undefined }],
+    queryKey: ['archive', 'search', { q: undefined, tags: undefined }],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/archive/search?limit=20`,
-        { cache: "no-store" }
+        `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/archive/search?limit=20`,
+        { cache: 'no-store' }
       );
       if (!res.ok) return { entries: [], hasMore: false, nextCursor: null };
       return res.json();
@@ -34,11 +34,11 @@ async function prefetchArchive() {
 async function prefetchAgents() {
   const qc = new QueryClient();
   await qc.prefetchQuery({
-    queryKey: ["agents"],
+    queryKey: ['agents'],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/agents`,
-        { cache: "no-store" }
+        `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/agents`,
+        { cache: 'no-store' }
       );
       if (!res.ok) return { agents: [] };
       return res.json();
@@ -53,22 +53,22 @@ export default async function SettingsPage({
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const session = await getAppSession();
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect('/login');
   const tabParam =
-    typeof searchParams?.tab === "string" ? searchParams!.tab : undefined;
+    typeof searchParams?.tab === 'string' ? searchParams!.tab : undefined;
   const adminAllowed = await isAdmin();
   const defaultTab =
-    tabParam === "admin" && adminAllowed
-      ? "admin"
-      : tabParam === "agents"
-      ? "agents"
-      : "archive";
+    tabParam === 'admin' && adminAllowed
+      ? 'admin'
+      : tabParam === 'agents'
+        ? 'agents'
+        : 'archive';
   const dehydrated =
-    defaultTab === "archive"
+    defaultTab === 'archive'
       ? await prefetchArchive()
-      : defaultTab === "agents"
-      ? await prefetchAgents()
-      : undefined;
+      : defaultTab === 'agents'
+        ? await prefetchAgents()
+        : undefined;
   const adminContent = adminAllowed ? <AdminSections /> : null;
   return (
     <div className="flex min-h-screen flex-col">

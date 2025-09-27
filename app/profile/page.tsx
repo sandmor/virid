@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
 export default function ProfilePage() {
-  redirect("/settings?tab=archive");
+  redirect('/settings?tab=archive');
 }

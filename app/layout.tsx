@@ -1,17 +1,19 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/components/theme-provider';
 
-import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
-import { QueryProvider } from "@/components/query-provider";
+import './globals.css';
+import { ClerkProvider } from '@clerk/nextjs';
+import { QueryProvider } from '@/components/query-provider';
 
 export const metadata: Metadata = {
   // Update to your production domain when available
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_BASE_URL || "https://virid.local"),
-  title: "Virid Chat",
-  description: "Virid – multimodal AI chat with Clerk authentication.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://virid.local'
+  ),
+  title: 'Virid Chat',
+  description: 'Virid – multimodal AI chat with Clerk authentication.',
 };
 
 export const viewport = {
@@ -19,19 +21,19 @@ export const viewport = {
 };
 
 const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist",
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-geist',
 });
 
 const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist-mono",
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-geist-mono',
 });
 
-const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
-const DARK_THEME_COLOR = "hsl(240deg 10% 3.92%)";
+const LIGHT_THEME_COLOR = 'hsl(0 0% 100%)';
+const DARK_THEME_COLOR = 'hsl(240deg 10% 3.92%)';
 const THEME_COLOR_SCRIPT = `\
 (function() {
   var html = document.documentElement;
@@ -82,9 +84,7 @@ export default function RootLayout({
         >
           <Toaster position="top-center" />
           <ClerkProvider>
-            <QueryProvider>
-              {children}
-            </QueryProvider>
+            <QueryProvider>{children}</QueryProvider>
           </ClerkProvider>
         </ThemeProvider>
       </body>

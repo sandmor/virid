@@ -1,52 +1,59 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
-import { useSignUp } from "@clerk/nextjs";
-import { AuthForm } from "@/components/auth-form";
-import { SubmitButton } from "@/components/submit-button";
-import { toast } from "@/components/toast";
-import { SocialAuthButtons } from "@/components/social-auth-buttons";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+import { useSignUp } from '@clerk/nextjs';
+import { AuthForm } from '@/components/auth-form';
+import { SubmitButton } from '@/components/submit-button';
+import { toast } from '@/components/toast';
+import { SocialAuthButtons } from '@/components/social-auth-buttons';
 
 export default function Page() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [isSuccessful, setIsSuccessful] = useState(false);
 
   const { isLoaded, signUp, setActive } = useSignUp();
 
   useEffect(() => {
     if (isSuccessful) {
-      const timeout = setTimeout(() => router.push("/"), 400);
+      const timeout = setTimeout(() => router.push('/'), 400);
       return () => clearTimeout(timeout);
     }
   }, [isSuccessful, router]);
 
   const handleSubmit = async (formData: FormData) => {
     if (!isLoaded) return;
-    const emailVal = formData.get("email") as string;
-    const passwordVal = formData.get("password") as string;
+    const emailVal = formData.get('email') as string;
+    const passwordVal = formData.get('password') as string;
     setEmail(emailVal);
     try {
-      const result = await signUp.create({ emailAddress: emailVal, password: passwordVal });
-      if (result.status === "complete") {
+      const result = await signUp.create({
+        emailAddress: emailVal,
+        password: passwordVal,
+      });
+      if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId });
         setIsSuccessful(true);
-  toast({ type: "success", description: "Account created successfully!" });
+        toast({
+          type: 'success',
+          description: 'Account created successfully!',
+        });
         router.refresh();
-      } else if (result.status === "missing_requirements") {
-        toast({ type: "error", description: "Additional verification required" });
+      } else if (result.status === 'missing_requirements') {
+        toast({
+          type: 'error',
+          description: 'Additional verification required',
+        });
       } else {
-        toast({ type: "error", description: "Unexpected sign up state" });
+        toast({ type: 'error', description: 'Unexpected sign up state' });
       }
     } catch (e: any) {
-      const raw = e?.errors?.[0]?.message || "Failed to create account";
-      const normalized = /exist/i.test(raw)
-        ? "Account already exists!"
-        : raw;
-      toast({ type: "error", description: normalized });
+      const raw = e?.errors?.[0]?.message || 'Failed to create account';
+      const normalized = /exist/i.test(raw) ? 'Account already exists!' : raw;
+      toast({ type: 'error', description: normalized });
     }
   };
 
@@ -54,12 +61,15 @@ export default function Page() {
     if (!isLoaded) return;
     try {
       await signUp.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: "/sso-callback",
-  redirectUrlComplete: "/",
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/',
       });
     } catch (e: any) {
-      toast({ type: "error", description: e?.errors?.[0]?.message || "Google sign-up failed" });
+      toast({
+        type: 'error',
+        description: e?.errors?.[0]?.message || 'Google sign-up failed',
+      });
     }
   }, [isLoaded, signUp]);
 
@@ -74,19 +84,19 @@ export default function Page() {
         </div>
         <AuthForm action={handleSubmit} defaultEmail={email}>
           <SubmitButton isSuccessful={isSuccessful}>
-            {isLoaded ? "Sign Up" : "Loading"}
+            {isLoaded ? 'Sign Up' : 'Loading'}
           </SubmitButton>
           <SocialAuthDivider />
           <SocialAuthButtons mode="sign-up" />
           <p className="mt-4 text-center text-gray-600 text-sm dark:text-zinc-400">
-            {"Already have an account? "}
+            {'Already have an account? '}
             <Link
               className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
               href="/login"
             >
               Sign in
             </Link>
-            {" instead."}
+            {' instead.'}
           </p>
         </AuthForm>
       </div>

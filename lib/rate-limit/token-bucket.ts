@@ -1,10 +1,10 @@
-import { prisma } from "../db/prisma";
-import { ChatSDKError } from "../errors";
+import { prisma } from '../db/prisma';
+import { ChatSDKError } from '../errors';
 
 export type TokenBucketConfig = {
-  capacity: number;                // Maximum tokens storable
-  refillAmount: number;            // Tokens added each interval
-  refillIntervalSeconds: number;   // Interval length
+  capacity: number; // Maximum tokens storable
+  refillAmount: number; // Tokens added each interval
+  refillIntervalSeconds: number; // Interval length
 };
 
 /**
@@ -23,7 +23,8 @@ export async function consumeTokens({
   cost: number;
   config: TokenBucketConfig;
 }): Promise<{ remaining: number; capacity: number } | never> {
-  if (cost <= 0) return { remaining: config.capacity, capacity: config.capacity };
+  if (cost <= 0)
+    return { remaining: config.capacity, capacity: config.capacity };
 
   try {
     const result = await prisma.$transaction(async (tx) => {
@@ -55,13 +56,16 @@ export async function consumeTokens({
 
       if (tokens < cost) {
         // Not enough tokens; persist any refill and return error
-        if (tokens !== state.tokens || lastRefill.getTime() !== state.lastRefill.getTime()) {
+        if (
+          tokens !== state.tokens ||
+          lastRefill.getTime() !== state.lastRefill.getTime()
+        ) {
           await tx.userRateLimit.update({
             where: { userId },
             data: { tokens, lastRefill },
           });
         }
-        throw new ChatSDKError("rate_limit:chat");
+        throw new ChatSDKError('rate_limit:chat');
       }
 
       tokens -= cost;
@@ -77,6 +81,9 @@ export async function consumeTokens({
     return result;
   } catch (error) {
     if (error instanceof ChatSDKError) throw error;
-    throw new ChatSDKError("bad_request:database", "Failed token bucket transaction");
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed token bucket transaction'
+    );
   }
 }

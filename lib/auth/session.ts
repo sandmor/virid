@@ -1,9 +1,9 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db/prisma";
-import { readGuestSession } from "./guest";
+import { auth, clerkClient } from '@clerk/nextjs/server';
+import { prisma } from '@/lib/db/prisma';
+import { readGuestSession } from './guest';
 
 export type AppSession = {
-  user: { id: string; type: "guest" | "regular"; email?: string | null };
+  user: { id: string; type: 'guest' | 'regular'; email?: string | null };
 };
 
 export async function getAppSession(): Promise<AppSession | null> {
@@ -14,7 +14,7 @@ export async function getAppSession(): Promise<AppSession | null> {
 
   if (hasClerkEnv) {
     try {
-  const a = await auth();
+      const a = await auth();
       if (a.userId) {
         // Resolve email reliably from Clerk user profile; session claims may not include it for some providers
         let resolvedEmail: string | undefined;
@@ -41,7 +41,7 @@ export async function getAppSession(): Promise<AppSession | null> {
             update: { email: resolvedEmail },
             create: {
               id: a.userId,
-              email: resolvedEmail || "user@unknown",
+              email: resolvedEmail || 'user@unknown',
             },
           });
         } catch {
@@ -50,7 +50,7 @@ export async function getAppSession(): Promise<AppSession | null> {
         return {
           user: {
             id: a.userId,
-            type: "regular",
+            type: 'regular',
             email: resolvedEmail,
           },
         };
@@ -72,7 +72,7 @@ export async function getAppSession(): Promise<AppSession | null> {
     } catch {
       /* ignore */
     }
-    return { user: { id: guest.uid, type: "guest", email: guest.email } };
+    return { user: { id: guest.uid, type: 'guest', email: guest.email } };
   }
 
   return null;

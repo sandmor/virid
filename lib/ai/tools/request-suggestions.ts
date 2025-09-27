@@ -1,12 +1,12 @@
-import { streamObject, tool, type UIMessageStreamWriter } from "ai";
-import type { AppSession } from "@/lib/auth/session";
-import { z } from "zod";
-import { getDocumentById, saveSuggestions } from "@/lib/db/queries";
-import type { Suggestion } from "@/lib/db/schema";
-import type { ChatMessage } from "@/lib/types";
-import { generateUUID } from "@/lib/utils";
-import { getLanguageModel } from "../providers";
-import { ARTIFACT_GENERATION_MODEL } from "../models";
+import { streamObject, tool, type UIMessageStreamWriter } from 'ai';
+import type { AppSession } from '@/lib/auth/session';
+import { z } from 'zod';
+import { getDocumentById, saveSuggestions } from '@/lib/db/queries';
+import type { Suggestion } from '@/lib/db/schema';
+import type { ChatMessage } from '@/lib/types';
+import { generateUUID } from '@/lib/utils';
+import { getLanguageModel } from '../providers';
+import { ARTIFACT_GENERATION_MODEL } from '../models';
 
 type RequestSuggestionsProps = {
   session: AppSession;
@@ -18,37 +18,37 @@ export const requestSuggestions = ({
   dataStream,
 }: RequestSuggestionsProps) =>
   tool({
-    description: "Request suggestions for a document",
+    description: 'Request suggestions for a document',
     inputSchema: z.object({
       documentId: z
         .string()
-        .describe("The ID of the document to request edits"),
+        .describe('The ID of the document to request edits'),
     }),
     execute: async ({ documentId }) => {
       const document = await getDocumentById({ id: documentId });
 
       if (!document || !document.content) {
         return {
-          error: "Document not found",
+          error: 'Document not found',
         };
       }
 
       const suggestions: Omit<
         Suggestion,
-        "userId" | "createdAt" | "documentCreatedAt"
+        'userId' | 'createdAt' | 'documentCreatedAt'
       >[] = [];
 
       const model = await getLanguageModel(ARTIFACT_GENERATION_MODEL);
       const { elementStream } = streamObject({
         model,
         system:
-          "You are a help writing assistant. Given a piece of writing, please offer suggestions to improve the piece of writing and describe the change. It is very important for the edits to contain full sentences instead of just words. Max 5 suggestions.",
+          'You are a help writing assistant. Given a piece of writing, please offer suggestions to improve the piece of writing and describe the change. It is very important for the edits to contain full sentences instead of just words. Max 5 suggestions.',
         prompt: document.content,
-        output: "array",
+        output: 'array',
         schema: z.object({
-          originalSentence: z.string().describe("The original sentence"),
-          suggestedSentence: z.string().describe("The suggested sentence"),
-          description: z.string().describe("The description of the suggestion"),
+          originalSentence: z.string().describe('The original sentence'),
+          suggestedSentence: z.string().describe('The suggested sentence'),
+          description: z.string().describe('The description of the suggestion'),
         }),
       });
 
@@ -64,7 +64,7 @@ export const requestSuggestions = ({
         };
 
         dataStream.write({
-          type: "data-suggestion",
+          type: 'data-suggestion',
           data: suggestion,
           transient: true,
         });
@@ -89,7 +89,7 @@ export const requestSuggestions = ({
         id: documentId,
         title: document.title,
         kind: document.kind,
-        message: "Suggestions have been added to the document",
+        message: 'Suggestions have been added to the document',
       };
     },
   });
