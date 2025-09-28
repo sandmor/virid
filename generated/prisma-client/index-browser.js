@@ -164,7 +164,8 @@ exports.Prisma.ChatScalarFieldEnum = {
   settings: 'settings',
   parentChatId: 'parentChatId',
   forkedFromMessageId: 'forkedFromMessageId',
-  forkDepth: 'forkDepth'
+  forkDepth: 'forkDepth',
+  agentId: 'agentId'
 };
 
 exports.Prisma.MessageScalarFieldEnum = {

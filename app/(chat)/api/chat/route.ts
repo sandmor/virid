@@ -202,6 +202,7 @@ export async function POST(request: Request) {
         userId: session.user.id,
         title: placeholder,
         visibility: selectedVisibilityType,
+        agentId,
       });
       createdNewChat = true;
 

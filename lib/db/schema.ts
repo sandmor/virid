@@ -18,7 +18,7 @@ export interface ChatSettings {
 }
 
 export type Chat = Omit<
-  Prisma.ChatGetPayload<{}>,
+  Prisma.ChatGetPayload<{ include: { agent: true } }>,
   'lastContext' | 'visibility' | 'settings'
 > & {
   lastContext: AppUsage | null;

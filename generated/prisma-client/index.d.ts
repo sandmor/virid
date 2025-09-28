@@ -2115,6 +2115,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type AgentCountOutputType
+   */
+
+  export type AgentCountOutputType = {
+    chats: number
+  }
+
+  export type AgentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    chats?: boolean | AgentCountOutputTypeCountChatsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AgentCountOutputType without action
+   */
+  export type AgentCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgentCountOutputType
+     */
+    select?: AgentCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AgentCountOutputType without action
+   */
+  export type AgentCountOutputTypeCountChatsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChatWhereInput
+  }
+
+
+  /**
    * Count Type ChatCountOutputType
    */
 
@@ -6713,6 +6744,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    chats?: boolean | Agent$chatsArgs<ExtArgs>
+    _count?: boolean | AgentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["agent"]>
 
   export type AgentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6750,6 +6783,8 @@ export namespace Prisma {
   export type AgentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "description" | "settings" | "createdAt" | "updatedAt", ExtArgs["result"]["agent"]>
   export type AgentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    chats?: boolean | Agent$chatsArgs<ExtArgs>
+    _count?: boolean | AgentCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AgentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -6762,6 +6797,7 @@ export namespace Prisma {
     name: "Agent"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      chats: Prisma.$ChatPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -7166,6 +7202,7 @@ export namespace Prisma {
   export interface Prisma__AgentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    chats<T extends Agent$chatsArgs<ExtArgs> = {}>(args?: Subset<T, Agent$chatsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7598,6 +7635,30 @@ export namespace Prisma {
   }
 
   /**
+   * Agent.chats
+   */
+  export type Agent$chatsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Chat
+     */
+    select?: ChatSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Chat
+     */
+    omit?: ChatOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChatInclude<ExtArgs> | null
+    where?: ChatWhereInput
+    orderBy?: ChatOrderByWithRelationInput | ChatOrderByWithRelationInput[]
+    cursor?: ChatWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ChatScalarFieldEnum | ChatScalarFieldEnum[]
+  }
+
+  /**
    * Agent without action
    */
   export type AgentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7645,6 +7706,7 @@ export namespace Prisma {
     parentChatId: string | null
     forkedFromMessageId: string | null
     forkDepth: number | null
+    agentId: string | null
   }
 
   export type ChatMaxAggregateOutputType = {
@@ -7656,6 +7718,7 @@ export namespace Prisma {
     parentChatId: string | null
     forkedFromMessageId: string | null
     forkDepth: number | null
+    agentId: string | null
   }
 
   export type ChatCountAggregateOutputType = {
@@ -7669,6 +7732,7 @@ export namespace Prisma {
     parentChatId: number
     forkedFromMessageId: number
     forkDepth: number
+    agentId: number
     _all: number
   }
 
@@ -7690,6 +7754,7 @@ export namespace Prisma {
     parentChatId?: true
     forkedFromMessageId?: true
     forkDepth?: true
+    agentId?: true
   }
 
   export type ChatMaxAggregateInputType = {
@@ -7701,6 +7766,7 @@ export namespace Prisma {
     parentChatId?: true
     forkedFromMessageId?: true
     forkDepth?: true
+    agentId?: true
   }
 
   export type ChatCountAggregateInputType = {
@@ -7714,6 +7780,7 @@ export namespace Prisma {
     parentChatId?: true
     forkedFromMessageId?: true
     forkDepth?: true
+    agentId?: true
     _all?: true
   }
 
@@ -7814,6 +7881,7 @@ export namespace Prisma {
     parentChatId: string | null
     forkedFromMessageId: string | null
     forkDepth: number
+    agentId: string | null
     _count: ChatCountAggregateOutputType | null
     _avg: ChatAvgAggregateOutputType | null
     _sum: ChatSumAggregateOutputType | null
@@ -7846,7 +7914,9 @@ export namespace Prisma {
     parentChatId?: boolean
     forkedFromMessageId?: boolean
     forkDepth?: boolean
+    agentId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    agent?: boolean | Chat$agentArgs<ExtArgs>
     messages?: boolean | Chat$messagesArgs<ExtArgs>
     votes?: boolean | Chat$votesArgs<ExtArgs>
     streams?: boolean | Chat$streamsArgs<ExtArgs>
@@ -7865,7 +7935,9 @@ export namespace Prisma {
     parentChatId?: boolean
     forkedFromMessageId?: boolean
     forkDepth?: boolean
+    agentId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    agent?: boolean | Chat$agentArgs<ExtArgs>
   }, ExtArgs["result"]["chat"]>
 
   export type ChatSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -7879,7 +7951,9 @@ export namespace Prisma {
     parentChatId?: boolean
     forkedFromMessageId?: boolean
     forkDepth?: boolean
+    agentId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
+    agent?: boolean | Chat$agentArgs<ExtArgs>
   }, ExtArgs["result"]["chat"]>
 
   export type ChatSelectScalar = {
@@ -7893,11 +7967,13 @@ export namespace Prisma {
     parentChatId?: boolean
     forkedFromMessageId?: boolean
     forkDepth?: boolean
+    agentId?: boolean
   }
 
-  export type ChatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "title" | "userId" | "visibility" | "lastContext" | "settings" | "parentChatId" | "forkedFromMessageId" | "forkDepth", ExtArgs["result"]["chat"]>
+  export type ChatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "title" | "userId" | "visibility" | "lastContext" | "settings" | "parentChatId" | "forkedFromMessageId" | "forkDepth" | "agentId", ExtArgs["result"]["chat"]>
   export type ChatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    agent?: boolean | Chat$agentArgs<ExtArgs>
     messages?: boolean | Chat$messagesArgs<ExtArgs>
     votes?: boolean | Chat$votesArgs<ExtArgs>
     streams?: boolean | Chat$streamsArgs<ExtArgs>
@@ -7906,15 +7982,18 @@ export namespace Prisma {
   }
   export type ChatIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    agent?: boolean | Chat$agentArgs<ExtArgs>
   }
   export type ChatIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
+    agent?: boolean | Chat$agentArgs<ExtArgs>
   }
 
   export type $ChatPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Chat"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
+      agent: Prisma.$AgentPayload<ExtArgs> | null
       messages: Prisma.$MessagePayload<ExtArgs>[]
       votes: Prisma.$VotePayload<ExtArgs>[]
       streams: Prisma.$StreamPayload<ExtArgs>[]
@@ -7931,6 +8010,7 @@ export namespace Prisma {
       parentChatId: string | null
       forkedFromMessageId: string | null
       forkDepth: number
+      agentId: string | null
     }, ExtArgs["result"]["chat"]>
     composites: {}
   }
@@ -8326,6 +8406,7 @@ export namespace Prisma {
   export interface Prisma__ChatClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    agent<T extends Chat$agentArgs<ExtArgs> = {}>(args?: Subset<T, Chat$agentArgs<ExtArgs>>): Prisma__AgentClient<$Result.GetResult<Prisma.$AgentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     messages<T extends Chat$messagesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     votes<T extends Chat$votesArgs<ExtArgs> = {}>(args?: Subset<T, Chat$votesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     streams<T extends Chat$streamsArgs<ExtArgs> = {}>(args?: Subset<T, Chat$streamsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StreamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -8369,6 +8450,7 @@ export namespace Prisma {
     readonly parentChatId: FieldRef<"Chat", 'String'>
     readonly forkedFromMessageId: FieldRef<"Chat", 'String'>
     readonly forkDepth: FieldRef<"Chat", 'Int'>
+    readonly agentId: FieldRef<"Chat", 'String'>
   }
     
 
@@ -8762,6 +8844,25 @@ export namespace Prisma {
      * Limit how many Chats to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Chat.agent
+   */
+  export type Chat$agentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Agent
+     */
+    select?: AgentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Agent
+     */
+    omit?: AgentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgentInclude<ExtArgs> | null
+    where?: AgentWhereInput
   }
 
   /**
@@ -17668,7 +17769,8 @@ export namespace Prisma {
     settings: 'settings',
     parentChatId: 'parentChatId',
     forkedFromMessageId: 'forkedFromMessageId',
-    forkDepth: 'forkDepth'
+    forkDepth: 'forkDepth',
+    agentId: 'agentId'
   };
 
   export type ChatScalarFieldEnum = (typeof ChatScalarFieldEnum)[keyof typeof ChatScalarFieldEnum]
@@ -18109,6 +18211,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Agent"> | Date | string
     updatedAt?: DateTimeFilter<"Agent"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    chats?: ChatListRelationFilter
   }
 
   export type AgentOrderByWithRelationInput = {
@@ -18120,6 +18223,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    chats?: ChatOrderByRelationAggregateInput
   }
 
   export type AgentWhereUniqueInput = Prisma.AtLeast<{
@@ -18134,6 +18238,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Agent"> | Date | string
     updatedAt?: DateTimeFilter<"Agent"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    chats?: ChatListRelationFilter
   }, "id">
 
   export type AgentOrderByWithAggregationInput = {
@@ -18176,7 +18281,9 @@ export namespace Prisma {
     parentChatId?: UuidNullableFilter<"Chat"> | string | null
     forkedFromMessageId?: UuidNullableFilter<"Chat"> | string | null
     forkDepth?: IntFilter<"Chat"> | number
+    agentId?: UuidNullableFilter<"Chat"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    agent?: XOR<AgentNullableScalarRelationFilter, AgentWhereInput> | null
     messages?: MessageListRelationFilter
     votes?: VoteListRelationFilter
     streams?: StreamListRelationFilter
@@ -18194,7 +18301,9 @@ export namespace Prisma {
     parentChatId?: SortOrderInput | SortOrder
     forkedFromMessageId?: SortOrderInput | SortOrder
     forkDepth?: SortOrder
+    agentId?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
+    agent?: AgentOrderByWithRelationInput
     messages?: MessageOrderByRelationAggregateInput
     votes?: VoteOrderByRelationAggregateInput
     streams?: StreamOrderByRelationAggregateInput
@@ -18215,7 +18324,9 @@ export namespace Prisma {
     parentChatId?: UuidNullableFilter<"Chat"> | string | null
     forkedFromMessageId?: UuidNullableFilter<"Chat"> | string | null
     forkDepth?: IntFilter<"Chat"> | number
+    agentId?: UuidNullableFilter<"Chat"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    agent?: XOR<AgentNullableScalarRelationFilter, AgentWhereInput> | null
     messages?: MessageListRelationFilter
     votes?: VoteListRelationFilter
     streams?: StreamListRelationFilter
@@ -18233,6 +18344,7 @@ export namespace Prisma {
     parentChatId?: SortOrderInput | SortOrder
     forkedFromMessageId?: SortOrderInput | SortOrder
     forkDepth?: SortOrder
+    agentId?: SortOrderInput | SortOrder
     _count?: ChatCountOrderByAggregateInput
     _avg?: ChatAvgOrderByAggregateInput
     _max?: ChatMaxOrderByAggregateInput
@@ -18254,6 +18366,7 @@ export namespace Prisma {
     parentChatId?: UuidNullableWithAggregatesFilter<"Chat"> | string | null
     forkedFromMessageId?: UuidNullableWithAggregatesFilter<"Chat"> | string | null
     forkDepth?: IntWithAggregatesFilter<"Chat"> | number
+    agentId?: UuidNullableWithAggregatesFilter<"Chat"> | string | null
   }
 
   export type MessageWhereInput = {
@@ -18963,6 +19076,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutAgentsInput
+    chats?: ChatCreateNestedManyWithoutAgentInput
   }
 
   export type AgentUncheckedCreateInput = {
@@ -18973,6 +19087,7 @@ export namespace Prisma {
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    chats?: ChatUncheckedCreateNestedManyWithoutAgentInput
   }
 
   export type AgentUpdateInput = {
@@ -18983,6 +19098,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutAgentsNestedInput
+    chats?: ChatUpdateManyWithoutAgentNestedInput
   }
 
   export type AgentUncheckedUpdateInput = {
@@ -18993,6 +19109,7 @@ export namespace Prisma {
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    chats?: ChatUncheckedUpdateManyWithoutAgentNestedInput
   }
 
   export type AgentCreateManyInput = {
@@ -19035,6 +19152,7 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
+    agent?: AgentCreateNestedOneWithoutChatsInput
     messages?: MessageCreateNestedManyWithoutChatInput
     votes?: VoteCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
@@ -19052,6 +19170,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
+    agentId?: string | null
     messages?: MessageUncheckedCreateNestedManyWithoutChatInput
     votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
@@ -19069,6 +19188,7 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
+    agent?: AgentUpdateOneWithoutChatsNestedInput
     messages?: MessageUpdateManyWithoutChatNestedInput
     votes?: VoteUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
@@ -19086,6 +19206,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
     messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
     votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
@@ -19103,6 +19224,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
+    agentId?: string | null
   }
 
   export type ChatUpdateManyMutationInput = {
@@ -19128,6 +19250,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type MessageCreateInput = {
@@ -20031,6 +20154,11 @@ export namespace Prisma {
     not?: NestedUuidNullableFilter<$PrismaModel> | string | null
   }
 
+  export type AgentNullableScalarRelationFilter = {
+    is?: AgentWhereInput | null
+    isNot?: AgentWhereInput | null
+  }
+
   export type MessageListRelationFilter = {
     every?: MessageWhereInput
     some?: MessageWhereInput
@@ -20072,6 +20200,7 @@ export namespace Prisma {
     parentChatId?: SortOrder
     forkedFromMessageId?: SortOrder
     forkDepth?: SortOrder
+    agentId?: SortOrder
   }
 
   export type ChatAvgOrderByAggregateInput = {
@@ -20087,6 +20216,7 @@ export namespace Prisma {
     parentChatId?: SortOrder
     forkedFromMessageId?: SortOrder
     forkDepth?: SortOrder
+    agentId?: SortOrder
   }
 
   export type ChatMinOrderByAggregateInput = {
@@ -20098,6 +20228,7 @@ export namespace Prisma {
     parentChatId?: SortOrder
     forkedFromMessageId?: SortOrder
     forkDepth?: SortOrder
+    agentId?: SortOrder
   }
 
   export type ChatSumOrderByAggregateInput = {
@@ -20764,6 +20895,20 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type ChatCreateNestedManyWithoutAgentInput = {
+    create?: XOR<ChatCreateWithoutAgentInput, ChatUncheckedCreateWithoutAgentInput> | ChatCreateWithoutAgentInput[] | ChatUncheckedCreateWithoutAgentInput[]
+    connectOrCreate?: ChatCreateOrConnectWithoutAgentInput | ChatCreateOrConnectWithoutAgentInput[]
+    createMany?: ChatCreateManyAgentInputEnvelope
+    connect?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+  }
+
+  export type ChatUncheckedCreateNestedManyWithoutAgentInput = {
+    create?: XOR<ChatCreateWithoutAgentInput, ChatUncheckedCreateWithoutAgentInput> | ChatCreateWithoutAgentInput[] | ChatUncheckedCreateWithoutAgentInput[]
+    connectOrCreate?: ChatCreateOrConnectWithoutAgentInput | ChatCreateOrConnectWithoutAgentInput[]
+    createMany?: ChatCreateManyAgentInputEnvelope
+    connect?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+  }
+
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
   }
@@ -20776,10 +20921,44 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAgentsInput, UserUpdateWithoutAgentsInput>, UserUncheckedUpdateWithoutAgentsInput>
   }
 
+  export type ChatUpdateManyWithoutAgentNestedInput = {
+    create?: XOR<ChatCreateWithoutAgentInput, ChatUncheckedCreateWithoutAgentInput> | ChatCreateWithoutAgentInput[] | ChatUncheckedCreateWithoutAgentInput[]
+    connectOrCreate?: ChatCreateOrConnectWithoutAgentInput | ChatCreateOrConnectWithoutAgentInput[]
+    upsert?: ChatUpsertWithWhereUniqueWithoutAgentInput | ChatUpsertWithWhereUniqueWithoutAgentInput[]
+    createMany?: ChatCreateManyAgentInputEnvelope
+    set?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+    disconnect?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+    delete?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+    connect?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+    update?: ChatUpdateWithWhereUniqueWithoutAgentInput | ChatUpdateWithWhereUniqueWithoutAgentInput[]
+    updateMany?: ChatUpdateManyWithWhereWithoutAgentInput | ChatUpdateManyWithWhereWithoutAgentInput[]
+    deleteMany?: ChatScalarWhereInput | ChatScalarWhereInput[]
+  }
+
+  export type ChatUncheckedUpdateManyWithoutAgentNestedInput = {
+    create?: XOR<ChatCreateWithoutAgentInput, ChatUncheckedCreateWithoutAgentInput> | ChatCreateWithoutAgentInput[] | ChatUncheckedCreateWithoutAgentInput[]
+    connectOrCreate?: ChatCreateOrConnectWithoutAgentInput | ChatCreateOrConnectWithoutAgentInput[]
+    upsert?: ChatUpsertWithWhereUniqueWithoutAgentInput | ChatUpsertWithWhereUniqueWithoutAgentInput[]
+    createMany?: ChatCreateManyAgentInputEnvelope
+    set?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+    disconnect?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+    delete?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+    connect?: ChatWhereUniqueInput | ChatWhereUniqueInput[]
+    update?: ChatUpdateWithWhereUniqueWithoutAgentInput | ChatUpdateWithWhereUniqueWithoutAgentInput[]
+    updateMany?: ChatUpdateManyWithWhereWithoutAgentInput | ChatUpdateManyWithWhereWithoutAgentInput[]
+    deleteMany?: ChatScalarWhereInput | ChatScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutChatsInput = {
     create?: XOR<UserCreateWithoutChatsInput, UserUncheckedCreateWithoutChatsInput>
     connectOrCreate?: UserCreateOrConnectWithoutChatsInput
     connect?: UserWhereUniqueInput
+  }
+
+  export type AgentCreateNestedOneWithoutChatsInput = {
+    create?: XOR<AgentCreateWithoutChatsInput, AgentUncheckedCreateWithoutChatsInput>
+    connectOrCreate?: AgentCreateOrConnectWithoutChatsInput
+    connect?: AgentWhereUniqueInput
   }
 
   export type MessageCreateNestedManyWithoutChatInput = {
@@ -20844,6 +21023,16 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutChatsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutChatsInput, UserUpdateWithoutChatsInput>, UserUncheckedUpdateWithoutChatsInput>
+  }
+
+  export type AgentUpdateOneWithoutChatsNestedInput = {
+    create?: XOR<AgentCreateWithoutChatsInput, AgentUncheckedCreateWithoutChatsInput>
+    connectOrCreate?: AgentCreateOrConnectWithoutChatsInput
+    upsert?: AgentUpsertWithoutChatsInput
+    disconnect?: AgentWhereInput | boolean
+    delete?: AgentWhereInput | boolean
+    connect?: AgentWhereUniqueInput
+    update?: XOR<XOR<AgentUpdateToOneWithWhereWithoutChatsInput, AgentUpdateWithoutChatsInput>, AgentUncheckedUpdateWithoutChatsInput>
   }
 
   export type MessageUpdateManyWithoutChatNestedInput = {
@@ -21618,6 +21807,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
+    agent?: AgentCreateNestedOneWithoutChatsInput
     messages?: MessageCreateNestedManyWithoutChatInput
     votes?: VoteCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
@@ -21634,6 +21824,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
+    agentId?: string | null
     messages?: MessageUncheckedCreateNestedManyWithoutChatInput
     votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
@@ -21791,6 +21982,7 @@ export namespace Prisma {
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    chats?: ChatCreateNestedManyWithoutAgentInput
   }
 
   export type AgentUncheckedCreateWithoutUserInput = {
@@ -21800,6 +21992,7 @@ export namespace Prisma {
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    chats?: ChatUncheckedCreateNestedManyWithoutAgentInput
   }
 
   export type AgentCreateOrConnectWithoutUserInput = {
@@ -21842,6 +22035,7 @@ export namespace Prisma {
     parentChatId?: UuidNullableFilter<"Chat"> | string | null
     forkedFromMessageId?: UuidNullableFilter<"Chat"> | string | null
     forkDepth?: IntFilter<"Chat"> | number
+    agentId?: UuidNullableFilter<"Chat"> | string | null
   }
 
   export type DocumentUpsertWithWhereUniqueWithoutUserInput = {
@@ -22097,6 +22291,50 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutAgentsInput, UserUncheckedCreateWithoutAgentsInput>
   }
 
+  export type ChatCreateWithoutAgentInput = {
+    id?: string
+    createdAt: Date | string
+    title: string
+    visibility?: string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: string | null
+    forkedFromMessageId?: string | null
+    forkDepth?: number
+    user: UserCreateNestedOneWithoutChatsInput
+    messages?: MessageCreateNestedManyWithoutChatInput
+    votes?: VoteCreateNestedManyWithoutChatInput
+    streams?: StreamCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
+  }
+
+  export type ChatUncheckedCreateWithoutAgentInput = {
+    id?: string
+    createdAt: Date | string
+    title: string
+    userId: string
+    visibility?: string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: string | null
+    forkedFromMessageId?: string | null
+    forkDepth?: number
+    messages?: MessageUncheckedCreateNestedManyWithoutChatInput
+    votes?: VoteUncheckedCreateNestedManyWithoutChatInput
+    streams?: StreamUncheckedCreateNestedManyWithoutChatInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
+  }
+
+  export type ChatCreateOrConnectWithoutAgentInput = {
+    where: ChatWhereUniqueInput
+    create: XOR<ChatCreateWithoutAgentInput, ChatUncheckedCreateWithoutAgentInput>
+  }
+
+  export type ChatCreateManyAgentInputEnvelope = {
+    data: ChatCreateManyAgentInput | ChatCreateManyAgentInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutAgentsInput = {
     update: XOR<UserUpdateWithoutAgentsInput, UserUncheckedUpdateWithoutAgentsInput>
     create: XOR<UserCreateWithoutAgentsInput, UserUncheckedCreateWithoutAgentsInput>
@@ -22130,6 +22368,22 @@ export namespace Prisma {
     rateLimit?: UserRateLimitUncheckedUpdateOneWithoutUserNestedInput
   }
 
+  export type ChatUpsertWithWhereUniqueWithoutAgentInput = {
+    where: ChatWhereUniqueInput
+    update: XOR<ChatUpdateWithoutAgentInput, ChatUncheckedUpdateWithoutAgentInput>
+    create: XOR<ChatCreateWithoutAgentInput, ChatUncheckedCreateWithoutAgentInput>
+  }
+
+  export type ChatUpdateWithWhereUniqueWithoutAgentInput = {
+    where: ChatWhereUniqueInput
+    data: XOR<ChatUpdateWithoutAgentInput, ChatUncheckedUpdateWithoutAgentInput>
+  }
+
+  export type ChatUpdateManyWithWhereWithoutAgentInput = {
+    where: ChatScalarWhereInput
+    data: XOR<ChatUpdateManyMutationInput, ChatUncheckedUpdateManyWithoutAgentInput>
+  }
+
   export type UserCreateWithoutChatsInput = {
     id: string
     email: string
@@ -22155,6 +22409,31 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutChatsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutChatsInput, UserUncheckedCreateWithoutChatsInput>
+  }
+
+  export type AgentCreateWithoutChatsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAgentsInput
+  }
+
+  export type AgentUncheckedCreateWithoutChatsInput = {
+    id?: string
+    userId: string
+    name: string
+    description?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AgentCreateOrConnectWithoutChatsInput = {
+    where: AgentWhereUniqueInput
+    create: XOR<AgentCreateWithoutChatsInput, AgentUncheckedCreateWithoutChatsInput>
   }
 
   export type MessageCreateWithoutChatInput = {
@@ -22282,6 +22561,37 @@ export namespace Prisma {
     agents?: AgentUncheckedUpdateManyWithoutUserNestedInput
   }
 
+  export type AgentUpsertWithoutChatsInput = {
+    update: XOR<AgentUpdateWithoutChatsInput, AgentUncheckedUpdateWithoutChatsInput>
+    create: XOR<AgentCreateWithoutChatsInput, AgentUncheckedCreateWithoutChatsInput>
+    where?: AgentWhereInput
+  }
+
+  export type AgentUpdateToOneWithWhereWithoutChatsInput = {
+    where?: AgentWhereInput
+    data: XOR<AgentUpdateWithoutChatsInput, AgentUncheckedUpdateWithoutChatsInput>
+  }
+
+  export type AgentUpdateWithoutChatsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAgentsNestedInput
+  }
+
+  export type AgentUncheckedUpdateWithoutChatsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type MessageUpsertWithWhereUniqueWithoutChatInput = {
     where: MessageWhereUniqueInput
     update: XOR<MessageUpdateWithoutChatInput, MessageUncheckedUpdateWithoutChatInput>
@@ -22387,6 +22697,7 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
+    agent?: AgentCreateNestedOneWithoutChatsInput
     votes?: VoteCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
@@ -22403,6 +22714,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
+    agentId?: string | null
     votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
@@ -22455,6 +22767,7 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
+    agent?: AgentUpdateOneWithoutChatsNestedInput
     votes?: VoteUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
@@ -22471,6 +22784,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
@@ -22526,6 +22840,7 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
+    agent?: AgentCreateNestedOneWithoutChatsInput
     messages?: MessageCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
@@ -22542,6 +22857,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
+    agentId?: string | null
     messages?: MessageUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
@@ -22603,6 +22919,7 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
+    agent?: AgentUpdateOneWithoutChatsNestedInput
     messages?: MessageUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
@@ -22619,6 +22936,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
     messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
@@ -22853,6 +23171,7 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
+    agent?: AgentCreateNestedOneWithoutChatsInput
     messages?: MessageCreateNestedManyWithoutChatInput
     votes?: VoteCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryCreateNestedManyWithoutChatInput
@@ -22869,6 +23188,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
+    agentId?: string | null
     messages?: MessageUncheckedCreateNestedManyWithoutChatInput
     votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedCreateNestedManyWithoutChatInput
@@ -22901,6 +23221,7 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
+    agent?: AgentUpdateOneWithoutChatsNestedInput
     messages?: MessageUpdateManyWithoutChatNestedInput
     votes?: VoteUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
@@ -22917,6 +23238,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
     messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
     votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
@@ -23129,6 +23451,7 @@ export namespace Prisma {
     forkedFromMessageId?: string | null
     forkDepth?: number
     user: UserCreateNestedOneWithoutChatsInput
+    agent?: AgentCreateNestedOneWithoutChatsInput
     messages?: MessageCreateNestedManyWithoutChatInput
     votes?: VoteCreateNestedManyWithoutChatInput
     streams?: StreamCreateNestedManyWithoutChatInput
@@ -23145,6 +23468,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
+    agentId?: string | null
     messages?: MessageUncheckedCreateNestedManyWithoutChatInput
     votes?: VoteUncheckedCreateNestedManyWithoutChatInput
     streams?: StreamUncheckedCreateNestedManyWithoutChatInput
@@ -23235,6 +23559,7 @@ export namespace Prisma {
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutChatsNestedInput
+    agent?: AgentUpdateOneWithoutChatsNestedInput
     messages?: MessageUpdateManyWithoutChatNestedInput
     votes?: VoteUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
@@ -23251,6 +23576,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
     messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
     votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
@@ -23472,6 +23798,7 @@ export namespace Prisma {
     parentChatId?: string | null
     forkedFromMessageId?: string | null
     forkDepth?: number
+    agentId?: string | null
   }
 
   export type DocumentCreateManyUserInput = {
@@ -23529,6 +23856,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
+    agent?: AgentUpdateOneWithoutChatsNestedInput
     messages?: MessageUpdateManyWithoutChatNestedInput
     votes?: VoteUpdateManyWithoutChatNestedInput
     streams?: StreamUpdateManyWithoutChatNestedInput
@@ -23545,6 +23873,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
     messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
     votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
     streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
@@ -23561,6 +23890,7 @@ export namespace Prisma {
     parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
     forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
     forkDepth?: IntFieldUpdateOperationsInput | number
+    agentId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type DocumentUpdateWithoutUserInput = {
@@ -23685,6 +24015,7 @@ export namespace Prisma {
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    chats?: ChatUpdateManyWithoutAgentNestedInput
   }
 
   export type AgentUncheckedUpdateWithoutUserInput = {
@@ -23694,6 +24025,7 @@ export namespace Prisma {
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    chats?: ChatUncheckedUpdateManyWithoutAgentNestedInput
   }
 
   export type AgentUncheckedUpdateManyWithoutUserInput = {
@@ -23703,6 +24035,66 @@ export namespace Prisma {
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChatCreateManyAgentInput = {
+    id?: string
+    createdAt: Date | string
+    title: string
+    userId: string
+    visibility?: string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: string | null
+    forkedFromMessageId?: string | null
+    forkDepth?: number
+  }
+
+  export type ChatUpdateWithoutAgentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    title?: StringFieldUpdateOperationsInput | string
+    visibility?: StringFieldUpdateOperationsInput | string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkDepth?: IntFieldUpdateOperationsInput | number
+    user?: UserUpdateOneRequiredWithoutChatsNestedInput
+    messages?: MessageUpdateManyWithoutChatNestedInput
+    votes?: VoteUpdateManyWithoutChatNestedInput
+    streams?: StreamUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUpdateManyWithoutChatNestedInput
+  }
+
+  export type ChatUncheckedUpdateWithoutAgentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    title?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    visibility?: StringFieldUpdateOperationsInput | string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkDepth?: IntFieldUpdateOperationsInput | number
+    messages?: MessageUncheckedUpdateManyWithoutChatNestedInput
+    votes?: VoteUncheckedUpdateManyWithoutChatNestedInput
+    streams?: StreamUncheckedUpdateManyWithoutChatNestedInput
+    pinnedArchiveEntries?: ChatPinnedArchiveEntryUncheckedUpdateManyWithoutChatNestedInput
+  }
+
+  export type ChatUncheckedUpdateManyWithoutAgentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    title?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    visibility?: StringFieldUpdateOperationsInput | string
+    lastContext?: NullableJsonNullValueInput | InputJsonValue
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    parentChatId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkedFromMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    forkDepth?: IntFieldUpdateOperationsInput | number
   }
 
   export type MessageCreateManyChatInput = {

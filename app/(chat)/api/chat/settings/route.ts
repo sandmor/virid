@@ -1,7 +1,11 @@
 import { z } from 'zod';
 import { getAppSession } from '@/lib/auth/session';
 import { getChatById } from '@/lib/db/queries';
-import { getChatSettings, setAllowedTools } from '@/lib/db/chat-settings';
+import {
+  getChatSettings,
+  setAllowedTools,
+  updateChatAgent,
+} from '@/lib/db/chat-settings';
 import { ChatSDKError } from '@/lib/errors';
 
 const patchSchema = z.object({
@@ -11,6 +15,7 @@ const patchSchema = z.object({
     .max(32)
     .nullable()
     .optional(),
+  agentId: z.string().uuid().nullable().optional(),
 });
 
 export async function GET(request: Request) {
@@ -41,6 +46,9 @@ export async function PATCH(request: Request) {
   if (body.allowedTools !== undefined) {
     await setAllowedTools(body.chatId, body.allowedTools ?? undefined);
   } // else undefined means no change
+  if (body.agentId !== undefined) {
+    await updateChatAgent(body.chatId, body.agentId);
+  }
   const settings = await getChatSettings(body.chatId);
   return Response.json({ settings }, { status: 200 });
 }

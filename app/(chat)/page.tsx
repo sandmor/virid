@@ -83,6 +83,7 @@ export default async function Page({
           allowedModelIds={allowedModels}
           agentId={agentId}
           initialAgent={initialAgent}
+          initialSettings={null}
         />
         <DataStreamHandler />
       </>
@@ -102,6 +103,7 @@ export default async function Page({
         allowedModelIds={allowedModels}
         agentId={agentId}
         initialAgent={initialAgent}
+        initialSettings={null}
       />
       <DataStreamHandler />
     </>

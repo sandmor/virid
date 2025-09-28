@@ -60,7 +60,9 @@ export function VisibilitySelector({
       <Button
         variant="ghost"
         className={cn('h-8 px-2 w-full justify-start gap-2', className)}
-        onClick={() => setVisibilityType(visibilityType === 'private' ? 'public' : 'private')}
+        onClick={() =>
+          setVisibilityType(visibilityType === 'private' ? 'public' : 'private')
+        }
       >
         {selectedVisibility?.icon}
         <span className="text-sm">{selectedVisibility?.label}</span>
@@ -88,7 +90,10 @@ export function VisibilitySelector({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="min-w-[280px] md:min-w-[300px]">
+      <DropdownMenuContent
+        align="start"
+        className="min-w-[280px] md:min-w-[300px]"
+      >
         {visibilities.map((visibility) => (
           <DropdownMenuItem
             className="group/item flex flex-row items-center justify-between gap-4"

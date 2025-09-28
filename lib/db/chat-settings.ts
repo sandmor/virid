@@ -55,6 +55,20 @@ export async function setAllowedTools(
   }));
 }
 
+export async function updateChatAgent(chatId: string, agentId: string | null) {
+  try {
+    await prisma.chat.update({
+      where: { id: chatId },
+      data: { agentId },
+    });
+  } catch (_error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat agent'
+    );
+  }
+}
+
 export async function refreshPinnedEntriesCache(
   chatId: string,
   pinnedSlugs: string[]

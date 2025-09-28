@@ -37,6 +37,7 @@ export function Chat({
   allowedModelIds,
   agentId,
   initialAgent,
+  initialSettings,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -48,6 +49,7 @@ export function Chat({
   allowedModelIds: string[];
   agentId?: string;
   initialAgent?: AgentPreset | null;
+  initialSettings?: ChatSettings | null;
 }) {
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -76,13 +78,21 @@ export function Chat({
 
   // Provisional pinning (allow selecting archive entries before first message creates backend chat row)
   const [stagedPinnedSlugs, setStagedPinnedSlugs] = useState<string[]>(() =>
-    normalizePinnedEntries(initialAgentSettings?.pinnedEntries ?? [])
+    normalizePinnedEntries(
+      initialSettings?.pinnedEntries ??
+        initialAgentSettings?.pinnedEntries ??
+        []
+    )
   );
   const stagedPinnedSlugsRef = useRef<string[]>(stagedPinnedSlugs);
   // Provisional tool allow list (undefined => all, subset array => restrict)
   const [stagedAllowedTools, setStagedAllowedTools] = useState<
     string[] | undefined
-  >(() => normalizeAllowedTools(initialAgentSettings?.tools?.allow));
+  >(() =>
+    normalizeAllowedTools(
+      initialSettings?.tools?.allow ?? initialAgentSettings?.tools?.allow
+    )
+  );
   const stagedAllowedToolsRef = useRef<string[] | undefined>(
     stagedAllowedTools
   );
@@ -119,19 +129,51 @@ export function Chat({
     }
   }, [selectedAgent?.id]);
 
-  const handleSelectAgent = (agent: AgentPreset | null) => {
-    if (chatHasStartedRef.current) return;
-    if (agent) {
-      setSelectedAgent({
-        id: agent.id,
-        name: agent.name,
-        description: agent.description,
-        settings: agent.settings,
+  const handleSelectAgent = async (
+    agent: AgentPreset | null,
+    options?: { userInitiated?: boolean }
+  ) => {
+    const userInitiated = options?.userInitiated ?? false;
+    const newAgentId = agent?.id ?? null;
+    if (selectedAgentId === newAgentId) return;
+
+    try {
+      // Persist to backend only for user-initiated changes. If parent is just syncing props
+      // (userInitiated=false), skip network roundtrip.
+      if (userInitiated) {
+        await fetchWithErrorHandlers(`/api/chat/settings`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chatId: id, agentId: newAgentId }),
+        });
+      }
+
+      // Update local state (always)
+      if (agent) {
+        setSelectedAgent({
+          id: agent.id,
+          name: agent.name,
+          description: agent.description,
+          settings: agent.settings,
+        });
+        setSelectedAgentId(agent.id);
+      } else {
+        setSelectedAgent(null);
+        setSelectedAgentId(undefined);
+      }
+
+      // Update staged settings to new agent's base
+      const settings = (agent?.settings ?? null) as ChatSettings | null;
+      setStagedPinnedSlugs(
+        normalizePinnedEntries(settings?.pinnedEntries ?? [])
+      );
+      setStagedAllowedTools(normalizeAllowedTools(settings?.tools?.allow));
+    } catch (error) {
+      console.error('Failed to update chat agent', error);
+      toast({
+        type: 'error',
+        description: 'Failed to update chat agent',
       });
-      setSelectedAgentId(agent.id);
-    } else {
-      setSelectedAgent(null);
-      setSelectedAgentId(undefined);
     }
   };
 

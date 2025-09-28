@@ -40,6 +40,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const uiMessages = convertToUIMessages(messagesFromDb);
 
+  // Fetch agent if exists
+  let initialAgent = null;
+  if (chat.agent) {
+    initialAgent = {
+      id: chat.agent.id,
+      name: chat.agent.name,
+      description: chat.agent.description,
+      settings: chat.agent.settings,
+    };
+  }
+
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get('chat-model');
   const { modelIds: allowedModels } = await getTierForUserType(
@@ -71,6 +82,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           initialVisibilityType={chat.visibility}
           isReadonly={session?.user?.id !== chat.userId}
           allowedModelIds={allowedModels}
+          agentId={chat.agent?.id}
+          initialAgent={initialAgent}
+          initialSettings={chat.settings}
         />
         <DataStreamHandler />
       </>
@@ -88,6 +102,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         initialVisibilityType={chat.visibility}
         isReadonly={session?.user?.id !== chat.userId}
         allowedModelIds={allowedModels}
+        agentId={chat.agent?.id}
+        initialAgent={initialAgent}
+        initialSettings={chat.settings}
       />
       <DataStreamHandler />
     </>

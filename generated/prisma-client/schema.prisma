@@ -68,7 +68,8 @@ model Agent {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chats Chat[]
 
   @@map("Agent")
 }
@@ -89,7 +90,10 @@ model Chat {
   forkedFromMessageId String? @db.Uuid
   forkDepth           Int     @default(0)
 
+  agentId String? @db.Uuid
+
   user                 User                     @relation(fields: [userId], references: [id])
+  agent                Agent?                   @relation(fields: [agentId], references: [id])
   messages             Message[]
   votes                Vote[]
   streams              Stream[]

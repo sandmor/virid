@@ -22,13 +22,18 @@ interface ChatAgentSelectorProps {
   selectedAgentId?: string;
   selectedAgentLabel?: string;
   chatHasStarted: boolean;
-  onSelectAgent?: (agent: AgentPreset | null) => void;
+  // agent: selected agent (or null for default)
+  // options.userInitiated: true when user clicked in UI; false when parent is syncing props
+  onSelectAgent?: (
+    agent: AgentPreset | null,
+    options?: { userInitiated?: boolean }
+  ) => void | Promise<void>;
 }
 
 export function ChatAgentSelector({
   selectedAgentId,
   selectedAgentLabel,
-  chatHasStarted,
+  chatHasStarted: _chatHasStarted,
   onSelectAgent,
 }: ChatAgentSelectorProps) {
   const [open, setOpen] = useState(false);
@@ -53,8 +58,9 @@ export function ChatAgentSelector({
   const displayLabel =
     effectiveSelected?.name ?? selectedAgentLabel ?? 'Default';
 
-  const canModify = Boolean(onSelectAgent) && !chatHasStarted;
-  const buttonDisabled = !canModify;
+  const canModify = Boolean(onSelectAgent);
+  const [isApplying, setIsApplying] = useState(false);
+  const buttonDisabled = !canModify || isApplying;
   const syncedAgentRef = useRef<string | null>(null);
 
   const handleOpenChange = (next: boolean) => {
@@ -62,25 +68,43 @@ export function ChatAgentSelector({
     setOpen(next);
   };
 
-  const chooseAgent = (agent: AgentPreset | null) => {
+  const chooseAgent = async (agent: AgentPreset | null) => {
     if (!onSelectAgent) return;
-    onSelectAgent(agent);
-    syncedAgentRef.current = agent ? agent.id : null;
+    const result = onSelectAgent(agent, { userInitiated: true });
+    // If caller returned a promise, await it and show spinner
+    if (result && typeof (result as Promise<void>).then === 'function') {
+      try {
+        setIsApplying(true);
+        await result;
+        // mark synced only after successful apply
+        syncedAgentRef.current = agent ? agent.id : null;
+      } catch (e) {
+        // swallow here; caller is expected to show errors
+      } finally {
+        setIsApplying(false);
+      }
+    } else {
+      // synchronous handler
+      syncedAgentRef.current = agent ? agent.id : null;
+    }
     setOpen(false);
   };
 
   useEffect(() => {
+    // When parent props change (external sync), notify parent but mark as non-user-initiated
     if (!canModify || !onSelectAgent) return;
     if (!selectedAgentId) {
       if (syncedAgentRef.current !== null) {
-        onSelectAgent(null);
+        // sync back to parent without causing persistence
+        const res = onSelectAgent(null, { userInitiated: false });
+        // if parent returned a promise, avoid awaiting here; just mark synced immediately
         syncedAgentRef.current = null;
       }
       return;
     }
     if (!effectiveSelected) return;
     if (syncedAgentRef.current === selectedAgentId) return;
-    onSelectAgent(effectiveSelected);
+    const res = onSelectAgent(effectiveSelected, { userInitiated: false });
     syncedAgentRef.current = selectedAgentId;
   }, [canModify, onSelectAgent, selectedAgentId, effectiveSelected]);
 
@@ -112,6 +136,11 @@ export function ChatAgentSelector({
               <Loader size={12} />
             </span>
           )}
+          {isApplying && (
+            <span className="animate-spin">
+              <Loader size={12} />
+            </span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-72 p-0 shadow-lg">
@@ -119,6 +148,9 @@ export function ChatAgentSelector({
           <span>Agents</span>
           {isLoading && (
             <span className="text-[10px] text-muted-foreground">Loading…</span>
+          )}
+          {isApplying && (
+            <span className="text-[10px] text-muted-foreground">Applying…</span>
           )}
         </div>
         <div className="max-h-[60vh] overflow-y-auto p-2 flex flex-col gap-1">
@@ -129,6 +161,7 @@ export function ChatAgentSelector({
               !selectedAgentId ? 'bg-accent/60' : 'bg-background'
             )}
             onClick={() => chooseAgent(null)}
+            disabled={isApplying}
           >
             <div className="flex items-center gap-2 truncate">
               <Sparkles size={12} className="text-primary" />
@@ -152,6 +185,7 @@ export function ChatAgentSelector({
                     isActive ? 'bg-accent/60' : 'bg-background'
                   )}
                   onClick={() => chooseAgent(agent)}
+                  disabled={isApplying}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium truncate" title={agent.name}>

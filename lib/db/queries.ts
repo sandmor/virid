@@ -31,15 +31,17 @@ export async function saveChat({
   userId,
   title,
   visibility,
+  agentId,
 }: {
   id: string;
   userId: string;
   title: string;
   visibility: VisibilityType;
+  agentId?: string;
 }) {
   try {
     await prisma.chat.create({
-      data: { id, createdAt: new Date(), userId, title, visibility },
+      data: { id, createdAt: new Date(), userId, title, visibility, agentId },
     });
     return;
   } catch (_error) {
@@ -63,6 +65,7 @@ export async function deleteChatById({ id }: { id: string }): Promise<Chat> {
       visibility: visibility as Chat['visibility'],
       lastContext: lastContext as unknown as Chat['lastContext'],
       settings: (deleted as any).settings ?? null,
+      agent: null,
     };
   } catch (_error) {
     throw new ChatSDKError(
@@ -103,6 +106,7 @@ export async function getChatsByUserId({
         where: { userId: id, createdAt: { gt: selectedChat.createdAt } },
         orderBy: { createdAt: 'desc' },
         take: extendedLimit,
+        include: { agent: true },
       });
       filteredChats = rows.map((c) => ({
         id: c.id,
@@ -113,8 +117,9 @@ export async function getChatsByUserId({
         lastContext: c.lastContext as unknown as Chat['lastContext'],
         parentChatId: (c as any).parentChatId ?? null,
         forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
-        forkDepth: (c as any).forkDepth ?? 0,
+        forkDepth: (c as any).forkedFromMessageId ?? 0,
         settings: ((c as any).settings as any) ?? null,
+        agent: c.agent ?? null,
       })) as unknown as Chat[];
     } else if (endingBefore) {
       const selectedChat = await prisma.chat.findUnique({
@@ -131,6 +136,7 @@ export async function getChatsByUserId({
         where: { userId: id, createdAt: { lt: selectedChat.createdAt } },
         orderBy: { createdAt: 'desc' },
         take: extendedLimit,
+        include: { agent: true },
       });
       filteredChats = rows.map((c) => ({
         id: c.id,
@@ -143,12 +149,14 @@ export async function getChatsByUserId({
         forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
         forkDepth: (c as any).forkDepth ?? 0,
         settings: ((c as any).settings as any) ?? null,
+        agent: c.agent ?? null,
       })) as unknown as Chat[];
     } else {
       const rows = await prisma.chat.findMany({
         where: { userId: id },
         orderBy: { createdAt: 'desc' },
         take: extendedLimit,
+        include: { agent: true },
       });
       filteredChats = rows.map((c) => ({
         id: c.id,
@@ -161,6 +169,7 @@ export async function getChatsByUserId({
         forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
         forkDepth: (c as any).forkDepth ?? 0,
         settings: ((c as any).settings as any) ?? null,
+        agent: c.agent ?? null,
       })) as unknown as Chat[];
     }
 
@@ -184,21 +193,26 @@ export async function getChatById({
   id: string;
 }): Promise<Chat | null> {
   try {
-    const selectedChat = await prisma.chat.findUnique({ where: { id } });
+    const selectedChat = await prisma.chat.findUnique({
+      where: { id },
+      include: { agent: true },
+    });
     if (!selectedChat) {
       return null;
     }
 
-    const { lastContext, visibility, settings, ...rest } =
+    const { lastContext, visibility, settings, agent, ...rest } =
       selectedChat as typeof selectedChat & {
         visibility: string;
         settings: any;
+        agent: any;
       };
     return {
       ...rest,
       visibility: visibility as Chat['visibility'],
       lastContext: lastContext as unknown as Chat['lastContext'],
       settings: (settings as any) ?? null,
+      agent: agent ?? null,
     } as Chat;
   } catch (_error) {
     throw new ChatSDKError('bad_request:database', 'Failed to get chat by id');
@@ -356,6 +370,7 @@ export async function forkChat({
         parentChatId: sourceChat.parentChatId || sourceChat.id,
         forkedFromMessageId: pivotMessageId,
         forkDepth: (sourceChat.forkDepth || 0) + 1,
+        agentId: sourceChat.agentId,
       } as any,
     });
 
