@@ -39,7 +39,9 @@ describe('systemPrompt', () => {
       allowedTools: ['archiveReadEntry'],
     });
 
-    expect(withoutArchive).not.toContain('Memory Archive (Long-form Knowledge Files)');
+    expect(withoutArchive).not.toContain(
+      'Memory Archive (Long-form Knowledge Files)'
+    );
     expect(withArchive).toContain('Memory Archive (Long-form Knowledge Files)');
   });
 

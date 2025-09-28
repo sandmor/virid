@@ -10,10 +10,12 @@ import {
 } from 'react';
 import { forkChatAction } from '@/app/(chat)/actions';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import type { ChatMessage } from '@/lib/types';
 import { getTextFromMessage } from '@/lib/utils';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
+import { toast } from './toast';
 
 export type MessageEditorProps = {
   message: ChatMessage;
@@ -47,6 +49,7 @@ export function MessageEditor({ message, setMode }: MessageEditorProps) {
   };
 
   const router = useRouter();
+  const queryClient = useQueryClient();
   return (
     <div className="flex w-full flex-col gap-2">
       <Textarea
@@ -74,6 +77,7 @@ export function MessageEditor({ message, setMode }: MessageEditorProps) {
           onClick={async () => {
             setIsSubmitting(true);
             setMode('view');
+            toast({ type: 'success', description: 'Forking chat…' });
             try {
               const match = window.location.pathname.match(/\/chat\/(.+)$/);
               if (!match) throw new Error('Cannot infer chat id for fork');
@@ -84,9 +88,25 @@ export function MessageEditor({ message, setMode }: MessageEditorProps) {
                 mode: 'edit',
                 editedText: draftContent,
               });
-              router.push(`/chat/${newChatId}`);
+              // Invalidate chat history query so sidebar updates with new chat
+              queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
+              // Refetch again after title generation completes (async operation)
+              setTimeout(() => {
+                queryClient.invalidateQueries({
+                  queryKey: ['chat', 'history'],
+                });
+              }, 8000); // Wait 8 seconds for title generation to complete
+              // For user messages, trigger regeneration. For assistant messages, just navigate.
+              const shouldRegenerate = message.role === 'user';
+              router.push(
+                `/chat/${newChatId}${shouldRegenerate ? '?regenerate=true' : ''}`
+              );
             } catch (err) {
               console.error('Fork failed', err);
+              toast({ type: 'error', description: 'Failed to fork chat' });
+              setMode('edit'); // Re-enable edit mode on failure
+            } finally {
+              setIsSubmitting(false);
             }
           }}
           variant="default"

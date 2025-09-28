@@ -9,6 +9,7 @@ import type { AppUsage } from '../usage';
 import { generateUUID } from '../utils';
 import { type Chat, type Suggestion, type User, type Document } from './schema';
 import { refreshPinnedEntriesCache } from './chat-settings';
+import { generateTitleFromChatHistory } from '../../app/(chat)/actions';
 
 // Optionally, if not using email/pass login, you can use an Auth.js adapter.
 
@@ -305,10 +306,7 @@ export async function getActiveMessagesByChatId({ id }: { id: string }) {
 }
 
 // Regeneration now handled by forking chats at higher level.
-
-// Fork chat placeholder (full logic to be implemented when wiring edit flows)
-// forkChat will be re-implemented with simplified semantics (copy prefix messages) in a later step.
-export async function forkChatSimplified({
+export async function forkChat({
   sourceChatId,
   pivotMessageId,
   userId,
@@ -316,7 +314,7 @@ export async function forkChatSimplified({
   editedText,
 }: {
   sourceChatId: string;
-  pivotMessageId: string; // id of assistant being regenerated OR user being edited
+  pivotMessageId: string; // id of message being regenerated (assistant) or edited (user/assistant)
   userId: string;
   mode: 'regenerate' | 'edit';
   editedText?: string; // required for edit mode (new user text)
@@ -342,17 +340,17 @@ export async function forkChatSimplified({
       throw new ChatSDKError('not_found:database', 'Pivot message not in chat');
 
     // For regeneration: pivot is assistant -> copy messages before it (exclude pivot)
-    // For edit: pivot is user -> copy messages before it (exclude old user message)
+    // For edit: pivot is user/assistant -> copy messages before it (exclude old message), then insert edited message
     const prefix = all.slice(0, pivotIndex);
 
-    // Determine new chat title (append fork marker)
+    // Determine new chat title (use source title as placeholder)
     const newChatId = generateUUID();
     await prisma.chat.create({
       data: {
         id: newChatId,
         createdAt: new Date(),
         userId,
-        title: sourceChat.title + ' (fork)',
+        title: sourceChat.title, // Use source title as placeholder
         visibility: sourceChat.visibility as any,
         lastContext: sourceChat.lastContext as Prisma.InputJsonValue,
         parentChatId: sourceChat.parentChatId || sourceChat.id,
@@ -374,15 +372,17 @@ export async function forkChatSimplified({
       });
     }
 
-    // For edit mode: insert the edited user message immediately so UI can stream assistant next
+    // For edit mode: insert the edited message immediately
+    // The role depends on the pivot message role
     let insertedEditedMessageId: string | undefined;
     if (mode === 'edit') {
+      const pivotMessage = all[pivotIndex];
       insertedEditedMessageId = generateUUID();
       await prisma.message.create({
         data: {
           id: insertedEditedMessageId,
           chatId: newChatId,
-          role: 'user',
+          role: pivotMessage.role,
           parts: [{ type: 'text', text: editedText }] as Prisma.InputJsonValue,
           attachments: [] as Prisma.InputJsonValue,
           createdAt: new Date(),
@@ -407,6 +407,40 @@ export async function forkChatSimplified({
         }
       }
     }
+
+    // Fire-and-forget real title generation (no await)
+    (async () => {
+      try {
+        // Get all messages from the new chat to generate title from conversation context
+        const chatMessages = await prisma.message.findMany({
+          where: { chatId: newChatId },
+          orderBy: { createdAt: 'asc' },
+        });
+
+        if (chatMessages.length > 0) {
+          // Convert to UIMessage format for title generation
+          const uiMessages = chatMessages.map((msg: any) => ({
+            id: msg.id,
+            role: msg.role,
+            parts: msg.parts,
+            metadata: undefined,
+          }));
+
+          const realTitle = await generateTitleFromChatHistory({
+            messages: uiMessages,
+          });
+          if (realTitle && realTitle !== sourceChat.title) {
+            await updateChatTitleById({ chatId: newChatId, title: realTitle });
+          }
+        }
+      } catch (e) {
+        console.warn(
+          'Deferred title generation failed for forked chat',
+          newChatId,
+          e
+        );
+      }
+    })();
 
     return { newChatId, insertedEditedMessageId, previousUserText };
   } catch (e) {

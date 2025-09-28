@@ -135,41 +135,47 @@ export function PureMessageActions({
 
   return (
     <Actions className="-ml-0.5">
-      {onRegenerate && message.role === 'assistant' && (
-        <Action
-          onClick={() => !disableRegenerate && onRegenerate(message.id)}
-          tooltip={disableRegenerate ? 'Regenerating…' : 'Regenerate'}
-          disabled={disableRegenerate}
-        >
-          <RotateCcw size={16} />
+      <div className="relative">
+        {setMode && (
+          <Action onClick={() => setMode('edit')} tooltip="Edit">
+            <Pencil size={16} />
+          </Action>
+        )}
+        {onRegenerate && message.role === 'assistant' && (
+          <Action
+            onClick={() => !disableRegenerate && onRegenerate(message.id)}
+            tooltip={disableRegenerate ? 'Regenerating…' : 'Regenerate'}
+            disabled={disableRegenerate}
+          >
+            <RotateCcw size={16} />
+          </Action>
+        )}
+        <Action onClick={handleCopy} tooltip="Copy">
+          <Copy size={16} />
         </Action>
-      )}
-      {/* Variant history action removed */}
-      <Action onClick={handleCopy} tooltip="Copy">
-        <Copy size={16} />
-      </Action>
 
-      <Action
-        data-testid="message-upvote"
-        disabled={vote?.isUpvoted}
-        onClick={() => {
-          upvoteMutation.mutate();
-        }}
-        tooltip="Upvote Response"
-      >
-        <ThumbsUp size={16} />
-      </Action>
+        <Action
+          data-testid="message-upvote"
+          disabled={vote?.isUpvoted}
+          onClick={() => {
+            upvoteMutation.mutate();
+          }}
+          tooltip="Upvote Response"
+        >
+          <ThumbsUp size={16} />
+        </Action>
 
-      <Action
-        data-testid="message-downvote"
-        disabled={vote && !vote.isUpvoted}
-        onClick={() => {
-          downvoteMutation.mutate();
-        }}
-        tooltip="Downvote Response"
-      >
-        <ThumbsDown size={16} />
-      </Action>
+        <Action
+          data-testid="message-downvote"
+          disabled={vote && !vote.isUpvoted}
+          onClick={() => {
+            downvoteMutation.mutate();
+          }}
+          tooltip="Downvote Response"
+        >
+          <ThumbsDown size={16} />
+        </Action>
+      </div>
     </Actions>
   );
 }

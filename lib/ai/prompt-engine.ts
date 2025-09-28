@@ -11,7 +11,8 @@ export type TemplateData = Record<string, unknown>;
 
 const PLACEHOLDER_REGEX = /\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g;
 
-const EACH_BLOCK_REGEX = /\{\{#each\s+([a-zA-Z0-9_.-]+)\s*\}\}([\s\S]*?)\{\{\/each\}\}/g;
+const EACH_BLOCK_REGEX =
+  /\{\{#each\s+([a-zA-Z0-9_.-]+)\s*\}\}([\s\S]*?)\{\{\/each\}\}/g;
 
 function resolvePath(source: TemplateData, path: string): unknown {
   const segments = path.split('.');
@@ -36,7 +37,10 @@ function resolvePath(source: TemplateData, path: string): unknown {
   return current;
 }
 
-function mergeData(target: TemplateData, additions: TemplateData): TemplateData {
+function mergeData(
+  target: TemplateData,
+  additions: TemplateData
+): TemplateData {
   return Object.assign({}, target, additions);
 }
 
@@ -142,7 +146,8 @@ export class PromptTemplateEngine<Context> {
 
     return renderedParts
       .map(({ rendered, separator }, index) => {
-        const suffix = separator ?? (index === renderedParts.length - 1 ? '' : this.joiner);
+        const suffix =
+          separator ?? (index === renderedParts.length - 1 ? '' : this.joiner);
         return `${rendered}${suffix}`;
       })
       .join('')

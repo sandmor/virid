@@ -56,7 +56,7 @@ import { ChatSDKError } from '@/lib/errors';
 import type { ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
 import { convertToUIMessages, generateUUID } from '@/lib/utils';
-import { generateTitleFromUserMessage } from '../../actions';
+import { generateTitleFromChatHistory } from '../../actions';
 import { updateChatTitleById } from '@/lib/db/queries';
 import { type PostRequestBody, postRequestBodySchema } from './schema';
 import { prisma } from '@/lib/db/prisma';
@@ -244,7 +244,9 @@ export async function POST(request: Request) {
       // Fire-and-forget real title generation (no await)
       (async () => {
         try {
-          const realTitle = await generateTitleFromUserMessage({ message });
+          const realTitle = await generateTitleFromChatHistory({
+            messages: [message],
+          });
           if (realTitle && realTitle !== placeholder) {
             await updateChatTitleById({ chatId: id, title: realTitle });
           }

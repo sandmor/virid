@@ -149,60 +149,65 @@ export function Chat({
     window.history.replaceState({}, '', next);
   }, [selectedAgentId]);
 
-  const { messages, setMessages, sendMessage, status, stop, resumeStream, regenerate } =
-    useChat<ChatMessage>({
-      id,
-      messages: initialMessages,
-      experimental_throttle: 100,
-      generateId: generateUUID,
-      transport: new DefaultChatTransport({
-        api: '/api/chat',
-        fetch: fetchWithErrorHandlers,
-        prepareSendMessagesRequest(request) {
-          const staged = stagedPinnedSlugsRef.current;
-          const stagedTools = stagedAllowedToolsRef.current;
-          return {
-            body: {
-              ...request.body,
-              id: request.id,
-              message: request.messages.at(-1),
-              selectedChatModel: currentModelIdRef.current,
-              selectedVisibilityType: visibilityType,
-              pinnedSlugs: staged.length > 0 ? staged : undefined,
-              allowedTools: !chatHasStartedRef.current
-                ? stagedTools
-                : undefined,
-              agentId: !chatHasStartedRef.current
-                ? stagedAgentIdRef.current
-                : undefined,
-            },
-          };
-        },
-      }),
-      onData: (dataPart) => {
-        setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-        if (dataPart.type === 'data-usage') {
-          setUsage(dataPart.data);
-        }
+  const {
+    messages,
+    setMessages,
+    sendMessage,
+    status,
+    stop,
+    resumeStream,
+    regenerate,
+  } = useChat<ChatMessage>({
+    id,
+    messages: initialMessages,
+    experimental_throttle: 100,
+    generateId: generateUUID,
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+      fetch: fetchWithErrorHandlers,
+      prepareSendMessagesRequest(request) {
+        const staged = stagedPinnedSlugsRef.current;
+        const stagedTools = stagedAllowedToolsRef.current;
+        return {
+          body: {
+            ...request.body,
+            id: request.id,
+            message: request.messages.at(-1),
+            selectedChatModel: currentModelIdRef.current,
+            selectedVisibilityType: visibilityType,
+            pinnedSlugs: staged.length > 0 ? staged : undefined,
+            allowedTools: !chatHasStartedRef.current ? stagedTools : undefined,
+            agentId: !chatHasStartedRef.current
+              ? stagedAgentIdRef.current
+              : undefined,
+          },
+        };
       },
-      onFinish: () => {
-        // Invalidate chat history infinite query (new message might affect ordering)
-        queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
-        if (!chatHasStartedRef.current) {
-          chatHasStartedRef.current = true;
-          // After first message, pins are persisted or merged; clear staged state & ref
-          setStagedPinnedSlugs([]);
-          stagedPinnedSlugsRef.current = [];
-          setStagedAllowedTools(undefined);
-          stagedAllowedToolsRef.current = undefined;
-        }
-      },
-      onError: (error) => {
-        if (error instanceof ChatSDKError) {
-          toast({ type: 'error', description: error.message });
-        }
-      },
-    });
+    }),
+    onData: (dataPart) => {
+      setDataStream((ds) => (ds ? [...ds, dataPart] : []));
+      if (dataPart.type === 'data-usage') {
+        setUsage(dataPart.data);
+      }
+    },
+    onFinish: () => {
+      // Invalidate chat history infinite query (new message might affect ordering)
+      queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
+      if (!chatHasStartedRef.current) {
+        chatHasStartedRef.current = true;
+        // After first message, pins are persisted or merged; clear staged state & ref
+        setStagedPinnedSlugs([]);
+        stagedPinnedSlugsRef.current = [];
+        setStagedAllowedTools(undefined);
+        stagedAllowedToolsRef.current = undefined;
+      }
+    },
+    onError: (error) => {
+      if (error instanceof ChatSDKError) {
+        toast({ type: 'error', description: error.message });
+      }
+    },
+  });
 
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
@@ -257,7 +262,11 @@ export function Chat({
 
   // Suppress auto-resume when a query injection or regeneration is pending to avoid duplicate stream starts
   const effectiveAutoResume =
-    autoResume && !query && !regenerateParam && !initialQueryHandledRef.current && !initialRegenerateHandledRef.current;
+    autoResume &&
+    !query &&
+    !regenerateParam &&
+    !initialQueryHandledRef.current &&
+    !initialRegenerateHandledRef.current;
   useAutoResume({
     autoResume: effectiveAutoResume,
     initialMessages,
@@ -313,6 +322,14 @@ export function Chat({
               if (!result?.newChatId) {
                 throw new Error('Fork action did not return newChatId');
               }
+              // Invalidate chat history query so sidebar updates with new chat
+              queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
+              // Refetch again after title generation completes (async operation)
+              setTimeout(() => {
+                queryClient.invalidateQueries({
+                  queryKey: ['chat', 'history'],
+                });
+              }, 8000);
               requestAnimationFrame(() => {
                 router.push(`/chat/${result.newChatId}?regenerate=true`);
               });

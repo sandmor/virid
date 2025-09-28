@@ -11,3 +11,4 @@ hooks/use-mobile.ts
 package-lock.json
 yarn.lock
 bun.lock
+generated/

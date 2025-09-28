@@ -1,9 +1,6 @@
 import type { Geo } from '@vercel/functions';
 import type { ArtifactKind } from '@/components/artifact';
-import {
-  PromptTemplateEngine,
-  type PromptPart,
-} from './prompt-engine';
+import { PromptTemplateEngine, type PromptPart } from './prompt-engine';
 
 export type RequestHints = {
   latitude: Geo['latitude'];
@@ -215,7 +212,7 @@ const defaultSystemPromptParts: PromptPart<SystemPromptContext>[] = [
 ];
 
 const defaultSystemPromptEngine = new PromptTemplateEngine<SystemPromptContext>(
-  defaultSystemPromptParts,
+  defaultSystemPromptParts
 );
 
 const requestPromptEngine = new PromptTemplateEngine<SystemPromptContext>([
@@ -285,7 +282,7 @@ You are a spreadsheet creation assistant. Create a spreadsheet in csv format bas
 
 export const updateDocumentPrompt = (
   currentContent: string | null,
-  type: ArtifactKind,
+  type: ArtifactKind
 ) => {
   let mediaType = 'document';
 
@@ -306,7 +303,7 @@ function formatGeoValue(value: unknown): string {
 
 function isToolGroupEnabled(
   allowedTools: string[] | undefined,
-  toolIds: readonly string[],
+  toolIds: readonly string[]
 ) {
   if (!toolIds.length) return true;
   if (allowedTools === undefined) return true;
@@ -330,12 +327,9 @@ function buildPinnedEntriesBlock(pinnedEntries?: PinnedEntry[]): string {
     const slug = entry.slug || 'unknown';
     const entity = entry.entity || 'unknown';
     const body = entry.body ?? '';
-    const textBody =
-      body.length > remaining ? body.slice(0, remaining) : body;
+    const textBody = body.length > remaining ? body.slice(0, remaining) : body;
 
-    segments.push(
-      `\n=== ${slug} — ${entity} ===\n${textBody}`,
-    );
+    segments.push(`\n=== ${slug} — ${entity} ===\n${textBody}`);
 
     remaining -= textBody.length;
   }

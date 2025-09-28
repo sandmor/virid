@@ -8,3 +8,4 @@ lib/utils.ts
 hooks/use-mobile.ts
 _.min.js
 _.min.css
+generated/
