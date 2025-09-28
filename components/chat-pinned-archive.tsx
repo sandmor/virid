@@ -21,7 +21,7 @@ import {
   PopoverContent,
 } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { Loader } from 'lucide-react';
+import { Loader, Bookmark } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -104,11 +104,12 @@ export function ChatPinnedArchive({
           variant="outline"
           className={cn('h-8 gap-1', className)}
         >
-          <span className="text-xs font-medium">Memory</span>
+          <Bookmark size={16} className="md:hidden" />
+          <span className="hidden md:inline text-xs font-medium">Memory</span>
           {effectivePinned.length > 0 && (
             <Badge
               variant="secondary"
-              className="text-[10px] px-1 py-0 leading-none"
+              className="hidden md:inline text-[10px] px-1 py-0 leading-none"
             >
               {effectivePinned.length}
             </Badge>

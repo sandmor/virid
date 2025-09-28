@@ -14,7 +14,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { Loader } from 'lucide-react';
+import { Loader, Settings } from 'lucide-react';
 
 // Human friendly labels (fallback to id if not present)
 const LABELS: Record<ChatToolId, string> = {
@@ -166,10 +166,11 @@ export function ChatToolSelector({
           className={cn('h-8 gap-1', className)}
           disabled={isBusy}
         >
-          <span className="text-xs font-medium">Tools</span>
+          <Settings size={16} className="md:hidden" />
+          <span className="hidden md:inline text-xs font-medium">Tools</span>
           <Badge
             variant="secondary"
-            className="text-[10px] px-1 py-0 leading-none"
+            className="hidden md:inline text-[10px] px-1 py-0 leading-none"
           >
             {isBusy ? '…' : count}
           </Badge>
@@ -190,26 +191,54 @@ export function ChatToolSelector({
           )}
         </div>
         <div className="max-h-[60vh] overflow-y-auto p-2 flex flex-col gap-2">
-          <button
-            className="flex items-center gap-2 rounded-md border px-2 py-1 text-xs hover:bg-accent disabled:opacity-50"
-            onClick={toggleAll}
-            disabled={isBusy}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              if (isBusy) return;
+              toggleAll();
+            }}
+            onKeyDown={(e) => {
+              if (isBusy) return;
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleAll();
+              }
+            }}
+            aria-disabled={isBusy}
+            className={cn(
+              'flex items-center gap-2 rounded-md border px-2 py-1 text-xs hover:bg-accent',
+              isBusy ? 'opacity-50 pointer-events-none' : ''
+            )}
           >
             <Checkbox checked={isAllSelected} className="h-3.5 w-3.5" />
             <span className="truncate">All Tools</span>
-          </button>
+          </div>
           <div className="flex flex-col gap-3">
             {TOOL_GROUPS.map((group) => {
               const state = getGroupState(group.tools);
               return (
                 <div key={group.id} className="flex flex-col gap-1">
-                  <button
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      if (isBusy) return;
+                      toggleGroup(group.tools);
+                    }}
+                    onKeyDown={(e) => {
+                      if (isBusy) return;
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleGroup(group.tools);
+                      }
+                    }}
+                    aria-disabled={isBusy}
                     className={cn(
-                      'flex items-center gap-2 rounded-md border px-2 py-1 text-[11px] font-medium hover:bg-accent disabled:opacity-50',
-                      state.checked ? 'bg-accent/60' : 'bg-background'
+                      'flex items-center gap-2 rounded-md border px-2 py-1 text-[11px] font-medium hover:bg-accent',
+                      state.checked ? 'bg-accent/60' : 'bg-background',
+                      isBusy ? 'opacity-50 pointer-events-none' : ''
                     )}
-                    onClick={() => toggleGroup(group.tools)}
-                    disabled={isBusy}
                   >
                     <Checkbox
                       checked={state.checked}
@@ -219,25 +248,38 @@ export function ChatToolSelector({
                     <span className="truncate" title={group.label}>
                       {group.label}
                     </span>
-                  </button>
+                  </div>
                   <div className="pl-4 flex flex-col gap-1">
                     {group.tools.map((tid) => {
                       const checked = selectedSet.has(tid);
                       return (
-                        <button
+                        <div
                           key={tid}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => {
+                            if (isBusy) return;
+                            toggleTool(tid);
+                          }}
+                          onKeyDown={(e) => {
+                            if (isBusy) return;
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              toggleTool(tid);
+                            }
+                          }}
+                          aria-disabled={isBusy}
                           className={cn(
-                            'flex items-center gap-2 rounded-md border px-2 py-1 text-[11px] text-left hover:bg-accent disabled:opacity-50',
-                            checked ? 'bg-accent/60' : 'bg-background'
+                            'flex items-center gap-2 rounded-md border px-2 py-1 text-[11px] text-left hover:bg-accent',
+                            checked ? 'bg-accent/60' : 'bg-background',
+                            isBusy ? 'opacity-50 pointer-events-none' : ''
                           )}
-                          onClick={() => toggleTool(tid)}
-                          disabled={isBusy}
                         >
                           <Checkbox checked={checked} className="h-3.5 w-3.5" />
                           <span className="truncate" title={tid}>
                             {LABELS[tid] || tid}
                           </span>
-                        </button>
+                        </div>
                       );
                     })}
                   </div>

@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { useAgents } from '@/hooks/use-agents';
 import type { Agent } from '@/lib/db/schema';
 import { Badge } from '@/components/ui/badge';
-import { Check, Loader, Sparkles } from 'lucide-react';
+import { Check, Loader, Sparkles, User } from 'lucide-react';
 
 export type AgentPreset = Pick<
   Agent,
@@ -97,10 +97,13 @@ export function ChatAgentSelector({
           className="h-8 gap-2"
           disabled={buttonDisabled}
         >
-          <span className="text-xs font-medium">Agent</span>
+          {/* mobile: icon only */}
+          <User size={16} className="md:hidden" />
+          {/* desktop: label + badge */}
+          <span className="hidden md:inline text-xs font-medium">Agent</span>
           <Badge
             variant="secondary"
-            className="max-w-[110px] truncate text-[10px] leading-none px-1 py-0"
+            className="hidden md:inline max-w-[110px] truncate text-[10px] leading-none px-1 py-0"
           >
             {displayLabel}
           </Badge>

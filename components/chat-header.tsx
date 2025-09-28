@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
@@ -11,6 +11,7 @@ import { useSidebar } from './ui/sidebar';
 import { VisibilitySelector, type VisibilityType } from './visibility-selector';
 import { ChatToolSelector } from './chat-tool-selector';
 import { ChatAgentSelector, type AgentPreset } from './chat-agent-selector';
+import { motion } from 'framer-motion';
 
 function PureChatHeader({
   chatId,
@@ -45,7 +46,12 @@ function PureChatHeader({
   const { width: windowWidth } = useWindowSize();
 
   return (
-    <header className="sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
+    <motion.header
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18 }}
+      className="sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2"
+    >
       <SidebarToggle />
 
       {(!open || windowWidth < 768) && (
@@ -58,12 +64,12 @@ function PureChatHeader({
           variant="outline"
         >
           <Plus size={16} />
-          <span className="md:sr-only">New Chat</span>
+          <span className="sr-only md:not-sr-only md:ml-2">New Chat</span>
         </Button>
       )}
 
       {!isReadonly && (
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 md:gap-2">
           <VisibilitySelector
             chatId={chatId}
             className="order-1 md:order-2"
@@ -90,7 +96,7 @@ function PureChatHeader({
           />
         </div>
       )}
-    </header>
+    </motion.header>
   );
 }
 
