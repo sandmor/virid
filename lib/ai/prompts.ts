@@ -1,5 +1,57 @@
 import type { Geo } from '@vercel/functions';
 import type { ArtifactKind } from '@/components/artifact';
+import {
+  PromptTemplateEngine,
+  type PromptPart,
+} from './prompt-engine';
+
+export type RequestHints = {
+  latitude: Geo['latitude'];
+  longitude: Geo['longitude'];
+  city: Geo['city'];
+  country: Geo['country'];
+};
+
+export type PinnedEntry = {
+  slug: string;
+  entity: string;
+  body: string;
+};
+
+export type SystemPromptContext = {
+  requestHints: RequestHints;
+  allowedTools?: string[];
+  pinnedEntries?: PinnedEntry[];
+};
+
+export type SystemPromptOptions = SystemPromptContext & {
+  parts?: PromptPart<SystemPromptContext>[];
+};
+
+const PINNED_MEMORY_CHAR_LIMIT = 20_000;
+
+const ARTIFACT_TOOL_IDS = ['createDocument', 'updateDocument'] as const;
+const ARCHIVE_TOOL_IDS = [
+  'archiveCreateEntry',
+  'archiveReadEntry',
+  'archiveUpdateEntry',
+  'archiveDeleteEntry',
+  'archiveLinkEntries',
+  'archiveSearchEntries',
+  'archiveApplyEdits',
+  'archivePinEntry',
+  'archiveUnpinEntry',
+] as const;
+
+export const regularPrompt =
+  'You are a friendly assistant! Keep your responses concise and helpful.';
+
+const requestOriginTemplate = `About the origin of user's request:
+- lat: {{latitude}}
+- lon: {{longitude}}
+- city: {{city}}
+- country: {{country}}
+`;
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
@@ -30,24 +82,6 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 - Immediately after creating a document
 
 Do not update document right after creating it. Wait for user feedback or request to update it.
-`;
-
-export const regularPrompt =
-  'You are a friendly assistant! Keep your responses concise and helpful.';
-
-export type RequestHints = {
-  latitude: Geo['latitude'];
-  longitude: Geo['longitude'];
-  city: Geo['city'];
-  country: Geo['country'];
-};
-
-export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
-About the origin of user's request:
-- lat: ${requestHints.latitude}
-- lon: ${requestHints.longitude}
-- city: ${requestHints.city}
-- country: ${requestHints.country}
 `;
 
 const archivePrompt = `
@@ -124,30 +158,100 @@ PINNED MEMORY (Chat-Scoped Context Injection)
 - If user asks for “always remember” or “keep this in context for this chat” → propose pinning and use archivePinEntry with the slug.
 `;
 
+const pinnedMemoryTemplate = `Pinned Memory Files (Authoritative context – treat as already read; update only via tools when user indicates changes)
+{{pinnedEntriesBlock}}
+`;
+
+const baseBehaviorPart: PromptPart<SystemPromptContext> = {
+  id: 'base-behavior',
+  template: regularPrompt,
+  priority: 10,
+};
+
+const requestOriginPart: PromptPart<SystemPromptContext> = {
+  id: 'request-origin',
+  template: requestOriginTemplate,
+  priority: 20,
+  prepare: ({ requestHints }) => ({
+    latitude: formatGeoValue(requestHints.latitude),
+    longitude: formatGeoValue(requestHints.longitude),
+    city: formatGeoValue(requestHints.city),
+    country: formatGeoValue(requestHints.country),
+  }),
+};
+
+const artifactsPart: PromptPart<SystemPromptContext> = {
+  id: 'artifacts',
+  template: artifactsPrompt,
+  priority: 30,
+  isEnabled: ({ allowedTools }) =>
+    isToolGroupEnabled(allowedTools, ARTIFACT_TOOL_IDS),
+};
+
+const archivePart: PromptPart<SystemPromptContext> = {
+  id: 'archive',
+  template: archivePrompt,
+  priority: 40,
+  isEnabled: ({ allowedTools }) =>
+    isToolGroupEnabled(allowedTools, ARCHIVE_TOOL_IDS),
+};
+
+const pinnedMemoryPart: PromptPart<SystemPromptContext> = {
+  id: 'pinned-memory',
+  template: pinnedMemoryTemplate,
+  priority: 50,
+  isEnabled: ({ pinnedEntries }) => Boolean(pinnedEntries?.length),
+  prepare: ({ pinnedEntries }) => ({
+    pinnedEntriesBlock: buildPinnedEntriesBlock(pinnedEntries),
+  }),
+};
+
+const defaultSystemPromptParts: PromptPart<SystemPromptContext>[] = [
+  baseBehaviorPart,
+  requestOriginPart,
+  artifactsPart,
+  archivePart,
+  pinnedMemoryPart,
+];
+
+const defaultSystemPromptEngine = new PromptTemplateEngine<SystemPromptContext>(
+  defaultSystemPromptParts,
+);
+
+const requestPromptEngine = new PromptTemplateEngine<SystemPromptContext>([
+  requestOriginPart,
+]);
+
+export function getDefaultSystemPromptParts() {
+  return defaultSystemPromptParts.map((part) => ({ ...part }));
+}
+
 export const systemPrompt = ({
   requestHints,
   pinnedEntries,
-}: {
-  requestHints: RequestHints;
-  pinnedEntries?: { slug: string; entity: string; body: string }[];
-}) => {
-  const requestPrompt = getRequestPromptFromHints(requestHints);
-  let pinnedSection = '';
-  if (pinnedEntries && pinnedEntries.length) {
-    // Basic size guard: cap total chars of pinned bodies to ~20k to stay safe.
-    let remaining = 20_000;
-    const included: { slug: string; entity: string; body: string }[] = [];
-    for (const p of pinnedEntries) {
-      if (remaining <= 0) break;
-      const trimmedBody =
-        p.body.length > remaining ? p.body.slice(0, remaining) : p.body;
-      included.push({ ...p, body: trimmedBody });
-      remaining -= trimmedBody.length;
-    }
-    pinnedSection = `\n\nPinned Memory Files (Authoritative context – treat as already read; update only via tools when user indicates changes)\n${included.map((p) => `\n=== ${p.slug} — ${p.entity} ===\n${p.body}`).join('\n')}`;
+  allowedTools,
+  parts,
+}: SystemPromptOptions) => {
+  const context: SystemPromptContext = {
+    requestHints,
+    pinnedEntries,
+    allowedTools,
+  };
+
+  if (parts) {
+    const customEngine = new PromptTemplateEngine<SystemPromptContext>(parts);
+    return customEngine.compose(context);
   }
-  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}${archivePrompt}${pinnedSection}`;
+
+  return defaultSystemPromptEngine.compose(context);
 };
+
+export const getRequestPromptFromHints = (requestHints: RequestHints) =>
+  requestPromptEngine.compose({
+    requestHints,
+    allowedTools: undefined,
+    pinnedEntries: undefined,
+  });
 
 export const codePrompt = `
 You are a Python code generator that creates self-contained, executable code snippets. When writing code:
@@ -181,7 +285,7 @@ You are a spreadsheet creation assistant. Create a spreadsheet in csv format bas
 
 export const updateDocumentPrompt = (
   currentContent: string | null,
-  type: ArtifactKind
+  type: ArtifactKind,
 ) => {
   let mediaType = 'document';
 
@@ -193,5 +297,48 @@ export const updateDocumentPrompt = (
 
   return `Improve the following contents of the ${mediaType} based on the given prompt.
 
-${currentContent}`;
+${currentContent ?? ''}`;
 };
+
+function formatGeoValue(value: unknown): string {
+  return value === undefined || value === null ? 'undefined' : String(value);
+}
+
+function isToolGroupEnabled(
+  allowedTools: string[] | undefined,
+  toolIds: readonly string[],
+) {
+  if (!toolIds.length) return true;
+  if (allowedTools === undefined) return true;
+  if (allowedTools.length === 0) return false;
+
+  const allowedSet = new Set(allowedTools);
+  return toolIds.some((tool) => allowedSet.has(tool));
+}
+
+function buildPinnedEntriesBlock(pinnedEntries?: PinnedEntry[]): string {
+  if (!pinnedEntries || pinnedEntries.length === 0) {
+    return '';
+  }
+
+  let remaining = PINNED_MEMORY_CHAR_LIMIT;
+  const segments: string[] = [];
+
+  for (const entry of pinnedEntries) {
+    if (remaining <= 0) break;
+
+    const slug = entry.slug || 'unknown';
+    const entity = entry.entity || 'unknown';
+    const body = entry.body ?? '';
+    const textBody =
+      body.length > remaining ? body.slice(0, remaining) : body;
+
+    segments.push(
+      `\n=== ${slug} — ${entity} ===\n${textBody}`,
+    );
+
+    remaining -= textBody.length;
+  }
+
+  return segments.join('');
+}

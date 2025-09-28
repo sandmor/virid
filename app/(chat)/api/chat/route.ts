@@ -409,6 +409,7 @@ export async function POST(request: Request) {
           system: systemPrompt({
             requestHints,
             pinnedEntries: pinnedForPrompt,
+            allowedTools: allowedToolIds,
           }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),

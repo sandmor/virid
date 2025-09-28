@@ -1,0 +1,80 @@
+import { describe, expect, it } from 'bun:test';
+import { systemPrompt, getRequestPromptFromHints } from '../prompts';
+import type { RequestHints } from '../prompts';
+
+const baseRequestHints: RequestHints = {
+  latitude: '48.8566',
+  longitude: '2.3522',
+  city: 'Paris',
+  country: 'France',
+};
+
+describe('systemPrompt', () => {
+  it('includes artifacts guidance when artifact tools are enabled', () => {
+    const prompt = systemPrompt({
+      requestHints: baseRequestHints,
+      allowedTools: ['createDocument', 'updateDocument'],
+    });
+
+    expect(prompt).toContain('This is a guide for using artifacts tools');
+  });
+
+  it('omits artifacts guidance when artifact tools are disabled', () => {
+    const prompt = systemPrompt({
+      requestHints: baseRequestHints,
+      allowedTools: [],
+    });
+
+    expect(prompt).not.toContain('This is a guide for using artifacts tools');
+  });
+
+  it('includes archive guidance only when archive tools are allowed', () => {
+    const withoutArchive = systemPrompt({
+      requestHints: baseRequestHints,
+      allowedTools: [],
+    });
+
+    const withArchive = systemPrompt({
+      requestHints: baseRequestHints,
+      allowedTools: ['archiveReadEntry'],
+    });
+
+    expect(withoutArchive).not.toContain('Memory Archive (Long-form Knowledge Files)');
+    expect(withArchive).toContain('Memory Archive (Long-form Knowledge Files)');
+  });
+
+  it('adds pinned entries respecting size guard', () => {
+    const longBody = 'a'.repeat(21_000);
+    const prompt = systemPrompt({
+      requestHints: baseRequestHints,
+      allowedTools: [],
+      pinnedEntries: [
+        {
+          slug: 'alpha',
+          entity: 'Project Alpha',
+          body: longBody,
+        },
+      ],
+    });
+
+    expect(prompt).toContain('=== alpha — Project Alpha ===');
+    expect(prompt).toContain('a'.repeat(20_000));
+    expect(prompt).not.toContain('a'.repeat(20_001));
+  });
+});
+
+describe('getRequestPromptFromHints', () => {
+  it('renders location hints with fallback', () => {
+    const prompt = getRequestPromptFromHints({
+      latitude: undefined,
+      longitude: undefined,
+      city: 'Madrid',
+      country: undefined,
+    });
+
+    expect(prompt).toContain('- lat: undefined');
+    expect(prompt).toContain('- lon: undefined');
+    expect(prompt).toContain('- city: Madrid');
+    expect(prompt).toContain('- country: undefined');
+  });
+});
