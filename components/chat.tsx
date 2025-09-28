@@ -149,7 +149,7 @@ export function Chat({
     window.history.replaceState({}, '', next);
   }, [selectedAgentId]);
 
-  const { messages, setMessages, sendMessage, status, stop, resumeStream } =
+  const { messages, setMessages, sendMessage, status, stop, resumeStream, regenerate } =
     useChat<ChatMessage>({
       id,
       messages: initialMessages,
@@ -206,7 +206,9 @@ export function Chat({
 
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
+  const regenerateParam = searchParams.get('regenerate');
   const initialQueryHandledRef = useRef(false);
+  const initialRegenerateHandledRef = useRef(false);
 
   // Single-run initial query injection (forked edit path)
   useEffect(() => {
@@ -232,6 +234,17 @@ export function Chat({
     window.history.replaceState({}, '', `/chat/${id}`);
   }, [query, messages, sendMessage, id]);
 
+  // Single-run regeneration trigger (forked regenerate path)
+  useEffect(() => {
+    if (!regenerateParam) return;
+    if (initialRegenerateHandledRef.current) return;
+    if (messages.length === 0) return; // Wait for messages to load
+    initialRegenerateHandledRef.current = true;
+    regenerate();
+    // Strip query param immediately to prevent re-trigger on fast re-render
+    window.history.replaceState({}, '', `/chat/${id}`);
+  }, [regenerateParam, messages, regenerate, id]);
+
   const { data: votes } = useQuery<Vote[] | undefined>({
     queryKey: ['chat', 'votes', id],
     queryFn: async () => fetcher(`/api/vote?chatId=${id}`),
@@ -242,9 +255,9 @@ export function Chat({
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
 
-  // Suppress auto-resume when a query injection is pending to avoid duplicate stream starts
+  // Suppress auto-resume when a query injection or regeneration is pending to avoid duplicate stream starts
   const effectiveAutoResume =
-    autoResume && !query && !initialQueryHandledRef.current;
+    autoResume && !query && !regenerateParam && !initialQueryHandledRef.current && !initialRegenerateHandledRef.current;
   useAutoResume({
     autoResume: effectiveAutoResume,
     initialMessages,
@@ -300,11 +313,8 @@ export function Chat({
               if (!result?.newChatId) {
                 throw new Error('Fork action did not return newChatId');
               }
-              const qp = result.previousUserText
-                ? `?query=${encodeURIComponent(result.previousUserText)}`
-                : '';
               requestAnimationFrame(() => {
-                router.push(`/chat/${result.newChatId}${qp}`);
+                router.push(`/chat/${result.newChatId}?regenerate=true`);
               });
             } catch (e) {
               console.error('Regenerate fork failed', e);
