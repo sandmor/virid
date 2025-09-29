@@ -29,7 +29,10 @@ async function getProviderClient(
   let factory: (model: string) => any;
   switch (provider) {
     case 'openrouter':
-      factory = createOpenRouter({ apiKey: apiKey ?? '' });
+      factory = createOpenRouter({
+        apiKey: apiKey ?? '',
+        extraBody: { include_reasoning: true },
+      });
       break;
     case 'openai':
       factory = createOpenAI({ apiKey });

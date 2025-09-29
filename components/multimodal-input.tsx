@@ -81,9 +81,18 @@ function PureMultimodalInput({
   const { width } = useWindowSize();
 
   const adjustHeight = useCallback(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '44px';
-    }
+    const el = textareaRef.current;
+    if (!el) return;
+
+    // Reset to auto to correctly measure scrollHeight
+    el.style.height = 'auto';
+
+    // Try to read inline maxHeight (set via style prop on the component). Fallback to 1000.
+    const rawMax = el.style.maxHeight || '';
+    const max = rawMax ? parseInt(rawMax.replace('px', ''), 10) : 1000;
+
+    const newHeight = Math.min(el.scrollHeight, max);
+    el.style.height = `${newHeight}px`;
   }, []);
 
   useEffect(() => {
@@ -93,9 +102,13 @@ function PureMultimodalInput({
   }, [adjustHeight]);
 
   const resetHeight = useCallback(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '44px';
-    }
+    const el = textareaRef.current;
+    if (!el) return;
+
+    // Restore to the configured minHeight if available, otherwise fall back to 44px
+    const rawMin = el.style.minHeight || '';
+    const min = rawMin ? rawMin : '44px';
+    el.style.height = min;
   }, []);
 
   const [localStorageInput, setLocalStorageInput] = useLocalStorage(
@@ -121,6 +134,16 @@ function PureMultimodalInput({
 
   const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value);
+
+    const el = textareaRef.current;
+    if (!el) return;
+
+    // Adjust height immediately based on the event target's scrollHeight
+    el.style.height = 'auto';
+    const rawMax = el.style.maxHeight || '';
+    const max = rawMax ? parseInt(rawMax.replace('px', ''), 10) : 1000;
+    const newHeight = Math.min(event.target.scrollHeight, max);
+    el.style.height = `${newHeight}px`;
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -297,8 +320,9 @@ function PureMultimodalInput({
             autoFocus
             className="grow resize-none border-0! border-none! bg-transparent p-2 text-sm outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden"
             data-testid="multimodal-input"
-            disableAutoResize={true}
-            maxHeight={200}
+            /* allow auto-resize so the input grows with content */
+            disableAutoResize={false}
+            maxHeight={180}
             minHeight={44}
             onChange={handleInput}
             placeholder="Send a message..."

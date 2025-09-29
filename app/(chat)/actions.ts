@@ -31,7 +31,9 @@ export async function generateTitleFromChatHistory({
     - ensure it is not more than 80 characters long
     - the title should be a summary of the main topic or question being discussed
     - focus on the user's intent and the conversation's core subject
-    - do not use quotes or colons`,
+    - do not surround the title with quotes
+    - do not include any introductory phrases like "Title:" or "Summary:"
+    - do not use markdown. The title must be in plain text, only emojis are allowed`,
     prompt: JSON.stringify(messages),
   });
 
