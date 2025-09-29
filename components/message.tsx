@@ -500,15 +500,15 @@ const PurePreviewMessage = ({
               disableRegenerate={disableRegenerate}
               modelBadge={
                 message.role === 'assistant' && message.metadata?.model ? (
-                    <span className="rounded-full bg-muted/30 px-2 py-0.5 text-sm font-medium text-muted-foreground">
-                      {(() => {
-                        const raw = message.metadata?.model as string | undefined;
-                        if (!raw) return '';
-                        const parts = raw.split(':');
-                        return parts.length > 1 ? parts.slice(1).join(':') : raw;
-                      })()}
-                    </span>
-                  ) : null
+                  <span className="rounded-full bg-muted/30 px-2 py-0.5 text-sm font-medium text-muted-foreground">
+                    {(() => {
+                      const raw = message.metadata?.model as string | undefined;
+                      if (!raw) return '';
+                      const parts = raw.split(':');
+                      return parts.length > 1 ? parts.slice(1).join(':') : raw;
+                    })()}
+                  </span>
+                ) : null
               }
             />
           )}

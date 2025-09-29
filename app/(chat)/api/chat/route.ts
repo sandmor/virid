@@ -60,7 +60,7 @@ import { updateChatTitleById } from '@/lib/db/queries';
 import { type PostRequestBody, postRequestBodySchema } from './schema';
 import { prisma } from '@/lib/db/prisma';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 let globalStreamContext: ResumableStreamContext | null = null;
 
