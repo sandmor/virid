@@ -174,7 +174,8 @@ exports.Prisma.MessageScalarFieldEnum = {
   role: 'role',
   parts: 'parts',
   attachments: 'attachments',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  model: 'model'
 };
 
 exports.Prisma.VoteScalarFieldEnum = {

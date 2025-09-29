@@ -16,6 +16,7 @@ export function PureMessageActions({
   setMode,
   onRegenerate,
   disableRegenerate,
+  modelBadge,
 }: {
   chatId: string;
   message: ChatMessage;
@@ -24,6 +25,7 @@ export function PureMessageActions({
   setMode?: (mode: 'view' | 'edit') => void;
   onRegenerate?: (assistantMessageId: string) => void;
   disableRegenerate?: boolean;
+  modelBadge?: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
   const voteQueryKey = ['chat', 'votes', chatId];
@@ -134,49 +136,58 @@ export function PureMessageActions({
   }
 
   return (
-    <Actions className="-ml-0.5">
-      <div className="relative">
-        {setMode && (
-          <Action onClick={() => setMode('edit')} tooltip="Edit">
-            <Pencil size={16} />
+    <div className="flex items-center gap-2 -ml-0.5">
+      <Actions>
+        <div className="relative">
+          {/* Primary actions: Copy, Upvote, Downvote */}
+          <Action onClick={handleCopy} tooltip="Copy">
+            <Copy size={16} />
           </Action>
-        )}
-        {onRegenerate && message.role === 'assistant' && (
+
           <Action
-            onClick={() => !disableRegenerate && onRegenerate(message.id)}
-            tooltip={disableRegenerate ? 'Regenerating…' : 'Regenerate'}
-            disabled={disableRegenerate}
+            data-testid="message-upvote"
+            disabled={vote?.isUpvoted}
+            onClick={() => {
+              upvoteMutation.mutate();
+            }}
+            tooltip="Upvote Response"
           >
-            <RotateCcw size={16} />
+            <ThumbsUp size={16} />
           </Action>
-        )}
-        <Action onClick={handleCopy} tooltip="Copy">
-          <Copy size={16} />
-        </Action>
 
-        <Action
-          data-testid="message-upvote"
-          disabled={vote?.isUpvoted}
-          onClick={() => {
-            upvoteMutation.mutate();
-          }}
-          tooltip="Upvote Response"
-        >
-          <ThumbsUp size={16} />
-        </Action>
+          <Action
+            data-testid="message-downvote"
+            disabled={vote && !vote.isUpvoted}
+            onClick={() => {
+              downvoteMutation.mutate();
+            }}
+            tooltip="Downvote Response"
+          >
+            <ThumbsDown size={16} />
+          </Action>
 
-        <Action
-          data-testid="message-downvote"
-          disabled={vote && !vote.isUpvoted}
-          onClick={() => {
-            downvoteMutation.mutate();
-          }}
-          tooltip="Downvote Response"
-        >
-          <ThumbsDown size={16} />
-        </Action>
-      </div>
-    </Actions>
+          {/* Secondary actions: Edit then Regenerate (last two) */}
+          {setMode && (
+            <Action onClick={() => setMode('edit')} tooltip="Edit">
+              <Pencil size={16} />
+            </Action>
+          )}
+          {onRegenerate && message.role === 'assistant' && (
+            <Action
+              onClick={() => !disableRegenerate && onRegenerate(message.id)}
+              tooltip={disableRegenerate ? 'Regenerating…' : 'Regenerate'}
+              disabled={disableRegenerate}
+            >
+              <RotateCcw size={16} />
+            </Action>
+          )}
+        </div>
+      </Actions>
+
+      {message.role === 'assistant' && modelBadge ? (
+        <div className="flex items-center">{modelBadge}</div>
+      ) : null}
+    </div>
   );
 }
 

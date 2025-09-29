@@ -17,7 +17,8 @@ import {
   ToolInput,
   ToolOutput,
 } from './elements/tool';
-import { Sparkle } from 'lucide-react';
+import { Sparkle, Cpu } from 'lucide-react';
+import { LogoOpenAI, LogoGoogle, LogoOpenRouter } from './icons';
 import { MessageActions } from './message-actions';
 import { MessageEditor } from './message-editor';
 import { MessageReasoning } from './message-reasoning';
@@ -68,7 +69,20 @@ const PurePreviewMessage = ({
       >
         {message.role === 'assistant' && (
           <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-            <Sparkle size={14} />
+            {(() => {
+              const raw = message.metadata?.model;
+              const provider = raw ? raw.split(':')[0] : undefined;
+              switch (provider) {
+                case 'openai':
+                  return <LogoOpenAI size={14} />;
+                case 'google':
+                  return <LogoGoogle size={14} />;
+                case 'openrouter':
+                  return <LogoOpenRouter size={14} />;
+                default:
+                  return raw ? <Cpu size={14} /> : <Sparkle size={14} />;
+              }
+            })()}
           </div>
         )}
 
@@ -179,8 +193,8 @@ const PurePreviewMessage = ({
                             ? part.errorText
                             : part.output &&
                                 typeof part.output === 'object' &&
-                                'error' in (part.output as any)
-                              ? String((part.output as any).error)
+                                'error' in part.output
+                              ? String(part.output.error)
                               : undefined
                         }
                         output={
@@ -188,7 +202,7 @@ const PurePreviewMessage = ({
                           part.output &&
                           !(
                             typeof part.output === 'object' &&
-                            'error' in (part.output as any)
+                            'error' in part.output
                           ) ? (
                             <Weather weatherAtLocation={part.output} />
                           ) : null
@@ -484,6 +498,18 @@ const PurePreviewMessage = ({
               vote={vote}
               onRegenerate={onRegenerateAssistant}
               disableRegenerate={disableRegenerate}
+              modelBadge={
+                message.role === 'assistant' && message.metadata?.model ? (
+                    <span className="rounded-full bg-muted/30 px-2 py-0.5 text-sm font-medium text-muted-foreground">
+                      {(() => {
+                        const raw = message.metadata?.model as string | undefined;
+                        if (!raw) return '';
+                        const parts = raw.split(':');
+                        return parts.length > 1 ? parts.slice(1).join(':') : raw;
+                      })()}
+                    </span>
+                  ) : null
+              }
             />
           )}
         </div>
@@ -495,23 +521,31 @@ const PurePreviewMessage = ({
 export const PreviewMessage = memo(
   PurePreviewMessage,
   (prevProps, nextProps) => {
-    if (prevProps.isLoading !== nextProps.isLoading) {
+    // re-render when loading state changes
+    if (prevProps.isLoading !== nextProps.isLoading) return false;
+    // always re-render on message id change
+    if (prevProps.message.id !== nextProps.message.id) return false;
+    // re-render when scroll padding requirement changes
+    if (prevProps.requiresScrollPadding !== nextProps.requiresScrollPadding)
       return false;
-    }
-    if (prevProps.message.id !== nextProps.message.id) {
-      return false;
-    }
-    if (prevProps.requiresScrollPadding !== nextProps.requiresScrollPadding) {
-      return false;
-    }
-    if (!equal(prevProps.message.parts, nextProps.message.parts)) {
-      return false;
-    }
-    if (!equal(prevProps.vote, nextProps.vote)) {
-      return false;
-    }
 
-    return false;
+    // re-render if message parts change
+    if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
+
+    // re-render if vote state changes
+    if (!equal(prevProps.vote, nextProps.vote)) return false;
+
+    // re-render if metadata that affects UI (createdAt or model) changed
+    if (
+      prevProps.message.metadata?.createdAt !==
+      nextProps.message.metadata?.createdAt
+    )
+      return false;
+    if (prevProps.message.metadata?.model !== nextProps.message.metadata?.model)
+      return false;
+
+    // otherwise skip rerender
+    return true;
   }
 );
 

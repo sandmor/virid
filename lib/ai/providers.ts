@@ -130,11 +130,6 @@ export async function listLanguageModels() {
 }
 
 export type RegisteredModelId = string;
-export function getResolvedProviderModelId(
-  appModelId: string
-): string | undefined {
-  return appModelId;
-}
 
 export function getProviderVersion() {
   return providerVersion;

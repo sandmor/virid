@@ -29,7 +29,7 @@ async function UpdateTierForm({ id }: { id: 'guest' | 'regular' }) {
           modelIds.length === 0
         )
           return;
-        await (prisma.tier as any).upsert({
+        await prisma.tier.upsert({
           where: { id },
           create: {
             id,

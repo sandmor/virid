@@ -110,6 +110,7 @@ model Message {
   parts       Json
   attachments Json
   createdAt   DateTime
+  model       String?
 
   chat  Chat   @relation(fields: [chatId], references: [id])
   votes Vote[]

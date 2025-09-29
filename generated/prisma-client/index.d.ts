@@ -8995,6 +8995,7 @@ export namespace Prisma {
     chatId: string | null
     role: string | null
     createdAt: Date | null
+    model: string | null
   }
 
   export type MessageMaxAggregateOutputType = {
@@ -9002,6 +9003,7 @@ export namespace Prisma {
     chatId: string | null
     role: string | null
     createdAt: Date | null
+    model: string | null
   }
 
   export type MessageCountAggregateOutputType = {
@@ -9011,6 +9013,7 @@ export namespace Prisma {
     parts: number
     attachments: number
     createdAt: number
+    model: number
     _all: number
   }
 
@@ -9020,6 +9023,7 @@ export namespace Prisma {
     chatId?: true
     role?: true
     createdAt?: true
+    model?: true
   }
 
   export type MessageMaxAggregateInputType = {
@@ -9027,6 +9031,7 @@ export namespace Prisma {
     chatId?: true
     role?: true
     createdAt?: true
+    model?: true
   }
 
   export type MessageCountAggregateInputType = {
@@ -9036,6 +9041,7 @@ export namespace Prisma {
     parts?: true
     attachments?: true
     createdAt?: true
+    model?: true
     _all?: true
   }
 
@@ -9118,6 +9124,7 @@ export namespace Prisma {
     parts: JsonValue
     attachments: JsonValue
     createdAt: Date
+    model: string | null
     _count: MessageCountAggregateOutputType | null
     _min: MessageMinAggregateOutputType | null
     _max: MessageMaxAggregateOutputType | null
@@ -9144,6 +9151,7 @@ export namespace Prisma {
     parts?: boolean
     attachments?: boolean
     createdAt?: boolean
+    model?: boolean
     chat?: boolean | ChatDefaultArgs<ExtArgs>
     votes?: boolean | Message$votesArgs<ExtArgs>
     _count?: boolean | MessageCountOutputTypeDefaultArgs<ExtArgs>
@@ -9156,6 +9164,7 @@ export namespace Prisma {
     parts?: boolean
     attachments?: boolean
     createdAt?: boolean
+    model?: boolean
     chat?: boolean | ChatDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["message"]>
 
@@ -9166,6 +9175,7 @@ export namespace Prisma {
     parts?: boolean
     attachments?: boolean
     createdAt?: boolean
+    model?: boolean
     chat?: boolean | ChatDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["message"]>
 
@@ -9176,9 +9186,10 @@ export namespace Prisma {
     parts?: boolean
     attachments?: boolean
     createdAt?: boolean
+    model?: boolean
   }
 
-  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "chatId" | "role" | "parts" | "attachments" | "createdAt", ExtArgs["result"]["message"]>
+  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "chatId" | "role" | "parts" | "attachments" | "createdAt" | "model", ExtArgs["result"]["message"]>
   export type MessageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chat?: boolean | ChatDefaultArgs<ExtArgs>
     votes?: boolean | Message$votesArgs<ExtArgs>
@@ -9204,6 +9215,7 @@ export namespace Prisma {
       parts: Prisma.JsonValue
       attachments: Prisma.JsonValue
       createdAt: Date
+      model: string | null
     }, ExtArgs["result"]["message"]>
     composites: {}
   }
@@ -9635,6 +9647,7 @@ export namespace Prisma {
     readonly parts: FieldRef<"Message", 'Json'>
     readonly attachments: FieldRef<"Message", 'Json'>
     readonly createdAt: FieldRef<"Message", 'DateTime'>
+    readonly model: FieldRef<"Message", 'String'>
   }
     
 
@@ -17782,7 +17795,8 @@ export namespace Prisma {
     role: 'role',
     parts: 'parts',
     attachments: 'attachments',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    model: 'model'
   };
 
   export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
@@ -18379,6 +18393,7 @@ export namespace Prisma {
     parts?: JsonFilter<"Message">
     attachments?: JsonFilter<"Message">
     createdAt?: DateTimeFilter<"Message"> | Date | string
+    model?: StringNullableFilter<"Message"> | string | null
     chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
     votes?: VoteListRelationFilter
   }
@@ -18390,6 +18405,7 @@ export namespace Prisma {
     parts?: SortOrder
     attachments?: SortOrder
     createdAt?: SortOrder
+    model?: SortOrderInput | SortOrder
     chat?: ChatOrderByWithRelationInput
     votes?: VoteOrderByRelationAggregateInput
   }
@@ -18404,6 +18420,7 @@ export namespace Prisma {
     parts?: JsonFilter<"Message">
     attachments?: JsonFilter<"Message">
     createdAt?: DateTimeFilter<"Message"> | Date | string
+    model?: StringNullableFilter<"Message"> | string | null
     chat?: XOR<ChatScalarRelationFilter, ChatWhereInput>
     votes?: VoteListRelationFilter
   }, "id">
@@ -18415,6 +18432,7 @@ export namespace Prisma {
     parts?: SortOrder
     attachments?: SortOrder
     createdAt?: SortOrder
+    model?: SortOrderInput | SortOrder
     _count?: MessageCountOrderByAggregateInput
     _max?: MessageMaxOrderByAggregateInput
     _min?: MessageMinOrderByAggregateInput
@@ -18430,6 +18448,7 @@ export namespace Prisma {
     parts?: JsonWithAggregatesFilter<"Message">
     attachments?: JsonWithAggregatesFilter<"Message">
     createdAt?: DateTimeWithAggregatesFilter<"Message"> | Date | string
+    model?: StringNullableWithAggregatesFilter<"Message"> | string | null
   }
 
   export type VoteWhereInput = {
@@ -19259,6 +19278,7 @@ export namespace Prisma {
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
+    model?: string | null
     chat: ChatCreateNestedOneWithoutMessagesInput
     votes?: VoteCreateNestedManyWithoutMessageInput
   }
@@ -19270,6 +19290,7 @@ export namespace Prisma {
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
+    model?: string | null
     votes?: VoteUncheckedCreateNestedManyWithoutMessageInput
   }
 
@@ -19279,6 +19300,7 @@ export namespace Prisma {
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    model?: NullableStringFieldUpdateOperationsInput | string | null
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
     votes?: VoteUpdateManyWithoutMessageNestedInput
   }
@@ -19290,6 +19312,7 @@ export namespace Prisma {
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    model?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUncheckedUpdateManyWithoutMessageNestedInput
   }
 
@@ -19300,6 +19323,7 @@ export namespace Prisma {
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
+    model?: string | null
   }
 
   export type MessageUpdateManyMutationInput = {
@@ -19308,6 +19332,7 @@ export namespace Prisma {
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    model?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type MessageUncheckedUpdateManyInput = {
@@ -19317,6 +19342,7 @@ export namespace Prisma {
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    model?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type VoteCreateInput = {
@@ -20285,6 +20311,7 @@ export namespace Prisma {
     parts?: SortOrder
     attachments?: SortOrder
     createdAt?: SortOrder
+    model?: SortOrder
   }
 
   export type MessageMaxOrderByAggregateInput = {
@@ -20292,6 +20319,7 @@ export namespace Prisma {
     chatId?: SortOrder
     role?: SortOrder
     createdAt?: SortOrder
+    model?: SortOrder
   }
 
   export type MessageMinOrderByAggregateInput = {
@@ -20299,6 +20327,7 @@ export namespace Prisma {
     chatId?: SortOrder
     role?: SortOrder
     createdAt?: SortOrder
+    model?: SortOrder
   }
   export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -22442,6 +22471,7 @@ export namespace Prisma {
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
+    model?: string | null
     votes?: VoteCreateNestedManyWithoutMessageInput
   }
 
@@ -22451,6 +22481,7 @@ export namespace Prisma {
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
+    model?: string | null
     votes?: VoteUncheckedCreateNestedManyWithoutMessageInput
   }
 
@@ -22618,6 +22649,7 @@ export namespace Prisma {
     parts?: JsonFilter<"Message">
     attachments?: JsonFilter<"Message">
     createdAt?: DateTimeFilter<"Message"> | Date | string
+    model?: StringNullableFilter<"Message"> | string | null
   }
 
   export type VoteUpsertWithWhereUniqueWithoutChatInput = {
@@ -22812,6 +22844,7 @@ export namespace Prisma {
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
+    model?: string | null
     chat: ChatCreateNestedOneWithoutMessagesInput
   }
 
@@ -22822,6 +22855,7 @@ export namespace Prisma {
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
+    model?: string | null
   }
 
   export type MessageCreateOrConnectWithoutVotesInput = {
@@ -22885,6 +22919,7 @@ export namespace Prisma {
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    model?: NullableStringFieldUpdateOperationsInput | string | null
     chat?: ChatUpdateOneRequiredWithoutMessagesNestedInput
   }
 
@@ -22895,6 +22930,7 @@ export namespace Prisma {
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    model?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ChatUpsertWithoutVotesInput = {
@@ -24103,6 +24139,7 @@ export namespace Prisma {
     parts: JsonNullValueInput | InputJsonValue
     attachments: JsonNullValueInput | InputJsonValue
     createdAt: Date | string
+    model?: string | null
   }
 
   export type VoteCreateManyChatInput = {
@@ -24128,6 +24165,7 @@ export namespace Prisma {
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    model?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUpdateManyWithoutMessageNestedInput
   }
 
@@ -24137,6 +24175,7 @@ export namespace Prisma {
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    model?: NullableStringFieldUpdateOperationsInput | string | null
     votes?: VoteUncheckedUpdateManyWithoutMessageNestedInput
   }
 
@@ -24146,6 +24185,7 @@ export namespace Prisma {
     parts?: JsonNullValueInput | InputJsonValue
     attachments?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    model?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type VoteUpdateWithoutChatInput = {

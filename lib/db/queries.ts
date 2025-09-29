@@ -7,13 +7,15 @@ import type { VisibilityType } from '@/components/visibility-selector';
 import { ChatSDKError } from '../errors';
 import type { AppUsage } from '../usage';
 import { generateUUID } from '../utils';
-import { type Chat, type Suggestion, type User, type Document } from './schema';
+import {
+  type Chat,
+  type ChatSettings,
+  type Suggestion,
+  type User,
+  type Document,
+} from './schema';
 import { refreshPinnedEntriesCache } from './chat-settings';
 import { generateTitleFromChatHistory } from '../../app/(chat)/actions';
-
-// Optionally, if not using email/pass login, you can use an Auth.js adapter.
-
-// All database access is routed through Prisma Client
 
 export async function getUser(email: string): Promise<User[]> {
   try {
@@ -64,7 +66,7 @@ export async function deleteChatById({ id }: { id: string }): Promise<Chat> {
       ...rest,
       visibility: visibility as Chat['visibility'],
       lastContext: lastContext as unknown as Chat['lastContext'],
-      settings: (deleted as any).settings ?? null,
+      settings: (deleted.settings as ChatSettings) ?? null,
       agent: null,
     };
   } catch (_error) {
@@ -115,10 +117,10 @@ export async function getChatsByUserId({
         userId: c.userId,
         visibility: c.visibility as Chat['visibility'],
         lastContext: c.lastContext as unknown as Chat['lastContext'],
-        parentChatId: (c as any).parentChatId ?? null,
-        forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
-        forkDepth: (c as any).forkedFromMessageId ?? 0,
-        settings: ((c as any).settings as any) ?? null,
+        parentChatId: c.parentChatId ?? null,
+        forkedFromMessageId: c.forkedFromMessageId ?? null,
+        forkDepth: c.forkedFromMessageId ?? 0,
+        settings: (c.settings as ChatSettings) ?? null,
         agent: c.agent ?? null,
       })) as unknown as Chat[];
     } else if (endingBefore) {
@@ -145,10 +147,10 @@ export async function getChatsByUserId({
         userId: c.userId,
         visibility: c.visibility as Chat['visibility'],
         lastContext: c.lastContext as unknown as Chat['lastContext'],
-        parentChatId: (c as any).parentChatId ?? null,
-        forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
-        forkDepth: (c as any).forkDepth ?? 0,
-        settings: ((c as any).settings as any) ?? null,
+        parentChatId: c.parentChatId ?? null,
+        forkedFromMessageId: c.forkedFromMessageId ?? null,
+        forkDepth: c.forkDepth ?? 0,
+        settings: (c.settings as ChatSettings) ?? null,
         agent: c.agent ?? null,
       })) as unknown as Chat[];
     } else {
@@ -165,10 +167,10 @@ export async function getChatsByUserId({
         userId: c.userId,
         visibility: c.visibility as Chat['visibility'],
         lastContext: c.lastContext as unknown as Chat['lastContext'],
-        parentChatId: (c as any).parentChatId ?? null,
-        forkedFromMessageId: (c as any).forkedFromMessageId ?? null,
-        forkDepth: (c as any).forkDepth ?? 0,
-        settings: ((c as any).settings as any) ?? null,
+        parentChatId: c.parentChatId ?? null,
+        forkedFromMessageId: c.forkedFromMessageId ?? null,
+        forkDepth: c.forkDepth ?? 0,
+        settings: (c.settings as ChatSettings) ?? null,
         agent: c.agent ?? null,
       })) as unknown as Chat[];
     }
@@ -211,7 +213,7 @@ export async function getChatById({
       ...rest,
       visibility: visibility as Chat['visibility'],
       lastContext: lastContext as unknown as Chat['lastContext'],
-      settings: (settings as any) ?? null,
+      settings: (settings as ChatSettings) ?? null,
       agent: agent ?? null,
     } as Chat;
   } catch (_error) {
@@ -264,11 +266,13 @@ export async function saveAssistantMessage({
   chatId,
   parts,
   attachments = [],
+  model,
 }: {
   id: string;
   chatId: string;
   parts: unknown;
   attachments?: unknown;
+  model?: string;
 }) {
   try {
     await prisma.message.create({
@@ -279,6 +283,7 @@ export async function saveAssistantMessage({
         parts: parts as Prisma.InputJsonValue,
         attachments: attachments as Prisma.InputJsonValue,
         createdAt: new Date(),
+        model,
       },
     });
   } catch {
@@ -365,7 +370,7 @@ export async function forkChat({
         createdAt: new Date(),
         userId,
         title: sourceChat.title, // Use source title as placeholder
-        visibility: sourceChat.visibility as any,
+        visibility: sourceChat.visibility as string,
         lastContext: sourceChat.lastContext as Prisma.InputJsonValue,
         parentChatId: sourceChat.parentChatId || sourceChat.id,
         forkedFromMessageId: pivotMessageId,

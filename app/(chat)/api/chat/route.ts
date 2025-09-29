@@ -24,7 +24,6 @@ import type { ModelCatalog } from 'tokenlens/core';
 import { fetchModels } from 'tokenlens/fetch';
 import { getUsage } from 'tokenlens/helpers';
 import { getLanguageModel } from '@/lib/ai/providers';
-import { getResolvedProviderModelId } from '@/lib/ai/providers';
 import { createDocument } from '@/lib/ai/tools/create-document';
 import { archiveCreateEntry } from '@/lib/ai/tools/archive-create-entry';
 import { archiveReadEntry } from '@/lib/ai/tools/archive-read-entry';
@@ -333,7 +332,7 @@ export async function POST(request: Request) {
             'Failed to load messages, proceeding with only user message',
             e
           );
-          return [] as any[];
+          return [];
         });
         const modelPromise = getLanguageModel(selectedChatModel);
         const pinnedPromise = (async () => {
@@ -373,10 +372,7 @@ export async function POST(request: Request) {
           pinnedPromise,
         ]);
 
-        const uiMessages = [
-          ...convertToUIMessages(messagesFromDb as any),
-          message,
-        ];
+        const uiMessages = [...convertToUIMessages(messagesFromDb), message];
 
         // Determine allowed tools (chat settings allow-list or default = all)
         const settings = await getChatSettings(id);
@@ -415,7 +411,7 @@ export async function POST(request: Request) {
             allowedTools: allowedToolIds,
           }),
           messages: convertToModelMessages(uiMessages),
-          stopWhen: stepCountIs(5),
+          stopWhen: stepCountIs(20),
           experimental_activeTools: allowedToolIds,
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: activeTools,
@@ -427,9 +423,7 @@ export async function POST(request: Request) {
           onFinish: async ({ usage }) => {
             try {
               const providers = await getTokenlensCatalog();
-              // Report usage against the exact selected model id
-              const modelId = getResolvedProviderModelId(selectedChatModel);
-              if (!modelId) {
+              if (!selectedChatModel) {
                 finalMergedUsage = usage;
                 dataStream.write({
                   type: 'data-usage',
@@ -447,8 +441,16 @@ export async function POST(request: Request) {
                 return;
               }
 
-              const summary = getUsage({ modelId, usage, providers });
-              finalMergedUsage = { ...usage, ...summary, modelId } as AppUsage;
+              const summary = getUsage({
+                modelId: selectedChatModel,
+                usage,
+                providers,
+              });
+              finalMergedUsage = {
+                ...usage,
+                ...summary,
+                modelId: selectedChatModel,
+              } as AppUsage;
               dataStream.write({ type: 'data-usage', data: finalMergedUsage });
             } catch (err) {
               console.warn('TokenLens enrichment failed', err);
@@ -468,6 +470,11 @@ export async function POST(request: Request) {
         dataStream.merge(
           result.toUIMessageStream({
             sendReasoning: true,
+            messageMetadata: ({}) => {
+              return {
+                model: selectedChatModel,
+              };
+            },
           })
         );
       },
@@ -483,6 +490,7 @@ export async function POST(request: Request) {
             chatId: id,
             parts: assistantMessage.parts,
             attachments: [],
+            model: selectedChatModel,
           });
         }
 
