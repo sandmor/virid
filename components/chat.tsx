@@ -3,7 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChatHeader } from '@/components/chat-header';
 import { useArtifactSelector } from '@/hooks/use-artifact';
@@ -114,7 +114,6 @@ export function Chat({
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
-
   useEffect(() => {
     if (chatHasStartedRef.current) return;
     const settings = (selectedAgent?.settings ?? null) as ChatSettings | null;
@@ -129,53 +128,44 @@ export function Chat({
     }
   }, [selectedAgent?.id]);
 
-  const handleSelectAgent = async (
-    agent: AgentPreset | null,
-    options?: { userInitiated?: boolean }
-  ) => {
-    const userInitiated = options?.userInitiated ?? false;
-    const newAgentId = agent?.id ?? null;
-    if (selectedAgentId === newAgentId) return;
+  const handleSelectAgent = useCallback(
+    async (agent: AgentPreset | null, options?: { userInitiated?: boolean }) => {
+      const userInitiated = options?.userInitiated ?? false;
+      const newAgentId = agent?.id ?? null;
+      if (selectedAgentId === newAgentId) return;
 
-    try {
-      // Persist to backend only for user-initiated changes. If parent is just syncing props
-      // (userInitiated=false), skip network roundtrip.
-      if (userInitiated) {
-        await fetchWithErrorHandlers(`/api/chat/settings`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chatId: id, agentId: newAgentId }),
-        });
+      try {
+        if (userInitiated) {
+          await fetchWithErrorHandlers(`/api/chat/settings`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chatId: id, agentId: newAgentId }),
+          });
+        }
+
+        if (agent) {
+          setSelectedAgent({
+            id: agent.id,
+            name: agent.name,
+            description: agent.description,
+            settings: agent.settings,
+          });
+          setSelectedAgentId(agent.id);
+        } else {
+          setSelectedAgent(null);
+          setSelectedAgentId(undefined);
+        }
+
+        const settings = (agent?.settings ?? null) as ChatSettings | null;
+        setStagedPinnedSlugs(normalizePinnedEntries(settings?.pinnedEntries ?? []));
+        setStagedAllowedTools(normalizeAllowedTools(settings?.tools?.allow));
+      } catch (error) {
+        console.error('Failed to update chat agent', error);
+        toast({ type: 'error', description: 'Failed to update chat agent' });
       }
-
-      // Update local state (always)
-      if (agent) {
-        setSelectedAgent({
-          id: agent.id,
-          name: agent.name,
-          description: agent.description,
-          settings: agent.settings,
-        });
-        setSelectedAgentId(agent.id);
-      } else {
-        setSelectedAgent(null);
-        setSelectedAgentId(undefined);
-      }
-
-      // Update staged settings to new agent's base
-      const settings = (agent?.settings ?? null) as ChatSettings | null;
-      setStagedPinnedSlugs(
-        normalizePinnedEntries(settings?.pinnedEntries ?? [])
-      );
-      setStagedAllowedTools(normalizeAllowedTools(settings?.tools?.allow));
-    } catch (error) {
-      console.error('Failed to update chat agent', error);
-      toast({
-        type: 'error',
-        description: 'Failed to update chat agent',
-      });
-    }
-  };
+    },
+    [id, selectedAgentId]
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -199,6 +189,8 @@ export function Chat({
     stop,
     resumeStream,
     regenerate,
+    error: chatError,
+    clearError: clearChatError,
   } = useChat<ChatMessage>({
     id,
     messages: initialMessages,
@@ -318,6 +310,78 @@ export function Chat({
 
   const [isForking, setIsForking] = useState(false);
 
+  const handleRetryOnError = useCallback(() => {
+    if (clearChatError) clearChatError();
+    // small delay to ensure error state clears before regenerating
+    setTimeout(() => {
+      regenerate();
+    }, 16);
+  }, [clearChatError, regenerate]);
+
+  const handleDismissError = useCallback(() => {
+    if (clearChatError) clearChatError();
+  }, [clearChatError]);
+
+  const handleForkRegenerate = useCallback(
+    async (assistantMessageId: string) => {
+      if (isForking) return; // guard against double clicks
+      setIsForking(true);
+      toast({ type: 'success', description: 'Forking chat…' });
+      try {
+        const match = window.location.pathname.match(/\/chat\/(.+)$/);
+        if (!match) throw new Error('Cannot infer current chat id');
+        const currentChatId = match[1];
+        const { forkChatAction } = await import('@/app/(chat)/actions');
+        const result: any = await forkChatAction({
+          sourceChatId: currentChatId,
+          pivotMessageId: assistantMessageId,
+          mode: 'regenerate',
+        });
+        if (!result?.newChatId) {
+          throw new Error('Fork action did not return newChatId');
+        }
+        queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
+        }, 8000);
+        requestAnimationFrame(() => {
+          router.push(`/chat/${result.newChatId}?regenerate=true`);
+        });
+      } catch (e) {
+        console.error('Regenerate fork failed', e);
+        toast({ type: 'error', description: (e as Error).message || 'Failed to fork chat' });
+        setIsForking(false);
+      }
+    },
+    [isForking, queryClient, router]
+  );
+
+  const handleAddStagedPin = useCallback((slug: string) => {
+    setStagedPinnedSlugs((prev) => (prev.includes(slug) ? prev : [...prev, slug]));
+  }, []);
+
+  const handleRemoveStagedPin = useCallback((slug: string) => {
+    setStagedPinnedSlugs((prev) => prev.filter((s) => s !== slug));
+  }, []);
+
+  const handleUpdateStagedAllowedTools = useCallback((tools: string[] | undefined) => {
+    setStagedAllowedTools(tools);
+  }, []);
+
+  useEffect(() => {
+    if (!chatError) return;
+    // Use project's toast with Retry/Dismiss actions following color schema
+    toast({
+      type: 'error',
+      description: chatError.message || 'An error occurred while generating the response.',
+      actions: [
+        { label: 'Retry', onClick: handleRetryOnError, primary: true },
+        { label: 'Dismiss', onClick: handleDismissError },
+      ],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatError]);
+
   return (
     <>
       <div className="overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background">
@@ -326,20 +390,12 @@ export function Chat({
           isReadonly={isReadonly}
           selectedVisibilityType={initialVisibilityType}
           stagedPinnedSlugs={stagedPinnedSlugs}
-          onAddStagedPin={(slug) =>
-            setStagedPinnedSlugs((prev) =>
-              prev.includes(slug) ? prev : [...prev, slug]
-            )
-          }
-          onRemoveStagedPin={(slug) =>
-            setStagedPinnedSlugs((prev) => prev.filter((s) => s !== slug))
-          }
+          onAddStagedPin={handleAddStagedPin}
+          onRemoveStagedPin={handleRemoveStagedPin}
           chatHasStarted={chatHasStartedRef.current}
-          stagedAllowedTools={stagedAllowedTools}
-          onUpdateStagedAllowedTools={(tools) => setStagedAllowedTools(tools)}
           selectedAgentId={selectedAgentId}
           selectedAgentLabel={selectedAgent?.name}
-          onSelectAgent={handleSelectAgent}
+                  onUpdateStagedAllowedTools={handleUpdateStagedAllowedTools}
         />
 
         <Messages
@@ -347,44 +403,8 @@ export function Chat({
           isArtifactVisible={isArtifactVisible}
           isReadonly={isReadonly}
           messages={messages}
-          onRegenerateAssistant={async (assistantMessageId: string) => {
-            if (isForking) return; // guard against double clicks
-            setIsForking(true);
-            toast({ type: 'success', description: 'Forking chat…' });
-            try {
-              const match = window.location.pathname.match(/\/chat\/(.+)$/);
-              if (!match) throw new Error('Cannot infer current chat id');
-              const currentChatId = match[1];
-              const { forkChatAction } = await import('@/app/(chat)/actions');
-              const result: any = await forkChatAction({
-                sourceChatId: currentChatId,
-                pivotMessageId: assistantMessageId,
-                mode: 'regenerate',
-              });
-              if (!result?.newChatId) {
-                throw new Error('Fork action did not return newChatId');
-              }
-              // Invalidate chat history query so sidebar updates with new chat
-              queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
-              // Refetch again after title generation completes (async operation)
-              setTimeout(() => {
-                queryClient.invalidateQueries({
-                  queryKey: ['chat', 'history'],
-                });
-              }, 8000);
-              requestAnimationFrame(() => {
-                router.push(`/chat/${result.newChatId}?regenerate=true`);
-              });
-            } catch (e) {
-              console.error('Regenerate fork failed', e);
-              toast({
-                type: 'error',
-                description: (e as Error).message || 'Failed to fork chat',
-              });
-              setIsForking(false);
-            }
-          }}
-          selectedModelId={initialChatModel}
+          onRegenerateAssistant={handleForkRegenerate}
+          selectedModelId={currentModelId}
           status={status}
           votes={votes}
           disableRegenerate={isForking}
@@ -411,37 +431,37 @@ export function Chat({
             />
           )}
         </div>
-      </div>
 
-      {isForking && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center bg-gradient-to-t from-background/80 via-background/20 to-transparent p-6">
-          <div className="flex items-center gap-2 rounded-full border bg-background/90 px-4 py-2 text-sm shadow-lg backdrop-blur-md">
-            <span className="relative inline-flex h-4 w-4">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-40" />
-              <span className="relative inline-flex h-4 w-4 rounded-full bg-primary" />
-            </span>
-            <span>Creating fork…</span>
+        {isForking && (
+          <div className="pointer-events-none fixed inset-0 z-50 flex items-end justify-center bg-gradient-to-t from-background/80 via-background/20 to-transparent p-6">
+            <div className="flex items-center gap-2 rounded-full border bg-background/90 px-4 py-2 text-sm shadow-lg backdrop-blur-md">
+              <span className="relative inline-flex h-4 w-4">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-40" />
+                <span className="relative inline-flex h-4 w-4 rounded-full bg-primary" />
+              </span>
+              <span>Creating fork…</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <Artifact
-        attachments={attachments}
-        chatId={id}
-        input={input}
-        isReadonly={isReadonly}
-        messages={messages}
-        selectedModelId={currentModelId}
-        selectedVisibilityType={visibilityType}
-        sendMessage={sendMessage}
-        setAttachments={setAttachments}
-        setInput={setInput}
-        setMessages={setMessages}
-        status={status}
-        stop={stop}
-        votes={votes}
-        allowedModelIds={allowedModelIds}
-      />
+        <Artifact
+          attachments={attachments}
+          chatId={id}
+          input={input}
+          isReadonly={isReadonly}
+          messages={messages}
+          selectedModelId={currentModelId}
+          selectedVisibilityType={visibilityType}
+          sendMessage={sendMessage}
+          setAttachments={setAttachments}
+          setInput={setInput}
+          setMessages={setMessages}
+          status={status}
+          stop={stop}
+          votes={votes}
+          allowedModelIds={allowedModelIds}
+        />
+      </div>
     </>
   );
 }
