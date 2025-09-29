@@ -426,7 +426,7 @@ const PureToolbar = ({
         ref={toolbarRef}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
-        {status === 'streaming' ? (
+        {status === 'submitted' || status === 'streaming' ? (
           <motion.div
             animate={{ scale: 1.4 }}
             className="p-3"

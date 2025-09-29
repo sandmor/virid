@@ -423,6 +423,7 @@ export async function POST(request: Request) {
             isEnabled: isProductionEnvironment,
             functionId: 'stream-text',
           },
+          abortSignal: request.signal,
           onFinish: async ({ usage }) => {
             try {
               const providers = await getTokenlensCatalog();
