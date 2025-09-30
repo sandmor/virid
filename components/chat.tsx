@@ -129,7 +129,10 @@ export function Chat({
   }, [selectedAgent?.id]);
 
   const handleSelectAgent = useCallback(
-    async (agent: AgentPreset | null, options?: { userInitiated?: boolean }) => {
+    async (
+      agent: AgentPreset | null,
+      options?: { userInitiated?: boolean }
+    ) => {
       const userInitiated = options?.userInitiated ?? false;
       const newAgentId = agent?.id ?? null;
       if (selectedAgentId === newAgentId) return;
@@ -157,7 +160,9 @@ export function Chat({
         }
 
         const settings = (agent?.settings ?? null) as ChatSettings | null;
-        setStagedPinnedSlugs(normalizePinnedEntries(settings?.pinnedEntries ?? []));
+        setStagedPinnedSlugs(
+          normalizePinnedEntries(settings?.pinnedEntries ?? [])
+        );
         setStagedAllowedTools(normalizeAllowedTools(settings?.tools?.allow));
       } catch (error) {
         console.error('Failed to update chat agent', error);
@@ -349,7 +354,10 @@ export function Chat({
         });
       } catch (e) {
         console.error('Regenerate fork failed', e);
-        toast({ type: 'error', description: (e as Error).message || 'Failed to fork chat' });
+        toast({
+          type: 'error',
+          description: (e as Error).message || 'Failed to fork chat',
+        });
         setIsForking(false);
       }
     },
@@ -357,23 +365,29 @@ export function Chat({
   );
 
   const handleAddStagedPin = useCallback((slug: string) => {
-    setStagedPinnedSlugs((prev) => (prev.includes(slug) ? prev : [...prev, slug]));
+    setStagedPinnedSlugs((prev) =>
+      prev.includes(slug) ? prev : [...prev, slug]
+    );
   }, []);
 
   const handleRemoveStagedPin = useCallback((slug: string) => {
     setStagedPinnedSlugs((prev) => prev.filter((s) => s !== slug));
   }, []);
 
-  const handleUpdateStagedAllowedTools = useCallback((tools: string[] | undefined) => {
-    setStagedAllowedTools(tools);
-  }, []);
+  const handleUpdateStagedAllowedTools = useCallback(
+    (tools: string[] | undefined) => {
+      setStagedAllowedTools(tools);
+    },
+    []
+  );
 
   useEffect(() => {
     if (!chatError) return;
     // Use project's toast with Retry/Dismiss actions following color schema
     toast({
       type: 'error',
-      description: chatError.message || 'An error occurred while generating the response.',
+      description:
+        chatError.message || 'An error occurred while generating the response.',
       actions: [
         { label: 'Retry', onClick: handleRetryOnError, primary: true },
         { label: 'Dismiss', onClick: handleDismissError },
@@ -395,7 +409,7 @@ export function Chat({
           chatHasStarted={chatHasStartedRef.current}
           selectedAgentId={selectedAgentId}
           selectedAgentLabel={selectedAgent?.name}
-                  onUpdateStagedAllowedTools={handleUpdateStagedAllowedTools}
+          onUpdateStagedAllowedTools={handleUpdateStagedAllowedTools}
         />
 
         <Messages

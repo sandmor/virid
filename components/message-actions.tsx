@@ -119,10 +119,7 @@ export function PureMessageActions({
       <Actions className="-mr-0.5 justify-end">
         <div className="relative">
           {setMode && (
-            <Action
-              onClick={() => setMode('edit')}
-              tooltip="Edit"
-            >
+            <Action onClick={() => setMode('edit')} tooltip="Edit">
               <Pencil size={16} />
             </Action>
           )}

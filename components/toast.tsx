@@ -16,7 +16,9 @@ export type ToastAction = {
   primary?: boolean;
 };
 
-export function toast(props: Omit<ToastProps, 'id'> & { actions?: ToastAction[] }) {
+export function toast(
+  props: Omit<ToastProps, 'id'> & { actions?: ToastAction[] }
+) {
   return sonnerToast.custom((id) => (
     <Toast
       description={props.description}
