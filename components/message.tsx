@@ -35,6 +35,11 @@ const PurePreviewMessage = ({
   requiresScrollPadding,
   onRegenerateAssistant,
   disableRegenerate,
+  onDeleteMessage,
+  onDeleteMessageCascade,
+  onToggleSelectMessage,
+  isSelected,
+  isSelectionMode,
 }: {
   chatId: string;
   message: ChatMessage;
@@ -44,6 +49,13 @@ const PurePreviewMessage = ({
   requiresScrollPadding: boolean;
   onRegenerateAssistant?: (assistantMessageId: string) => void;
   disableRegenerate?: boolean;
+  onDeleteMessage?: (messageId: string) => Promise<{ chatDeleted: boolean }>;
+  onDeleteMessageCascade?: (
+    messageId: string
+  ) => Promise<{ chatDeleted: boolean }>;
+  onToggleSelectMessage?: (messageId: string) => void;
+  isSelected?: boolean;
+  isSelectionMode?: boolean;
 }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
 
@@ -498,6 +510,11 @@ const PurePreviewMessage = ({
               vote={vote}
               onRegenerate={onRegenerateAssistant}
               disableRegenerate={disableRegenerate}
+              onDelete={onDeleteMessage}
+              onDeleteCascade={onDeleteMessageCascade}
+              onToggleSelect={onToggleSelectMessage}
+              isSelected={Boolean(isSelected)}
+              isSelectionMode={Boolean(isSelectionMode)}
               modelBadge={
                 message.role === 'assistant' && message.metadata?.model ? (
                   <span className="rounded-full bg-muted/30 px-2 py-0.5 text-sm font-medium text-muted-foreground">
@@ -542,6 +559,10 @@ export const PreviewMessage = memo(
     )
       return false;
     if (prevProps.message.metadata?.model !== nextProps.message.metadata?.model)
+      return false;
+    if (prevProps.isSelected !== nextProps.isSelected) return false;
+    if (prevProps.isSelectionMode !== nextProps.isSelectionMode) return false;
+    if (prevProps.onToggleSelectMessage !== nextProps.onToggleSelectMessage)
       return false;
 
     // otherwise skip rerender

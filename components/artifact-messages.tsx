@@ -15,6 +15,13 @@ type ArtifactMessagesProps = {
   messages: ChatMessage[];
   isReadonly: boolean;
   artifactStatus: UIArtifact['status'];
+  onDeleteMessage?: (messageId: string) => Promise<{ chatDeleted: boolean }>;
+  onDeleteMessageCascade?: (
+    messageId: string
+  ) => Promise<{ chatDeleted: boolean }>;
+  onToggleSelectMessage?: (messageId: string) => void;
+  selectedMessageIds: Set<string>;
+  isSelectionMode: boolean;
 };
 
 function PureArtifactMessages({
@@ -23,6 +30,11 @@ function PureArtifactMessages({
   votes,
   messages,
   isReadonly,
+  onDeleteMessage,
+  onDeleteMessageCascade,
+  onToggleSelectMessage,
+  selectedMessageIds,
+  isSelectionMode,
 }: ArtifactMessagesProps) {
   const {
     containerRef: messagesContainerRef,
@@ -49,6 +61,11 @@ function PureArtifactMessages({
           requiresScrollPadding={
             hasSentMessage && index === messages.length - 1
           }
+          onDeleteMessage={onDeleteMessage}
+          onDeleteMessageCascade={onDeleteMessageCascade}
+          onToggleSelectMessage={onToggleSelectMessage}
+          isSelected={selectedMessageIds.has(message.id)}
+          isSelectionMode={isSelectionMode}
           vote={
             votes
               ? votes.find((vote) => vote.messageId === message.id)
@@ -80,6 +97,22 @@ function areEqual(
     nextProps.artifactStatus === 'streaming'
   ) {
     return true;
+  }
+
+  if (prevProps.onDeleteMessage !== nextProps.onDeleteMessage) {
+    return false;
+  }
+  if (prevProps.onDeleteMessageCascade !== nextProps.onDeleteMessageCascade) {
+    return false;
+  }
+  if (prevProps.onToggleSelectMessage !== nextProps.onToggleSelectMessage) {
+    return false;
+  }
+  if (prevProps.isSelectionMode !== nextProps.isSelectionMode) {
+    return false;
+  }
+  if (prevProps.selectedMessageIds !== nextProps.selectedMessageIds) {
+    return false;
   }
 
   if (prevProps.status !== nextProps.status) {

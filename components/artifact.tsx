@@ -62,12 +62,17 @@ function PureArtifact({
   setAttachments,
   sendMessage,
   messages,
+  onDeleteMessage,
+  onDeleteMessageCascade,
   setMessages,
   votes,
   isReadonly,
   selectedVisibilityType,
   selectedModelId,
   allowedModelIds,
+  onToggleSelectMessage,
+  selectedMessageIds,
+  isSelectionMode,
 }: {
   chatId: string;
   input: string;
@@ -77,6 +82,10 @@ function PureArtifact({
   attachments: Attachment[];
   setAttachments: Dispatch<SetStateAction<Attachment[]>>;
   messages: ChatMessage[];
+  onDeleteMessage: (messageId: string) => Promise<{ chatDeleted: boolean }>;
+  onDeleteMessageCascade: (
+    messageId: string
+  ) => Promise<{ chatDeleted: boolean }>;
   setMessages: UseChatHelpers<ChatMessage>['setMessages'];
   votes: Vote[] | undefined;
   sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
@@ -84,6 +93,9 @@ function PureArtifact({
   selectedVisibilityType: VisibilityType;
   selectedModelId: string;
   allowedModelIds: string[];
+  onToggleSelectMessage?: (messageId: string) => void;
+  selectedMessageIds: Set<string>;
+  isSelectionMode: boolean;
 }) {
   const { artifact, setArtifact, metadata, setMetadata } = useArtifact();
 
@@ -324,6 +336,11 @@ function PureArtifact({
                   chatId={chatId}
                   isReadonly={isReadonly}
                   messages={messages}
+                  onDeleteMessage={onDeleteMessage}
+                  onDeleteMessageCascade={onDeleteMessageCascade}
+                  onToggleSelectMessage={onToggleSelectMessage}
+                  selectedMessageIds={selectedMessageIds}
+                  isSelectionMode={isSelectionMode}
                   status={status}
                   votes={votes}
                 />
@@ -511,13 +528,25 @@ export const Artifact = memo(PureArtifact, (prevProps, nextProps) => {
   if (prevProps.status !== nextProps.status) {
     return false;
   }
+  if (prevProps.onDeleteMessage !== nextProps.onDeleteMessage) {
+    return false;
+  }
+  if (prevProps.onDeleteMessageCascade !== nextProps.onDeleteMessageCascade) {
+    return false;
+  }
+  if (prevProps.isSelectionMode !== nextProps.isSelectionMode) {
+    return false;
+  }
+  if (prevProps.selectedMessageIds !== nextProps.selectedMessageIds) {
+    return false;
+  }
   if (!equal(prevProps.votes, nextProps.votes)) {
     return false;
   }
   if (prevProps.input !== nextProps.input) {
     return false;
   }
-  if (!equal(prevProps.messages, nextProps.messages.length)) {
+  if (!equal(prevProps.messages, nextProps.messages)) {
     return false;
   }
   if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) {

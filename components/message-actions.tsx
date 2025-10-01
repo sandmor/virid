@@ -1,12 +1,33 @@
 import equal from 'fast-deep-equal';
-import { memo } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCopyToClipboard } from 'usehooks-ts';
 import type { Vote } from '@/lib/db/schema';
 import type { ChatMessage } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import { Action, Actions } from './elements/actions';
-import { Copy, Pencil, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
+import {
+  Copy,
+  Pencil,
+  ThumbsUp,
+  ThumbsDown,
+  RotateCcw,
+  Trash2,
+} from 'lucide-react';
+import { ChatSDKError } from '@/lib/errors';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { buttonVariants } from '@/components/ui/button';
 
 export function PureMessageActions({
   chatId,
@@ -17,6 +38,11 @@ export function PureMessageActions({
   onRegenerate,
   disableRegenerate,
   modelBadge,
+  onDelete,
+  onDeleteCascade,
+  onToggleSelect,
+  isSelected,
+  isSelectionMode,
 }: {
   chatId: string;
   message: ChatMessage;
@@ -26,9 +52,15 @@ export function PureMessageActions({
   onRegenerate?: (assistantMessageId: string) => void;
   disableRegenerate?: boolean;
   modelBadge?: React.ReactNode;
+  onDelete?: (messageId: string) => Promise<{ chatDeleted: boolean }>;
+  onDeleteCascade?: (messageId: string) => Promise<{ chatDeleted: boolean }>;
+  onToggleSelect?: (messageId: string) => void;
+  isSelected?: boolean;
+  isSelectionMode?: boolean;
 }) {
   const queryClient = useQueryClient();
   const voteQueryKey = ['chat', 'votes', chatId];
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const upvoteMutation = useMutation({
     mutationFn: async () => {
@@ -93,9 +125,46 @@ export function PureMessageActions({
   });
   const [_, copyToClipboard] = useCopyToClipboard();
 
-  if (isLoading) {
-    return null;
-  }
+  type DeleteMode = 'single' | 'cascade';
+
+  const deleteMutation = useMutation<
+    { chatDeleted: boolean },
+    ChatSDKError | Error,
+    { mode: DeleteMode }
+  >({
+    mutationFn: async ({ mode }) => {
+      if (mode === 'single') {
+        if (!onDelete) {
+          throw new ChatSDKError('bad_request:api');
+        }
+        const result = await onDelete(message.id);
+        return result ?? { chatDeleted: false };
+      }
+
+      if (!onDeleteCascade) {
+        throw new ChatSDKError('bad_request:api');
+      }
+
+      const result = await onDeleteCascade(message.id);
+      return result ?? { chatDeleted: false };
+    },
+    onError: (error) => {
+      if (error instanceof ChatSDKError) {
+        toast.error(error.message);
+        return;
+      }
+      toast.error('Failed to delete message.');
+    },
+    onSuccess: (data, variables) => {
+      const successDescription = data?.chatDeleted
+        ? 'Chat deleted.'
+        : variables.mode === 'cascade'
+          ? 'Messages deleted.'
+          : 'Message deleted.';
+      toast.success(successDescription);
+      setIsDeleteDialogOpen(false);
+    },
+  });
 
   const textFromParts = message.parts
     ?.filter((part) => part.type === 'text')
@@ -113,11 +182,113 @@ export function PureMessageActions({
     toast.success('Copied to clipboard!');
   };
 
+  const handleDelete = useCallback(
+    (mode: DeleteMode) => {
+      deleteMutation.mutate({ mode });
+    },
+    [deleteMutation]
+  );
+
+  const SelectionIndicator = ({ checked }: { checked: boolean }) => (
+    <span
+      aria-hidden="true"
+      className={cn(
+        'block h-4 w-4 rounded-[4px] border transition-colors',
+        checked
+          ? 'border-primary bg-primary'
+          : 'border-muted-foreground/40 bg-transparent'
+      )}
+    />
+  );
+
+  const handleDeleteDialogToggle = useCallback(
+    (open: boolean) => {
+      if (deleteMutation.isPending) {
+        return;
+      }
+      setIsDeleteDialogOpen(open);
+    },
+    [deleteMutation.isPending]
+  );
+
+  const renderDeleteAction = () => {
+    if (!onDelete) {
+      return null;
+    }
+
+    return (
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={handleDeleteDialogToggle}
+      >
+        <AlertDialogTrigger asChild>
+          <Action
+            disabled={deleteMutation.isPending}
+            tooltip={deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+          >
+            <Trash2 size={16} />
+          </Action>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete message?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Choose whether to delete only this message or remove it along with
+              every following message in the thread.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:flex-row">
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={cn(buttonVariants({ variant: 'secondary' }))}
+              disabled={deleteMutation.isPending}
+              onClick={(event) => {
+                event.preventDefault();
+                handleDelete('single');
+              }}
+            >
+              Delete only this
+            </AlertDialogAction>
+            <AlertDialogAction
+              className={cn(buttonVariants({ variant: 'destructive' }))}
+              disabled={deleteMutation.isPending || !onDeleteCascade}
+              onClick={(event) => {
+                event.preventDefault();
+                if (!onDeleteCascade) {
+                  return;
+                }
+                handleDelete('cascade');
+              }}
+            >
+              Delete this & following
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  };
+
+  if (isLoading) {
+    return null;
+  }
+
   // User messages get edit (on hover) and copy actions
   if (message.role === 'user') {
     return (
       <Actions className="-mr-0.5 justify-end">
         <div className="relative">
+          {onToggleSelect && (
+            <Action
+              aria-pressed={isSelected}
+              onClick={() => onToggleSelect(message.id)}
+              tooltip={isSelected ? 'Deselect' : 'Select'}
+            >
+              <SelectionIndicator checked={Boolean(isSelected)} />
+            </Action>
+          )}
+          {renderDeleteAction()}
           {setMode && (
             <Action onClick={() => setMode('edit')} tooltip="Edit">
               <Pencil size={16} />
@@ -136,6 +307,16 @@ export function PureMessageActions({
       <Actions>
         <div className="relative">
           {/* Primary actions: Copy, Upvote, Downvote */}
+          {onToggleSelect && (
+            <Action
+              aria-pressed={isSelected}
+              onClick={() => onToggleSelect(message.id)}
+              tooltip={isSelected ? 'Deselect' : 'Select'}
+            >
+              <SelectionIndicator checked={Boolean(isSelected)} />
+            </Action>
+          )}
+          {renderDeleteAction()}
           <Action onClick={handleCopy} tooltip="Copy">
             <Copy size={16} />
           </Action>
@@ -190,6 +371,21 @@ export function PureMessageActions({
 export const MessageActions = memo(
   PureMessageActions,
   (prevProps, nextProps) => {
+    if (prevProps.onDelete !== nextProps.onDelete) {
+      return false;
+    }
+    if (prevProps.onDeleteCascade !== nextProps.onDeleteCascade) {
+      return false;
+    }
+    if (prevProps.onToggleSelect !== nextProps.onToggleSelect) {
+      return false;
+    }
+    if (prevProps.isSelected !== nextProps.isSelected) {
+      return false;
+    }
+    if (prevProps.isSelectionMode !== nextProps.isSelectionMode) {
+      return false;
+    }
     if (!equal(prevProps.vote, nextProps.vote)) {
       return false;
     }

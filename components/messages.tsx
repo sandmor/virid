@@ -20,6 +20,13 @@ type MessagesProps = {
   selectedModelId: string;
   onRegenerateAssistant?: (assistantMessageId: string) => void;
   disableRegenerate?: boolean;
+  onDeleteMessage: (messageId: string) => Promise<{ chatDeleted: boolean }>;
+  onDeleteMessageCascade?: (
+    messageId: string
+  ) => Promise<{ chatDeleted: boolean }>;
+  onToggleSelectMessage?: (messageId: string) => void;
+  selectedMessageIds: Set<string>;
+  isSelectionMode: boolean;
 };
 
 function PureMessages({
@@ -28,6 +35,11 @@ function PureMessages({
   votes,
   messages,
   isReadonly,
+  onDeleteMessage,
+  onDeleteMessageCascade,
+  onToggleSelectMessage,
+  selectedMessageIds,
+  isSelectionMode,
   onRegenerateAssistant,
   disableRegenerate,
 }: MessagesProps) {
@@ -79,6 +91,11 @@ function PureMessages({
               requiresScrollPadding={
                 hasSentMessage && index === messages.length - 1
               }
+              onDeleteMessage={onDeleteMessage}
+              onDeleteMessageCascade={onDeleteMessageCascade}
+              onToggleSelectMessage={onToggleSelectMessage}
+              isSelected={selectedMessageIds.has(message.id)}
+              isSelectionMode={isSelectionMode}
               onRegenerateAssistant={onRegenerateAssistant}
               vote={
                 votes
@@ -120,6 +137,14 @@ export const Messages = memo(PureMessages, (prevProps, nextProps) => {
     return false;
   }
 
+  if (prevProps.onDeleteMessage !== nextProps.onDeleteMessage) return false;
+  if (prevProps.onDeleteMessageCascade !== nextProps.onDeleteMessageCascade)
+    return false;
+  if (prevProps.onToggleSelectMessage !== nextProps.onToggleSelectMessage)
+    return false;
+  if (prevProps.isSelectionMode !== nextProps.isSelectionMode) return false;
+  if (prevProps.selectedMessageIds !== nextProps.selectedMessageIds)
+    return false;
   if (prevProps.status !== nextProps.status) return false;
   if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
   if (prevProps.messages.length !== nextProps.messages.length) return false;

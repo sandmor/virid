@@ -1188,6 +1188,162 @@ export async function deleteMessagesByChatIdAfterTimestamp({
   }
 }
 
+export async function deleteMessageById({
+  chatId,
+  messageId,
+  userId,
+}: {
+  chatId: string;
+  messageId: string;
+  userId: string;
+}) {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const message = await tx.message.findUnique({
+        where: { id: messageId },
+        select: {
+          id: true,
+          chatId: true,
+          chat: {
+            select: {
+              userId: true,
+            },
+          },
+        },
+      });
+
+      if (!message) {
+        throw new ChatSDKError('not_found:database', 'Message not found');
+      }
+
+      if (message.chatId !== chatId) {
+        throw new ChatSDKError(
+          'forbidden:database',
+          'Message does not belong to the specified chat'
+        );
+      }
+
+      if (message.chat.userId !== userId) {
+        throw new ChatSDKError(
+          'forbidden:database',
+          'Chat ownership mismatch when deleting message'
+        );
+      }
+
+      await tx.vote.deleteMany({
+        where: { chatId, messageId },
+      });
+
+      await tx.message.delete({ where: { id: messageId } });
+
+      const remainingMessages = await tx.message.count({
+        where: { chatId },
+      });
+
+      if (remainingMessages === 0) {
+        await tx.vote.deleteMany({ where: { chatId } });
+        await tx.stream.deleteMany({ where: { chatId } });
+        await tx.chat.delete({ where: { id: chatId } });
+
+        return { messageId, chatId, chatDeleted: true } as const;
+      }
+
+      return { messageId, chatId, chatDeleted: false } as const;
+    });
+  } catch (error) {
+    if (error instanceof ChatSDKError) {
+      throw error;
+    }
+    throw new ChatSDKError('bad_request:database', 'Failed to delete message');
+  }
+}
+
+export async function deleteMessagesByIds({
+  chatId,
+  messageIds,
+  userId,
+}: {
+  chatId: string;
+  messageIds: string[];
+  userId: string;
+}) {
+  if (!messageIds.length) {
+    return { deleted: 0 as const, chatDeleted: false as const } as const;
+  }
+
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const messages = await tx.message.findMany({
+        where: { id: { in: messageIds } },
+        select: {
+          id: true,
+          chatId: true,
+          chat: {
+            select: {
+              userId: true,
+            },
+          },
+        },
+      });
+
+      if (messages.length !== messageIds.length) {
+        throw new ChatSDKError(
+          'not_found:database',
+          'One or more messages missing'
+        );
+      }
+
+      for (const message of messages) {
+        if (message.chatId !== chatId) {
+          throw new ChatSDKError(
+            'forbidden:database',
+            'Message does not belong to the specified chat'
+          );
+        }
+        if (message.chat.userId !== userId) {
+          throw new ChatSDKError(
+            'forbidden:database',
+            'Chat ownership mismatch when deleting messages'
+          );
+        }
+      }
+
+      await tx.vote.deleteMany({
+        where: { chatId, messageId: { in: messageIds } },
+      });
+
+      const deleted = await tx.message.deleteMany({
+        where: { id: { in: messageIds } },
+      });
+
+      const remainingMessages = await tx.message.count({
+        where: { chatId },
+      });
+
+      if (remainingMessages === 0) {
+        await tx.vote.deleteMany({ where: { chatId } });
+        await tx.stream.deleteMany({ where: { chatId } });
+        await tx.chat.delete({ where: { id: chatId } });
+
+        return {
+          deleted: deleted.count as const,
+          chatDeleted: true as const,
+        } as const;
+      }
+
+      return {
+        deleted: deleted.count as const,
+        chatDeleted: false as const,
+      } as const;
+    });
+  } catch (error) {
+    if (error instanceof ChatSDKError) {
+      throw error;
+    }
+    throw new ChatSDKError('bad_request:database', 'Failed to delete messages');
+  }
+}
+
 export async function updateChatVisiblityById({
   chatId,
   visibility,

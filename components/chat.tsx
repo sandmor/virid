@@ -3,7 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChatHeader } from '@/components/chat-header';
 import { useArtifactSelector } from '@/hooks/use-artifact';
@@ -25,6 +25,7 @@ import {
   normalizeAllowedTools,
   normalizePinnedEntries,
 } from '@/lib/agent-settings';
+import { Button } from './ui/button';
 
 export function Chat({
   id,
@@ -253,6 +254,11 @@ export function Chat({
   const regenerateParam = searchParams.get('regenerate');
   const initialQueryHandledRef = useRef(false);
   const initialRegenerateHandledRef = useRef(false);
+  const messagesRef = useRef<ChatMessage[]>(messages);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // Single-run initial query injection (forked edit path)
   useEffect(() => {
@@ -298,6 +304,159 @@ export function Chat({
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
+  const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
+  const selectedMessageIdsRef = useRef<string[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const chatDeletedRef = useRef(false);
+
+  const selectionSet = useMemo(
+    () => new Set(selectedMessageIds),
+    [selectedMessageIds]
+  );
+  const isSelectionMode = !isReadonly && selectedMessageIds.length > 0;
+
+  useEffect(() => {
+    selectedMessageIdsRef.current = selectedMessageIds;
+  }, [selectedMessageIds]);
+
+  const handleChatDeleted = useCallback(() => {
+    if (chatDeletedRef.current) {
+      return;
+    }
+
+    chatDeletedRef.current = true;
+    setSelectedMessageIds([]);
+    setAttachments([]);
+    router.replace('/chat');
+    queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
+  }, [queryClient, router]);
+
+  const handleDeleteMessage = useCallback(
+    async (messageId: string) => {
+      let previousMessages: ChatMessage[] = [];
+      let previousSelection: string[] = [];
+      setMessages((current) => {
+        previousMessages = current;
+        return current.filter((message) => message.id !== messageId);
+      });
+      setSelectedMessageIds((current) => {
+        previousSelection = [...current];
+        if (!current.length) return current;
+        return current.filter((id) => id !== messageId);
+      });
+
+      try {
+        const response = await fetchWithErrorHandlers(
+          `/api/chat/${id}/messages/${messageId}`,
+          {
+            method: 'DELETE',
+          }
+        );
+
+        const payload = await response.json().catch(() => null);
+        const chatDeleted = Boolean(payload?.chatDeleted);
+
+        queryClient.setQueryData<Vote[] | undefined>(
+          ['chat', 'votes', id],
+          (current) =>
+            current
+              ? current.filter((vote) => vote.messageId !== messageId)
+              : current
+        );
+
+        if (chatDeleted || messagesRef.current.length === 0) {
+          handleChatDeleted();
+          return { chatDeleted: true } as const;
+        }
+
+        return { chatDeleted: false } as const;
+      } catch (error) {
+        setMessages(previousMessages);
+        setSelectedMessageIds(previousSelection);
+        throw error;
+      }
+    },
+    [handleChatDeleted, id, queryClient, setMessages]
+  );
+
+  const handleDeleteMessageCascade = useCallback(
+    async (messageId: string) => {
+      if (isReadonly) {
+        return { chatDeleted: false } as const;
+      }
+
+      const currentMessages = messagesRef.current;
+      const startIndex = currentMessages.findIndex(
+        (message) => message.id === messageId
+      );
+
+      if (startIndex === -1) {
+        return { chatDeleted: false } as const;
+      }
+
+      const idsToDelete = currentMessages
+        .slice(startIndex)
+        .map((message) => message.id);
+
+      if (idsToDelete.length <= 1) {
+        return handleDeleteMessage(messageId);
+      }
+
+      let previousMessages: ChatMessage[] = [];
+      let previousSelection: string[] = [];
+
+      setMessages((current) => {
+        previousMessages = current;
+        return current.filter((message) => !idsToDelete.includes(message.id));
+      });
+
+      setSelectedMessageIds((current) => {
+        previousSelection = [...current];
+        if (!current.length) return current;
+        return current.filter((id) => !idsToDelete.includes(id));
+      });
+
+      try {
+        const response = await fetchWithErrorHandlers(
+          `/api/chat/${id}/messages`,
+          {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messageIds: idsToDelete }),
+          }
+        );
+        const payload = await response.json().catch(() => null);
+        const chatDeleted = Boolean(payload?.chatDeleted);
+
+        queryClient.setQueryData<Vote[] | undefined>(
+          ['chat', 'votes', id],
+          (current) =>
+            current
+              ? current.filter((vote) => !idsToDelete.includes(vote.messageId))
+              : current
+        );
+
+        if (chatDeleted || messagesRef.current.length === 0) {
+          handleChatDeleted();
+          return { chatDeleted: true } as const;
+        }
+
+        return { chatDeleted: false } as const;
+      } catch (error) {
+        setMessages(previousMessages);
+        setSelectedMessageIds(previousSelection);
+        throw error;
+      }
+    },
+    [
+      handleChatDeleted,
+      handleDeleteMessage,
+      id,
+      isReadonly,
+      queryClient,
+      setMessages,
+    ]
+  );
 
   // Suppress auto-resume when a query injection or regeneration is pending to avoid duplicate stream starts
   const effectiveAutoResume =
@@ -326,6 +485,76 @@ export function Chat({
   const handleDismissError = useCallback(() => {
     if (clearChatError) clearChatError();
   }, [clearChatError]);
+
+  const handleToggleSelectMessage = useCallback(
+    (messageId: string) => {
+      if (isReadonly) return;
+      setSelectedMessageIds((current) => {
+        if (current.includes(messageId)) {
+          return current.filter((id) => id !== messageId);
+        }
+        return [...current, messageId];
+      });
+    },
+    [isReadonly]
+  );
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedMessageIds([]);
+  }, []);
+
+  const handleDeleteSelected = useCallback(async () => {
+    if (isReadonly) return;
+    const ids = selectedMessageIdsRef.current;
+    if (!ids.length) return;
+
+    setIsBulkDeleting(true);
+    let previousMessages: ChatMessage[] = [];
+    setMessages((current) => {
+      previousMessages = current;
+      return current.filter((message) => !ids.includes(message.id));
+    });
+
+    try {
+      const response = await fetchWithErrorHandlers(
+        `/api/chat/${id}/messages`,
+        {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageIds: ids }),
+        }
+      );
+
+      const payload = await response.json().catch(() => null);
+      const chatDeleted = Boolean(payload?.chatDeleted);
+
+      queryClient.setQueryData<Vote[] | undefined>(
+        ['chat', 'votes', id],
+        (current) =>
+          current
+            ? current.filter((vote) => !ids.includes(vote.messageId))
+            : current
+      );
+
+      setSelectedMessageIds([]);
+
+      if (chatDeleted || messagesRef.current.length === 0) {
+        toast({ type: 'success', description: 'Chat deleted.' });
+        handleChatDeleted();
+      } else {
+        toast({ type: 'success', description: 'Messages deleted.' });
+      }
+    } catch (error) {
+      setMessages(previousMessages);
+      if (error instanceof ChatSDKError) {
+        toast({ type: 'error', description: error.message });
+      } else {
+        toast({ type: 'error', description: 'Failed to delete messages.' });
+      }
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  }, [handleChatDeleted, id, isReadonly, queryClient, setMessages]);
 
   const handleForkRegenerate = useCallback(
     async (assistantMessageId: string) => {
@@ -417,6 +646,13 @@ export function Chat({
           isArtifactVisible={isArtifactVisible}
           isReadonly={isReadonly}
           messages={messages}
+          onDeleteMessage={handleDeleteMessage}
+          onDeleteMessageCascade={handleDeleteMessageCascade}
+          onToggleSelectMessage={
+            !isReadonly ? handleToggleSelectMessage : undefined
+          }
+          selectedMessageIds={selectionSet}
+          isSelectionMode={isSelectionMode}
           onRegenerateAssistant={handleForkRegenerate}
           selectedModelId={currentModelId}
           status={status}
@@ -424,7 +660,34 @@ export function Chat({
           disableRegenerate={isForking}
         />
 
-        <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
+        {isSelectionMode && (
+          <div className="sticky bottom-[106px] z-20 w-full border-t border-border bg-background/95 shadow-sm">
+            <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 text-sm">
+              <span className="font-medium">
+                {selectedMessageIds.length} message
+                {selectedMessageIds.length === 1 ? '' : 's'} selected
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleClearSelection}
+                  variant="outline"
+                  disabled={isBulkDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDeleteSelected}
+                  variant="destructive"
+                  disabled={isBulkDeleting}
+                >
+                  {isBulkDeleting ? 'Deleting…' : 'Delete selected'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="sticky bottom-0 z-10 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
           {!isReadonly && (
             <MultimodalInput
               attachments={attachments}
@@ -464,6 +727,13 @@ export function Chat({
           input={input}
           isReadonly={isReadonly}
           messages={messages}
+          onDeleteMessage={handleDeleteMessage}
+          onDeleteMessageCascade={handleDeleteMessageCascade}
+          onToggleSelectMessage={
+            !isReadonly ? handleToggleSelectMessage : undefined
+          }
+          selectedMessageIds={selectionSet}
+          isSelectionMode={isSelectionMode}
           selectedModelId={currentModelId}
           selectedVisibilityType={visibilityType}
           sendMessage={sendMessage}
