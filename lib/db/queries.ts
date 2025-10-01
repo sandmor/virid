@@ -1326,14 +1326,14 @@ export async function deleteMessagesByIds({
         await tx.chat.delete({ where: { id: chatId } });
 
         return {
-          deleted: deleted.count as const,
-          chatDeleted: true as const,
+          deleted: deleted.count,
+          chatDeleted: true,
         } as const;
       }
 
       return {
-        deleted: deleted.count as const,
-        chatDeleted: false as const,
+        deleted: deleted.count,
+        chatDeleted: false,
       } as const;
     });
   } catch (error) {
