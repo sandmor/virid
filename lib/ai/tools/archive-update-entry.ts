@@ -54,9 +54,62 @@ const canonicalSchema = z
     }
   });
 
-// Extremely lenient outer schema: accept any object (the model can send natural variants)
+const slugLikeValue = z.union([z.string(), z.number()]);
+const stringLikeValue = z.union([z.string(), z.number(), z.boolean()]);
+const stringOrStringArrayValue = z.union([
+  stringLikeValue,
+  z.array(stringLikeValue),
+]);
+
+// Extremely lenient outer schema with explicit properties to satisfy OpenAI function schema
 const rawInputSchema = z
-  .record(z.string(), z.any())
+  .object({
+    slug: slugLikeValue
+      .describe('Slug identifier for the entry (aliases accepted)')
+      .optional(),
+    id: slugLikeValue.optional(),
+    entry: slugLikeValue.optional(),
+    file: slugLikeValue.optional(),
+    targetSlug: slugLikeValue.optional(),
+    identifier: slugLikeValue.optional(),
+    newEntity: stringLikeValue.optional(),
+    entity: stringLikeValue.optional(),
+    title: stringLikeValue.optional(),
+    name: stringLikeValue.optional(),
+    rename: z
+      .union([
+        stringLikeValue,
+        z
+          .object({
+            to: stringLikeValue.optional(),
+            from: stringLikeValue.optional(),
+          })
+          .passthrough(),
+      ])
+      .optional(),
+    body: stringLikeValue.optional(),
+    fullBody: stringLikeValue.optional(),
+    replaceBody: stringLikeValue.optional(),
+    content: stringLikeValue.optional(),
+    text: stringLikeValue.optional(),
+    replace: stringLikeValue.optional(),
+    appendBody: stringLikeValue.optional(),
+    append: stringLikeValue.optional(),
+    addition: stringLikeValue.optional(),
+    add: stringLikeValue.optional(),
+    extra: stringLikeValue.optional(),
+    addTags: stringOrStringArrayValue.optional(),
+    addTag: stringOrStringArrayValue.optional(),
+    tagsAdd: stringOrStringArrayValue.optional(),
+    tagAdd: stringOrStringArrayValue.optional(),
+    removeTags: stringOrStringArrayValue.optional(),
+    removeTag: stringOrStringArrayValue.optional(),
+    tagsRemove: stringOrStringArrayValue.optional(),
+    tagRemove: stringOrStringArrayValue.optional(),
+    setTags: stringOrStringArrayValue.optional(),
+    tags: stringOrStringArrayValue.optional(),
+  })
+  .catchall(z.unknown())
   .describe(
     'Lenient update syntax: provide slug (or id / entry / file) and any of body|content|replaceBody, append|appendBody|add, entity|title|name|rename, addTags|addTag, removeTags|removeTag, tags|setTags (exact set). Comma separated tag strings allowed.'
   );
