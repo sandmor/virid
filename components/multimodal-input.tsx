@@ -25,6 +25,7 @@ import { displayProviderName } from '@/lib/ai/registry';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
 import { cn } from '@/lib/utils';
+import { ReasoningEffortSelector } from './chat-reasoning-selector';
 import { Context } from './elements/context';
 import {
   PromptInput,
@@ -59,6 +60,8 @@ function PureMultimodalInput({
   onModelChange,
   usage,
   allowedModelIds,
+  reasoningEffort,
+  onReasoningEffortChange,
 }: {
   chatId: string;
   input: string;
@@ -76,6 +79,11 @@ function PureMultimodalInput({
   onModelChange?: (modelId: string) => void;
   usage?: AppUsage;
   allowedModelIds: string[];
+  reasoningEffort?: 'low' | 'medium' | 'high';
+  onReasoningEffortChange?: (
+    effort: 'low' | 'medium' | 'high',
+    options?: { userInitiated?: boolean }
+  ) => void | Promise<void>;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
@@ -340,6 +348,13 @@ function PureMultimodalInput({
               selectedModelId={selectedModelId}
               allowedModelIds={allowedModelIds}
             />
+            {onReasoningEffortChange && (
+              <ReasoningEffortSelector
+                selectedEffort={reasoningEffort}
+                onSelectEffort={onReasoningEffortChange}
+                chatHasStarted={messages.length > 0}
+              />
+            )}
           </PromptInputTools>
 
           {status === 'submitted' || status === 'streaming' ? (
@@ -468,7 +483,7 @@ function PureModelSelectorCompact({
       value={selectedModel?.name}
     >
       <Trigger
-        className="flex h-8 items-center gap-2 rounded-lg border-0 bg-background px-2 text-foreground shadow-none transition-colors hover:bg-accent focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="flex h-8 items-center gap-2 rounded-lg border border-border/60 bg-background px-2 text-xs font-medium text-foreground shadow-none transition-colors hover:bg-accent focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
         type="button"
         data-testid="model-selector"
       >

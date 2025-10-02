@@ -117,17 +117,21 @@ export async function POST(request: Request) {
       selectedChatModel,
       selectedVisibilityType,
       pinnedSlugs,
-      allowedTools,
+      allowedTools: rawAllowedTools,
       agentId,
+      reasoningEffort,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel['id'];
       selectedVisibilityType: VisibilityType;
       pinnedSlugs?: string[];
-      allowedTools?: string[];
+      allowedTools?: string[] | null;
       agentId?: string;
+      reasoningEffort?: 'low' | 'medium' | 'high';
     } = requestBody;
+
+    const allowedTools = rawAllowedTools ?? undefined;
 
     const session = await getAppSession();
 
@@ -235,6 +239,8 @@ export async function POST(request: Request) {
               pinnedSlugs && pinnedSlugs.length
                 ? pinnedSlugs.slice(0, 12)
                 : undefined,
+            reasoningEffort,
+            modelId: selectedChatModel,
           },
         });
       } catch (e) {
@@ -381,6 +387,11 @@ export async function POST(request: Request) {
           createdNewChat && allowedTools !== undefined
             ? allowedTools // could be [] meaning no tools
             : settings.tools?.allow;
+
+        // Determine reasoning effort (prefer provided value, then settings, then default medium)
+        const effectiveReasoningEffort =
+          reasoningEffort ?? settings.reasoningEffort ?? 'medium';
+
         const allToolFactories: Record<string, any> = {
           getWeather,
           createDocument: createDocument({ session, dataStream }),
@@ -403,6 +414,36 @@ export async function POST(request: Request) {
         const activeTools: Record<string, any> = {};
         for (const k of allowedToolIds) activeTools[k] = allToolFactories[k];
 
+        // Build provider-specific options for reasoning effort
+        const [provider] = selectedChatModel.split(':');
+        const providerOptions: Record<string, any> = {};
+
+        if (provider === 'openai') {
+          // OpenAI uses reasoningEffort: 'minimal' | 'low' | 'medium' | 'high'
+          providerOptions.openai = {
+            reasoningEffort: effectiveReasoningEffort,
+          };
+        } else if (provider === 'google') {
+          // Google uses thinkingConfig with thinkingBudget (number of tokens)
+          // Map effort levels to token budgets
+          const budgetMap = { low: 2048, medium: 4096, high: 8192 };
+          providerOptions.google = {
+            thinkingConfig: {
+              thinkingBudget: budgetMap[effectiveReasoningEffort],
+              includeThoughts: true,
+            },
+          };
+        } else if (provider === 'openrouter') {
+          // OpenRouter uses reasoning.effort: 'low' | 'medium' | 'high'
+          providerOptions.openrouter = {
+            reasoning: {
+              effort: effectiveReasoningEffort,
+              enabled: true,
+              exclude: false,
+            },
+          };
+        }
+
         const result = streamText({
           model,
           system: systemPrompt({
@@ -415,6 +456,7 @@ export async function POST(request: Request) {
           experimental_activeTools: allowedToolIds,
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: activeTools,
+          ...(Object.keys(providerOptions).length > 0 && { providerOptions }),
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: 'stream-text',

@@ -48,10 +48,24 @@ export const postRequestBodySchema = z.object({
     .optional(),
   // Optional allow list of tool ids.
   // Semantics: omitted (undefined) => ALL tools allowed (no restriction stored)
-  //            empty array []     => NO tools allowed
-  allowedTools: z.array(z.string().min(1).max(64)).max(64).optional(),
-  // Optional agent ID to initialize chat settings from
+  //            [] => NO tools (explicit empty allow list)
+  //            ['toolA', 'toolB'] => only those tools
+  allowedTools: z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(64)
+        .regex(/^[a-zA-Z0-9_-]+$/, {
+          message: 'Tool id contains invalid characters',
+        })
+    )
+    .max(32)
+    .optional(),
   agentId: z.string().uuid().optional(),
+  // Optional reasoning effort level (low, medium, high)
+  // Controls how much computational effort the model uses for reasoning
+  reasoningEffort: z.enum(['low', 'medium', 'high']).optional(),
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

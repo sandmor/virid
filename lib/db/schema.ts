@@ -9,12 +9,15 @@ export type User = Prisma.UserGetPayload<{}>;
 // ChatSettings: forward-compatible container for per-chat configuration.
 // pinnedEntries: cached list of currently pinned archive entry slugs (authoritative source remains junction table)
 // tools.allow: optional allow-list of tool identifiers; if absent => all tools enabled.
+// modelId: persistent chat-level model preference (provider:model slug)
+// reasoningEffort: controls how much computational effort the model uses for reasoning (low, medium, high)
 export interface ChatSettings {
   pinnedEntries?: string[]; // denormalized convenience cache
   tools?: {
     allow?: string[]; // tool ids
   };
-  // Future fields: tokenBudget?: number; etc.
+  modelId?: string; // composite provider:model id
+  reasoningEffort?: 'low' | 'medium' | 'high'; // reasoning effort level
 }
 
 export type Chat = Omit<

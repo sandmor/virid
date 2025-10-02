@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   useAgents,
   useCreateAgent,
@@ -37,6 +37,14 @@ import {
   agentSettingsToChatSettings,
   type AgentSettingsValue,
 } from '@/lib/agent-settings';
+import { deriveChatModel } from '@/lib/ai/models';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface AgentFormState {
   name: string;
@@ -44,35 +52,152 @@ interface AgentFormState {
   settings: AgentSettingsValue;
 }
 
+const DEFAULT_MODEL_VALUE = '__DEFAULT_MODEL__';
+const DEFAULT_REASONING_VALUE = '__DEFAULT_REASONING__';
+
+const REASONING_OPTIONS: Array<{
+  value: 'low' | 'medium' | 'high';
+  label: string;
+  description: string;
+}> = [
+  {
+    value: 'low',
+    label: 'Low',
+    description: 'Faster responses with lighter reasoning depth',
+  },
+  {
+    value: 'medium',
+    label: 'Medium',
+    description: 'Balanced speed and reasoning quality',
+  },
+  {
+    value: 'high',
+    label: 'High',
+    description: 'Best reasoning quality with higher latency',
+  },
+];
+
 function cloneAgentSettings(
   value: AgentSettingsValue = DEFAULT_AGENT_SETTINGS
 ): AgentSettingsValue {
   return {
     pinnedEntries: [...value.pinnedEntries],
     allowedTools: value.allowedTools ? [...value.allowedTools] : undefined,
+    modelId: value.modelId,
+    reasoningEffort: value.reasoningEffort,
   };
 }
 
-export function AgentsManagement() {
+export function AgentsManagement({
+  allowedModelIds,
+  allowedReasoningEfforts,
+}: {
+  allowedModelIds: string[];
+  allowedReasoningEfforts?: Array<'low' | 'medium' | 'high'>;
+}) {
   const { data, isLoading, error, refetch, isFetching } = useAgents();
   const createAgent = useCreateAgent();
   const updateAgent = useUpdateAgent();
   const deleteAgent = useDeleteAgent();
+
+  const modelOptions = useMemo(() => {
+    const unique = Array.from(new Set(allowedModelIds));
+    return unique.map((id) => deriveChatModel(id));
+  }, [allowedModelIds]);
+  const reasoningOptions = useMemo(() => {
+    if (allowedReasoningEfforts === undefined) {
+      return REASONING_OPTIONS;
+    }
+    return REASONING_OPTIONS.filter((option) =>
+      allowedReasoningEfforts.includes(option.value)
+    );
+  }, [allowedReasoningEfforts]);
+  const allowedModelIdSet = useMemo(
+    () => new Set(modelOptions.map((model) => model.id)),
+    [modelOptions]
+  );
+  const reasoningValueSet = useMemo(
+    () =>
+      new Set(
+        allowedReasoningEfforts && allowedReasoningEfforts.length > 0
+          ? allowedReasoningEfforts
+          : REASONING_OPTIONS.map((option) => option.value)
+      ),
+    [allowedReasoningEfforts]
+  );
+
+  const sanitizeSettings = useCallback(
+    (value: AgentSettingsValue): AgentSettingsValue => {
+      const nextModelId =
+        value.modelId && allowedModelIdSet.has(value.modelId)
+          ? value.modelId
+          : undefined;
+      const nextReasoningEffort =
+        value.reasoningEffort && reasoningValueSet.has(value.reasoningEffort)
+          ? value.reasoningEffort
+          : undefined;
+
+      if (
+        nextModelId === value.modelId &&
+        nextReasoningEffort === value.reasoningEffort
+      ) {
+        return value;
+      }
+
+      return {
+        ...value,
+        modelId: nextModelId,
+        reasoningEffort: nextReasoningEffort,
+      };
+    },
+    [allowedModelIdSet, reasoningValueSet]
+  );
+
+  const getModelDisplayName = useCallback(
+    (modelId: string | undefined) => {
+      if (!modelId) return 'Workspace default';
+      const option = modelOptions.find((model) => model.id === modelId);
+      if (option) return option.name;
+      return deriveChatModel(modelId).name;
+    },
+    [modelOptions]
+  );
+
+  const getReasoningLabel = useCallback((value: string | undefined) => {
+    if (value !== 'low' && value !== 'medium' && value !== 'high') {
+      return 'Workspace default';
+    }
+    const option = REASONING_OPTIONS.find((opt) => opt.value === value);
+    return option ? option.label : value;
+  }, []);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [formData, setFormData] = useState<AgentFormState>(() => ({
     name: '',
     description: '',
-    settings: cloneAgentSettings(),
+    settings: sanitizeSettings(cloneAgentSettings()),
   }));
   const [deletingAgentId, setDeletingAgentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFormData((prev) => {
+      const nextSettings = sanitizeSettings(prev.settings);
+      if (nextSettings === prev.settings) {
+        return prev;
+      }
+      return {
+        ...prev,
+        settings: nextSettings,
+      };
+    });
+  }, [sanitizeSettings]);
 
   const resetFormState = () => {
     setFormData({
       name: '',
       description: '',
-      settings: cloneAgentSettings(),
+      settings: sanitizeSettings(cloneAgentSettings()),
     });
   };
 
@@ -111,10 +236,10 @@ export function AgentsManagement() {
     const deduped = normalized ? Array.from(new Set(normalized)) : undefined;
     setFormData((prev) => ({
       ...prev,
-      settings: {
+      settings: sanitizeSettings({
         ...prev.settings,
         allowedTools: deduped ? [...deduped] : deduped,
-      },
+      }),
     }));
   };
 
@@ -189,9 +314,11 @@ export function AgentsManagement() {
     setFormData({
       name: agent.name,
       description: agent.description || '',
-      settings: cloneAgentSettings(
-        agentSettingsFromChatSettings(
-          agent.settings as ChatSettings | null | undefined
+      settings: sanitizeSettings(
+        cloneAgentSettings(
+          agentSettingsFromChatSettings(
+            agent.settings as ChatSettings | null | undefined
+          )
         )
       ),
     });
@@ -365,6 +492,98 @@ export function AgentsManagement() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="text-sm font-medium">Base model</label>
+                <p className="text-xs text-muted-foreground">
+                  Pick the default language model when chats start with this
+                  agent.
+                </p>
+                <div className="mt-2">
+                  <Select
+                    value={formData.settings.modelId ?? DEFAULT_MODEL_VALUE}
+                    onValueChange={(value) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        settings: sanitizeSettings({
+                          ...prev.settings,
+                          modelId:
+                            value === DEFAULT_MODEL_VALUE ? undefined : value,
+                        }),
+                      }));
+                    }}
+                  >
+                    <SelectTrigger className="h-9 w-full text-left text-sm justify-between">
+                      <SelectValue placeholder="Workspace default" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={DEFAULT_MODEL_VALUE}>
+                        Workspace default
+                      </SelectItem>
+                      {modelOptions.map((model) => (
+                        <SelectItem key={model.id} value={model.id}>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              {model.name}
+                            </span>
+                            {model.description && (
+                              <span className="text-[11px] text-muted-foreground">
+                                {model.description}
+                              </span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Reasoning effort</label>
+                <p className="text-xs text-muted-foreground">
+                  Control how much reasoning time this agent spends by default.
+                </p>
+                <div className="mt-2">
+                  <Select
+                    value={
+                      formData.settings.reasoningEffort ??
+                      DEFAULT_REASONING_VALUE
+                    }
+                    onValueChange={(value) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        settings: sanitizeSettings({
+                          ...prev.settings,
+                          reasoningEffort:
+                            value === DEFAULT_REASONING_VALUE
+                              ? undefined
+                              : (value as 'low' | 'medium' | 'high'),
+                        }),
+                      }));
+                    }}
+                  >
+                    <SelectTrigger className="h-9 w-full text-left text-sm justify-between">
+                      <SelectValue placeholder="Workspace default" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={DEFAULT_REASONING_VALUE}>
+                        Workspace default
+                      </SelectItem>
+                      {reasoningOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              {option.label}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">
+                              {option.description}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="flex justify-end space-x-2">
                 <Button
                   type="button"
@@ -453,8 +672,16 @@ export function AgentsManagement() {
                     Created {new Date(agent.createdAt).toLocaleDateString()}
                   </div>
                   {(() => {
-                    const settings = agentSettingsFromChatSettings(
-                      agent.settings as ChatSettings | null | undefined
+                    const settings = sanitizeSettings(
+                      cloneAgentSettings(
+                        agentSettingsFromChatSettings(
+                          agent.settings as ChatSettings | null | undefined
+                        )
+                      )
+                    );
+                    const modelLabel = getModelDisplayName(settings.modelId);
+                    const reasoningLabel = getReasoningLabel(
+                      settings.reasoningEffort
                     );
                     return (
                       <div className="space-y-2">
@@ -507,6 +734,22 @@ export function AgentsManagement() {
                                 </Badge>
                               ))
                             )}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                            Base model
+                          </p>
+                          <div className="mt-1 text-xs text-foreground">
+                            {modelLabel}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                            Reasoning effort
+                          </p>
+                          <div className="mt-1 text-xs text-foreground">
+                            {reasoningLabel}
                           </div>
                         </div>
                       </div>
@@ -629,6 +872,97 @@ export function AgentsManagement() {
                   stagedAllowedTools={formData.settings.allowedTools}
                   onUpdateStagedAllowedTools={updateAllowedTools}
                 />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Base model</label>
+              <p className="text-xs text-muted-foreground">
+                Choose which model the agent prefers when a chat starts.
+              </p>
+              <div className="mt-2">
+                <Select
+                  value={formData.settings.modelId ?? DEFAULT_MODEL_VALUE}
+                  onValueChange={(value) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      settings: sanitizeSettings({
+                        ...prev.settings,
+                        modelId:
+                          value === DEFAULT_MODEL_VALUE ? undefined : value,
+                      }),
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="h-9 w-full text-left text-sm justify-between">
+                    <SelectValue placeholder="Workspace default" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={DEFAULT_MODEL_VALUE}>
+                      Workspace default
+                    </SelectItem>
+                    {modelOptions.map((model) => (
+                      <SelectItem key={model.id} value={model.id}>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">
+                            {model.name}
+                          </span>
+                          {model.description && (
+                            <span className="text-[11px] text-muted-foreground">
+                              {model.description}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Reasoning effort</label>
+              <p className="text-xs text-muted-foreground">
+                Adjust how much reasoning time this agent should take by
+                default.
+              </p>
+              <div className="mt-2">
+                <Select
+                  value={
+                    formData.settings.reasoningEffort ?? DEFAULT_REASONING_VALUE
+                  }
+                  onValueChange={(value) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      settings: sanitizeSettings({
+                        ...prev.settings,
+                        reasoningEffort:
+                          value === DEFAULT_REASONING_VALUE
+                            ? undefined
+                            : (value as 'low' | 'medium' | 'high'),
+                      }),
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="h-9 w-full text-left text-sm justify-between">
+                    <SelectValue placeholder="Workspace default" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={DEFAULT_REASONING_VALUE}>
+                      Workspace default
+                    </SelectItem>
+                    {reasoningOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">
+                            {option.label}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">
+                            {option.description}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex justify-end space-x-2">

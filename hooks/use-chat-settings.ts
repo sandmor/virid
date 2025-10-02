@@ -59,3 +59,89 @@ export function useUpdateAllowedTools(chatId: string | undefined) {
     },
   });
 }
+
+export function useUpdateReasoningEffort(chatId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (effort: 'low' | 'medium' | 'high' | null) => {
+      if (!chatId) throw new Error('Missing chatId');
+      const body = { chatId, reasoningEffort: effort };
+      const res = await fetch('/api/chat/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error('Failed to update reasoning effort');
+      return res.json() as Promise<{ settings: ChatSettings }>;
+    },
+    onMutate: async (effort) => {
+      if (!chatId) return;
+      await qc.cancelQueries({ queryKey: ['chat', 'settings', chatId] });
+      const prev = qc.getQueryData<{ settings: ChatSettings }>([
+        'chat',
+        'settings',
+        chatId,
+      ]);
+      const normalized = effort === null ? undefined : effort;
+      const nextSettings: ChatSettings = {
+        ...(prev?.settings || {}),
+        reasoningEffort: normalized,
+      };
+      qc.setQueryData(['chat', 'settings', chatId], { settings: nextSettings });
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (chatId && context?.prev) {
+        qc.setQueryData(['chat', 'settings', chatId], context.prev);
+      }
+    },
+    onSuccess: (data) => {
+      if (chatId) qc.setQueryData(['chat', 'settings', chatId], data);
+    },
+  });
+}
+
+export function useUpdateModelId(chatId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (modelId: string | null) => {
+      if (!chatId) throw new Error('Missing chatId');
+      const body = { chatId, modelId };
+      const res = await fetch('/api/chat/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error('Failed to update model');
+      return res.json() as Promise<{ settings: ChatSettings }>;
+    },
+    onMutate: async (modelId) => {
+      if (!chatId) return;
+      await qc.cancelQueries({ queryKey: ['chat', 'settings', chatId] });
+      const prev = qc.getQueryData<{ settings: ChatSettings }>([
+        'chat',
+        'settings',
+        chatId,
+      ]);
+      const normalized = modelId === null ? undefined : modelId;
+      const nextSettings: ChatSettings = {
+        ...(prev?.settings || {}),
+      };
+      if (normalized === undefined) {
+        delete nextSettings.modelId;
+      } else {
+        nextSettings.modelId = normalized;
+      }
+      qc.setQueryData(['chat', 'settings', chatId], { settings: nextSettings });
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (chatId && context?.prev) {
+        qc.setQueryData(['chat', 'settings', chatId], context.prev);
+      }
+    },
+    onSuccess: (data) => {
+      if (chatId) qc.setQueryData(['chat', 'settings', chatId], data);
+    },
+  });
+}

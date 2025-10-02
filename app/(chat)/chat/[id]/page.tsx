@@ -8,6 +8,7 @@ import { DEFAULT_CHAT_MODEL, isModelIdAllowed } from '@/lib/ai/models';
 import { getTierForUserType } from '@/lib/ai/tiers';
 import { getChatById, getMessagesByChatId } from '@/lib/db/queries';
 import { convertToUIMessages } from '@/lib/utils';
+import { normalizeModelId } from '@/lib/agent-settings';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -59,12 +60,26 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const cookieCandidate = chatModelFromCookie
     ? chatModelFromCookie.value
     : undefined;
-  let initialModel =
-    cookieCandidate && isModelIdAllowed(cookieCandidate, allowedModels)
-      ? cookieCandidate
-      : DEFAULT_CHAT_MODEL;
-  if (!isModelIdAllowed(initialModel, allowedModels)) {
-    initialModel = allowedModels[0];
+
+  const chatSettingsModel = normalizeModelId(chat.settings?.modelId);
+  const agentSettingsModel = normalizeModelId(
+    (chat.agent?.settings as any)?.modelId
+  );
+
+  const candidateOrder = [
+    chatSettingsModel,
+    agentSettingsModel,
+    cookieCandidate,
+    DEFAULT_CHAT_MODEL,
+  ];
+
+  let initialModel = candidateOrder.find(
+    (candidate): candidate is string =>
+      !!candidate && isModelIdAllowed(candidate, allowedModels)
+  );
+
+  if (!initialModel) {
+    initialModel = allowedModels[0] ?? DEFAULT_CHAT_MODEL;
   }
 
   if (

@@ -8,6 +8,7 @@ import { generateUUID } from '@/lib/utils';
 import { getAppSession } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import type { Agent as AgentModel } from '@/lib/db/schema';
+import { normalizeModelId } from '@/lib/agent-settings';
 
 export default async function Page({
   searchParams,
@@ -28,17 +29,6 @@ export default async function Page({
   const { modelIds: allowedModels } = await getTierForUserType(
     session.user.type
   );
-  const cookieCandidate = modelIdFromCookie
-    ? modelIdFromCookie.value
-    : undefined;
-  let initialModel =
-    cookieCandidate && isModelIdAllowed(cookieCandidate, allowedModels)
-      ? cookieCandidate
-      : DEFAULT_CHAT_MODEL;
-  if (!isModelIdAllowed(initialModel, allowedModels)) {
-    initialModel = allowedModels[0];
-  }
-
   // Check for agentId
   const agentId =
     typeof searchParams?.agentId === 'string'
@@ -64,6 +54,28 @@ export default async function Page({
     } catch {
       // Ignore errors; fall back to default selections
     }
+  }
+
+  const cookieCandidate = modelIdFromCookie
+    ? modelIdFromCookie.value
+    : undefined;
+  const agentModelPreference = normalizeModelId(
+    initialAgent?.settings ? (initialAgent.settings as any)?.modelId : undefined
+  );
+
+  const candidateOrder = [
+    agentModelPreference,
+    cookieCandidate,
+    DEFAULT_CHAT_MODEL,
+  ];
+
+  let initialModel = candidateOrder.find(
+    (candidate): candidate is string =>
+      !!candidate && isModelIdAllowed(candidate, allowedModels)
+  );
+
+  if (!initialModel) {
+    initialModel = allowedModels[0] ?? DEFAULT_CHAT_MODEL;
   }
 
   if (

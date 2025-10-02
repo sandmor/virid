@@ -9,10 +9,14 @@ export default function SettingsView({
   defaultTab,
   isAdmin,
   adminContent,
+  allowedModelIds,
+  allowedReasoningEfforts,
 }: {
   defaultTab: 'archive' | 'agents' | 'admin';
   isAdmin: boolean;
   adminContent?: React.ReactNode;
+  allowedModelIds: string[];
+  allowedReasoningEfforts?: Array<'low' | 'medium' | 'high'>;
 }) {
   const router = useRouter();
   const search = useSearchParams();
@@ -58,7 +62,10 @@ export default function SettingsView({
         >
           {tab === 'agents' && (
             <div className="flex-1 min-h-0 overflow-hidden">
-              <AgentsManagement />
+              <AgentsManagement
+                allowedModelIds={allowedModelIds}
+                allowedReasoningEfforts={allowedReasoningEfforts}
+              />
             </div>
           )}
         </TabsContent>

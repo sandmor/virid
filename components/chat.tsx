@@ -9,6 +9,11 @@ import { ChatHeader } from '@/components/chat-header';
 import { useArtifactSelector } from '@/hooks/use-artifact';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
+import {
+  useChatSettings as useChatSettingsQuery,
+  useUpdateModelId,
+  useUpdateReasoningEffort,
+} from '@/hooks/use-chat-settings';
 import type { ChatSettings, Vote } from '@/lib/db/schema';
 import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
@@ -24,6 +29,8 @@ import type { AgentPreset } from './chat-agent-selector';
 import {
   normalizeAllowedTools,
   normalizePinnedEntries,
+  normalizeModelId,
+  normalizeReasoningEffort,
 } from '@/lib/agent-settings';
 import { Button } from './ui/button';
 
@@ -63,12 +70,36 @@ export function Chat({
 
   const [input, setInput] = useState<string>('');
   const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
-  const [currentModelId, setCurrentModelId] = useState(initialChatModel);
-  const currentModelIdRef = useRef(currentModelId);
 
   const resolvedInitialAgent = initialAgent ?? null;
   const initialAgentSettings = (resolvedInitialAgent?.settings ??
     null) as ChatSettings | null;
+
+  const initialReasoningEffort = normalizeReasoningEffort(
+    initialSettings?.reasoningEffort ??
+      initialAgentSettings?.reasoningEffort ??
+      undefined
+  );
+
+  const initialModelId = (() => {
+    const candidates = [
+      normalizeModelId(initialSettings?.modelId),
+      normalizeModelId(initialAgentSettings?.modelId),
+      normalizeModelId(initialChatModel),
+    ];
+    for (const candidate of candidates) {
+      if (candidate && allowedModelIds.includes(candidate)) {
+        return candidate;
+      }
+    }
+    if (allowedModelIds.length > 0) {
+      return allowedModelIds[0];
+    }
+    return normalizeModelId(initialChatModel) ?? initialChatModel;
+  })();
+
+  const [currentModelId, setCurrentModelId] = useState(initialModelId);
+  const currentModelIdRef = useRef(currentModelId);
   const [selectedAgent, setSelectedAgent] = useState<AgentPreset | null>(
     resolvedInitialAgent
   );
@@ -97,6 +128,21 @@ export function Chat({
   const stagedAllowedToolsRef = useRef<string[] | undefined>(
     stagedAllowedTools
   );
+  // Provisional reasoning effort
+  const [stagedReasoningEffort, setStagedReasoningEffort] = useState<
+    'low' | 'medium' | 'high' | undefined
+  >(() => initialReasoningEffort ?? undefined);
+  const stagedReasoningEffortRef = useRef<
+    'low' | 'medium' | 'high' | undefined
+  >(stagedReasoningEffort);
+  const [shouldFetchSettings, setShouldFetchSettings] = useState(
+    initialMessages.length > 0
+  );
+  const { data: chatSettingsData } = useChatSettingsQuery(
+    shouldFetchSettings ? id : undefined
+  );
+  const updateReasoningEffortMutation = useUpdateReasoningEffort(id);
+  const updateModelIdMutation = useUpdateModelId(id);
   const chatHasStartedRef = useRef(initialMessages.length > 0);
   useEffect(() => {
     if (initialMessages.length > 0) chatHasStartedRef.current = true;
@@ -107,6 +153,28 @@ export function Chat({
   useEffect(() => {
     stagedAllowedToolsRef.current = stagedAllowedTools;
   }, [stagedAllowedTools]);
+  useEffect(() => {
+    stagedReasoningEffortRef.current = stagedReasoningEffort;
+  }, [stagedReasoningEffort]);
+
+  useEffect(() => {
+    const settings = chatSettingsData?.settings;
+    if (!settings) return;
+
+    const normalizedEffort = normalizeReasoningEffort(settings.reasoningEffort);
+    if (normalizedEffort !== stagedReasoningEffortRef.current) {
+      setStagedReasoningEffort(normalizedEffort);
+    }
+
+    const normalizedModel = normalizeModelId(settings.modelId);
+    if (
+      normalizedModel &&
+      allowedModelIds.includes(normalizedModel) &&
+      normalizedModel !== currentModelIdRef.current
+    ) {
+      setCurrentModelId(normalizedModel);
+    }
+  }, [chatSettingsData?.settings, allowedModelIds]);
 
   useEffect(() => {
     stagedAgentIdRef.current = selectedAgentId;
@@ -123,11 +191,29 @@ export function Chat({
         normalizePinnedEntries(settings?.pinnedEntries ?? [])
       );
       setStagedAllowedTools(normalizeAllowedTools(settings?.tools?.allow));
+      const normalizedEffort = normalizeReasoningEffort(
+        settings?.reasoningEffort
+      );
+      setStagedReasoningEffort(normalizedEffort ?? undefined);
+      stagedReasoningEffortRef.current = normalizedEffort ?? undefined;
+      const normalizedModel = normalizeModelId(settings?.modelId);
+      if (normalizedModel && allowedModelIds.includes(normalizedModel)) {
+        setCurrentModelId(normalizedModel);
+      }
     } else {
       setStagedPinnedSlugs([]);
       setStagedAllowedTools(undefined);
+      setStagedReasoningEffort(initialReasoningEffort ?? undefined);
+      stagedReasoningEffortRef.current = initialReasoningEffort ?? undefined;
+      setCurrentModelId(initialModelId);
     }
-  }, [selectedAgent?.id]);
+  }, [
+    selectedAgent?.id,
+    selectedAgent?.settings,
+    allowedModelIds,
+    initialModelId,
+    initialReasoningEffort,
+  ]);
 
   const handleSelectAgent = useCallback(
     async (
@@ -173,6 +259,69 @@ export function Chat({
     [id, selectedAgentId]
   );
 
+  const handleModelChange = useCallback(
+    async (modelId: string) => {
+      const normalized = normalizeModelId(modelId);
+      if (!normalized || !allowedModelIds.includes(normalized)) {
+        return;
+      }
+      if (normalized === currentModelIdRef.current) {
+        return;
+      }
+
+      const previous = currentModelIdRef.current;
+      setCurrentModelId(normalized);
+      currentModelIdRef.current = normalized;
+
+      if (!chatHasStartedRef.current) {
+        return;
+      }
+
+      try {
+        await updateModelIdMutation.mutateAsync(normalized);
+      } catch (error) {
+        setCurrentModelId(previous);
+        currentModelIdRef.current = previous;
+        toast({
+          type: 'error',
+          description: 'Failed to update chat model preference',
+        });
+      }
+    },
+    [allowedModelIds, updateModelIdMutation]
+  );
+
+  const handleReasoningEffortChange = useCallback(
+    async (
+      effort: 'low' | 'medium' | 'high',
+      _options?: { userInitiated?: boolean }
+    ) => {
+      const previous = stagedReasoningEffortRef.current;
+      if (previous === effort) {
+        return;
+      }
+      setStagedReasoningEffort(effort);
+      stagedReasoningEffortRef.current = effort;
+
+      if (!chatHasStartedRef.current) {
+        return;
+      }
+
+      try {
+        await updateReasoningEffortMutation.mutateAsync(effort);
+      } catch (error) {
+        setStagedReasoningEffort(previous ?? undefined);
+        stagedReasoningEffortRef.current = previous ?? undefined;
+        toast({
+          type: 'error',
+          description: 'Failed to update reasoning effort',
+        });
+        throw error;
+      }
+    },
+    [updateReasoningEffortMutation]
+  );
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (chatHasStartedRef.current) return;
@@ -208,6 +357,7 @@ export function Chat({
       prepareSendMessagesRequest(request) {
         const staged = stagedPinnedSlugsRef.current;
         const stagedTools = stagedAllowedToolsRef.current;
+        const stagedEffort = stagedReasoningEffortRef.current;
         return {
           body: {
             ...request.body,
@@ -217,6 +367,9 @@ export function Chat({
             selectedVisibilityType: visibilityType,
             pinnedSlugs: staged.length > 0 ? staged : undefined,
             allowedTools: !chatHasStartedRef.current ? stagedTools : undefined,
+            reasoningEffort: !chatHasStartedRef.current
+              ? stagedEffort
+              : undefined,
             agentId: !chatHasStartedRef.current
               ? stagedAgentIdRef.current
               : undefined,
@@ -235,6 +388,7 @@ export function Chat({
       queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
       if (!chatHasStartedRef.current) {
         chatHasStartedRef.current = true;
+        setShouldFetchSettings(true);
         // After first message, pins are persisted or merged; clear staged state & ref
         setStagedPinnedSlugs([]);
         stagedPinnedSlugsRef.current = [];
@@ -694,7 +848,7 @@ export function Chat({
               chatId={id}
               input={input}
               messages={messages}
-              onModelChange={setCurrentModelId}
+              onModelChange={handleModelChange}
               selectedModelId={currentModelId}
               selectedVisibilityType={visibilityType}
               sendMessage={sendMessage}
@@ -705,6 +859,8 @@ export function Chat({
               stop={stop}
               usage={usage}
               allowedModelIds={allowedModelIds}
+              reasoningEffort={stagedReasoningEffort}
+              onReasoningEffortChange={handleReasoningEffortChange}
             />
           )}
         </div>

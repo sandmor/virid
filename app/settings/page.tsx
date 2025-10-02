@@ -7,6 +7,7 @@ import { HydrationBoundary } from '@tanstack/react-query';
 import { isAdmin } from '@/lib/auth/admin';
 import SettingsView from './view';
 import AdminSections from './AdminSections';
+import { getTierForUserType } from '@/lib/ai/tiers';
 
 export const metadata: Metadata = {
   title: 'Account Settings',
@@ -54,6 +55,9 @@ export default async function SettingsPage({
 }) {
   const session = await getAppSession();
   if (!session?.user) redirect('/login');
+  const { modelIds: allowedModels } = await getTierForUserType(
+    session.user.type
+  );
   const tabParam =
     typeof searchParams?.tab === 'string' ? searchParams!.tab : undefined;
   const adminAllowed = await isAdmin();
@@ -88,6 +92,7 @@ export default async function SettingsPage({
               defaultTab={defaultTab}
               isAdmin={adminAllowed}
               adminContent={adminContent}
+              allowedModelIds={allowedModels}
             />
           </Suspense>
         </HydrationBoundary>

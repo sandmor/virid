@@ -4,6 +4,8 @@ import { getChatById } from '@/lib/db/queries';
 import {
   getChatSettings,
   setAllowedTools,
+  setReasoningEffort,
+  setModelId,
   updateChatAgent,
 } from '@/lib/db/chat-settings';
 import { ChatSDKError } from '@/lib/errors';
@@ -16,6 +18,8 @@ const patchSchema = z.object({
     .nullable()
     .optional(),
   agentId: z.string().uuid().nullable().optional(),
+  reasoningEffort: z.enum(['low', 'medium', 'high']).nullable().optional(),
+  modelId: z.string().min(2).max(256).nullable().optional(),
 });
 
 export async function GET(request: Request) {
@@ -46,6 +50,13 @@ export async function PATCH(request: Request) {
   if (body.allowedTools !== undefined) {
     await setAllowedTools(body.chatId, body.allowedTools ?? undefined);
   } // else undefined means no change
+  if (body.reasoningEffort !== undefined) {
+    await setReasoningEffort(body.chatId, body.reasoningEffort ?? undefined);
+  }
+  if (body.modelId !== undefined) {
+    const modelId = body.modelId ?? undefined;
+    await setModelId(body.chatId, modelId);
+  }
   if (body.agentId !== undefined) {
     await updateChatAgent(body.chatId, body.agentId);
   }

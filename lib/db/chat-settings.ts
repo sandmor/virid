@@ -55,6 +55,29 @@ export async function setAllowedTools(
   }));
 }
 
+export async function setReasoningEffort(
+  chatId: string,
+  effort: 'low' | 'medium' | 'high' | undefined
+) {
+  return updateChatSettings(chatId, (prev) => ({
+    ...prev,
+    reasoningEffort: effort,
+  }));
+}
+
+export async function setModelId(chatId: string, modelId: string | undefined) {
+  return updateChatSettings(chatId, (prev) => {
+    if (modelId === undefined) {
+      const { modelId: _omit, ...rest } = prev;
+      return rest;
+    }
+    return {
+      ...prev,
+      modelId,
+    };
+  });
+}
+
 export async function updateChatAgent(chatId: string, agentId: string | null) {
   try {
     await prisma.chat.update({
@@ -76,15 +99,18 @@ export async function refreshPinnedEntriesCache(
   return updateChatSettings(chatId, () => ({ pinnedEntries: pinnedSlugs }));
 }
 
-// Merge agent (base) settings with runtime overrides (allowedTools, pinnedSlugs, future fields).
+// Merge agent (base) settings with runtime overrides (allowedTools, pinnedSlugs, reasoningEffort, future fields).
 // Precedence order (highest last): base <- overrides
 // - base: agent.settings (or existing chat settings if we later support cloning chats)
 // - overrides.allowedTools -> maps to tools.allow semantics
 // - overrides.pinnedSlugs -> sets pinnedEntries cache (does not create join rows itself)
+// - overrides.reasoningEffort -> sets reasoning effort level
 // Input semantics mirror chat creation API semantics.
 export interface SettingsOverrideInput {
   allowedTools?: string[]; // undefined => no restriction stored, [] => explicit empty allow list, [...]
   pinnedSlugs?: string[]; // optional initial pinned slugs (cache only); join table insert handled separately
+  reasoningEffort?: 'low' | 'medium' | 'high'; // reasoning effort level
+  modelId?: string; // preferred chat model id (provider:model)
 }
 
 export async function applyInitialSettingsPreset({
@@ -113,6 +139,19 @@ export async function applyInitialSettingsPreset({
   if (overrides.pinnedSlugs) {
     // Cache - actual pin join rows are handled elsewhere (route logic already handles pinning asynchronously)
     merged.pinnedEntries = overrides.pinnedSlugs.slice(0, 64); // guard size
+  }
+
+  if (Object.prototype.hasOwnProperty.call(overrides, 'reasoningEffort')) {
+    merged.reasoningEffort = overrides.reasoningEffort;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(overrides, 'modelId')) {
+    const candidate = overrides.modelId;
+    if (typeof candidate === 'string' && candidate.trim().length > 0) {
+      merged.modelId = candidate;
+    } else {
+      delete merged.modelId;
+    }
   }
 
   await prisma.chat.update({
