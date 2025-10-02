@@ -11,8 +11,13 @@ export default async function ProvidersSection() {
     initialKeys[p] = rows.find((r) => r.id === p)?.apiKey;
   }
   return (
-    <section className="space-y-4">
-      <h2 className="text-lg font-semibold">Providers</h2>
+    <section className="space-y-5 rounded-3xl border border-border/60 bg-muted/10 p-6 shadow-sm backdrop-blur-sm">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold">Providers</h2>
+        <p className="text-xs text-muted-foreground">
+          Override or rotate credentials for any downstream model provider.
+        </p>
+      </div>
       <ProvidersEditor initialKeys={initialKeys} />
     </section>
   );

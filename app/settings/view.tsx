@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArchiveExplorer } from '../profile/view'; // reuse existing implementation
 import { AgentsManagement } from '@/components/agents-management';
@@ -38,22 +39,36 @@ export default function SettingsView({
       onValueChange={(v) => setTab(v as 'archive' | 'agents' | 'admin')}
       className="flex flex-col h-full min-h-0"
     >
-      <div className="px-6 pb-2 border-b">
-        <TabsList>
-          <TabsTrigger value="archive">Archive</TabsTrigger>
-          <TabsTrigger value="agents">Agents</TabsTrigger>
-          {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
+      <div className="px-6 pb-3">
+        <TabsList className="rounded-full border border-border/60 bg-muted/50 px-1.5 py-1 shadow-sm backdrop-blur">
+          <TabsTrigger value="archive" className="rounded-full px-4 py-1.5">
+            Archive
+          </TabsTrigger>
+          <TabsTrigger value="agents" className="rounded-full px-4 py-1.5">
+            Agents
+          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="admin" className="rounded-full px-4 py-1.5">
+              Admin
+            </TabsTrigger>
+          )}
         </TabsList>
       </div>
-      <div className="flex-1 min-h-0 overflow-hidden pt-4">
+      <div className="flex-1 min-h-0 overflow-hidden pt-2">
         <TabsContent
           value="archive"
           className="flex h-full min-h-0 flex-col overflow-hidden"
         >
           {tab === 'archive' && (
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <motion.div
+              key="archive"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.21, 1.02, 0.73, 1] }}
+              className="flex-1 min-h-0 overflow-hidden"
+            >
               <ArchiveExplorer />
-            </div>
+            </motion.div>
           )}
         </TabsContent>
         <TabsContent
@@ -61,12 +76,18 @@ export default function SettingsView({
           className="flex h-full min-h-0 flex-col overflow-hidden"
         >
           {tab === 'agents' && (
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <motion.div
+              key="agents"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.21, 1.02, 0.73, 1] }}
+              className="flex-1 min-h-0 overflow-hidden"
+            >
               <AgentsManagement
                 allowedModelIds={allowedModelIds}
                 allowedReasoningEfforts={allowedReasoningEfforts}
               />
-            </div>
+            </motion.div>
           )}
         </TabsContent>
         {isAdmin && (
@@ -74,7 +95,17 @@ export default function SettingsView({
             value="admin"
             className="flex h-full min-h-0 flex-col overflow-auto"
           >
-            {tab === 'admin' && adminContent}
+            {tab === 'admin' && (
+              <motion.div
+                key="admin"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: [0.21, 1.02, 0.73, 1] }}
+                className="flex-1"
+              >
+                {adminContent}
+              </motion.div>
+            )}
           </TabsContent>
         )}
         {!isAdmin && tab === 'admin' && (

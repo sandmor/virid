@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { ChevronDown, Loader2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CheckCircle2, ChevronDown, CircleAlert, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,8 @@ import {
 } from '@/components/ui/collapsible';
 import { toast } from '@/components/toast';
 import { SUPPORTED_PROVIDERS, displayProviderName } from '@/lib/ai/registry';
+
+type FeedbackState = 'idle' | 'saved' | 'deleted' | 'error';
 
 export function ProvidersEditor({
   initialKeys,
@@ -30,6 +33,33 @@ export function ProvidersEditor({
       >
     )
   );
+  const [feedback, setFeedback] = useState<Record<string, FeedbackState>>(
+    () =>
+      Object.fromEntries(
+        SUPPORTED_PROVIDERS.map((provider) => [provider, 'idle'] as const)
+      ) as Record<string, FeedbackState>
+  );
+  const feedbackTimers = useRef<Record<string, number>>({});
+
+  useEffect(() => {
+    return () => {
+      Object.values(feedbackTimers.current).forEach((timer) =>
+        window.clearTimeout(timer)
+      );
+    };
+  }, []);
+
+  const setFeedbackState = (id: string, state: FeedbackState, ttl = 1600) => {
+    setFeedback((prev) => ({ ...prev, [id]: state }));
+    if (state === 'idle') return;
+    if (feedbackTimers.current[id]) {
+      window.clearTimeout(feedbackTimers.current[id]);
+    }
+    feedbackTimers.current[id] = window.setTimeout(() => {
+      setFeedback((prev) => ({ ...prev, [id]: 'idle' }));
+      delete feedbackTimers.current[id];
+    }, ttl);
+  };
 
   const saveMutation = useMutation({
     mutationFn: async ({ id, apiKey }: { id: string; apiKey: string }) => {
@@ -51,6 +81,7 @@ export function ProvidersEditor({
         type: 'success',
         description: `${displayProviderName(variables.id)} saved`,
       });
+      setFeedbackState(variables.id, 'saved');
       router.refresh();
     },
     onError: (error, variables) => {
@@ -61,6 +92,7 @@ export function ProvidersEditor({
             ? error.message
             : `Failed to save ${displayProviderName(variables.id)}`,
       });
+      setFeedbackState(variables.id, 'error', 2200);
     },
   });
 
@@ -86,6 +118,7 @@ export function ProvidersEditor({
         type: 'success',
         description: `${displayProviderName(variables.id)} removed`,
       });
+      setFeedbackState(variables.id, 'deleted');
       router.refresh();
     },
     onError: (error, variables) => {
@@ -96,6 +129,7 @@ export function ProvidersEditor({
             ? error.message
             : `Failed to delete ${displayProviderName(variables.id)}`,
       });
+      setFeedbackState(variables.id, 'error', 2200);
     },
   });
 
@@ -123,65 +157,229 @@ export function ProvidersEditor({
   }
 
   return (
-    <div className="space-y-2">
-      {SUPPORTED_PROVIDERS.map((p) => {
+    <div className="space-y-3">
+      {SUPPORTED_PROVIDERS.map((p, index) => {
         const trimmedValue = keys[p]?.trim() ?? '';
         const isSaving =
           saveMutation.isPending && saveMutation.variables?.id === p;
         const isDeleting =
           deleteMutation.isPending && deleteMutation.variables?.id === p;
+        const status = feedback[p] ?? 'idle';
 
         return (
-          <Collapsible
+          <motion.div
             key={p}
-            open={open[p] ?? false}
-            onOpenChange={(o) => setOpen((s) => ({ ...s, [p]: o }))}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05, duration: 0.2 }}
           >
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
-                <span className="font-medium">{displayProviderName(p)}</span>
-                <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-2 border rounded-md p-3 space-y-2">
-              <div className="flex gap-2">
-                <Input
-                  type="password"
-                  placeholder={`${displayProviderName(p)} API key`}
-                  value={keys[p] || ''}
-                  onChange={(e) =>
-                    setKeys((k) => ({ ...k, [p]: e.target.value }))
-                  }
-                />
+            <Collapsible
+              open={open[p] ?? false}
+              onOpenChange={(o) => setOpen((s) => ({ ...s, [p]: o }))}
+            >
+              <CollapsibleTrigger asChild>
                 <Button
-                  onClick={() => save(p)}
-                  disabled={isSaving || isDeleting || trimmedValue.length === 0}
+                  asChild
+                  variant="outline"
+                  className="w-full justify-between rounded-xl border border-border/60 bg-card/40 px-4 py-3 text-left transition-all hover:border-primary/30 hover:bg-card/80"
                 >
-                  {isSaving && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Save
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                    className="flex w-full items-center justify-between"
+                  >
+                    <span className="font-medium tracking-tight">
+                      {displayProviderName(p)}
+                    </span>
+                    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground/80">
+                      <AnimatePresence initial={false} mode="popLayout">
+                        {status === 'saved' || status === 'deleted' ? (
+                          <motion.span
+                            key="status-pill"
+                            className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-1 text-emerald-500"
+                            initial={{ opacity: 0, scale: 0.85 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.18 }}
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            {status === 'deleted' ? 'Removed' : 'Saved'}
+                          </motion.span>
+                        ) : null}
+                      </AnimatePresence>
+                      <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+                    </div>
+                  </motion.button>
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => remove(p)}
-                  disabled={isDeleting}
-                >
-                  {isDeleting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Delete
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                This stores an override for {p} in the database. If absent, the
-                app will fall back to environment variables.
-              </p>
-            </CollapsibleContent>
-          </Collapsible>
+              </CollapsibleTrigger>
+
+              <AnimatePresence initial={false}>
+                {open[p] ? (
+                  <CollapsibleContent forceMount asChild>
+                    <motion.div
+                      key="content"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className="mt-3 rounded-2xl border border-border/60 bg-background/60 p-4 shadow-sm backdrop-blur"
+                    >
+                      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                        <Input
+                          type="password"
+                          placeholder={`${displayProviderName(p)} API key`}
+                          value={keys[p] || ''}
+                          onChange={(e) =>
+                            setKeys((k) => ({ ...k, [p]: e.target.value }))
+                          }
+                          className="md:flex-1"
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            asChild
+                            disabled={
+                              isSaving ||
+                              isDeleting ||
+                              trimmedValue.length === 0
+                            }
+                          >
+                            <motion.button
+                              type="button"
+                              onClick={() => save(p)}
+                              whileTap={{ scale: 0.97 }}
+                              transition={{
+                                type: 'spring',
+                                stiffness: 420,
+                                damping: 32,
+                              }}
+                              className="flex items-center gap-2"
+                            >
+                              <ButtonLabel
+                                state={status}
+                                isBusy={isSaving}
+                                busyLabel="Saving…"
+                                idleLabel="Save"
+                                successLabel="Saved"
+                                successStates={['saved']}
+                              />
+                            </motion.button>
+                          </Button>
+                          <Button
+                            asChild
+                            variant="destructive"
+                            disabled={isDeleting}
+                          >
+                            <motion.button
+                              type="button"
+                              onClick={() => remove(p)}
+                              whileTap={{ scale: 0.97 }}
+                              transition={{
+                                type: 'spring',
+                                stiffness: 420,
+                                damping: 32,
+                              }}
+                              className="flex items-center gap-2"
+                            >
+                              <ButtonLabel
+                                state={status === 'saved' ? 'idle' : status}
+                                isBusy={isDeleting}
+                                busyLabel="Removing…"
+                                idleLabel="Delete"
+                                successLabel="Removed"
+                                successStates={['deleted']}
+                              />
+                            </motion.button>
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        This stores an override for {p} in the database. If
+                        absent, the app will fall back to environment variables.
+                      </p>
+                      <AnimatePresence initial={false}>
+                        {status === 'error' ? (
+                          <motion.p
+                            key="error"
+                            className="mt-2 flex items-center gap-1 text-xs text-destructive"
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.18 }}
+                          >
+                            <CircleAlert className="h-3.5 w-3.5" />
+                            Something went wrong. Try again.
+                          </motion.p>
+                        ) : null}
+                      </AnimatePresence>
+                    </motion.div>
+                  </CollapsibleContent>
+                ) : null}
+              </AnimatePresence>
+            </Collapsible>
+          </motion.div>
         );
       })}
       <Separator />
     </div>
+  );
+}
+
+function ButtonLabel({
+  state,
+  isBusy,
+  busyLabel,
+  idleLabel,
+  successLabel,
+  successStates = ['saved', 'deleted'],
+}: {
+  state: FeedbackState;
+  isBusy: boolean;
+  busyLabel: string;
+  idleLabel: string;
+  successLabel: string;
+  successStates?: FeedbackState[];
+}) {
+  const isSuccess = successStates.includes(state);
+
+  return (
+    <AnimatePresence initial={false} mode="popLayout">
+      {isBusy ? (
+        <motion.span
+          key="busy"
+          className="flex items-center gap-2"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.18 }}
+        >
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {busyLabel}
+        </motion.span>
+      ) : isSuccess ? (
+        <motion.span
+          key="success"
+          className="flex items-center gap-2"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.18 }}
+        >
+          <CheckCircle2 className="h-4 w-4" />
+          {successLabel}
+        </motion.span>
+      ) : (
+        <motion.span
+          key="idle"
+          className="flex items-center gap-2"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.18 }}
+        >
+          {idleLabel}
+        </motion.span>
+      )}
+    </AnimatePresence>
   );
 }

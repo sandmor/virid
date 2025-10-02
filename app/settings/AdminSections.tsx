@@ -4,17 +4,21 @@ import TiersSection from './_tiers-section';
 
 export default function AdminSections() {
   return (
-    <div className="space-y-10 px-2 max-w-5xl mx-auto w-full">
+    <div className="space-y-10 px-2 py-6 max-w-5xl mx-auto w-full animate-in fade-in-0 slide-in-from-bottom-4">
       <Suspense
         fallback={
-          <p className="text-sm text-muted-foreground">Loading providers…</p>
+          <div className="rounded-3xl border border-border/60 bg-muted/10 p-6 shadow-sm animate-pulse">
+            <p className="text-sm text-muted-foreground">Loading providers…</p>
+          </div>
         }
       >
         <ProvidersSection />
       </Suspense>
       <Suspense
         fallback={
-          <p className="text-sm text-muted-foreground">Loading tiers…</p>
+          <div className="rounded-3xl border border-border/60 bg-muted/10 p-6 shadow-sm animate-pulse">
+            <p className="text-sm text-muted-foreground">Loading tiers…</p>
+          </div>
         }
       >
         <TiersSection />

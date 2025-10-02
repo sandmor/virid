@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ModelPicker } from '@/components/admin/model-picker';
 
 export function ModelPickerFormFields({
@@ -11,6 +11,9 @@ export function ModelPickerFormFields({
   defaultValue?: string[];
 }) {
   const [models, setModels] = useState<string[]>(defaultValue);
+  useEffect(() => {
+    setModels(defaultValue);
+  }, [defaultValue]);
   return (
     <div className="space-y-2">
       <ModelPicker value={models} onChange={setModels} />
