@@ -3,10 +3,10 @@ import { getModelCapabilities } from '@/lib/ai/model-capabilities';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { modelId: string } }
+  { params }: { params: Promise<{ modelId: string }> }
 ) {
   try {
-    const modelId = decodeURIComponent(params.modelId);
+    const { modelId } = await params;
     const capabilities = await getModelCapabilities(modelId);
 
     if (!capabilities) {

@@ -94,10 +94,8 @@ export function ReasoningEffortSelector({
   );
 
   useEffect(() => {
-    // Sync external changes
-    if (selectedEffort !== syncedEffortRef.current) {
-      syncedEffortRef.current = selectedEffort;
-    }
+    // Sync ref when selectedEffort changes from parent
+    syncedEffortRef.current = selectedEffort;
   }, [selectedEffort]);
 
   const selectedOption = REASONING_OPTIONS.find(

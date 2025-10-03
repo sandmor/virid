@@ -157,9 +157,15 @@ export function Chat({
     stagedReasoningEffortRef.current = stagedReasoningEffort;
   }, [stagedReasoningEffort]);
 
+  const settingsVersionRef = useRef(0);
   useEffect(() => {
     const settings = chatSettingsData?.settings;
     if (!settings) return;
+
+    // Only sync from server if chat has started (avoid overwriting staged settings)
+    if (!chatHasStartedRef.current) return;
+
+    settingsVersionRef.current += 1;
 
     const normalizedEffort = normalizeReasoningEffort(settings.reasoningEffort);
     if (normalizedEffort !== stagedReasoningEffortRef.current) {

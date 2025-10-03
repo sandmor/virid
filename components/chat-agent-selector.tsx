@@ -91,22 +91,9 @@ export function ChatAgentSelector({
   };
 
   useEffect(() => {
-    // When parent props change (external sync), notify parent but mark as non-user-initiated
-    if (!canModify || !onSelectAgent) return;
-    if (!selectedAgentId) {
-      if (syncedAgentRef.current !== null) {
-        // sync back to parent without causing persistence
-        const res = onSelectAgent(null, { userInitiated: false });
-        // if parent returned a promise, avoid awaiting here; just mark synced immediately
-        syncedAgentRef.current = null;
-      }
-      return;
-    }
-    if (!effectiveSelected) return;
-    if (syncedAgentRef.current === selectedAgentId) return;
-    const res = onSelectAgent(effectiveSelected, { userInitiated: false });
-    syncedAgentRef.current = selectedAgentId;
-  }, [canModify, onSelectAgent, selectedAgentId, effectiveSelected]);
+    // Sync ref when selectedAgentId changes from parent
+    syncedAgentRef.current = selectedAgentId ?? null;
+  }, [selectedAgentId]);
 
   return (
     <Popover

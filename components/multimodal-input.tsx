@@ -22,6 +22,7 @@ import { saveChatModelAsCookie } from '@/app/(chat)/actions';
 import { SelectItem } from '@/components/ui/select';
 import { deriveChatModel } from '@/lib/ai/models';
 import { displayProviderName } from '@/lib/ai/registry';
+import { useModelCapabilities } from '@/hooks/use-model-capabilities';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
 import { cn } from '@/lib/utils';
@@ -156,6 +157,46 @@ function PureMultimodalInput({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadQueue, setUploadQueue] = useState<string[]>([]);
+  const { data: modelCapabilities, isLoading: isLoadingCapabilities } =
+    useModelCapabilities(selectedModelId);
+
+  const supportsAttachments = useMemo(() => {
+    if (modelCapabilities === null) {
+      return false;
+    }
+    if (!modelCapabilities) {
+      return true;
+    }
+    const formats = modelCapabilities.supportedFormats;
+    return formats.includes('image') || formats.includes('file');
+  }, [modelCapabilities]);
+
+  useEffect(() => {
+    if (supportsAttachments) {
+      return;
+    }
+
+    let cleared = false;
+    setAttachments((current) => {
+      if (current.length === 0) {
+        return current;
+      }
+      cleared = true;
+      return [];
+    });
+
+    if (cleared) {
+      toast.warning(
+        'Attachments cleared because the selected model does not support them.'
+      );
+    }
+
+    setUploadQueue([]);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, [supportsAttachments, setAttachments, setUploadQueue]);
 
   const submitForm = useCallback(() => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
@@ -234,6 +275,12 @@ function PureMultimodalInput({
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
+      if (!supportsAttachments) {
+        event.target.value = '';
+        toast.error('Attachments are not supported by the selected model.');
+        return;
+      }
+
       const files = Array.from(event.target.files || []);
 
       setUploadQueue(files.map((file) => file.name));
@@ -255,7 +302,7 @@ function PureMultimodalInput({
         setUploadQueue([]);
       }
     },
-    [setAttachments, uploadFile]
+    [setAttachments, uploadFile, supportsAttachments]
   );
 
   return (
@@ -277,6 +324,8 @@ function PureMultimodalInput({
         ref={fileInputRef}
         tabIndex={-1}
         type="file"
+        disabled={!supportsAttachments}
+        aria-disabled={!supportsAttachments}
       />
 
       <PromptInput
@@ -342,7 +391,14 @@ function PureMultimodalInput({
         </div>
         <PromptInputToolbar className="!border-top-0 border-t-0! p-0 shadow-none dark:border-0 dark:border-transparent!">
           <PromptInputTools className="gap-0 sm:gap-0.5">
-            <AttachmentsButton fileInputRef={fileInputRef} status={status} />
+            <AttachmentsButton
+              fileInputRef={fileInputRef}
+              status={status}
+              supportsAttachments={supportsAttachments}
+              isCheckingCapabilities={
+                isLoadingCapabilities && modelCapabilities === undefined
+              }
+            />
             <ModelSelectorCompact
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
@@ -393,6 +449,9 @@ export const MultimodalInput = memo(
     if (prevProps.selectedModelId !== nextProps.selectedModelId) {
       return false;
     }
+    if (prevProps.reasoningEffort !== nextProps.reasoningEffort) {
+      return false;
+    }
 
     return true;
   }
@@ -401,17 +460,38 @@ export const MultimodalInput = memo(
 function PureAttachmentsButton({
   fileInputRef,
   status,
+  supportsAttachments,
+  isCheckingCapabilities,
 }: {
   fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
   status: UseChatHelpers<ChatMessage>['status'];
+  supportsAttachments: boolean;
+  isCheckingCapabilities: boolean;
 }) {
+  const isDisabled =
+    status !== 'ready' || !supportsAttachments || isCheckingCapabilities;
+  const disabledReason = !supportsAttachments
+    ? 'Attachments are disabled for this model.'
+    : isCheckingCapabilities
+      ? 'Checking model capabilities…'
+      : status !== 'ready'
+        ? 'Please wait for the current response to finish.'
+        : undefined;
+
   return (
     <Button
       className="aspect-square h-8 rounded-lg p-1 transition-colors hover:bg-accent"
       data-testid="attachments-button"
-      disabled={status !== 'ready'}
+      disabled={isDisabled}
+      title={disabledReason}
       onClick={(event) => {
         event.preventDefault();
+        if (isDisabled) {
+          if (!supportsAttachments) {
+            toast.error('Attachments are not supported by the selected model.');
+          }
+          return;
+        }
         fileInputRef.current?.click();
       }}
       variant="ghost"

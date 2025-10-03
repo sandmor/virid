@@ -13,13 +13,15 @@ import { normalizeModelId } from '@/lib/agent-settings';
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await getAppSession();
 
   if (!session) {
     redirect('/api/auth/guest');
   }
+
+  const resolvedSearchParams = await searchParams;
 
   const id = generateUUID();
 
@@ -31,8 +33,8 @@ export default async function Page({
   );
   // Check for agentId
   const agentId =
-    typeof searchParams?.agentId === 'string'
-      ? searchParams.agentId
+    typeof resolvedSearchParams?.agentId === 'string'
+      ? resolvedSearchParams.agentId
       : undefined;
   let initialAgent: Pick<
     AgentModel,

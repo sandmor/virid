@@ -51,15 +51,15 @@ async function prefetchAgents() {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await getAppSession();
   if (!session?.user) redirect('/login');
   const { modelIds: allowedModels } = await getTierForUserType(
     session.user.type
   );
-  const tabParam =
-    typeof searchParams?.tab === 'string' ? searchParams!.tab : undefined;
+  const params = await searchParams;
+  const tabParam = typeof params?.tab === 'string' ? params.tab : undefined;
   const adminAllowed = await isAdmin();
   const defaultTab =
     tabParam === 'admin' && adminAllowed
