@@ -263,15 +263,23 @@ export function Chat({
       const newAgentId = agent?.id ?? null;
       if (selectedAgentId === newAgentId) return;
 
-      try {
-        if (userInitiated) {
+      const shouldPersistSelection = userInitiated && chatHasStartedRef.current;
+
+      if (shouldPersistSelection) {
+        try {
           await fetchWithErrorHandlers(`/api/chat/settings`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chatId: id, agentId: newAgentId }),
           });
+        } catch (error) {
+          console.error('Failed to update chat agent', error);
+          toast({ type: 'error', description: 'Failed to update chat agent' });
+          return;
         }
+      }
 
+      try {
         if (agent) {
           setSelectedAgent({
             id: agent.id,
@@ -291,8 +299,11 @@ export function Chat({
         );
         setStagedAllowedTools(normalizeAllowedTools(settings?.tools?.allow));
       } catch (error) {
-        console.error('Failed to update chat agent', error);
-        toast({ type: 'error', description: 'Failed to update chat agent' });
+        console.error('Failed to apply chat agent selection', error);
+        toast({
+          type: 'error',
+          description: 'Failed to apply chat agent selection',
+        });
       }
     },
     [id, selectedAgentId]
@@ -522,7 +533,7 @@ export function Chat({
       let previousMessages: ChatMessage[] = [];
       let previousSelection: string[] = [];
       setMessages((current) => {
-        previousMessages = current;
+        previousMessages = [...current];
         return current.filter((message) => message.id !== messageId);
       });
       setSelectedMessageIds((current) => {
@@ -584,7 +595,7 @@ export function Chat({
       let previousSelection: string[] = [];
 
       setMessages((current) => {
-        previousMessages = current;
+        previousMessages = [...current];
         return current.filter((message) => !idsToDelete.includes(message.id));
       });
 
@@ -681,7 +692,7 @@ export function Chat({
     setIsBulkDeleting(true);
     let previousMessages: ChatMessage[] = [];
     setMessages((current) => {
-      previousMessages = current;
+      previousMessages = [...current];
       return current.filter((message) => !ids.includes(message.id));
     });
 
@@ -802,6 +813,7 @@ export function Chat({
           chatHasStarted={chatHasStartedRef.current}
           selectedAgentId={selectedAgentId}
           selectedAgentLabel={selectedAgent?.name}
+          onSelectAgent={handleSelectAgent}
           stagedAllowedTools={stagedAllowedTools}
           onUpdateStagedAllowedTools={handleUpdateStagedAllowedTools}
           selectedModelId={currentModelId}

@@ -41,7 +41,10 @@ function PureChatHeader({
   onUpdateStagedAllowedTools?: (tools: string[] | undefined) => void;
   selectedAgentId?: string;
   selectedAgentLabel?: string | null;
-  onSelectAgent?: (agent: AgentPreset | null) => void;
+  onSelectAgent?: (
+    agent: AgentPreset | null,
+    options?: { userInitiated?: boolean }
+  ) => void | Promise<void>;
   selectedModelId?: string;
   selectedModelCapabilities?: ChatModelCapabilitiesSummary | null;
 }) {
@@ -134,6 +137,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
     (nextProps.selectedAgentLabel ?? '')
   )
     return false;
+  if (prevProps.onSelectAgent !== nextProps.onSelectAgent) return false;
   if ((prevProps.selectedModelId ?? '') !== (nextProps.selectedModelId ?? ''))
     return false;
 
