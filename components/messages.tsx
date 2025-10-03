@@ -3,7 +3,6 @@ import equal from 'fast-deep-equal';
 import { ArrowDownIcon } from 'lucide-react';
 import { memo, useEffect } from 'react';
 import { useMessages } from '@/hooks/use-messages';
-import type { Vote } from '@/lib/db/schema';
 import type { ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
 import { Conversation, ConversationContent } from './elements/conversation';
@@ -13,7 +12,6 @@ import { PreviewMessage, ThinkingMessage } from './message';
 type MessagesProps = {
   chatId: string;
   status: UseChatHelpers<ChatMessage>['status'];
-  votes: Vote[] | undefined;
   messages: ChatMessage[];
   isReadonly: boolean;
   isArtifactVisible: boolean;
@@ -32,7 +30,6 @@ type MessagesProps = {
 function PureMessages({
   chatId,
   status,
-  votes,
   messages,
   isReadonly,
   onDeleteMessage,
@@ -97,11 +94,6 @@ function PureMessages({
               isSelected={selectedMessageIds.has(message.id)}
               isSelectionMode={isSelectionMode}
               onRegenerateAssistant={onRegenerateAssistant}
-              vote={
-                votes
-                  ? votes.find((vote) => vote.messageId === message.id)
-                  : undefined
-              }
               disableRegenerate={disableRegenerate}
             />
           ))}
@@ -149,7 +141,6 @@ export const Messages = memo(PureMessages, (prevProps, nextProps) => {
   if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
   if (prevProps.messages.length !== nextProps.messages.length) return false;
   if (!equal(prevProps.messages, nextProps.messages)) return false;
-  if (!equal(prevProps.votes, nextProps.votes)) return false;
 
   // Props are equal — skip rerender
   return true;

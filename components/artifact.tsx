@@ -17,7 +17,7 @@ import { imageArtifact } from '@/artifacts/image/client';
 import { sheetArtifact } from '@/artifacts/sheet/client';
 import { textArtifact } from '@/artifacts/text/client';
 import { useArtifact } from '@/hooks/use-artifact';
-import type { Document, Vote } from '@/lib/db/schema';
+import type { Document } from '@/lib/db/schema';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { fetcher } from '@/lib/utils';
 import { ArtifactActions } from './artifact-actions';
@@ -66,7 +66,6 @@ function PureArtifact({
   onDeleteMessage,
   onDeleteMessageCascade,
   setMessages,
-  votes,
   isReadonly,
   selectedVisibilityType,
   selectedModelId,
@@ -88,7 +87,6 @@ function PureArtifact({
     messageId: string
   ) => Promise<{ chatDeleted: boolean }>;
   setMessages: UseChatHelpers<ChatMessage>['setMessages'];
-  votes: Vote[] | undefined;
   sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
   isReadonly: boolean;
   selectedVisibilityType: VisibilityType;
@@ -343,7 +341,6 @@ function PureArtifact({
                   selectedMessageIds={selectedMessageIds}
                   isSelectionMode={isSelectionMode}
                   status={status}
-                  votes={votes}
                 />
 
                 <div className="relative flex w-full flex-row items-end gap-2 px-4 pb-4">
@@ -539,9 +536,6 @@ export const Artifact = memo(PureArtifact, (prevProps, nextProps) => {
     return false;
   }
   if (prevProps.selectedMessageIds !== nextProps.selectedMessageIds) {
-    return false;
-  }
-  if (!equal(prevProps.votes, nextProps.votes)) {
     return false;
   }
   if (prevProps.input !== nextProps.input) {

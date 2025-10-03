@@ -2,7 +2,6 @@
 import equal from 'fast-deep-equal';
 import { motion } from 'framer-motion';
 import { memo, useState } from 'react';
-import type { Vote } from '@/lib/db/schema';
 import type { ChatMessage } from '@/lib/types';
 import { cn, sanitizeText } from '@/lib/utils';
 import { useDataStream } from './data-stream-provider';
@@ -29,7 +28,6 @@ import { DiffView } from './diffview';
 const PurePreviewMessage = ({
   chatId,
   message,
-  vote,
   isLoading,
   isReadonly,
   requiresScrollPadding,
@@ -43,7 +41,6 @@ const PurePreviewMessage = ({
 }: {
   chatId: string;
   message: ChatMessage;
-  vote: Vote | undefined;
   isLoading: boolean;
   isReadonly: boolean;
   requiresScrollPadding: boolean;
@@ -507,7 +504,6 @@ const PurePreviewMessage = ({
               key={`action-${message.id}`}
               message={message}
               setMode={setMode}
-              vote={vote}
               onRegenerate={onRegenerateAssistant}
               disableRegenerate={disableRegenerate}
               onDelete={onDeleteMessage}
@@ -548,9 +544,6 @@ export const PreviewMessage = memo(
 
     // re-render if message parts change
     if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
-
-    // re-render if vote state changes
-    if (!equal(prevProps.vote, nextProps.vote)) return false;
 
     // re-render if metadata that affects UI (createdAt or model) changed
     if (

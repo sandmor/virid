@@ -1,9 +1,7 @@
 import type { UseChatHelpers } from '@ai-sdk/react';
-import equal from 'fast-deep-equal';
 import { motion } from 'framer-motion';
 import { memo } from 'react';
 import { useMessages } from '@/hooks/use-messages';
-import type { Vote } from '@/lib/db/schema';
 import type { ChatMessage } from '@/lib/types';
 import type { UIArtifact } from './artifact';
 import { PreviewMessage, ThinkingMessage } from './message';
@@ -11,7 +9,6 @@ import { PreviewMessage, ThinkingMessage } from './message';
 type ArtifactMessagesProps = {
   chatId: string;
   status: UseChatHelpers<ChatMessage>['status'];
-  votes: Vote[] | undefined;
   messages: ChatMessage[];
   isReadonly: boolean;
   artifactStatus: UIArtifact['status'];
@@ -27,7 +24,6 @@ type ArtifactMessagesProps = {
 function PureArtifactMessages({
   chatId,
   status,
-  votes,
   messages,
   isReadonly,
   onDeleteMessage,
@@ -66,11 +62,6 @@ function PureArtifactMessages({
           onToggleSelectMessage={onToggleSelectMessage}
           isSelected={selectedMessageIds.has(message.id)}
           isSelectionMode={isSelectionMode}
-          vote={
-            votes
-              ? votes.find((vote) => vote.messageId === message.id)
-              : undefined
-          }
         />
       ))}
 
@@ -122,9 +113,6 @@ function areEqual(
     return false;
   }
   if (prevProps.messages.length !== nextProps.messages.length) {
-    return false;
-  }
-  if (!equal(prevProps.votes, nextProps.votes)) {
     return false;
   }
 

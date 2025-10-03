@@ -1,20 +1,11 @@
-import equal from 'fast-deep-equal';
 import { memo, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCopyToClipboard } from 'usehooks-ts';
-import type { Vote } from '@/lib/db/schema';
 import type { ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Action, Actions } from './elements/actions';
-import {
-  Copy,
-  Pencil,
-  ThumbsUp,
-  ThumbsDown,
-  RotateCcw,
-  Trash2,
-} from 'lucide-react';
+import { Copy, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 import { ChatSDKError } from '@/lib/errors';
 import {
   AlertDialog,
@@ -32,7 +23,6 @@ import { buttonVariants } from '@/components/ui/button';
 export function PureMessageActions({
   chatId,
   message,
-  vote,
   isLoading,
   setMode,
   onRegenerate,
@@ -46,7 +36,6 @@ export function PureMessageActions({
 }: {
   chatId: string;
   message: ChatMessage;
-  vote: Vote | undefined;
   isLoading: boolean;
   setMode?: (mode: 'view' | 'edit') => void;
   onRegenerate?: (assistantMessageId: string) => void;
@@ -59,70 +48,8 @@ export function PureMessageActions({
   isSelectionMode?: boolean;
 }) {
   const queryClient = useQueryClient();
-  const voteQueryKey = ['chat', 'votes', chatId];
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const upvoteMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch('/api/vote', {
-        method: 'PATCH',
-        body: JSON.stringify({ chatId, messageId: message.id, type: 'up' }),
-      });
-      if (!res.ok) throw new Error('Failed to upvote');
-      return res.json().catch(() => ({}));
-    },
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: voteQueryKey });
-      const prev = queryClient.getQueryData<Vote[] | undefined>(voteQueryKey);
-      queryClient.setQueryData<Vote[] | undefined>(voteQueryKey, (current) => {
-        const safe = current || [];
-        const filtered = safe.filter((v) => v.messageId !== message.id);
-        return [
-          ...filtered,
-          { chatId, messageId: message.id, isUpvoted: true } as Vote,
-        ];
-      });
-      return { prev };
-    },
-    onError: (_e, _v, ctx) => {
-      if (ctx?.prev) queryClient.setQueryData(voteQueryKey, ctx.prev);
-      toast.error('Failed to upvote response.');
-    },
-    onSuccess: () => {
-      toast.success('Upvoted Response!');
-    },
-  });
-
-  const downvoteMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch('/api/vote', {
-        method: 'PATCH',
-        body: JSON.stringify({ chatId, messageId: message.id, type: 'down' }),
-      });
-      if (!res.ok) throw new Error('Failed to downvote');
-      return res.json().catch(() => ({}));
-    },
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: voteQueryKey });
-      const prev = queryClient.getQueryData<Vote[] | undefined>(voteQueryKey);
-      queryClient.setQueryData<Vote[] | undefined>(voteQueryKey, (current) => {
-        const safe = current || [];
-        const filtered = safe.filter((v) => v.messageId !== message.id);
-        return [
-          ...filtered,
-          { chatId, messageId: message.id, isUpvoted: false } as Vote,
-        ];
-      });
-      return { prev };
-    },
-    onError: (_e, _v, ctx) => {
-      if (ctx?.prev) queryClient.setQueryData(voteQueryKey, ctx.prev);
-      toast.error('Failed to downvote response.');
-    },
-    onSuccess: () => {
-      toast.success('Downvoted Response!');
-    },
-  });
   const [_, copyToClipboard] = useCopyToClipboard();
 
   type DeleteMode = 'single' | 'cascade';
@@ -306,7 +233,7 @@ export function PureMessageActions({
     <div className="flex items-center gap-2 -ml-0.5">
       <Actions>
         <div className="relative">
-          {/* Primary actions: Copy, Upvote, Downvote */}
+          {/* Primary actions: Copy */}
           {onToggleSelect && (
             <Action
               aria-pressed={isSelected}
@@ -319,28 +246,6 @@ export function PureMessageActions({
           {renderDeleteAction()}
           <Action onClick={handleCopy} tooltip="Copy">
             <Copy size={16} />
-          </Action>
-
-          <Action
-            data-testid="message-upvote"
-            disabled={vote?.isUpvoted}
-            onClick={() => {
-              upvoteMutation.mutate();
-            }}
-            tooltip="Upvote Response"
-          >
-            <ThumbsUp size={16} />
-          </Action>
-
-          <Action
-            data-testid="message-downvote"
-            disabled={vote && !vote.isUpvoted}
-            onClick={() => {
-              downvoteMutation.mutate();
-            }}
-            tooltip="Downvote Response"
-          >
-            <ThumbsDown size={16} />
           </Action>
 
           {/* Secondary actions: Edit then Regenerate (last two) */}
@@ -384,9 +289,6 @@ export const MessageActions = memo(
       return false;
     }
     if (prevProps.isSelectionMode !== nextProps.isSelectionMode) {
-      return false;
-    }
-    if (!equal(prevProps.vote, nextProps.vote)) {
       return false;
     }
     if (prevProps.isLoading !== nextProps.isLoading) {

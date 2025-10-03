@@ -95,7 +95,6 @@ model Chat {
   user                 User                     @relation(fields: [userId], references: [id])
   agent                Agent?                   @relation(fields: [agentId], references: [id])
   messages             Message[]
-  votes                Vote[]
   streams              Stream[]
   pinnedArchiveEntries ChatPinnedArchiveEntry[]
 
@@ -112,23 +111,10 @@ model Message {
   createdAt   DateTime
   model       String?
 
-  chat  Chat   @relation(fields: [chatId], references: [id])
-  votes Vote[]
+  chat Chat @relation(fields: [chatId], references: [id])
 
   @@index([chatId])
   @@map("Message")
-}
-
-model Vote {
-  chatId    String  @db.Uuid
-  messageId String  @db.Uuid
-  isUpvoted Boolean
-
-  message Message @relation(fields: [messageId], references: [id])
-  chat    Chat    @relation(fields: [chatId], references: [id])
-
-  @@id([chatId, messageId])
-  @@map("Vote")
 }
 
 model Document {

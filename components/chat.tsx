@@ -14,7 +14,7 @@ import {
   useUpdateModelId,
   useUpdateReasoningEffort,
 } from '@/hooks/use-chat-settings';
-import type { ChatSettings, Vote } from '@/lib/db/schema';
+import type { ChatSettings } from '@/lib/db/schema';
 import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
@@ -465,13 +465,6 @@ export function Chat({
     window.history.replaceState({}, '', `/chat/${id}`);
   }, [regenerateParam, messages, regenerate, id]);
 
-  const { data: votes } = useQuery<Vote[] | undefined>({
-    queryKey: ['chat', 'votes', id],
-    queryFn: async () => fetcher(`/api/vote?chatId=${id}`),
-    enabled: messages.length >= 2,
-    staleTime: 30_000,
-  });
-
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
   const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
@@ -525,14 +518,6 @@ export function Chat({
 
         const payload = await response.json().catch(() => null);
         const chatDeleted = Boolean(payload?.chatDeleted);
-
-        queryClient.setQueryData<Vote[] | undefined>(
-          ['chat', 'votes', id],
-          (current) =>
-            current
-              ? current.filter((vote) => vote.messageId !== messageId)
-              : current
-        );
 
         if (chatDeleted || messagesRef.current.length === 0) {
           handleChatDeleted();
@@ -597,14 +582,6 @@ export function Chat({
         );
         const payload = await response.json().catch(() => null);
         const chatDeleted = Boolean(payload?.chatDeleted);
-
-        queryClient.setQueryData<Vote[] | undefined>(
-          ['chat', 'votes', id],
-          (current) =>
-            current
-              ? current.filter((vote) => !idsToDelete.includes(vote.messageId))
-              : current
-        );
 
         if (chatDeleted || messagesRef.current.length === 0) {
           handleChatDeleted();
@@ -697,14 +674,6 @@ export function Chat({
 
       const payload = await response.json().catch(() => null);
       const chatDeleted = Boolean(payload?.chatDeleted);
-
-      queryClient.setQueryData<Vote[] | undefined>(
-        ['chat', 'votes', id],
-        (current) =>
-          current
-            ? current.filter((vote) => !ids.includes(vote.messageId))
-            : current
-      );
 
       setSelectedMessageIds([]);
 
@@ -831,7 +800,6 @@ export function Chat({
           onRegenerateAssistant={handleForkRegenerate}
           selectedModelId={currentModelId}
           status={status}
-          votes={votes}
           disableRegenerate={isForking}
         />
 
@@ -919,7 +887,6 @@ export function Chat({
           setMessages={setMessages}
           status={status}
           stop={stop}
-          votes={votes}
           allowedModels={allowedModels}
         />
       </div>

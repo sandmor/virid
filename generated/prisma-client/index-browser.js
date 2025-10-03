@@ -178,12 +178,6 @@ exports.Prisma.MessageScalarFieldEnum = {
   model: 'model'
 };
 
-exports.Prisma.VoteScalarFieldEnum = {
-  chatId: 'chatId',
-  messageId: 'messageId',
-  isUpvoted: 'isUpvoted'
-};
-
 exports.Prisma.DocumentScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -288,7 +282,6 @@ exports.Prisma.ModelName = {
   Agent: 'Agent',
   Chat: 'Chat',
   Message: 'Message',
-  Vote: 'Vote',
   Document: 'Document',
   Suggestion: 'Suggestion',
   Stream: 'Stream',

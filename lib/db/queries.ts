@@ -54,7 +54,6 @@ export async function saveChat({
 export async function deleteChatById({ id }: { id: string }): Promise<Chat> {
   try {
     // Cascades are not defined; delete manually in correct order.
-    await prisma.vote.deleteMany({ where: { chatId: id } });
     await prisma.message.deleteMany({ where: { chatId: id } });
     await prisma.stream.deleteMany({ where: { chatId: id } });
 
@@ -468,47 +467,6 @@ export async function forkChat({
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to fork chat (simplified)'
-    );
-  }
-}
-
-export async function voteMessage({
-  chatId,
-  messageId,
-  type,
-}: {
-  chatId: string;
-  messageId: string;
-  type: 'up' | 'down';
-}) {
-  try {
-    const existingVote = await prisma.vote.findUnique({
-      where: { chatId_messageId: { chatId, messageId } },
-    });
-
-    if (existingVote) {
-      await prisma.vote.update({
-        where: { chatId_messageId: { chatId, messageId } },
-        data: { isUpvoted: type === 'up' },
-      });
-      return;
-    }
-    await prisma.vote.create({
-      data: { chatId, messageId, isUpvoted: type === 'up' },
-    });
-    return;
-  } catch (_error) {
-    throw new ChatSDKError('bad_request:database', 'Failed to vote message');
-  }
-}
-
-export async function getVotesByChatId({ id }: { id: string }) {
-  try {
-    return await prisma.vote.findMany({ where: { chatId: id } });
-  } catch (_error) {
-    throw new ChatSDKError(
-      'bad_request:database',
-      'Failed to get votes by chat id'
     );
   }
 }
@@ -1172,9 +1130,6 @@ export async function deleteMessagesByChatIdAfterTimestamp({
     );
 
     if (messageIds.length > 0) {
-      await prisma.vote.deleteMany({
-        where: { chatId, messageId: { in: messageIds } },
-      });
       await prisma.message.deleteMany({
         where: { chatId, id: { in: messageIds } },
       });
@@ -1230,10 +1185,6 @@ export async function deleteMessageById({
         );
       }
 
-      await tx.vote.deleteMany({
-        where: { chatId, messageId },
-      });
-
       await tx.message.delete({ where: { id: messageId } });
 
       const remainingMessages = await tx.message.count({
@@ -1241,7 +1192,6 @@ export async function deleteMessageById({
       });
 
       if (remainingMessages === 0) {
-        await tx.vote.deleteMany({ where: { chatId } });
         await tx.stream.deleteMany({ where: { chatId } });
         await tx.chat.delete({ where: { id: chatId } });
 
@@ -1308,10 +1258,6 @@ export async function deleteMessagesByIds({
         }
       }
 
-      await tx.vote.deleteMany({
-        where: { chatId, messageId: { in: messageIds } },
-      });
-
       const deleted = await tx.message.deleteMany({
         where: { id: { in: messageIds } },
       });
@@ -1321,7 +1267,6 @@ export async function deleteMessagesByIds({
       });
 
       if (remainingMessages === 0) {
-        await tx.vote.deleteMany({ where: { chatId } });
         await tx.stream.deleteMany({ where: { chatId } });
         await tx.chat.delete({ where: { id: chatId } });
 

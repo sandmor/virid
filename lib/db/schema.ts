@@ -39,6 +39,3 @@ export type ArchiveLink = Prisma.ArchiveLinkGetPayload<{}>;
 
 // Message is the current message table used by the app
 export type DBMessage = Prisma.MessageGetPayload<{}>;
-
-// Current vote type used by UI components
-export type Vote = Prisma.VoteGetPayload<{}>;

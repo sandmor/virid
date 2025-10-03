@@ -13,7 +13,6 @@ export type Surface =
   | 'stream'
   | 'database'
   | 'history'
-  | 'vote'
   | 'document'
   | 'suggestions'
   | 'model'; // model entitlement / access errors
@@ -29,7 +28,6 @@ export const visibilityBySurface: Record<Surface, ErrorVisibility> = {
   stream: 'response',
   api: 'response',
   history: 'response',
-  vote: 'response',
   document: 'response',
   suggestions: 'response',
   model: 'response',

@@ -1,6 +1,6 @@
 <h1 align="center">Virid Chat</h1>
 
-Advanced multimodal AI chat application built with Next.js 15, React 19, and the AI SDK. Features a sophisticated artifact system, persistent memory archive, and comprehensive admin controls.
+Advanced multimodal AI chat application built with Next.js 15 (App Router), React 19, Prisma & PostgreSQL. It features a structured artifact system, persistent memory archive, tier‑aware model registry, runtime model capability introspection, and granular administrative controls.
 
 <p align="center">
   <a href="#features"><strong>Features</strong></a> ·
@@ -18,52 +18,55 @@ Advanced multimodal AI chat application built with Next.js 15, React 19, and the
 
 ### Core Chat Experience
 
-- **Multimodal Conversations**: Support for text, images, and file attachments
-- **Real-time Streaming**: Live response streaming with AI SDK
-- **Chat Management**: Fork conversations, track message lineage, vote on responses
-- **Auto-resume**: Continue conversations seamlessly across sessions
-- **Rate Limiting**: Token bucket system with configurable refill rates
+- **Multimodal Conversations**: Text plus model-dependent support for image/file/audio (auto-derived from model capabilities)
+- **Live Streaming**: Incremental token + tool call streaming via AI SDK (`ai` v5)
+- **Conversation Lineage**: Fork chats from any message (parent/fork metadata persisted in `Chat` table)
+- **Auto-Resume**: Recent context & pinned archive memory automatically reattached on reload
+- **Token Bucket Rate Limiting**: Per-tier configurable capacity/refill stored in `Tier` + per-user runtime state in `UserRateLimit`
+- **Guest & Auth Modes**: Seamless anonymous upgrade path without losing context
 
 ### Advanced AI Integration
 
-- **Unified Provider API**: Single interface for multiple AI providers (OpenRouter, OpenAI, Google Gemini)
-- **Dynamic Model Selection**: Choose from various models based on user tier
-- **Tool Calling**: AI can use specialized tools for enhanced capabilities
-- **Context Preservation**: Maintains conversation context and user preferences
+- **Unified Provider Layer**: OpenRouter, OpenAI, Google (Gemini) exposed through a single abstraction
+- **Dynamic Entitlements**: Runtime tier lookup (guest/regular) resolves allowed model IDs
+- **Capability Introspection**: Model capabilities (tool support, formats) persisted & auto-synced (OpenRouter catalog fetch with fallback defaults)
+- **Selective Tool Access**: Agents/chats may restrict tool allow-lists (see `agent-settings` serialization)
+- **Context Preservation**: Persisted `lastContext`, pinned archive entries, and agent settings
 
 ### Artifacts System
 
-AI-generated collaborative documents that enhance conversations:
+AI-generated & user-editable structured documents that can be created inline during a conversation:
 
-- **Text Artifacts**: Rich text documents with editing and suggestions
-- **Code Artifacts**: Syntax-highlighted code with live editing and execution
-- **Image Artifacts**: AI-generated images with editing capabilities
-- **Sheet Artifacts**: CSV data with interactive data grid visualization
+- **Text Artifacts**: ProseMirror rich text w/ suggestion tracking (stored in `Document` / `Suggestion` tables)
+- **Code Artifacts**: CodeMirror editing + diff & syntax highlighting (execution hooks pluggable)
+- **Image Artifacts**: Generation via multimodal-capable models; editing UI (client-side transformations)
+- **Sheet Artifacts**: CSV / tabular data rendered using React Data Grid with editing & export
 
 ### Archive Memory System
 
-Persistent, searchable knowledge base for long-term memory:
+Persistent, per-user, queryable knowledge base powering long‑term conversational memory:
 
-- **Knowledge Entries**: Store facts, preferences, and relationships
-- **Semantic Linking**: Connect related concepts with bidirectional relationships
-- **AI Integration**: Archive tools allow AI to remember and retrieve information
-- **Search & Discovery**: Full-text search with tag-based filtering
+- **Entries**: `ArchiveEntry` entities (slug, tags, body) with automatic timestamps
+- **Semantic Links**: Directed edges (`ArchiveLink`) with optional bidirectionality
+- **Pinned Context**: `ChatPinnedArchiveEntry` join table injects selected memories into prompt scaffolding
+- **AI Tools**: Tool layer can create/update/link archive entries on demand
+- **Query & Filter**: Tag & (planned) full‑text search over entries (implementation hooks prepared)
 
 ### Authentication & Security
 
-- **Clerk Integration**: Enterprise-grade authentication with SSO support
-- **Guest Mode**: Anonymous access with limited model availability
-- **Session Management**: Secure cookie-based sessions for guests
-- **Model Entitlements**: Tier-based access control for AI models
+- **Clerk**: OAuth / SSO & user management (regular users)
+- **Guest Mode**: Cookie-scoped ephemeral identity (pattern `guest-\d+`) with restricted models
+- **Admin Assertion**: First-class admin via `ADMIN_USER_ID` (preferred) or fallback `ADMIN_EMAIL`
+- **Tier Enforcement**: Model & rate limit entitlements resolved per user type
 
 ### Admin Dashboard
 
-Comprehensive administrative controls:
+Operational management interface (in progress / evolving):
 
-- **Provider Management**: Override API keys per provider
-- **Tier Configuration**: Manage user tiers, rate limits, and model access
-- **Usage Monitoring**: Track API usage and system performance
-- **Model Catalog**: Curate available models and their capabilities
+- **Provider API Keys**: Database overrides trump environment variables (`Provider` table)
+- **Tier Management**: Adjust model allow lists + bucket config (backed by `Tier` rows, with fallbacks if missing)
+- **Model Capabilities**: View persisted model capability matrix & usage (referenced by tiers)
+- **Housekeeping Tasks**: Planned actions (sync OpenRouter models, prune unused capabilities)
 
 ## Artifacts
 
@@ -78,10 +81,10 @@ The artifact system enables AI to create and manipulate structured content durin
 
 ### Code Artifacts
 
-- Syntax highlighting with CodeMirror
-- Multiple language support
-- Live code execution and validation
-- Code completion and refactoring suggestions
+- Syntax highlighting (CodeMirror + Shiki hybrid for static render / diff)
+- Multi-language editing (JS/TS, Python, others extendable)
+- Draft vs current rendering + diff visualization
+- (Pluggable) execution/refactor hooks; suggestions stored similarly to text artifacts
 
 ### Image Artifacts
 
@@ -128,12 +131,13 @@ The archive provides tools for AI assistants to:
 
 Provider-agnostic model registry supporting multiple AI providers:
 
-### Supported Models
+### Supported (Curated) Models
 
-- **GPT-5**: OpenAI's latest flagship model
-- **Gemini 2.5 Pro/Flash**: Google's advanced multimodal models
-- **Grok 4**: xAI's reasoning-focused model
-- **Kimi K2**: Moonshot's multilingual model
+Curated list included at build time (see `lib/ai/models.ts`). Capabilities may be further enriched automatically:
+
+- OpenAI: `gpt-5`
+- Google: `gemini-2.5-flash-image-preview`, `gemini-2.5-flash`, `gemini-2.5-pro`
+- OpenRouter Aggregated: `x-ai/grok-4`, `x-ai/grok-4-fast:free`, `moonshotai/kimi-k2:free`
 
 ### Provider Integration
 
@@ -144,9 +148,14 @@ Provider-agnostic model registry supporting multiple AI providers:
 
 ### Entitlement System
 
-- **Guest Tier**: Free models only (Grok 4 Fast, Kimi K2)
-- **Authenticated Tier**: Full model access with rate limiting
-- **Admin Override**: Custom tier configurations per user type
+Default tier definitions (fallback when DB rows absent):
+
+| Tier    | Models                                                   | Capacity | Refill | Interval |
+| ------- | -------------------------------------------------------- | -------- | ------ | -------- |
+| guest   | grok-4-fast:free, kimi-k2:free                           | 60       | 20     | 3600s    |
+| regular | gpt-5, gemini flash/pro variants, grok-4 (+ free models) | 300      | 100    | 3600s    |
+
+All values can be overridden by inserting/updating `Tier` rows.
 
 ## Auth
 
@@ -161,10 +170,9 @@ Flexible authentication system with enterprise and guest support:
 
 ### Guest Mode
 
-- **Cookie Sessions**: Secure anonymous access
-- **Fallback Authentication**: Seamless upgrade to full accounts
-- **Limited Access**: Free-tier models and basic features
-- **Data Isolation**: Separate handling for guest data
+- Cookie session identity; upgrade path to Clerk user without losing chats
+- Rate & model limitations inherited from `guest` tier
+- Data stored under synthetic `User` row keyed by guest id (no email requirement)
 
 ## Admin
 
@@ -187,59 +195,58 @@ Administrative interface for system management:
 
 ### Frontend
 
-- **Next.js 15**: App Router with React 19
-- **TypeScript**: Full type safety and developer experience
-- **Tailwind CSS v4**: Utility-first styling with modern features
-- **shadcn/ui**: High-quality component library
-- **Radix UI**: Accessible, unstyled UI primitives
-- **Framer Motion**: Smooth animations and transitions
+- Next.js 15 (App Router, React 19)
+- TypeScript + strict type surfaces
+- Tailwind CSS v4 + shadcn/ui + Radix primitives
+- Framer Motion for transitions
+- Progressive streaming UI using `@ai-sdk/react`
 
 ### Backend & Data
 
-- **AI SDK**: Unified interface for AI providers
-- **Prisma**: Type-safe database ORM
-- **PostgreSQL**: Primary data store (Neon Serverless)
-- **Redis**: Caching and rate limiting (Upstash)
-- **Vercel Blob**: File storage and CDN
+- AI SDK (`ai` v5) provider unification + streaming handlers
+- Prisma ORM with modular schema (model capabilities, archive, artifacts, rate limit)
+- PostgreSQL primary storage (Neon friendly)
+- Redis (optional) future caching / ephemeral coordination; current rate limiting uses PostgreSQL
+- Vercel Blob for file & artifact attachments
 
 ### Development & Deployment
 
-- **Bun**: Fast package manager and runtime
-- **Biome**: Lightning-fast linter and formatter
-- **Playwright**: End-to-end testing
-- **Vercel**: Deployment platform with edge functions
-- **OpenTelemetry**: Observability and monitoring
+- Bun (package manager + fast scripts)
+- ESLint + Prettier (configured) — (Biome mention removed; repo uses standard toolchain)
+- Playwright (E2E) harness ready (tests reside under `playwright/`)
+- OpenTelemetry instrumentation hooks (`instrumentation.ts`, `@vercel/otel`)
+- Deploy-first design for Vercel (Edge/Node hybrid)
 
 ### Key Libraries
 
-- **@ai-sdk/react**: React hooks for AI conversations
-- **@clerk/nextjs**: Authentication and user management
-- **@tanstack/react-query**: Data fetching and caching
-- **react-hook-form**: Form management with validation
-- **zod**: Runtime type validation
-- **date-fns**: Date manipulation utilities
+- `ai`, `@ai-sdk/react` (multimodal streaming + tool calls)
+- `@clerk/nextjs` (auth), `@tanstack/react-query`, `react-hook-form`, `zod`
+- ProseMirror + CodeMirror + Shiki (artifact editors)
+- `sonner` (toasts), `lucide-react` (icons), `framer-motion` (animation)
+- `diff-match-patch` + custom diff view components
 
 ## Running locally
 
 ### Prerequisites
 
-- Node.js 18+ or Bun
-- PostgreSQL database
-- Redis (optional, for rate limiting)
+- Node.js 18+ (or Bun runtime) — Bun v1.1.x recommended
+- PostgreSQL database (local, Docker, or Neon)
+- (Optional) Redis if extending caching strategies (not required for baseline)
 
 ### Setup
 
 ```bash
-# Install dependencies
+# 1. Install dependencies
 bun install
 
-# Set up database
-bun run db:migrate
+# 2. (First time) Push schema & generate client
+bun run db:push      # Applies schema without creating a migration (dev convenience)
+bun run db:generate  # Generates client to ./generated/prisma-client
 
-# Generate Prisma client
-bun run db:generate
+# Alternatively create an initial migration (idempotent if already created)
+bun run db:migrate   # prisma migrate dev --name init
 
-# Start development server
+# 3. Start dev server (Next.js + streaming)
 bun run dev
 ```
 
@@ -247,56 +254,62 @@ Navigate to http://localhost:3000.
 
 ### Environment Variables
 
-Create `.env.local` with required configuration:
+Create `.env.local` (loaded by Next.js) and ensure `DATABASE_URL` is present when invoking Prisma CLI.
 
 #### Essential
 
-| Variable                   | Purpose                             |
-| -------------------------- | ----------------------------------- |
-| `AUTH_SECRET`              | Session encryption key              |
-| `NEXT_PUBLIC_APP_BASE_URL` | Base URL for metadata and redirects |
-| `DATABASE_URL`             | PostgreSQL connection string        |
-| `OPENROUTER_API_KEY`       | OpenRouter API key for AI models    |
+| Variable                   | Purpose                                      |
+| -------------------------- | -------------------------------------------- |
+| `AUTH_SECRET`              | Guest session encryption key                 |
+| `NEXT_PUBLIC_APP_BASE_URL` | Base URL for metadata / OAuth redirects      |
+| `DATABASE_URL`             | PostgreSQL connection string                 |
+| `OPENROUTER_API_KEY`       | OpenRouter API key (model catalog + routing) |
 
 #### Authentication (Clerk)
 
-| Variable                            | Purpose          |
-| ----------------------------------- | ---------------- |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk client key |
-| `CLERK_SECRET_KEY`                  | Clerk server key |
+| Variable                            | Purpose                          |
+| ----------------------------------- | -------------------------------- |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (frontend) |
+| `CLERK_SECRET_KEY`                  | Clerk secret key (backend)       |
 
 #### Optional
 
-| Variable                       | Purpose                            |
-| ------------------------------ | ---------------------------------- |
-| `REDIS_URL`                    | Redis connection for rate limiting |
-| `BLOB_READ_WRITE_TOKEN`        | Vercel Blob storage token          |
-| `OPENAI_API_KEY`               | Direct OpenAI API access           |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Direct Gemini API access           |
-| `ADMIN_USER_ID`                | Admin user ID for dashboard access |
-| `ADMIN_EMAIL`                  | Admin email fallback               |
+| Variable                       | Purpose                                            |
+| ------------------------------ | -------------------------------------------------- |
+| `REDIS_URL`                    | (Pluggable) Redis caching / future rate control    |
+| `BLOB_READ_WRITE_TOKEN`        | Vercel Blob storage token                          |
+| `OPENAI_API_KEY`               | Direct OpenAI API access (bypassing OpenRouter)    |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Direct Gemini API access                           |
+| `ADMIN_USER_ID`                | Hard admin (takes precedence over email)           |
+| `ADMIN_EMAIL`                  | Fallback admin identity (bootstrap)                |
+| `TITLE_GENERATION_MODEL`       | Override model for automatic chat title generation |
+| `ARTIFACT_GENERATION_MODEL`    | Override model for artifact creation prompts       |
 
 ### Database Setup
 
 ```bash
-# Create database and run migrations
-bun run db:push
+# Apply schema (development convenience) OR create a migration:
+bun run db:push        # Fast, no migration file
+# or
+bun run db:migrate     # Creates/updates migration history
 
-# (Optional) Seed with initial data
-bun run db:seed
+# Generate client (usually triggered by build as well):
+bun run db:generate
+
+# (Optional) Inspect / edit data:
+bun run db:studio
 ```
+
+If you plan to enforce tier overrides or seed model capabilities manually, insert rows into `Tier` and `Model` tables (Prisma Studio or SQL). Missing rows fall back to hardcoded safe defaults so the app can boot cold.
 
 ### Testing
 
 ```bash
-# Run Playwright tests
-bun run test:e2e
-
-# Run linting
+# Lint (ESLint)
 bun run lint
 
-# Run type checking
-bun run type-check
+# Type check
+bunx tsc --noEmit
 ```
 
 ## Deployment
@@ -316,10 +329,10 @@ bun run type-check
 The application is designed to run on any platform supporting Node.js:
 
 ```bash
-# Build for production
+# Production build (generates Prisma client first)
 bun run build
 
-# Start production server
+# Launch server
 bun run start
 ```
 
