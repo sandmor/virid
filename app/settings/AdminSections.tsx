@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import ProvidersSection from './_providers-section';
 import TiersSection from './_tiers-section';
+import ModelCapabilitiesSection from './_model-capabilities-section';
 
 export default function AdminSections() {
   return (
@@ -13,6 +14,17 @@ export default function AdminSections() {
         }
       >
         <ProvidersSection />
+      </Suspense>
+      <Suspense
+        fallback={
+          <div className="rounded-3xl border border-border/60 bg-muted/10 p-6 shadow-sm animate-pulse">
+            <p className="text-sm text-muted-foreground">
+              Loading model capabilities…
+            </p>
+          </div>
+        }
+      >
+        <ModelCapabilitiesSection />
       </Suspense>
       <Suspense
         fallback={

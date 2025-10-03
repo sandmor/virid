@@ -792,7 +792,9 @@ export function Chat({
           chatHasStarted={chatHasStartedRef.current}
           selectedAgentId={selectedAgentId}
           selectedAgentLabel={selectedAgent?.name}
+          stagedAllowedTools={stagedAllowedTools}
           onUpdateStagedAllowedTools={handleUpdateStagedAllowedTools}
+          selectedModelId={currentModelId}
         />
 
         <Messages

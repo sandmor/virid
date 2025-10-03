@@ -26,6 +26,7 @@ function PureChatHeader({
   selectedAgentId,
   selectedAgentLabel,
   onSelectAgent,
+  selectedModelId,
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
@@ -39,6 +40,7 @@ function PureChatHeader({
   selectedAgentId?: string;
   selectedAgentLabel?: string | null;
   onSelectAgent?: (agent: AgentPreset | null) => void;
+  selectedModelId?: string;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -93,6 +95,7 @@ function PureChatHeader({
             chatHasStarted={chatHasStarted}
             stagedAllowedTools={stagedAllowedTools}
             onUpdateStagedAllowedTools={onUpdateStagedAllowedTools}
+            selectedModelId={selectedModelId}
           />
         </div>
       )}
@@ -114,5 +117,6 @@ export const ChatHeader = memo(
     (prevProps.selectedAgentId ?? '__none__') ===
       (nextProps.selectedAgentId ?? '__none__') &&
     (prevProps.selectedAgentLabel ?? '') ===
-      (nextProps.selectedAgentLabel ?? '')
+      (nextProps.selectedAgentLabel ?? '') &&
+    (prevProps.selectedModelId ?? '') === (nextProps.selectedModelId ?? '')
 );

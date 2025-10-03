@@ -654,6 +654,11 @@ export function AgentsManagement({
                       chatHasStarted={false}
                       stagedAllowedTools={formData.settings.allowedTools}
                       onUpdateStagedAllowedTools={updateAllowedTools}
+                      selectedModelId={
+                        formData.settings.modelId === DEFAULT_MODEL_VALUE
+                          ? undefined
+                          : (formData.settings.modelId ?? undefined)
+                      }
                     />
                   </div>
                 </div>
@@ -1141,6 +1146,11 @@ export function AgentsManagement({
                   chatHasStarted={false}
                   stagedAllowedTools={formData.settings.allowedTools}
                   onUpdateStagedAllowedTools={updateAllowedTools}
+                  selectedModelId={
+                    formData.settings.modelId === DEFAULT_MODEL_VALUE
+                      ? undefined
+                      : (formData.settings.modelId ?? undefined)
+                  }
                 />
               </div>
             </div>

@@ -33,6 +33,7 @@ export function TierCard({ id, tier, action }: TierCardProps) {
     if (state.status === 'success') {
       setShowSuccess(true);
       const timeout = window.setTimeout(() => setShowSuccess(false), 1800);
+      window.dispatchEvent(new CustomEvent('settings:tiers-updated'));
       return () => window.clearTimeout(timeout);
     }
 
@@ -48,7 +49,7 @@ export function TierCard({ id, tier, action }: TierCardProps) {
       return state.message;
     }
     if (state.status === 'success') {
-      return 'Changes saved';
+      return state.message ?? 'Changes saved';
     }
     return undefined;
   }, [state]);

@@ -59,6 +59,7 @@ import { generateTitleFromChatHistory } from '../../actions';
 import { updateChatTitleById } from '@/lib/db/queries';
 import { type PostRequestBody, postRequestBodySchema } from './schema';
 import { prisma } from '@/lib/db/prisma';
+import { getModelCapabilities } from '@/lib/ai/model-capabilities';
 
 export const maxDuration = 300;
 
@@ -380,6 +381,10 @@ export async function POST(request: Request) {
 
         const uiMessages = [...convertToUIMessages(messagesFromDb), message];
 
+        // Check model capabilities for tool support
+        const modelCapabilities = await getModelCapabilities(selectedChatModel);
+        const modelSupportsTools = modelCapabilities?.supportsTools ?? true; // Default to true if not found
+
         // Determine allowed tools (chat settings allow-list or default = all)
         const settings = await getChatSettings(id);
         // If chat just created and we received a provisional allowedTools list, prefer it over settings
@@ -407,10 +412,14 @@ export async function POST(request: Request) {
           archivePinEntry: archivePinEntry({ session, chatId: id }),
           archiveUnpinEntry: archiveUnpinEntry({ session, chatId: id }),
         };
-        const allowedToolIds =
-          effectiveAllowedTools === undefined
+
+        // If model doesn't support tools, force empty tool list
+        const allowedToolIds = !modelSupportsTools
+          ? []
+          : effectiveAllowedTools === undefined
             ? Object.keys(allToolFactories) // undefined => all tools
             : effectiveAllowedTools.filter((k) => k in allToolFactories); // [] => none
+
         const activeTools: Record<string, any> = {};
         for (const k of allowedToolIds) activeTools[k] = allToolFactories[k];
 

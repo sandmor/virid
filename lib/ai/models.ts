@@ -1,3 +1,5 @@
+import { getModelCapabilities } from './model-capabilities';
+
 export const DEFAULT_CHAT_MODEL = 'openrouter:x-ai/grok-4-fast:free';
 
 export const TITLE_GENERATION_MODEL =

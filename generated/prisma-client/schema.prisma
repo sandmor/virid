@@ -230,3 +230,17 @@ model ArchiveLink {
   @@index([type])
   @@map("ArchiveLink")
 }
+
+// Model capabilities metadata
+model Model {
+  id               String   @id @db.VarChar(256) // composite id (provider:model)
+  name             String   @db.VarChar(256) // Human-readable name
+  provider         String   @db.VarChar(64) // Provider slug (openai, google, openrouter)
+  supportsTools    Boolean  @default(true) // Whether the model supports tool calling
+  supportedFormats String[] // Supported input formats: text, image, file, audio, video, etc.
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([provider])
+  @@map("Model")
+}

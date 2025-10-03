@@ -5,6 +5,7 @@ import {
   useChatSettings,
   useUpdateAllowedTools,
 } from '@/hooks/use-chat-settings';
+import { useModelCapabilities } from '@/hooks/use-model-capabilities';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -14,7 +15,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { Loader, Settings } from 'lucide-react';
+import { Loader, Settings, AlertCircle } from 'lucide-react';
 
 // Human friendly labels (fallback to id if not present)
 const LABELS: Record<ChatToolId, string> = {
@@ -68,23 +69,30 @@ export function ChatToolSelector({
   chatHasStarted,
   stagedAllowedTools,
   onUpdateStagedAllowedTools,
+  selectedModelId,
 }: {
   chatId: string;
   className?: string;
   chatHasStarted?: boolean;
   stagedAllowedTools?: string[] | undefined;
   onUpdateStagedAllowedTools?: (tools: string[] | undefined) => void;
+  selectedModelId?: string;
 }) {
   const { data, isLoading } = useChatSettings(
     chatHasStarted ? chatId : undefined
   );
   const mutation = useUpdateAllowedTools(chatHasStarted ? chatId : undefined);
+  const { data: modelCapabilities, isLoading: isLoadingCapabilities } =
+    useModelCapabilities(selectedModelId);
   const [open, setOpen] = useState(false);
 
   // Local state for selected tools: undefined means all, array means specific
   const [selectedTools, setSelectedTools] = useState<ChatToolId[] | undefined>(
     undefined
   );
+
+  // Check if model supports tools
+  const modelSupportsTools = modelCapabilities?.supportsTools ?? true;
 
   // Sync with server data or staged props
   useEffect(() => {
@@ -105,6 +113,21 @@ export function ChatToolSelector({
   );
   const count = isAllSelected ? CHAT_TOOL_IDS.length : selectedSet.size;
   const isBusy = mutation.isPending || (chatHasStarted && isLoading);
+
+  // If model doesn't support tools, show disabled state
+  if (!modelSupportsTools) {
+    return (
+      <div
+        className={cn(
+          'flex items-center gap-2 rounded-full border border-border/40 bg-muted/30 px-3 py-1.5 text-xs text-muted-foreground',
+          className
+        )}
+      >
+        <AlertCircle className="h-3.5 w-3.5" />
+        <span>Tools not supported by this model</span>
+      </div>
+    );
+  }
 
   const updateTools = (tools: ChatToolId[] | undefined) => {
     setSelectedTools(tools);

@@ -239,6 +239,16 @@ exports.Prisma.ArchiveLinkScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ModelScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  provider: 'provider',
+  supportsTools: 'supportsTools',
+  supportedFormats: 'supportedFormats',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -284,7 +294,8 @@ exports.Prisma.ModelName = {
   Stream: 'Stream',
   ArchiveEntry: 'ArchiveEntry',
   ChatPinnedArchiveEntry: 'ChatPinnedArchiveEntry',
-  ArchiveLink: 'ArchiveLink'
+  ArchiveLink: 'ArchiveLink',
+  Model: 'Model'
 };
 
 /**

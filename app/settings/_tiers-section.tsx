@@ -1,5 +1,6 @@
 import { CatalogRefreshButton } from '@/components/admin/catalog-refresh-button';
 import { TierCard, type TierActionState } from '@/components/admin/tier-card';
+import { ensureModelCapabilities } from '@/lib/ai/model-capabilities';
 import { getTier, invalidateTierCache } from '@/lib/ai/tiers';
 import { prisma } from '@/lib/db/prisma';
 import { revalidatePath } from 'next/cache';
@@ -43,6 +44,14 @@ async function updateTierAction(
     return { status: 'error', message: 'Select at least one model.' };
   }
 
+  const ensureResult = await ensureModelCapabilities(modelIds);
+  if (ensureResult.errors.length > 0) {
+    return {
+      status: 'error',
+      message: `Failed to register models: ${ensureResult.errors.join('; ')}`,
+    };
+  }
+
   await prisma.tier.upsert({
     where: { id },
     create: {
@@ -63,7 +72,14 @@ async function updateTierAction(
   invalidateTierCache(id);
   revalidatePath('/settings');
 
-  return { status: 'success', message: 'Tier updated.' };
+  const messageParts = ['Tier updated.'];
+  if (ensureResult.created > 0) {
+    messageParts.push(
+      `Added ${ensureResult.created} new model${ensureResult.created === 1 ? '' : 's'} to the catalog.`
+    );
+  }
+
+  return { status: 'success', message: messageParts.join(' ') };
 }
 
 export default async function TiersSection() {
