@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   RefreshCw,
@@ -30,6 +37,7 @@ import {
 import type {
   ManagedModelCapabilities,
   ModelFormat,
+  ModelPricing,
 } from '@/lib/ai/model-capabilities';
 import { cn } from '@/lib/utils';
 
@@ -44,11 +52,189 @@ type StatusMessage = {
 
 const ALL_FORMATS: ModelFormat[] = ['text', 'image', 'file', 'audio', 'video'];
 
+type PricingViewMode = 'perMillion' | 'perThousand' | 'perToken';
+
+const PRICING_VIEW_CONFIG: Record<
+  PricingViewMode,
+  {
+    label: string;
+    shortLabel: string;
+    description: string;
+    displayMultiplier: number;
+    step: string;
+  }
+> = {
+  perMillion: {
+    label: 'per million tokens',
+    shortLabel: '/M',
+    description: '1,000,000 token batch',
+    displayMultiplier: 1,
+    step: '0.000001',
+  },
+  perThousand: {
+    label: 'per thousand tokens',
+    shortLabel: '/K',
+    description: '1,000 token batch',
+    displayMultiplier: 1 / 1_000,
+    step: '0.0000001',
+  },
+  perToken: {
+    label: 'per token',
+    shortLabel: '/token',
+    description: 'Single token',
+    displayMultiplier: 1 / 1_000_000,
+    step: '0.0000000001',
+  },
+};
+
+type PricingField = {
+  key: keyof ModelPricing;
+  label: string;
+  tokenBased: boolean;
+};
+
+const PRICING_FIELDS: PricingField[] = [
+  { key: 'prompt', label: 'Prompt', tokenBased: true },
+  { key: 'completion', label: 'Completion', tokenBased: true },
+  { key: 'reasoning', label: 'Reasoning', tokenBased: true },
+  { key: 'cacheRead', label: 'Cache read', tokenBased: true },
+  { key: 'cacheWrite', label: 'Cache write', tokenBased: true },
+  { key: 'image', label: 'Image', tokenBased: false },
+];
+
+const TOKEN_SUMMARY_FIELDS = PRICING_FIELDS.filter((field) => field.tokenBased);
+const IMAGE_SUMMARY_FIELD = PRICING_FIELDS.find(
+  (field) => field.key === 'image'
+);
+
+type PricingRange = {
+  min: number;
+  median: number;
+  max: number;
+};
+
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 8,
+});
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function convertPriceForView(value: number, view: PricingViewMode): number {
+  return value * PRICING_VIEW_CONFIG[view].displayMultiplier;
+}
+
+function convertPriceFromView(value: number, view: PricingViewMode): number {
+  return value / PRICING_VIEW_CONFIG[view].displayMultiplier;
+}
+
+function formatCurrencyValue(value: number): string {
+  return currencyFormatter.format(value);
+}
+
+function formatNumberForInput(value: number): string {
+  const fixed = value.toFixed(12);
+  const normalized = fixed.replace(/\.0+$/, '').replace(/(\.[0-9]*?)0+$/, '$1');
+  return normalized === '-0' ? '0' : normalized;
+}
+
+function computeRange(values: number[]): PricingRange | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  const median =
+    sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+  return {
+    min: sorted[0],
+    median,
+    max: sorted[sorted.length - 1],
+  };
+}
+
+function formatRangeForView(
+  range: PricingRange,
+  view: PricingViewMode
+): string {
+  const config = PRICING_VIEW_CONFIG[view];
+  const min = formatCurrencyValue(convertPriceForView(range.min, view));
+  const max = formatCurrencyValue(convertPriceForView(range.max, view));
+  const median = formatCurrencyValue(convertPriceForView(range.median, view));
+
+  if (Math.abs(range.max - range.min) < 1e-12) {
+    return `${median} ${config.shortLabel}`;
+  }
+
+  return `${min} – ${max} ${config.shortLabel} (median ${median})`;
+}
+
+function formatImageRange(range: PricingRange): string {
+  const min = formatCurrencyValue(range.min);
+  const max = formatCurrencyValue(range.max);
+  const median = formatCurrencyValue(range.median);
+
+  if (Math.abs(range.max - range.min) < 1e-8) {
+    return `${median} / image`;
+  }
+
+  return `${min} – ${max} / image (median ${median})`;
+}
+
+type PricingStats = {
+  pricedCount: number;
+  missingCount: number;
+  ranges: Partial<Record<keyof ModelPricing, PricingRange>>;
+};
+
+function computePricingStats(models: ManagedModelCapabilities[]): PricingStats {
+  const ranges: Partial<Record<keyof ModelPricing, PricingRange>> = {};
+
+  const pricedModels = models.filter((model) => {
+    if (!model.pricing) return false;
+    return Object.values(model.pricing).some(isFiniteNumber);
+  });
+
+  const tokenKeys: Array<keyof ModelPricing> = [
+    'prompt',
+    'completion',
+    'reasoning',
+    'cacheRead',
+    'cacheWrite',
+  ];
+
+  for (const key of tokenKeys) {
+    const values = pricedModels
+      .map((model) => model.pricing?.[key])
+      .filter(isFiniteNumber);
+    const range = computeRange(values);
+    if (range) ranges[key] = range;
+  }
+
+  const imageValues = pricedModels
+    .map((model) => model.pricing?.image)
+    .filter(isFiniteNumber);
+  const imageRange = computeRange(imageValues);
+  if (imageRange) {
+    ranges.image = imageRange;
+  }
+
+  return {
+    pricedCount: pricedModels.length,
+    missingCount: models.length - pricedModels.length,
+    ranges,
+  };
+}
+
 export function ModelCapabilitiesManager({
   initialModels,
 }: ModelCapabilitiesManagerProps) {
   const [models, setModels] =
     useState<ManagedModelCapabilities[]>(initialModels);
+  const [pricingView, setPricingView] =
+    useState<PricingViewMode>('perThousand');
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [expandedProvider, setExpandedProvider] = useState<string | null>(
     () => initialModels[0]?.provider ?? null
@@ -61,7 +247,8 @@ export function ModelCapabilitiesManager({
     name: string;
     supportsTools: boolean;
     supportedFormats: ModelFormat[];
-  }>({ name: '', supportsTools: false, supportedFormats: [] });
+    pricing: ModelPricing | null;
+  }>({ name: '', supportsTools: false, supportedFormats: [], pricing: null });
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
   const statusTimeoutRef = useRef<number | null>(null);
@@ -88,6 +275,13 @@ export function ModelCapabilitiesManager({
   const activeModel = activeModelId
     ? (models.find((model) => model.id === activeModelId) ?? null)
     : null;
+
+  const pricingStats = useMemo(() => computePricingStats(models), [models]);
+  const pricingViewConfig = PRICING_VIEW_CONFIG[pricingView];
+  const pricingViewOptions = useMemo(
+    () => Object.keys(PRICING_VIEW_CONFIG) as PricingViewMode[],
+    []
+  );
 
   const setStatusMessage = useCallback((message: StatusMessage | null) => {
     if (statusTimeoutRef.current) {
@@ -153,6 +347,7 @@ export function ModelCapabilitiesManager({
       name: model.name,
       supportsTools: model.supportsTools,
       supportedFormats: [...model.supportedFormats],
+      pricing: model.pricing ? { ...model.pricing } : null,
     });
     setDialogOpen(true);
   };
@@ -160,7 +355,12 @@ export function ModelCapabilitiesManager({
   const closeDialog = () => {
     setDialogOpen(false);
     setActiveModelId(null);
-    setEditForm({ name: '', supportsTools: false, supportedFormats: [] });
+    setEditForm({
+      name: '',
+      supportsTools: false,
+      supportedFormats: [],
+      pricing: null,
+    });
     setSaving(false);
     setResetting(false);
   };
@@ -214,6 +414,64 @@ export function ModelCapabilitiesManager({
       setSyncingProvider(null);
     }
   };
+
+  const handleSyncTokenLens = useCallback(
+    async (provider: string) => {
+      setSyncingProvider(provider);
+      setStatusMessage(null);
+
+      try {
+        const response = await fetch('/api/admin/model-capabilities', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'sync-tokenlens',
+            provider,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          await refreshModels();
+          const syncedCount = typeof data.synced === 'number' ? data.synced : 0;
+          const errors: string[] = Array.isArray(data.errors)
+            ? data.errors
+            : [];
+
+          if (syncedCount === 0 && errors.length > 0) {
+            setStatusMessage({
+              type: 'error',
+              message:
+                errors[0] ??
+                `No ${provider} models were synchronized from TokenLens.`,
+            });
+          } else {
+            setStatusMessage({
+              type: 'success',
+              message: `Synced ${syncedCount} ${provider} model${syncedCount === 1 ? '' : 's'} from TokenLens${errors.length ? ` (${errors.length} warnings)` : ''}`,
+            });
+          }
+        } else {
+          setStatusMessage({
+            type: 'error',
+            message: data.error || 'Failed to sync from TokenLens',
+          });
+        }
+      } catch (error) {
+        setStatusMessage({
+          type: 'error',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Network error while syncing',
+        });
+      } finally {
+        setSyncingProvider(null);
+      }
+    },
+    [refreshModels, setStatusMessage]
+  );
 
   const handleRemoveUnused = async () => {
     setCleaning(true);
@@ -274,6 +532,7 @@ export function ModelCapabilitiesManager({
             provider: activeModel.provider,
             supportsTools: editForm.supportsTools,
             supportedFormats: editForm.supportedFormats,
+            pricing: editForm.pricing,
           },
         }),
       });
@@ -324,23 +583,17 @@ export function ModelCapabilitiesManager({
 
       const data = await response.json();
 
-      if (response.ok) {
-        const updatedModels = await refreshModels();
-        const refreshed = updatedModels.find((m) => m.id === activeModel.id);
-        if (refreshed) {
-          setEditForm({
-            name: refreshed.name,
-            supportsTools: refreshed.supportsTools,
-            supportedFormats: [...refreshed.supportedFormats],
-          });
-        }
-        const hadWarnings =
-          Array.isArray(data.errors) && data.errors.length > 0;
+      if (response.ok && data.model) {
+        const refreshed = data.model;
+        setEditForm({
+          name: refreshed.name,
+          supportsTools: refreshed.supportsTools,
+          supportedFormats: [...refreshed.supportedFormats],
+          pricing: refreshed.pricing ? { ...refreshed.pricing } : null,
+        });
         setStatusMessage({
-          type: hadWarnings ? 'error' : 'success',
-          message: hadWarnings
-            ? `Reset ${activeModel.name} with warnings: ${data.errors.join(', ')}`
-            : `Reset ${activeModel.name} from OpenRouter defaults`,
+          type: 'success',
+          message: `Reset ${refreshed.name} from OpenRouter${data.errors?.length ? ` (${data.errors.length} warnings)` : ''}`,
         });
       } else {
         setStatusMessage({
@@ -354,12 +607,108 @@ export function ModelCapabilitiesManager({
         message:
           error instanceof Error
             ? error.message
-            : 'Network error while resetting model',
+            : 'Network error while syncing',
       });
     } finally {
       setResetting(false);
     }
   };
+
+  const handleSyncPricingFromTokenLens = async () => {
+    if (!activeModel) return;
+
+    setResetting(true);
+    setStatusMessage(null);
+
+    try {
+      const response = await fetch('/api/admin/model-capabilities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync-pricing-tokenlens',
+          modelId: activeModel.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.pricing) {
+        setEditForm((prev) => ({
+          ...prev,
+          pricing: { ...data.pricing },
+        }));
+        setStatusMessage({
+          type: 'success',
+          message: `Synced pricing from TokenLens for ${activeModel.name}`,
+        });
+      } else {
+        setStatusMessage({
+          type: 'error',
+          message: data.error || 'Failed to sync pricing from TokenLens',
+        });
+      }
+    } catch (error) {
+      setStatusMessage({
+        type: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Network error while syncing pricing',
+      });
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const getPricingDisplayValue = useCallback(
+    (field: keyof ModelPricing, tokenBased: boolean) => {
+      const pricing = editForm.pricing;
+      if (!pricing) return '';
+      const rawValue = pricing[field];
+      if (!isFiniteNumber(rawValue)) return '';
+      const displayValue = tokenBased
+        ? convertPriceForView(rawValue, pricingView)
+        : rawValue;
+      return formatNumberForInput(displayValue);
+    },
+    [editForm.pricing, pricingView]
+  );
+
+  const handlePricingFieldChange = useCallback(
+    (field: keyof ModelPricing, tokenBased: boolean) =>
+      (event: ChangeEvent<HTMLInputElement>) => {
+        const raw = event.target.value;
+        setEditForm((prev) => {
+          const nextPricing = { ...(prev.pricing ?? {}) } as ModelPricing;
+
+          if (raw === '') {
+            delete nextPricing[field];
+          } else {
+            const parsed = Number.parseFloat(raw);
+            if (Number.isNaN(parsed)) {
+              return prev;
+            }
+            nextPricing[field] = tokenBased
+              ? convertPriceFromView(parsed, pricingView)
+              : parsed;
+          }
+
+          const normalized = Object.keys(nextPricing).length
+            ? nextPricing
+            : null;
+
+          return {
+            ...prev,
+            pricing: normalized,
+          };
+        });
+      },
+    [pricingView]
+  );
+
+  const clearPricing = useCallback(() => {
+    setEditForm((prev) => ({ ...prev, pricing: null }));
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -395,6 +744,72 @@ export function ModelCapabilitiesManager({
         </div>
       </div>
 
+      <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/10 p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary" className="text-xs">
+            Pricing set {pricingStats.pricedCount}/{models.length}
+          </Badge>
+          {pricingStats.missingCount > 0 && (
+            <Badge variant="outline" className="text-xs">
+              Missing pricing {pricingStats.missingCount}
+            </Badge>
+          )}
+          <div className="ml-auto flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span>View token prices</span>
+            <div className="flex items-center gap-1 rounded-md border border-border/60 bg-background p-1">
+              {pricingViewOptions.map((mode) => {
+                const option = PRICING_VIEW_CONFIG[mode];
+                return (
+                  <Button
+                    key={mode}
+                    size="sm"
+                    variant={pricingView === mode ? 'default' : 'ghost'}
+                    className="h-7 px-2 text-xs"
+                    onClick={() => setPricingView(mode)}
+                  >
+                    {option.shortLabel}
+                  </Button>
+                );
+              })}
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              {pricingViewConfig.label}
+            </span>
+          </div>
+        </div>
+        {TOKEN_SUMMARY_FIELDS.some(
+          (field) => pricingStats.ranges[field.key] !== undefined
+        ) && (
+          <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+            {TOKEN_SUMMARY_FIELDS.map((field) => {
+              const range = pricingStats.ranges[field.key];
+              if (!range) return null;
+              return (
+                <div
+                  key={field.key}
+                  className="rounded-md border border-border/60 bg-background px-2 py-1"
+                >
+                  <span className="font-medium text-foreground">
+                    {field.label}:
+                  </span>{' '}
+                  {formatRangeForView(range, pricingView)}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {IMAGE_SUMMARY_FIELD && pricingStats.ranges.image && (
+          <div className="text-[11px] text-muted-foreground">
+            <div className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-background px-2 py-1">
+              <span className="font-medium text-foreground">
+                {IMAGE_SUMMARY_FIELD.label}:
+              </span>
+              <span>{formatImageRange(pricingStats.ranges.image)}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Status banner */}
       <AnimatePresence>
         {status && (
@@ -426,6 +841,9 @@ export function ModelCapabilitiesManager({
           const persistedCount = providerModels.filter(
             (m) => m.isPersisted
           ).length;
+          const providerPricedCount = providerModels.filter((m) =>
+            m.pricing ? Object.values(m.pricing).some(isFiniteNumber) : false
+          ).length;
 
           return (
             <div
@@ -449,11 +867,14 @@ export function ModelCapabilitiesManager({
                       {persistedCount !== providerModels.length
                         ? ` • ${providerModels.length - persistedCount} fallback`
                         : ''}
+                      {providerPricedCount > 0
+                        ? ` • ${providerPricedCount} priced`
+                        : ''}
                     </p>
                   </div>
                 </button>
                 <div className="flex items-center gap-2">
-                  {isOpenRouter && (
+                  {isOpenRouter ? (
                     <Button
                       onClick={handleSyncOpenRouter}
                       disabled={syncingProvider === provider}
@@ -467,6 +888,21 @@ export function ModelCapabilitiesManager({
                         <RefreshCw className="h-4 w-4" />
                       )}
                       Sync OpenRouter
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => handleSyncTokenLens(provider)}
+                      disabled={syncingProvider === provider}
+                      variant="secondary"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      {syncingProvider === provider ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                      Sync TokenLens
                     </Button>
                   )}
                   {expandedProvider === provider ? (
@@ -550,6 +986,67 @@ export function ModelCapabilitiesManager({
                               </Badge>
                             ))}
                           </div>
+
+                          {model.pricing ? (
+                            <div className="mt-2 rounded-lg bg-muted/40 p-3 text-xs">
+                              <div className="grid gap-x-4 gap-y-2 sm:grid-cols-2">
+                                {PRICING_FIELDS.map((field) => {
+                                  const rawValue = model.pricing?.[field.key];
+                                  if (!isFiniteNumber(rawValue)) return null;
+                                  const displayValue = field.tokenBased
+                                    ? convertPriceForView(rawValue, pricingView)
+                                    : rawValue;
+                                  const suffix = field.tokenBased
+                                    ? pricingViewConfig.shortLabel
+                                    : field.key === 'image'
+                                      ? '/image'
+                                      : '';
+                                  return (
+                                    <div
+                                      key={`${model.id}-${field.key}`}
+                                      className="flex items-start justify-between gap-4"
+                                    >
+                                      <span className="text-muted-foreground">
+                                        {field.label}:
+                                      </span>
+                                      <div className="text-right">
+                                        <span className="font-mono text-xs font-semibold text-foreground">
+                                          {formatCurrencyValue(displayValue)}
+                                        </span>
+                                        {suffix && (
+                                          <span className="ml-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                                            {suffix}
+                                          </span>
+                                        )}
+                                        {field.tokenBased &&
+                                          pricingView !== 'perMillion' && (
+                                            <p className="text-[10px] text-muted-foreground">
+                                              {formatCurrencyValue(rawValue)} /M
+                                            </p>
+                                          )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="mt-2 rounded-lg border border-dashed border-border/60 bg-muted/10 p-3 text-xs text-muted-foreground">
+                              <div className="flex items-center justify-between gap-2">
+                                <span>
+                                  No pricing configured for this model.
+                                </span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openEditDialog(model)}
+                                  className="h-7 px-2 text-xs"
+                                >
+                                  Add pricing
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -632,6 +1129,95 @@ export function ModelCapabilitiesManager({
                     </Badge>
                   ))}
                 </div>
+              </div>
+
+              <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <Label className="text-sm font-medium">
+                      Pricing ({pricingViewConfig.label})
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Enter costs per {pricingViewConfig.description}. Values
+                      are stored per million tokens and converted for display.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={clearPricing}
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs"
+                      disabled={!editForm.pricing}
+                    >
+                      Clear pricing
+                    </Button>
+                    <Button
+                      onClick={handleSyncPricingFromTokenLens}
+                      disabled={resetting}
+                      size="sm"
+                      variant="ghost"
+                      className="gap-2 text-xs"
+                    >
+                      {resetting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                      Sync TokenLens
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {PRICING_FIELDS.map((field) => (
+                    <div key={`edit-${field.key}`}>
+                      <Label
+                        htmlFor={`pricing-${field.key}`}
+                        className="text-xs text-muted-foreground"
+                      >
+                        {field.label}{' '}
+                        {field.tokenBased
+                          ? `(${pricingViewConfig.shortLabel})`
+                          : '($)'}
+                      </Label>
+                      <Input
+                        id={`pricing-${field.key}`}
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        step={
+                          field.tokenBased ? pricingViewConfig.step : '0.01'
+                        }
+                        placeholder="0"
+                        value={getPricingDisplayValue(
+                          field.key,
+                          field.tokenBased
+                        )}
+                        onChange={handlePricingFieldChange(
+                          field.key,
+                          field.tokenBased
+                        )}
+                        className="mt-1"
+                      />
+                      {field.tokenBased &&
+                        pricingView !== 'perMillion' &&
+                        isFiniteNumber(editForm.pricing?.[field.key]) && (
+                          <p className="mt-1 text-[11px] text-muted-foreground">
+                            ={' '}
+                            {formatCurrencyValue(
+                              editForm.pricing?.[field.key] as number
+                            )}{' '}
+                            /M tokens
+                          </p>
+                        )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Leave blank to hide cost information for this model. Toggle
+                  the view above to switch between million, thousand, or token
+                  units while editing.
+                </p>
               </div>
 
               {activeModel.provider === 'openrouter' && (

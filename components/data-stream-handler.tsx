@@ -13,10 +13,24 @@ export function DataStreamHandler() {
 
   useEffect(() => {
     if (!dataStream?.length) {
+      if (lastProcessedIndex.current !== -1) {
+        lastProcessedIndex.current = -1;
+        setArtifact({
+          ...initialArtifactData,
+          boundingBox: { ...initialArtifactData.boundingBox },
+          status: 'idle',
+        });
+        setMetadata(null, false);
+      }
       return;
     }
 
-    const newDeltas = dataStream.slice(lastProcessedIndex.current + 1);
+    if (lastProcessedIndex.current >= dataStream.length) {
+      lastProcessedIndex.current = -1;
+    }
+
+    const startIndex = Math.max(lastProcessedIndex.current + 1, 0);
+    const newDeltas = dataStream.slice(startIndex);
     lastProcessedIndex.current = dataStream.length - 1;
 
     for (const delta of newDeltas) {
@@ -35,7 +49,11 @@ export function DataStreamHandler() {
 
       setArtifact((draftArtifact) => {
         if (!draftArtifact) {
-          return { ...initialArtifactData, status: 'streaming' };
+          return {
+            ...initialArtifactData,
+            boundingBox: { ...initialArtifactData.boundingBox },
+            status: 'streaming',
+          };
         }
 
         switch (delta.type) {

@@ -1,8 +1,19 @@
 import { prisma } from '../db/prisma';
+import type { ProviderInfo, ProviderModel } from '@tokenlens/core';
 import type { SupportedProvider } from './registry';
 import { getTier } from './tiers';
+import { Prisma } from '../../generated/prisma-client';
 
 export type ModelFormat = 'text' | 'image' | 'file' | 'audio' | 'video';
+
+export type ModelPricing = {
+  prompt?: number; // Cost per million input tokens
+  completion?: number; // Cost per million output tokens
+  image?: number; // Cost per image generated
+  reasoning?: number; // Cost per million reasoning tokens
+  cacheRead?: number; // Cost per million cache read tokens
+  cacheWrite?: number; // Cost per million cache write tokens
+};
 
 export type ModelCapabilities = {
   id: string; // composite id (provider:model)
@@ -10,6 +21,7 @@ export type ModelCapabilities = {
   provider: string;
   supportsTools: boolean;
   supportedFormats: ModelFormat[];
+  pricing?: ModelPricing | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -44,6 +56,14 @@ const PROVIDER_DEFAULTS: Record<
   },
 };
 
+const FORMAT_PRIORITY: ModelFormat[] = [
+  'text',
+  'image',
+  'file',
+  'audio',
+  'video',
+];
+
 // OpenRouter API response types
 export type OpenRouterModel = {
   id: string;
@@ -53,6 +73,12 @@ export type OpenRouterModel = {
     output_modalities?: string[];
   };
   supported_parameters?: string[];
+  pricing?: {
+    prompt?: string | number; // Cost per million tokens (can be string or number)
+    completion?: string | number; // Cost per million tokens
+    image?: string | number; // Cost per image
+    request?: string | number; // Cost per request
+  };
 };
 
 export type OpenRouterModelsResponse = {
@@ -64,12 +90,146 @@ export type OpenRouterModelsResponse = {
  */
 function mapModalityToFormat(modality: string): ModelFormat | null {
   const normalized = modality.toLowerCase();
-  if (normalized.includes('text')) return 'text';
-  if (normalized.includes('image')) return 'image';
-  if (normalized.includes('file')) return 'file';
-  if (normalized.includes('audio')) return 'audio';
-  if (normalized.includes('video')) return 'video';
+
+  if (
+    normalized.includes('text') ||
+    normalized.includes('chat') ||
+    normalized.includes('language') ||
+    normalized.includes('code') ||
+    normalized.includes('json')
+  ) {
+    return 'text';
+  }
+
+  if (
+    normalized.includes('image') ||
+    normalized.includes('vision') ||
+    normalized.includes('visual') ||
+    normalized.includes('graphic') ||
+    normalized.includes('picture')
+  ) {
+    return 'image';
+  }
+
+  if (
+    normalized.includes('file') ||
+    normalized.includes('document') ||
+    normalized.includes('doc') ||
+    normalized.includes('pdf') ||
+    normalized.includes('attachment')
+  ) {
+    return 'file';
+  }
+
+  if (
+    normalized.includes('audio') ||
+    normalized.includes('speech') ||
+    normalized.includes('voice') ||
+    normalized.includes('sound')
+  ) {
+    return 'audio';
+  }
+
+  if (
+    normalized.includes('video') ||
+    normalized.includes('animation') ||
+    normalized.includes('frame')
+  ) {
+    return 'video';
+  }
+
   return null;
+}
+
+type CompositeModelId = {
+  providerId: string;
+  modelKey: string;
+};
+
+function parseCompositeModelId(modelId: string): CompositeModelId | null {
+  if (!modelId) return null;
+  const [providerId, ...rest] = modelId.split(':');
+  if (!providerId || rest.length === 0) return null;
+  const modelKey = rest.join(':');
+  if (!modelKey) return null;
+  return { providerId, modelKey };
+}
+
+function sortFormats(formats: Set<ModelFormat>): ModelFormat[] {
+  return Array.from(formats).sort(
+    (a, b) => FORMAT_PRIORITY.indexOf(a) - FORMAT_PRIORITY.indexOf(b)
+  );
+}
+
+function normalizeTokenLensPricing(model: ProviderModel): ModelPricing | null {
+  const pricing: ModelPricing = {};
+  const { cost } = model;
+
+  if (cost) {
+    if (typeof cost.input === 'number' && Number.isFinite(cost.input)) {
+      pricing.prompt = cost.input;
+    }
+    if (typeof cost.output === 'number' && Number.isFinite(cost.output)) {
+      pricing.completion = cost.output;
+    }
+    if (typeof cost.reasoning === 'number' && Number.isFinite(cost.reasoning)) {
+      pricing.reasoning = cost.reasoning;
+    }
+    if (
+      typeof cost.cache_read === 'number' &&
+      Number.isFinite(cost.cache_read)
+    ) {
+      pricing.cacheRead = cost.cache_read;
+    }
+    if (
+      typeof cost.cache_write === 'number' &&
+      Number.isFinite(cost.cache_write)
+    ) {
+      pricing.cacheWrite = cost.cache_write;
+    }
+  }
+
+  return Object.keys(pricing).length > 0 ? pricing : null;
+}
+
+function deriveTokenLensFormats(model: ProviderModel): Set<ModelFormat> {
+  const formats = new Set<ModelFormat>();
+  const addModalities = (values?: readonly string[]) => {
+    if (!values) return;
+    for (const value of values) {
+      if (!value) continue;
+      const format = mapModalityToFormat(value);
+      if (format) formats.add(format);
+    }
+  };
+
+  addModalities(model.modalities?.input);
+  addModalities(model.modalities?.output);
+
+  if (model.attachment) {
+    formats.add('file');
+  }
+
+  if (formats.size === 0) {
+    formats.add('text');
+  }
+
+  return formats;
+}
+
+function buildTokenLensCapabilities(
+  provider: ProviderInfo,
+  modelKey: string,
+  model: ProviderModel
+): Omit<ModelCapabilities, 'createdAt' | 'updatedAt'> {
+  return {
+    id: `${provider.id}:${modelKey}`,
+    name: model.name ?? modelKey,
+    provider: provider.id,
+    supportsTools: Boolean(model.tool_call),
+    supportedFormats: sortFormats(deriveTokenLensFormats(model)),
+    pricing: normalizeTokenLensPricing(model),
+  };
 }
 
 /**
@@ -94,12 +254,37 @@ export function parseOpenRouterCapabilities(
     }
   }
 
+  // Parse pricing information from OpenRouter
+  const pricing: ModelPricing | null = model.pricing
+    ? {
+        prompt:
+          typeof model.pricing.prompt === 'string'
+            ? Number.parseFloat(model.pricing.prompt) * 1_000_000
+            : typeof model.pricing.prompt === 'number'
+              ? model.pricing.prompt * 1_000_000
+              : undefined,
+        completion:
+          typeof model.pricing.completion === 'string'
+            ? Number.parseFloat(model.pricing.completion) * 1_000_000
+            : typeof model.pricing.completion === 'number'
+              ? model.pricing.completion * 1_000_000
+              : undefined,
+        image:
+          typeof model.pricing.image === 'string'
+            ? Number.parseFloat(model.pricing.image)
+            : typeof model.pricing.image === 'number'
+              ? model.pricing.image
+              : undefined,
+      }
+    : null;
+
   return {
     id: `${provider}:${model.id}`,
     name: model.name,
     provider,
     supportsTools,
     supportedFormats: Array.from(formats),
+    pricing,
   };
 }
 
@@ -132,6 +317,7 @@ export async function getModelCapabilities(
       return {
         ...model,
         supportedFormats: model.supportedFormats as ModelFormat[],
+        pricing: model.pricing as ModelPricing | null,
       };
     }
 
@@ -144,6 +330,7 @@ export async function getModelCapabilities(
         name: modelId.split(':').slice(1).join(':'),
         provider,
         ...defaults,
+        pricing: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -162,6 +349,9 @@ export async function getModelCapabilities(
 export async function upsertModelCapabilities(
   capabilities: Omit<ModelCapabilities, 'createdAt' | 'updatedAt'>
 ): Promise<ModelCapabilities> {
+  const pricingData = capabilities.pricing
+    ? capabilities.pricing
+    : Prisma.JsonNull;
   const model = await prisma.model.upsert({
     where: { id: capabilities.id },
     create: {
@@ -170,17 +360,20 @@ export async function upsertModelCapabilities(
       provider: capabilities.provider,
       supportsTools: capabilities.supportsTools,
       supportedFormats: capabilities.supportedFormats,
+      pricing: pricingData,
     },
     update: {
       name: capabilities.name,
       supportsTools: capabilities.supportsTools,
       supportedFormats: capabilities.supportedFormats,
+      pricing: pricingData,
     },
   });
 
   return {
     ...model,
     supportedFormats: model.supportedFormats as ModelFormat[],
+    pricing: model.pricing as ModelPricing | null,
   };
 }
 
@@ -254,6 +447,119 @@ export async function syncOpenRouterModels(
   }
 }
 
+export async function syncTokenLensModels(
+  options: {
+    provider?: string;
+    modelIds?: string[];
+    allowCreate?: boolean;
+  } = {}
+): Promise<{ synced: number; errors: string[] }> {
+  const { provider, modelIds, allowCreate = false } = options;
+
+  const errors: string[] = [];
+  let synced = 0;
+
+  // Determine existing models scoped by provider/modelIds for filtering
+  const whereClause = provider
+    ? { provider }
+    : modelIds && modelIds.length > 0
+      ? { id: { in: modelIds } }
+      : undefined;
+
+  const existing = await prisma.model.findMany({
+    ...(whereClause ? { where: whereClause } : {}),
+    select: { id: true },
+  });
+  const existingIds = new Set(existing.map((m) => m.id));
+
+  let targets: string[];
+  if (modelIds && modelIds.length > 0) {
+    targets = allowCreate
+      ? modelIds
+      : modelIds.filter((id) => existingIds.has(id));
+  } else {
+    targets = Array.from(existingIds);
+  }
+
+  if (targets.length === 0) {
+    return { synced, errors };
+  }
+
+  const normalizedTargets = Array.from(new Set(targets));
+  const targetEntries = normalizedTargets.map((id) => ({
+    id,
+    parts: parseCompositeModelId(id),
+  }));
+
+  const providerIds = new Set<string>();
+  for (const entry of targetEntries) {
+    if (!entry.parts) {
+      errors.push(`${entry.id}: invalid model id format`);
+      continue;
+    }
+    providerIds.add(entry.parts.providerId);
+  }
+
+  const { fetchModels } = await import('tokenlens/fetch');
+  const providerCatalog = new Map<string, ProviderInfo | null>();
+
+  for (const providerId of providerIds) {
+    if (providerCatalog.has(providerId)) continue;
+    try {
+      const info = await fetchModels(providerId);
+      if (!info) {
+        errors.push(`${providerId}: provider not found in TokenLens catalog`);
+        providerCatalog.set(providerId, null);
+      } else {
+        providerCatalog.set(providerId, info);
+      }
+    } catch (error) {
+      errors.push(
+        `${providerId}: ${error instanceof Error ? error.message : 'Failed to load TokenLens provider data'}`
+      );
+      providerCatalog.set(providerId, null);
+    }
+  }
+
+  for (const entry of targetEntries) {
+    const parts = entry.parts;
+    if (!parts) continue; // Already recorded as invalid
+
+    const providerInfo = providerCatalog.get(parts.providerId);
+    if (!providerInfo) {
+      continue; // Provider fetch failed (error logged above)
+    }
+
+    const providerModel = providerInfo.models?.[parts.modelKey];
+    if (!providerModel) {
+      errors.push(`${entry.id}: not found in TokenLens provider catalog`);
+      continue;
+    }
+
+    try {
+      const capabilities = buildTokenLensCapabilities(
+        providerInfo,
+        parts.modelKey,
+        providerModel
+      );
+
+      if (!allowCreate && !existingIds.has(capabilities.id)) {
+        continue;
+      }
+
+      await upsertModelCapabilities(capabilities);
+      existingIds.add(capabilities.id);
+      synced++;
+    } catch (error) {
+      errors.push(
+        `${entry.id}: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  return { synced, errors };
+}
+
 /**
  * Get all models from database
  */
@@ -265,6 +571,7 @@ export async function getAllModels(): Promise<ModelCapabilities[]> {
   return models.map((m) => ({
     ...m,
     supportedFormats: m.supportedFormats as ModelFormat[],
+    pricing: m.pricing as ModelPricing | null,
   }));
 }
 
@@ -322,6 +629,7 @@ export async function getManagedModels(): Promise<ManagedModelCapabilities[]> {
     const normalized: ManagedModelCapabilities = {
       ...model,
       supportedFormats: model.supportedFormats as ModelFormat[],
+      pricing: model.pricing as ModelPricing | null,
       isPersisted: true,
       inUse: tierSet.has(model.id),
     };
@@ -352,6 +660,36 @@ export async function getManagedModels(): Promise<ManagedModelCapabilities[]> {
   });
 
   return managed;
+}
+
+/**
+ * Sync pricing from TokenLens catalog for a specific model
+ */
+export async function syncPricingFromTokenLens(
+  modelId: string
+): Promise<ModelPricing | null> {
+  const parts = parseCompositeModelId(modelId);
+  if (!parts) {
+    return null;
+  }
+
+  try {
+    const { fetchModels } = await import('tokenlens/fetch');
+    const providerInfo = await fetchModels(parts.providerId);
+    if (!providerInfo) {
+      return null;
+    }
+
+    const providerModel = providerInfo.models?.[parts.modelKey];
+    if (!providerModel) {
+      return null;
+    }
+
+    return normalizeTokenLensPricing(providerModel);
+  } catch (error) {
+    console.error('Failed to sync pricing from TokenLens:', error);
+    return null;
+  }
 }
 
 /**

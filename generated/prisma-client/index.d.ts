@@ -16605,6 +16605,7 @@ export namespace Prisma {
     provider: number
     supportsTools: number
     supportedFormats: number
+    pricing: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -16635,6 +16636,7 @@ export namespace Prisma {
     provider?: true
     supportsTools?: true
     supportedFormats?: true
+    pricing?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -16718,6 +16720,7 @@ export namespace Prisma {
     provider: string
     supportsTools: boolean
     supportedFormats: string[]
+    pricing: JsonValue | null
     createdAt: Date
     updatedAt: Date
     _count: ModelCountAggregateOutputType | null
@@ -16745,6 +16748,7 @@ export namespace Prisma {
     provider?: boolean
     supportsTools?: boolean
     supportedFormats?: boolean
+    pricing?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["model"]>
@@ -16755,6 +16759,7 @@ export namespace Prisma {
     provider?: boolean
     supportsTools?: boolean
     supportedFormats?: boolean
+    pricing?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["model"]>
@@ -16765,6 +16770,7 @@ export namespace Prisma {
     provider?: boolean
     supportsTools?: boolean
     supportedFormats?: boolean
+    pricing?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["model"]>
@@ -16775,11 +16781,12 @@ export namespace Prisma {
     provider?: boolean
     supportsTools?: boolean
     supportedFormats?: boolean
+    pricing?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "provider" | "supportsTools" | "supportedFormats" | "createdAt" | "updatedAt", ExtArgs["result"]["model"]>
+  export type ModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "provider" | "supportsTools" | "supportedFormats" | "pricing" | "createdAt" | "updatedAt", ExtArgs["result"]["model"]>
 
   export type $ModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Model"
@@ -16790,6 +16797,7 @@ export namespace Prisma {
       provider: string
       supportsTools: boolean
       supportedFormats: string[]
+      pricing: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["model"]>
@@ -17220,6 +17228,7 @@ export namespace Prisma {
     readonly provider: FieldRef<"Model", 'String'>
     readonly supportsTools: FieldRef<"Model", 'Boolean'>
     readonly supportedFormats: FieldRef<"Model", 'String[]'>
+    readonly pricing: FieldRef<"Model", 'Json'>
     readonly createdAt: FieldRef<"Model", 'DateTime'>
     readonly updatedAt: FieldRef<"Model", 'DateTime'>
   }
@@ -17760,6 +17769,7 @@ export namespace Prisma {
     provider: 'provider',
     supportsTools: 'supportsTools',
     supportedFormats: 'supportedFormats',
+    pricing: 'pricing',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -18729,6 +18739,7 @@ export namespace Prisma {
     provider?: StringFilter<"Model"> | string
     supportsTools?: BoolFilter<"Model"> | boolean
     supportedFormats?: StringNullableListFilter<"Model">
+    pricing?: JsonNullableFilter<"Model">
     createdAt?: DateTimeFilter<"Model"> | Date | string
     updatedAt?: DateTimeFilter<"Model"> | Date | string
   }
@@ -18739,6 +18750,7 @@ export namespace Prisma {
     provider?: SortOrder
     supportsTools?: SortOrder
     supportedFormats?: SortOrder
+    pricing?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -18752,6 +18764,7 @@ export namespace Prisma {
     provider?: StringFilter<"Model"> | string
     supportsTools?: BoolFilter<"Model"> | boolean
     supportedFormats?: StringNullableListFilter<"Model">
+    pricing?: JsonNullableFilter<"Model">
     createdAt?: DateTimeFilter<"Model"> | Date | string
     updatedAt?: DateTimeFilter<"Model"> | Date | string
   }, "id">
@@ -18762,6 +18775,7 @@ export namespace Prisma {
     provider?: SortOrder
     supportsTools?: SortOrder
     supportedFormats?: SortOrder
+    pricing?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ModelCountOrderByAggregateInput
@@ -18778,6 +18792,7 @@ export namespace Prisma {
     provider?: StringWithAggregatesFilter<"Model"> | string
     supportsTools?: BoolWithAggregatesFilter<"Model"> | boolean
     supportedFormats?: StringNullableListFilter<"Model">
+    pricing?: JsonNullableWithAggregatesFilter<"Model">
     createdAt?: DateTimeWithAggregatesFilter<"Model"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Model"> | Date | string
   }
@@ -19621,6 +19636,7 @@ export namespace Prisma {
     provider: string
     supportsTools?: boolean
     supportedFormats?: ModelCreatesupportedFormatsInput | string[]
+    pricing?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19631,6 +19647,7 @@ export namespace Prisma {
     provider: string
     supportsTools?: boolean
     supportedFormats?: ModelCreatesupportedFormatsInput | string[]
+    pricing?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19641,6 +19658,7 @@ export namespace Prisma {
     provider?: StringFieldUpdateOperationsInput | string
     supportsTools?: BoolFieldUpdateOperationsInput | boolean
     supportedFormats?: ModelUpdatesupportedFormatsInput | string[]
+    pricing?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19651,6 +19669,7 @@ export namespace Prisma {
     provider?: StringFieldUpdateOperationsInput | string
     supportsTools?: BoolFieldUpdateOperationsInput | boolean
     supportedFormats?: ModelUpdatesupportedFormatsInput | string[]
+    pricing?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19661,6 +19680,7 @@ export namespace Prisma {
     provider: string
     supportsTools?: boolean
     supportedFormats?: ModelCreatesupportedFormatsInput | string[]
+    pricing?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19671,6 +19691,7 @@ export namespace Prisma {
     provider?: StringFieldUpdateOperationsInput | string
     supportsTools?: BoolFieldUpdateOperationsInput | boolean
     supportedFormats?: ModelUpdatesupportedFormatsInput | string[]
+    pricing?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19681,6 +19702,7 @@ export namespace Prisma {
     provider?: StringFieldUpdateOperationsInput | string
     supportsTools?: BoolFieldUpdateOperationsInput | boolean
     supportedFormats?: ModelUpdatesupportedFormatsInput | string[]
+    pricing?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20475,6 +20497,7 @@ export namespace Prisma {
     provider?: SortOrder
     supportsTools?: SortOrder
     supportedFormats?: SortOrder
+    pricing?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }

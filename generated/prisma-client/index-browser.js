@@ -239,6 +239,7 @@ exports.Prisma.ModelScalarFieldEnum = {
   provider: 'provider',
   supportsTools: 'supportsTools',
   supportedFormats: 'supportedFormats',
+  pricing: 'pricing',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

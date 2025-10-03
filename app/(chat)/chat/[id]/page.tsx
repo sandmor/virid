@@ -102,6 +102,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           agentId={chat.agent?.id}
           initialAgent={initialAgent}
           initialSettings={chat.settings}
+          key={chat.id}
         />
         <DataStreamHandler />
       </>
@@ -122,6 +123,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         agentId={chat.agent?.id}
         initialAgent={initialAgent}
         initialSettings={chat.settings}
+        key={chat.id}
       />
       <DataStreamHandler />
     </>

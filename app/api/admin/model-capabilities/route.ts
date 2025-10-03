@@ -5,6 +5,8 @@ import {
   getModelCapabilities,
   removeUnusedModels,
   syncOpenRouterModels,
+  syncTokenLensModels,
+  syncPricingFromTokenLens,
   upsertModelCapabilities,
 } from '@/lib/ai/model-capabilities';
 import { revalidatePath } from 'next/cache';
@@ -48,6 +50,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(result);
     }
 
+    if (action === 'sync-tokenlens') {
+      const providerParam =
+        typeof body.provider === 'string' && body.provider.length > 0
+          ? body.provider
+          : undefined;
+      const parsedModelIds = Array.isArray(modelIds)
+        ? modelIds.filter((id): id is string => typeof id === 'string')
+        : undefined;
+
+      if (!providerParam && (!parsedModelIds || parsedModelIds.length === 0)) {
+        return NextResponse.json(
+          { error: 'provider or modelIds required' },
+          { status: 400 }
+        );
+      }
+
+      const result = await syncTokenLensModels({
+        provider: providerParam,
+        modelIds: parsedModelIds,
+        allowCreate: body.allowCreate === true,
+      });
+
+      revalidatePath('/settings');
+      return NextResponse.json(result);
+    }
+
     if (action === 'reset-openrouter' && typeof modelId === 'string') {
       const result = await syncOpenRouterModels({
         modelIds: [modelId],
@@ -77,6 +105,31 @@ export async function POST(req: NextRequest) {
       const removed = await removeUnusedModels();
       revalidatePath('/settings');
       return NextResponse.json({ removed });
+    }
+
+    if (action === 'sync-pricing-tokenlens' && typeof modelId === 'string') {
+      const pricing = await syncPricingFromTokenLens(modelId);
+
+      if (!pricing) {
+        return NextResponse.json(
+          { error: 'Pricing not found in TokenLens catalog' },
+          { status: 404 }
+        );
+      }
+
+      // Get current model and update with new pricing
+      const model = await getModelCapabilities(modelId);
+      if (!model) {
+        return NextResponse.json({ error: 'Model not found' }, { status: 404 });
+      }
+
+      const updated = await upsertModelCapabilities({
+        ...model,
+        pricing,
+      });
+
+      revalidatePath('/settings');
+      return NextResponse.json({ model: updated, pricing });
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });

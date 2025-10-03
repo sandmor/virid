@@ -224,6 +224,7 @@ model Model {
   provider         String   @db.VarChar(64) // Provider slug (openai, google, openrouter)
   supportsTools    Boolean  @default(true) // Whether the model supports tool calling
   supportedFormats String[] // Supported input formats: text, image, file, audio, video, etc.
+  pricing          Json? // Pricing information: { prompt: number (per million), completion: number (per million), image: number (per image) }
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 

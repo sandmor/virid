@@ -6,7 +6,11 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChatHeader } from '@/components/chat-header';
-import { useArtifactSelector } from '@/hooks/use-artifact';
+import {
+  initialArtifactData,
+  useArtifact,
+  useArtifactSelector,
+} from '@/hooks/use-artifact';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import {
@@ -68,6 +72,7 @@ export function Chat({
 
   const queryClient = useQueryClient();
   const { setDataStream } = useDataStream();
+  const { setArtifact, setMetadata } = useArtifact();
 
   const [input, setInput] = useState<string>('');
   const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
@@ -166,6 +171,24 @@ export function Chat({
   useEffect(() => {
     stagedReasoningEffortRef.current = stagedReasoningEffort;
   }, [stagedReasoningEffort]);
+
+  useEffect(() => {
+    const resetArtifactState = () => ({
+      ...initialArtifactData,
+      boundingBox: { ...initialArtifactData.boundingBox },
+      status: 'idle' as const,
+    });
+
+    setDataStream([]);
+    setArtifact(resetArtifactState());
+    setMetadata(null, false);
+
+    return () => {
+      setDataStream([]);
+      setArtifact(resetArtifactState());
+      setMetadata(null, false);
+    };
+  }, [id, setArtifact, setDataStream, setMetadata]);
 
   const settingsVersionRef = useRef(0);
   useEffect(() => {

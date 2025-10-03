@@ -23,6 +23,7 @@ import {
 import type { ModelCatalog } from 'tokenlens/core';
 import { fetchModels } from 'tokenlens/fetch';
 import { getUsage } from 'tokenlens/helpers';
+import { getModelCost } from '@/lib/ai/pricing';
 import { getLanguageModel } from '@/lib/ai/providers';
 import { createDocument } from '@/lib/ai/tools/create-document';
 import { archiveCreateEntry } from '@/lib/ai/tools/archive-create-entry';
@@ -483,28 +484,32 @@ export async function POST(request: Request) {
                 return;
               }
 
-              if (!providers) {
-                finalMergedUsage = usage;
-                dataStream.write({
-                  type: 'data-usage',
-                  data: finalMergedUsage,
-                });
-                return;
+              // Get cost from database pricing
+              const dbCost = await getModelCost(selectedChatModel, usage);
+
+              // Try to get usage summary from tokenlens for context window info
+              let summary = {};
+              if (providers) {
+                try {
+                  summary = getUsage({
+                    modelId: selectedChatModel,
+                    usage,
+                    providers,
+                  });
+                } catch (err) {
+                  console.warn('TokenLens summary failed', err);
+                }
               }
 
-              const summary = getUsage({
-                modelId: selectedChatModel,
-                usage,
-                providers,
-              });
               finalMergedUsage = {
                 ...usage,
                 ...summary,
                 modelId: selectedChatModel,
+                costUSD: dbCost || undefined,
               } as AppUsage;
               dataStream.write({ type: 'data-usage', data: finalMergedUsage });
             } catch (err) {
-              console.warn('TokenLens enrichment failed', err);
+              console.warn('Usage enrichment failed', err);
               finalMergedUsage = usage;
               dataStream.write({ type: 'data-usage', data: finalMergedUsage });
             }
