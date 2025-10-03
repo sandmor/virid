@@ -28,6 +28,7 @@ import { Toolbar } from './toolbar';
 import { useSidebar } from './ui/sidebar';
 import { VersionFooter } from './version-footer';
 import type { VisibilityType } from './visibility-selector';
+import type { ChatModelOption } from '@/lib/ai/models';
 
 export const artifactDefinitions = [
   textArtifact,
@@ -69,7 +70,7 @@ function PureArtifact({
   isReadonly,
   selectedVisibilityType,
   selectedModelId,
-  allowedModelIds,
+  allowedModels,
   onToggleSelectMessage,
   selectedMessageIds,
   isSelectionMode,
@@ -92,7 +93,7 @@ function PureArtifact({
   isReadonly: boolean;
   selectedVisibilityType: VisibilityType;
   selectedModelId: string;
-  allowedModelIds: string[];
+  allowedModels: ChatModelOption[];
   onToggleSelectMessage?: (messageId: string) => void;
   selectedMessageIds: Set<string>;
   isSelectionMode: boolean;
@@ -360,7 +361,7 @@ function PureArtifact({
                     setMessages={setMessages}
                     status={status}
                     stop={stop}
-                    allowedModelIds={allowedModelIds}
+                    allowedModels={allowedModels}
                   />
                 </div>
               </div>
@@ -552,7 +553,7 @@ export const Artifact = memo(PureArtifact, (prevProps, nextProps) => {
   if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) {
     return false;
   }
-  if (!equal(prevProps.allowedModelIds, nextProps.allowedModelIds)) {
+  if (!equal(prevProps.allowedModels, nextProps.allowedModels)) {
     return false;
   }
 

@@ -33,6 +33,7 @@ import {
   normalizeReasoningEffort,
 } from '@/lib/agent-settings';
 import { Button } from './ui/button';
+import type { ChatModelOption } from '@/lib/ai/models';
 
 export function Chat({
   id,
@@ -42,7 +43,7 @@ export function Chat({
   isReadonly,
   autoResume,
   initialLastContext,
-  allowedModelIds,
+  allowedModels,
   agentId,
   initialAgent,
   initialSettings,
@@ -54,7 +55,7 @@ export function Chat({
   isReadonly: boolean;
   autoResume: boolean;
   initialLastContext?: AppUsage;
-  allowedModelIds: string[];
+  allowedModels: ChatModelOption[];
   agentId?: string;
   initialAgent?: AgentPreset | null;
   initialSettings?: ChatSettings | null;
@@ -74,6 +75,15 @@ export function Chat({
   const resolvedInitialAgent = initialAgent ?? null;
   const initialAgentSettings = (resolvedInitialAgent?.settings ??
     null) as ChatSettings | null;
+
+  const allowedModelIds = useMemo(
+    () => allowedModels.map((model) => model.id),
+    [allowedModels]
+  );
+  const allowedModelMap = useMemo(
+    () => new Map(allowedModels.map((model) => [model.id, model])),
+    [allowedModels]
+  );
 
   const initialReasoningEffort = normalizeReasoningEffort(
     initialSettings?.reasoningEffort ??
@@ -785,6 +795,8 @@ export function Chat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatError]);
 
+  const selectedModel = allowedModelMap.get(currentModelId);
+
   return (
     <>
       <div className="overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background">
@@ -801,6 +813,7 @@ export function Chat({
           stagedAllowedTools={stagedAllowedTools}
           onUpdateStagedAllowedTools={handleUpdateStagedAllowedTools}
           selectedModelId={currentModelId}
+          selectedModelCapabilities={selectedModel?.capabilities ?? null}
         />
 
         <Messages
@@ -866,7 +879,7 @@ export function Chat({
               status={status}
               stop={stop}
               usage={usage}
-              allowedModelIds={allowedModelIds}
+              allowedModels={allowedModels}
               reasoningEffort={stagedReasoningEffort}
               onReasoningEffortChange={handleReasoningEffortChange}
             />
@@ -907,7 +920,7 @@ export function Chat({
           status={status}
           stop={stop}
           votes={votes}
-          allowedModelIds={allowedModelIds}
+          allowedModels={allowedModels}
         />
       </div>
     </>

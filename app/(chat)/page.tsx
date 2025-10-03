@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { Chat } from '@/components/chat';
 import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL, isModelIdAllowed } from '@/lib/ai/models';
+import { resolveChatModelOptions } from '@/lib/ai/models.server';
 import { getTierForUserType } from '@/lib/ai/tiers';
 import { generateUUID } from '@/lib/utils';
 import { getAppSession } from '@/lib/auth/session';
@@ -28,9 +29,10 @@ export default async function Page({
   const cookieStore = await cookies();
   const modelIdFromCookie = cookieStore.get('chat-model');
 
-  const { modelIds: allowedModels } = await getTierForUserType(
+  const { modelIds: allowedModelIds } = await getTierForUserType(
     session.user.type
   );
+  const allowedModels = await resolveChatModelOptions(allowedModelIds);
   // Check for agentId
   const agentId =
     typeof resolvedSearchParams?.agentId === 'string'
@@ -73,16 +75,16 @@ export default async function Page({
 
   let initialModel = candidateOrder.find(
     (candidate): candidate is string =>
-      !!candidate && isModelIdAllowed(candidate, allowedModels)
+      !!candidate && isModelIdAllowed(candidate, allowedModelIds)
   );
 
   if (!initialModel) {
-    initialModel = allowedModels[0] ?? DEFAULT_CHAT_MODEL;
+    initialModel = allowedModelIds[0] ?? DEFAULT_CHAT_MODEL;
   }
 
   if (
     !modelIdFromCookie ||
-    !isModelIdAllowed(modelIdFromCookie.value, allowedModels)
+    !isModelIdAllowed(modelIdFromCookie.value, allowedModelIds)
   ) {
     return (
       <>
@@ -94,7 +96,7 @@ export default async function Page({
           initialVisibilityType="private"
           isReadonly={false}
           key={id}
-          allowedModelIds={allowedModels}
+          allowedModels={allowedModels}
           agentId={agentId}
           initialAgent={initialAgent}
           initialSettings={null}
@@ -114,7 +116,7 @@ export default async function Page({
         initialVisibilityType="private"
         isReadonly={false}
         key={id}
-        allowedModelIds={allowedModels}
+        allowedModels={allowedModels}
         agentId={agentId}
         initialAgent={initialAgent}
         initialSettings={null}

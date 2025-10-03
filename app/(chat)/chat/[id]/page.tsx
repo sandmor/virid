@@ -5,6 +5,7 @@ import { getAppSession } from '@/lib/auth/session';
 import { Chat } from '@/components/chat';
 import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL, isModelIdAllowed } from '@/lib/ai/models';
+import { resolveChatModelOptions } from '@/lib/ai/models.server';
 import { getTierForUserType } from '@/lib/ai/tiers';
 import { getChatById, getMessagesByChatId } from '@/lib/db/queries';
 import { convertToUIMessages } from '@/lib/utils';
@@ -54,9 +55,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get('chat-model');
-  const { modelIds: allowedModels } = await getTierForUserType(
+  const { modelIds: allowedModelIds } = await getTierForUserType(
     session.user.type
   );
+  const allowedModels = await resolveChatModelOptions(allowedModelIds);
   const cookieCandidate = chatModelFromCookie
     ? chatModelFromCookie.value
     : undefined;
@@ -75,16 +77,16 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   let initialModel = candidateOrder.find(
     (candidate): candidate is string =>
-      !!candidate && isModelIdAllowed(candidate, allowedModels)
+      !!candidate && isModelIdAllowed(candidate, allowedModelIds)
   );
 
   if (!initialModel) {
-    initialModel = allowedModels[0] ?? DEFAULT_CHAT_MODEL;
+    initialModel = allowedModelIds[0] ?? DEFAULT_CHAT_MODEL;
   }
 
   if (
     !chatModelFromCookie ||
-    !isModelIdAllowed(chatModelFromCookie.value, allowedModels)
+    !isModelIdAllowed(chatModelFromCookie.value, allowedModelIds)
   ) {
     return (
       <>
@@ -96,7 +98,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           initialMessages={uiMessages}
           initialVisibilityType={chat.visibility}
           isReadonly={session?.user?.id !== chat.userId}
-          allowedModelIds={allowedModels}
+          allowedModels={allowedModels}
           agentId={chat.agent?.id}
           initialAgent={initialAgent}
           initialSettings={chat.settings}
@@ -116,7 +118,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}
         isReadonly={session?.user?.id !== chat.userId}
-        allowedModelIds={allowedModels}
+        allowedModels={allowedModels}
         agentId={chat.agent?.id}
         initialAgent={initialAgent}
         initialSettings={chat.settings}

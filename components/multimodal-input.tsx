@@ -20,9 +20,7 @@ import { toast } from 'sonner';
 import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 import { saveChatModelAsCookie } from '@/app/(chat)/actions';
 import { SelectItem } from '@/components/ui/select';
-import { deriveChatModel } from '@/lib/ai/models';
 import { displayProviderName } from '@/lib/ai/registry';
-import { useModelCapabilities } from '@/hooks/use-model-capabilities';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
 import { cn } from '@/lib/utils';
@@ -43,6 +41,15 @@ import { PreviewAttachment } from './preview-attachment';
 import { SuggestedActions } from './suggested-actions';
 import { Button } from './ui/button';
 import type { VisibilityType } from './visibility-selector';
+import type { ChatModelOption } from '@/lib/ai/models';
+
+function modelSupportsAttachments(model: ChatModelOption | null | undefined) {
+  if (!model?.capabilities) {
+    return true;
+  }
+  const formats = model.capabilities.supportedFormats;
+  return formats.includes('image') || formats.includes('file');
+}
 
 function PureMultimodalInput({
   chatId,
@@ -60,7 +67,7 @@ function PureMultimodalInput({
   selectedModelId,
   onModelChange,
   usage,
-  allowedModelIds,
+  allowedModels,
   reasoningEffort,
   onReasoningEffortChange,
 }: {
@@ -79,7 +86,7 @@ function PureMultimodalInput({
   selectedModelId: string;
   onModelChange?: (modelId: string) => void;
   usage?: AppUsage;
-  allowedModelIds: string[];
+  allowedModels: ChatModelOption[];
   reasoningEffort?: 'low' | 'medium' | 'high';
   onReasoningEffortChange?: (
     effort: 'low' | 'medium' | 'high',
@@ -157,19 +164,31 @@ function PureMultimodalInput({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadQueue, setUploadQueue] = useState<string[]>([]);
-  const { data: modelCapabilities, isLoading: isLoadingCapabilities } =
-    useModelCapabilities(selectedModelId);
+  const selectedModel = useMemo(() => {
+    return allowedModels.find((model) => model.id === selectedModelId) ?? null;
+  }, [allowedModels, selectedModelId]);
 
-  const supportsAttachments = useMemo(() => {
-    if (modelCapabilities === null) {
-      return false;
-    }
-    if (!modelCapabilities) {
+  const supportsAttachments = useMemo(
+    () => modelSupportsAttachments(selectedModel),
+    [selectedModel]
+  );
+
+  const chatHasAttachments = useMemo(() => {
+    if (attachments.length > 0 || uploadQueue.length > 0) {
       return true;
     }
-    const formats = modelCapabilities.supportedFormats;
-    return formats.includes('image') || formats.includes('file');
-  }, [modelCapabilities]);
+    return messages.some((message) =>
+      Array.isArray(message.parts)
+        ? message.parts.some(
+            (part) =>
+              !!part &&
+              typeof part === 'object' &&
+              'type' in part &&
+              part.type === 'file'
+          )
+        : false
+    );
+  }, [attachments, uploadQueue, messages]);
 
   useEffect(() => {
     if (supportsAttachments) {
@@ -395,14 +414,12 @@ function PureMultimodalInput({
               fileInputRef={fileInputRef}
               status={status}
               supportsAttachments={supportsAttachments}
-              isCheckingCapabilities={
-                isLoadingCapabilities && modelCapabilities === undefined
-              }
             />
             <ModelSelectorCompact
+              allowedModels={allowedModels}
+              chatHasAttachments={chatHasAttachments}
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
-              allowedModelIds={allowedModelIds}
             />
             {onReasoningEffortChange && (
               <ReasoningEffortSelector
@@ -443,6 +460,9 @@ export const MultimodalInput = memo(
     if (!equal(prevProps.attachments, nextProps.attachments)) {
       return false;
     }
+    if (!equal(prevProps.allowedModels, nextProps.allowedModels)) {
+      return false;
+    }
     if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) {
       return false;
     }
@@ -461,22 +481,17 @@ function PureAttachmentsButton({
   fileInputRef,
   status,
   supportsAttachments,
-  isCheckingCapabilities,
 }: {
   fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
   status: UseChatHelpers<ChatMessage>['status'];
   supportsAttachments: boolean;
-  isCheckingCapabilities: boolean;
 }) {
-  const isDisabled =
-    status !== 'ready' || !supportsAttachments || isCheckingCapabilities;
+  const isDisabled = status !== 'ready' || !supportsAttachments;
   const disabledReason = !supportsAttachments
     ? 'Attachments are disabled for this model.'
-    : isCheckingCapabilities
-      ? 'Checking model capabilities…'
-      : status !== 'ready'
-        ? 'Please wait for the current response to finish.'
-        : undefined;
+    : status !== 'ready'
+      ? 'Please wait for the current response to finish.'
+      : undefined;
 
   return (
     <Button
@@ -506,11 +521,13 @@ const AttachmentsButton = memo(PureAttachmentsButton);
 function PureModelSelectorCompact({
   selectedModelId,
   onModelChange,
-  allowedModelIds,
+  allowedModels,
+  chatHasAttachments,
 }: {
   selectedModelId: string;
   onModelChange?: (modelId: string) => void;
-  allowedModelIds: string[];
+  allowedModels: ChatModelOption[];
+  chatHasAttachments: boolean;
 }) {
   const [optimisticModelId, setOptimisticModelId] = useState(selectedModelId);
 
@@ -518,7 +535,7 @@ function PureModelSelectorCompact({
     setOptimisticModelId(selectedModelId);
   }, [selectedModelId]);
 
-  const availableModels = allowedModelIds.map((id) => deriveChatModel(id));
+  const availableModels = allowedModels;
   const selectedModel = availableModels.find(
     (model) => model.id === optimisticModelId
   );
@@ -553,6 +570,12 @@ function PureModelSelectorCompact({
       onValueChange={(modelName) => {
         const model = availableModels.find((m) => m.name === modelName);
         if (model) {
+          if (chatHasAttachments && !modelSupportsAttachments(model)) {
+            toast.error(
+              'Cannot switch: remove attachments to use a text-only model.'
+            );
+            return;
+          }
           setOptimisticModelId(model.id);
           onModelChange?.(model.id);
           startTransition(() => {
@@ -592,7 +615,15 @@ function PureModelSelectorCompact({
                     key={model.id}
                     value={model.name}
                     data-testid={`model-selector-item-${model.id}`}
+                    disabled={
+                      chatHasAttachments && !modelSupportsAttachments(model)
+                    }
                     className="pl-8"
+                    title={
+                      chatHasAttachments && !modelSupportsAttachments(model)
+                        ? 'Remove attachments to select this model.'
+                        : undefined
+                    }
                   >
                     <div className="truncate font-medium text-xs">
                       {model.name}

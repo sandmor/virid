@@ -55,6 +55,7 @@ import {
   type AgentSettingsValue,
 } from '@/lib/agent-settings';
 import { deriveChatModel } from '@/lib/ai/models';
+import type { ChatModelOption } from '@/lib/ai/models';
 import {
   Select,
   SelectContent,
@@ -108,10 +109,10 @@ function cloneAgentSettings(
 }
 
 export function AgentsManagement({
-  allowedModelIds,
+  allowedModels,
   allowedReasoningEfforts,
 }: {
-  allowedModelIds: string[];
+  allowedModels: ChatModelOption[];
   allowedReasoningEfforts?: Array<'low' | 'medium' | 'high'>;
 }) {
   const { data, isLoading, error, refetch, isFetching } = useAgents();
@@ -130,9 +131,15 @@ export function AgentsManagement({
   }, []);
 
   const modelOptions = useMemo(() => {
-    const unique = Array.from(new Set(allowedModelIds));
-    return unique.map((id) => deriveChatModel(id));
-  }, [allowedModelIds]);
+    const seen = new Set<string>();
+    const unique: ChatModelOption[] = [];
+    for (const model of allowedModels) {
+      if (seen.has(model.id)) continue;
+      seen.add(model.id);
+      unique.push(model);
+    }
+    return unique;
+  }, [allowedModels]);
   const reasoningOptions = useMemo(() => {
     if (allowedReasoningEfforts === undefined) {
       return REASONING_OPTIONS;
@@ -143,6 +150,10 @@ export function AgentsManagement({
   }, [allowedReasoningEfforts]);
   const allowedModelIdSet = useMemo(
     () => new Set(modelOptions.map((model) => model.id)),
+    [modelOptions]
+  );
+  const allowedModelMap = useMemo(
+    () => new Map(modelOptions.map((model) => [model.id, model])),
     [modelOptions]
   );
   const reasoningValueSet = useMemo(
@@ -207,6 +218,10 @@ export function AgentsManagement({
     description: '',
     settings: sanitizeSettings(cloneAgentSettings()),
   }));
+  const currentModelId = formData.settings.modelId ?? undefined;
+  const currentModelCapabilities = currentModelId
+    ? (allowedModelMap.get(currentModelId)?.capabilities ?? null)
+    : null;
   const [deletingAgentId, setDeletingAgentId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -654,11 +669,8 @@ export function AgentsManagement({
                       chatHasStarted={false}
                       stagedAllowedTools={formData.settings.allowedTools}
                       onUpdateStagedAllowedTools={updateAllowedTools}
-                      selectedModelId={
-                        formData.settings.modelId === DEFAULT_MODEL_VALUE
-                          ? undefined
-                          : (formData.settings.modelId ?? undefined)
-                      }
+                      selectedModelId={currentModelId}
+                      selectedModelCapabilities={currentModelCapabilities}
                     />
                   </div>
                 </div>
@@ -1146,11 +1158,8 @@ export function AgentsManagement({
                   chatHasStarted={false}
                   stagedAllowedTools={formData.settings.allowedTools}
                   onUpdateStagedAllowedTools={updateAllowedTools}
-                  selectedModelId={
-                    formData.settings.modelId === DEFAULT_MODEL_VALUE
-                      ? undefined
-                      : (formData.settings.modelId ?? undefined)
-                  }
+                  selectedModelId={currentModelId}
+                  selectedModelCapabilities={currentModelCapabilities}
                 />
               </div>
             </div>

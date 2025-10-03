@@ -5,18 +5,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArchiveExplorer } from '../profile/view'; // reuse existing implementation
 import { AgentsManagement } from '@/components/agents-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { ChatModelOption } from '@/lib/ai/models';
 
 export default function SettingsView({
   defaultTab,
   isAdmin,
   adminContent,
-  allowedModelIds,
+  allowedModels,
   allowedReasoningEfforts,
 }: {
   defaultTab: 'archive' | 'agents' | 'admin';
   isAdmin: boolean;
   adminContent?: React.ReactNode;
-  allowedModelIds: string[];
+  allowedModels: ChatModelOption[];
   allowedReasoningEfforts?: Array<'low' | 'medium' | 'high'>;
 }) {
   const router = useRouter();
@@ -84,7 +85,7 @@ export default function SettingsView({
               className="flex-1 min-h-0 overflow-hidden"
             >
               <AgentsManagement
-                allowedModelIds={allowedModelIds}
+                allowedModels={allowedModels}
                 allowedReasoningEfforts={allowedReasoningEfforts}
               />
             </motion.div>

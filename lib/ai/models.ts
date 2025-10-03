@@ -1,4 +1,4 @@
-import { getModelCapabilities } from './model-capabilities';
+import type { ModelFormat } from './model-capabilities';
 
 export const DEFAULT_CHAT_MODEL = 'openrouter:x-ai/grok-4-fast:free';
 
@@ -13,6 +13,15 @@ export type ChatModel = {
   model: string; // provider-specific model slug used in SDK calls
   name: string; // human readable name
   description?: string; // optional
+};
+
+export type ChatModelCapabilitiesSummary = {
+  supportsTools: boolean;
+  supportedFormats: ModelFormat[];
+};
+
+export type ChatModelOption = ChatModel & {
+  capabilities: ChatModelCapabilitiesSummary | null;
 };
 
 export function buildCompositeModelId(provider: string, model: string) {

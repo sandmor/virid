@@ -12,6 +12,7 @@ import { VisibilitySelector, type VisibilityType } from './visibility-selector';
 import { ChatToolSelector } from './chat-tool-selector';
 import { ChatAgentSelector, type AgentPreset } from './chat-agent-selector';
 import { motion } from 'framer-motion';
+import type { ChatModelCapabilitiesSummary } from '@/lib/ai/models';
 
 function PureChatHeader({
   chatId,
@@ -27,6 +28,7 @@ function PureChatHeader({
   selectedAgentLabel,
   onSelectAgent,
   selectedModelId,
+  selectedModelCapabilities,
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
@@ -41,6 +43,7 @@ function PureChatHeader({
   selectedAgentLabel?: string | null;
   onSelectAgent?: (agent: AgentPreset | null) => void;
   selectedModelId?: string;
+  selectedModelCapabilities?: ChatModelCapabilitiesSummary | null;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -96,6 +99,7 @@ function PureChatHeader({
             stagedAllowedTools={stagedAllowedTools}
             onUpdateStagedAllowedTools={onUpdateStagedAllowedTools}
             selectedModelId={selectedModelId}
+            selectedModelCapabilities={selectedModelCapabilities}
           />
         </div>
       )}
@@ -103,20 +107,47 @@ function PureChatHeader({
   );
 }
 
-export const ChatHeader = memo(
-  PureChatHeader,
-  (prevProps, nextProps) =>
-    prevProps.chatId === nextProps.chatId &&
-    prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
-    prevProps.isReadonly === nextProps.isReadonly &&
-    prevProps.chatHasStarted === nextProps.chatHasStarted &&
-    prevProps.stagedPinnedSlugs.join('|') ===
-      nextProps.stagedPinnedSlugs.join('|') &&
-    (prevProps.stagedAllowedTools?.join('|') ?? '__all__') ===
-      (nextProps.stagedAllowedTools?.join('|') ?? '__all__') &&
-    (prevProps.selectedAgentId ?? '__none__') ===
-      (nextProps.selectedAgentId ?? '__none__') &&
-    (prevProps.selectedAgentLabel ?? '') ===
-      (nextProps.selectedAgentLabel ?? '') &&
-    (prevProps.selectedModelId ?? '') === (nextProps.selectedModelId ?? '')
-);
+export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
+  if (prevProps.chatId !== nextProps.chatId) return false;
+  if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
+    return false;
+  if (prevProps.isReadonly !== nextProps.isReadonly) return false;
+  if (prevProps.chatHasStarted !== nextProps.chatHasStarted) return false;
+  if (
+    prevProps.stagedPinnedSlugs.join('|') !==
+    nextProps.stagedPinnedSlugs.join('|')
+  )
+    return false;
+  if (
+    (prevProps.stagedAllowedTools?.join('|') ?? '__all__') !==
+    (nextProps.stagedAllowedTools?.join('|') ?? '__all__')
+  ) {
+    return false;
+  }
+  if (
+    (prevProps.selectedAgentId ?? '__none__') !==
+    (nextProps.selectedAgentId ?? '__none__')
+  )
+    return false;
+  if (
+    (prevProps.selectedAgentLabel ?? '') !==
+    (nextProps.selectedAgentLabel ?? '')
+  )
+    return false;
+  if ((prevProps.selectedModelId ?? '') !== (nextProps.selectedModelId ?? ''))
+    return false;
+
+  const prevCaps = prevProps.selectedModelCapabilities;
+  const nextCaps = nextProps.selectedModelCapabilities;
+  if ((prevCaps?.supportsTools ?? true) !== (nextCaps?.supportsTools ?? true))
+    return false;
+
+  const prevFormats = prevCaps?.supportedFormats ?? [];
+  const nextFormats = nextCaps?.supportedFormats ?? [];
+  if (prevFormats.length !== nextFormats.length) return false;
+  for (let i = 0; i < prevFormats.length; i++) {
+    if (prevFormats[i] !== nextFormats[i]) return false;
+  }
+
+  return true;
+});

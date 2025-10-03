@@ -5,7 +5,6 @@ import {
   useChatSettings,
   useUpdateAllowedTools,
 } from '@/hooks/use-chat-settings';
-import { useModelCapabilities } from '@/hooks/use-model-capabilities';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -16,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Loader, Settings, AlertCircle } from 'lucide-react';
+import type { ChatModelCapabilitiesSummary } from '@/lib/ai/models';
 
 // Human friendly labels (fallback to id if not present)
 const LABELS: Record<ChatToolId, string> = {
@@ -69,7 +69,8 @@ export function ChatToolSelector({
   chatHasStarted,
   stagedAllowedTools,
   onUpdateStagedAllowedTools,
-  selectedModelId,
+  selectedModelId: _selectedModelId,
+  selectedModelCapabilities,
 }: {
   chatId: string;
   className?: string;
@@ -77,13 +78,12 @@ export function ChatToolSelector({
   stagedAllowedTools?: string[] | undefined;
   onUpdateStagedAllowedTools?: (tools: string[] | undefined) => void;
   selectedModelId?: string;
+  selectedModelCapabilities?: ChatModelCapabilitiesSummary | null;
 }) {
   const { data, isLoading } = useChatSettings(
     chatHasStarted ? chatId : undefined
   );
   const mutation = useUpdateAllowedTools(chatHasStarted ? chatId : undefined);
-  const { data: modelCapabilities, isLoading: isLoadingCapabilities } =
-    useModelCapabilities(selectedModelId);
   const [open, setOpen] = useState(false);
 
   // Local state for selected tools: undefined means all, array means specific
@@ -92,7 +92,7 @@ export function ChatToolSelector({
   );
 
   // Check if model supports tools
-  const modelSupportsTools = modelCapabilities?.supportsTools ?? true;
+  const modelSupportsTools = selectedModelCapabilities?.supportsTools ?? true;
 
   // Sync with server data or staged props
   useEffect(() => {
