@@ -27,7 +27,7 @@ type MessagesProps = {
   isSelectionMode: boolean;
 };
 
-function PureMessages({
+export function Messages({
   chatId,
   status,
   messages,
@@ -122,26 +122,3 @@ function PureMessages({
     </div>
   );
 }
-
-export const Messages = memo(PureMessages, (prevProps, nextProps) => {
-  // If artifact visibility changed, re-render to update layout
-  if (prevProps.isArtifactVisible !== nextProps.isArtifactVisible) {
-    return false;
-  }
-
-  if (prevProps.onDeleteMessage !== nextProps.onDeleteMessage) return false;
-  if (prevProps.onDeleteMessageCascade !== nextProps.onDeleteMessageCascade)
-    return false;
-  if (prevProps.onToggleSelectMessage !== nextProps.onToggleSelectMessage)
-    return false;
-  if (prevProps.isSelectionMode !== nextProps.isSelectionMode) return false;
-  if (prevProps.selectedMessageIds !== nextProps.selectedMessageIds)
-    return false;
-  if (prevProps.status !== nextProps.status) return false;
-  if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
-  if (prevProps.messages.length !== nextProps.messages.length) return false;
-  if (!equal(prevProps.messages, nextProps.messages)) return false;
-
-  // Props are equal — skip rerender
-  return true;
-});
