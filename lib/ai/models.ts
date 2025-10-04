@@ -1,11 +1,11 @@
 import type { ModelFormat } from './model-capabilities';
 
-export const DEFAULT_CHAT_MODEL = 'openrouter:x-ai/grok-4-fast:free';
+export const DEFAULT_CHAT_MODEL = 'google:gemini-2.5-flash';
 
 export const TITLE_GENERATION_MODEL =
-  process.env.TITLE_GENERATION_MODEL ?? 'openrouter:x-ai/grok-4-fast:free';
+  process.env.TITLE_GENERATION_MODEL ?? 'google:gemini-2.5-flash';
 export const ARTIFACT_GENERATION_MODEL =
-  process.env.ARTIFACT_GENERATION_MODEL ?? 'openrouter:x-ai/grok-4-fast:free';
+  process.env.ARTIFACT_GENERATION_MODEL ?? 'google:gemini-2.5-flash';
 
 export type ChatModel = {
   id: string; // composite id provider:model
@@ -73,16 +73,6 @@ const curated: Record<string, { name: string; description?: string }> = {
     name: 'Grok 4',
     description:
       'xAI flagship: advanced long‑context reasoning & multimodal understanding',
-  },
-  'openrouter:x-ai/grok-4-fast:free': {
-    name: 'Grok 4 Fast (Free)',
-    description:
-      'Lower latency Grok variant optimized for rapid iteration (free tier)',
-  },
-  'openrouter:moonshotai/kimi-k2:free': {
-    name: 'Kimi K2 (Free)',
-    description:
-      'Moonshot Kimi K2 general model: efficient multilingual knowledge synthesis',
   },
 };
 

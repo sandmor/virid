@@ -22,7 +22,7 @@ export const postRequestBodySchema = z.object({
     parts: z.array(partSchema),
   }),
   // Accept any composite provider:model id; entitlement check is enforced server-side.
-  // Examples: 'openai:gpt-5', 'google:gemini-2.5-pro', 'openrouter:openai/gpt-5', 'openrouter:x-ai/grok-4-fast:free'
+  // Examples: 'openai:gpt-5', 'google:gemini-2.5-pro', 'openrouter:openai/gpt-5', 'openrouter:x-ai/grok-4'
   selectedChatModel: z
     .string()
     .min(3)

@@ -27,6 +27,7 @@ import type { Chat } from '@/lib/db/schema';
 // fetcher retained in utils for other components; not needed here
 import { Loader } from 'lucide-react';
 import { ChatItem } from './sidebar-history-item';
+import { ChatSearch } from './chat-search';
 
 type GroupedChats = {
   today: Chat[];
@@ -207,6 +208,14 @@ export function SidebarHistory({ user }: { user: SidebarUser | undefined }) {
 
   return (
     <>
+      <ChatSearch
+        currentChatId={id as string | undefined}
+        onDelete={(chatId) => {
+          setDeleteId(chatId);
+          setShowDeleteDialog(true);
+        }}
+      />
+
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
