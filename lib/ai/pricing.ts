@@ -20,8 +20,8 @@ export function calculateCost(
   usage: LanguageModelUsage & Record<string, unknown>,
   pricing: ModelPricing
 ): CostBreakdown {
-  const inputTokens = (usage.promptTokens as number | undefined) ?? 0;
-  const outputTokens = (usage.completionTokens as number | undefined) ?? 0;
+  const inputTokens = (usage.inputTokens as number | undefined) ?? 0;
+  const outputTokens = (usage.outputTokens as number | undefined) ?? 0;
   const reasoningTokens =
     'reasoningTokens' in usage ? ((usage.reasoningTokens as number) ?? 0) : 0;
   const cachedInputTokens =
