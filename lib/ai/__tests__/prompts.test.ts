@@ -16,7 +16,9 @@ describe('systemPrompt', () => {
       allowedTools: ['createDocument', 'updateDocument'],
     });
 
-    expect(prompt).toContain('This is a guide for using artifacts tools');
+    expect(prompt).toContain(
+      'Artifacts workspace (side-by-side document view)'
+    );
   });
 
   it('omits artifacts guidance when artifact tools are disabled', () => {
@@ -25,7 +27,9 @@ describe('systemPrompt', () => {
       allowedTools: [],
     });
 
-    expect(prompt).not.toContain('This is a guide for using artifacts tools');
+    expect(prompt).not.toContain(
+      'Artifacts workspace (side-by-side document view)'
+    );
   });
 
   it('includes archive guidance only when archive tools are allowed', () => {
@@ -40,9 +44,19 @@ describe('systemPrompt', () => {
     });
 
     expect(withoutArchive).not.toContain(
-      'Memory Archive (Long-form Knowledge Files)'
+      'Archive tools (long-form knowledge base)'
     );
-    expect(withArchive).toContain('Memory Archive (Long-form Knowledge Files)');
+    expect(withArchive).toContain('Archive tools (long-form knowledge base)');
+  });
+
+  it('always includes formatting guidance', () => {
+    const prompt = systemPrompt({
+      requestHints: baseRequestHints,
+      allowedTools: [],
+    });
+
+    expect(prompt).toContain('Render math with KaTeX syntax');
+    expect(prompt).toContain('```mermaid');
   });
 
   it('adds pinned entries respecting size guard', () => {
