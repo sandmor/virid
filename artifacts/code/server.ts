@@ -1,6 +1,5 @@
 import { streamObject } from 'ai';
 import { z } from 'zod';
-import type { CoreMessage } from 'ai';
 import { codePrompt, updateDocumentPrompt } from '@/lib/ai/prompts';
 import { getLanguageModel } from '@/lib/ai/providers';
 import { ARTIFACT_GENERATION_MODEL } from '@/lib/ai/models';
@@ -10,6 +9,7 @@ import {
   detectCodeLanguageFromText,
   type CodeLanguage,
 } from '@/lib/code/languages';
+import { buildConversationSummary } from '@/lib/ai/tools/conversation-context';
 
 type CodeDraftMetadata = {
   language: CodeLanguage;
@@ -20,73 +20,41 @@ const codeSchema = z.object({
   language: z.string().optional(),
 });
 
-function getTextFromMessages(messages?: CoreMessage[]): string {
-  if (!messages || messages.length === 0) {
-    return '';
-  }
-
-  const userTexts: string[] = [];
-
-  for (
-    let index = messages.length - 1;
-    index >= 0 && userTexts.length < 3;
-    index -= 1
-  ) {
-    const message = messages[index];
-    if (message.role !== 'user') {
-      continue;
-    }
-    const contentParts = Array.isArray(message.content)
-      ? message.content
-      : typeof message.content === 'string'
-        ? [message.content]
-        : [];
-    const textParts = contentParts
-      .map((part) => {
-        if (typeof part === 'string') {
-          return part;
-        }
-        if (part && typeof part === 'object' && 'type' in part) {
-          if (part.type === 'text' && typeof part.text === 'string') {
-            return part.text;
-          }
-        }
-        return '';
-      })
-      .filter(Boolean)
-      .join('\n');
-
-    if (textParts.trim().length > 0) {
-      userTexts.push(textParts.trim());
-    }
-  }
-
-  if (userTexts.length === 0) {
-    return '';
-  }
-
-  return userTexts.reverse().join('\n---\n');
-}
-
-function resolveLanguage(
-  title: string,
-  messages: CoreMessage[] | undefined,
-  requested?: CodeLanguage
-): CodeLanguage {
+function resolveLanguage({
+  fallback,
+  contextSummary,
+  recentUserTexts,
+  assistantPrelude,
+  requested,
+}: {
+  fallback: string;
+  contextSummary?: string;
+  recentUserTexts: string[];
+  assistantPrelude?: string;
+  requested?: CodeLanguage;
+}): CodeLanguage {
   if (requested) {
     return requested;
   }
 
-  const fromMessages = detectCodeLanguageFromText(
-    getTextFromMessages(messages)
-  );
-  if (fromMessages) {
-    return fromMessages;
-  }
+  const orderedUserText = [...recentUserTexts].reverse().join('\n---\n');
+  const candidateSegments = [
+    orderedUserText,
+    contextSummary ?? '',
+    assistantPrelude ?? '',
+    fallback,
+  ];
 
-  const fromTitle = detectCodeLanguageFromText(title);
-  if (fromTitle) {
-    return fromTitle;
+  for (const segment of candidateSegments) {
+    const normalized = typeof segment === 'string' ? segment.trim() : '';
+    if (!normalized) {
+      continue;
+    }
+
+    const detected = detectCodeLanguageFromText(normalized);
+    if (detected) {
+      return detected;
+    }
   }
 
   return 'python';
@@ -105,14 +73,14 @@ Only change the language if the request explicitly requires a different one.`;
 }
 
 function buildGenerationPrompt(
-  title: string,
-  additionalContext: string
+  promptHeading: string,
+  contextSummary?: string
 ): string {
-  if (additionalContext.trim().length === 0) {
-    return title;
+  if (!contextSummary || contextSummary.trim().length === 0) {
+    return promptHeading;
   }
 
-  return `${title}\n\nAdditional user context:\n${additionalContext}`;
+  return `${promptHeading}\n\nAdditional user context:\n${contextSummary}`;
 }
 
 export const codeDocumentHandler = createDocumentHandler<'code'>({
@@ -122,13 +90,25 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
     dataStream,
     context,
     requestedLanguage,
+    invocationMessages,
+    assistantPrelude,
   }) => {
     let draftContent = '';
-    let resolvedLanguage = resolveLanguage(
-      title,
-      context.messages,
-      requestedLanguage
-    );
+    const baseMessages = invocationMessages ?? context.messages;
+    const { summary: contextSummary, recentUserTexts } =
+      buildConversationSummary({
+        messages: baseMessages,
+        assistantPrelude,
+        recentUserLimit: 3,
+      });
+
+    let resolvedLanguage = resolveLanguage({
+      fallback: title,
+      contextSummary,
+      recentUserTexts,
+      assistantPrelude,
+      requested: requestedLanguage,
+    });
 
     dataStream.write({
       type: 'data-codeLanguage',
@@ -140,11 +120,10 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
       (context.model as any) ??
       (await getLanguageModel(ARTIFACT_GENERATION_MODEL));
 
-    const additionalContext = getTextFromMessages(context.messages);
     const { fullStream } = streamObject({
       model,
       system: buildCodeSystemPrompt(resolvedLanguage),
-      prompt: buildGenerationPrompt(title, additionalContext),
+      prompt: buildGenerationPrompt(title, contextSummary),
       schema: codeSchema,
       ...(context.providerOptions && {
         providerOptions: context.providerOptions,
@@ -187,7 +166,14 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
       } satisfies CodeDraftMetadata,
     };
   },
-  onUpdateDocument: async ({ document, description, dataStream, context }) => {
+  onUpdateDocument: async ({
+    document,
+    description,
+    dataStream,
+    context,
+    invocationMessages,
+    assistantPrelude,
+  }) => {
     let draftContent = '';
     const documentLanguage = ensureLanguageFromSchema(
       document.metadata && typeof document.metadata === 'object'
@@ -195,8 +181,22 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
         : undefined
     );
 
+    const baseMessages = invocationMessages ?? context.messages;
+    const { summary: contextSummary, recentUserTexts } =
+      buildConversationSummary({
+        messages: baseMessages,
+        assistantPrelude,
+        recentUserLimit: 3,
+      });
+
     let resolvedLanguage =
-      documentLanguage ?? resolveLanguage(description, context.messages);
+      documentLanguage ??
+      resolveLanguage({
+        fallback: description,
+        contextSummary,
+        recentUserTexts,
+        assistantPrelude,
+      });
 
     dataStream.write({
       type: 'data-codeLanguage',
@@ -207,11 +207,10 @@ export const codeDocumentHandler = createDocumentHandler<'code'>({
     const model =
       (context.model as any) ??
       (await getLanguageModel(ARTIFACT_GENERATION_MODEL));
-    const additionalContext = getTextFromMessages(context.messages);
     const { fullStream } = streamObject({
       model,
       system: `${buildCodeSystemPrompt(resolvedLanguage)}\n\nMaintain the existing language unless the user explicitly asks to change it.\n${updateDocumentPrompt(document.content, 'code')}`,
-      prompt: buildGenerationPrompt(description, additionalContext),
+      prompt: buildGenerationPrompt(description, contextSummary),
       schema: codeSchema,
       ...(context.providerOptions && {
         providerOptions: context.providerOptions,

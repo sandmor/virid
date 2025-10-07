@@ -38,14 +38,22 @@ export const textArtifact = new Artifact<'text', TextArtifactMetadata>({
     }
 
     if (streamPart.type === 'data-textDelta') {
+      const shouldReplace =
+        typeof (streamPart as any).replace === 'boolean'
+          ? (streamPart as any).replace
+          : false;
       setArtifact((draftArtifact) => {
+        const baseContent = shouldReplace ? '' : draftArtifact.content;
+        const nextContent = `${baseContent}${streamPart.data}`;
+        const nextLength = nextContent.length;
+
         return {
           ...draftArtifact,
-          content: draftArtifact.content + streamPart.data,
+          content: nextContent,
           isVisible:
             draftArtifact.status === 'streaming' &&
-            draftArtifact.content.length > 400 &&
-            draftArtifact.content.length < 450
+            nextLength > 400 &&
+            nextLength < 450
               ? true
               : draftArtifact.isVisible,
           status: 'streaming',

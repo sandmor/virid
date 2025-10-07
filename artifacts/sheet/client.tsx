@@ -18,9 +18,13 @@ export const sheetArtifact = new Artifact<'sheet', Metadata>({
   initialize: () => null,
   onStreamPart: ({ setArtifact, streamPart }) => {
     if (streamPart.type === 'data-sheetDelta') {
+      const shouldReplace =
+        typeof (streamPart as any).replace === 'boolean'
+          ? (streamPart as any).replace
+          : false;
       setArtifact((draftArtifact) => ({
         ...draftArtifact,
-        content: streamPart.data,
+        content: shouldReplace ? streamPart.data : streamPart.data,
         isVisible: true,
         status: 'streaming',
       }));

@@ -10,6 +10,7 @@ export function DataStreamHandler() {
 
   const { artifact, setArtifact, setMetadata } = useArtifact();
   const lastProcessedIndex = useRef(-1);
+  const pendingClearRef = useRef(false);
 
   useEffect(() => {
     if (!dataStream?.length) {
@@ -34,19 +35,51 @@ export function DataStreamHandler() {
     lastProcessedIndex.current = dataStream.length - 1;
 
     for (const delta of newDeltas) {
+      if (delta.type === 'data-clear') {
+        pendingClearRef.current = true;
+        setArtifact((draftArtifact) => {
+          if (!draftArtifact) {
+            return {
+              ...initialArtifactData,
+              boundingBox: { ...initialArtifactData.boundingBox },
+              status: 'streaming',
+            };
+          }
+
+          return {
+            ...draftArtifact,
+            status: 'streaming',
+          };
+        });
+        continue;
+      }
+
       const artifactDefinition = artifactDefinitions.find(
         (currentArtifactDefinition) =>
           currentArtifactDefinition.kind === artifact.kind
       );
 
+      const shouldReplaceContent =
+        pendingClearRef.current &&
+        (delta.type === 'data-textDelta' ||
+          delta.type === 'data-sheetDelta' ||
+          delta.type === 'data-codeDelta');
+
+      const streamPart = shouldReplaceContent
+        ? ({ ...delta, replace: true } as typeof delta & { replace: true })
+        : delta;
+
       if (artifactDefinition?.onStreamPart) {
         artifactDefinition.onStreamPart({
-          streamPart: delta,
+          streamPart,
           setArtifact,
           setMetadata,
         });
       }
 
+      if (shouldReplaceContent) {
+        pendingClearRef.current = false;
+      }
       setArtifact((draftArtifact) => {
         if (!draftArtifact) {
           return {
@@ -75,13 +108,6 @@ export function DataStreamHandler() {
             return {
               ...draftArtifact,
               kind: delta.data,
-              status: 'streaming',
-            };
-
-          case 'data-clear':
-            return {
-              ...draftArtifact,
-              content: '',
               status: 'streaming',
             };
 

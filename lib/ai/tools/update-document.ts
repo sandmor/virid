@@ -1,4 +1,4 @@
-import { tool, type UIMessageStreamWriter } from 'ai';
+import { tool, type CoreMessage, type UIMessageStreamWriter } from 'ai';
 import type { AppSession } from '@/lib/auth/session';
 import { z } from 'zod';
 import {
@@ -27,7 +27,7 @@ export const updateDocument = ({
         .string()
         .describe('The description of changes that need to be made'),
     }),
-    execute: async ({ id, description }) => {
+    execute: async ({ id, description }, runtime) => {
       const document = await getDocumentById({ id });
 
       if (!document) {
@@ -42,6 +42,10 @@ export const updateDocument = ({
         transient: true,
       });
 
+      const invocationMessages =
+        (runtime?.messages as CoreMessage[]) ?? undefined;
+      const assistantPrelude = extractAssistantPrelude(invocationMessages);
+
       const documentHandler = documentHandlersByArtifactKind.find(
         (documentHandlerByArtifactKind) =>
           documentHandlerByArtifactKind.kind === document.kind
@@ -51,12 +55,14 @@ export const updateDocument = ({
         throw new Error(`No document handler found for kind: ${document.kind}`);
       }
 
-      await documentHandler.onUpdateDocument({
+      const draftResult = await documentHandler.onUpdateDocument({
         document,
         description,
         dataStream,
         session,
         context,
+        invocationMessages,
+        assistantPrelude,
       });
 
       dataStream.write({ type: 'data-finish', data: null, transient: true });
@@ -65,7 +71,44 @@ export const updateDocument = ({
         id,
         title: document.title,
         kind: document.kind,
-        content: 'The document has been updated successfully.',
+        content: draftResult.content,
+        metadata: draftResult.metadata ?? null,
       };
     },
   });
+
+function extractAssistantPrelude(messages?: CoreMessage[]): string | undefined {
+  if (!messages || messages.length === 0) {
+    return undefined;
+  }
+
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message.role !== 'assistant') {
+      continue;
+    }
+
+    if (typeof message.content === 'string') {
+      const trimmed = message.content.trim();
+      if (trimmed) return trimmed;
+      continue;
+    }
+
+    if (Array.isArray(message.content)) {
+      const textContent = message.content
+        .map((part) => {
+          if (!part) return '';
+          if (typeof part === 'string') return part;
+          if ('type' in part && part.type === 'text' && 'text' in part) {
+            return typeof part.text === 'string' ? part.text : '';
+          }
+          return '';
+        })
+        .join('\n')
+        .trim();
+      if (textContent) return textContent;
+    }
+  }
+
+  return undefined;
+}

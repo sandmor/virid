@@ -40,6 +40,8 @@ export type CreateDocumentCallbackProps = {
   session: AppSession;
   context: ArtifactToolContext;
   requestedLanguage: CodeLanguage;
+  invocationMessages?: CoreMessage[];
+  assistantPrelude?: string;
 };
 
 export type UpdateDocumentCallbackProps = {
@@ -48,12 +50,21 @@ export type UpdateDocumentCallbackProps = {
   dataStream: UIMessageStreamWriter<ChatMessage>;
   session: AppSession;
   context: ArtifactToolContext;
+  invocationMessages?: CoreMessage[];
+  assistantPrelude?: string;
 };
 
-export type DocumentHandler<T = ArtifactKind> = {
+export type DocumentHandler<
+  T = ArtifactKind,
+  M extends Prisma.JsonValue | undefined = Prisma.JsonValue,
+> = {
   kind: T;
-  onCreateDocument: (args: CreateDocumentCallbackProps) => Promise<void>;
-  onUpdateDocument: (args: UpdateDocumentCallbackProps) => Promise<void>;
+  onCreateDocument: (
+    args: CreateDocumentCallbackProps
+  ) => Promise<DocumentDraftResult<M>>;
+  onUpdateDocument: (
+    args: UpdateDocumentCallbackProps
+  ) => Promise<DocumentDraftResult<M>>;
 };
 
 export function createDocumentHandler<
@@ -67,7 +78,7 @@ export function createDocumentHandler<
   onUpdateDocument: (
     params: UpdateDocumentCallbackProps
   ) => Promise<DocumentDraftResult<M>>;
-}): DocumentHandler<T> {
+}): DocumentHandler<T, M> {
   return {
     kind: config.kind,
     onCreateDocument: async (args: CreateDocumentCallbackProps) => {
@@ -78,6 +89,8 @@ export function createDocumentHandler<
         session: args.session,
         context: args.context,
         requestedLanguage: args.requestedLanguage,
+        invocationMessages: args.invocationMessages,
+        assistantPrelude: args.assistantPrelude,
       });
 
       if (args.session?.user?.id) {
@@ -91,7 +104,7 @@ export function createDocumentHandler<
         });
       }
 
-      return;
+      return draftResult;
     },
     onUpdateDocument: async (args: UpdateDocumentCallbackProps) => {
       const draftResult = await config.onUpdateDocument({
@@ -100,6 +113,8 @@ export function createDocumentHandler<
         dataStream: args.dataStream,
         session: args.session,
         context: args.context,
+        invocationMessages: args.invocationMessages,
+        assistantPrelude: args.assistantPrelude,
       });
 
       if (args.session?.user?.id) {
@@ -113,7 +128,7 @@ export function createDocumentHandler<
         });
       }
 
-      return;
+      return draftResult;
     },
   };
 }
