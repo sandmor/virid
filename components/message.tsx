@@ -16,7 +16,7 @@ import {
   ToolInput,
   ToolOutput,
 } from './elements/tool';
-import { Sparkle, Cpu } from 'lucide-react';
+import { Sparkle, Cpu, UserRound } from 'lucide-react';
 import { LogoOpenAI, LogoGoogle, LogoOpenRouter } from './icons';
 import { MessageActions } from './message-actions';
 import { MessageEditor } from './message-editor';
@@ -70,50 +70,43 @@ const PurePreviewMessage = ({
       data-testid={`message-${message.role}`}
       initial={{ opacity: 0 }}
     >
-      <div
-        className={cn('flex w-full items-start gap-2 md:gap-3', {
-          'justify-end': message.role === 'user' && mode !== 'edit',
-          'justify-start': message.role === 'assistant',
-        })}
-      >
-        {message.role === 'assistant' && (
-          <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-            {(() => {
+      <div className="flex w-full items-start gap-3 md:gap-4">
+        <div
+          className={cn(
+            '-mt-1 flex size-9 shrink-0 items-center justify-center rounded-full ring-1 ring-border',
+            message.role === 'assistant'
+              ? 'bg-background'
+              : 'bg-muted text-muted-foreground'
+          )}
+        >
+          {message.role === 'assistant' ? (
+            (() => {
               const raw = message.metadata?.model;
               const provider = raw ? raw.split(':')[0] : undefined;
               switch (provider) {
                 case 'openai':
-                  return <LogoOpenAI size={14} />;
+                  return <LogoOpenAI size={16} />;
                 case 'google':
-                  return <LogoGoogle size={14} />;
+                  return <LogoGoogle size={16} />;
                 case 'openrouter':
-                  return <LogoOpenRouter size={14} />;
+                  return <LogoOpenRouter size={16} />;
                 default:
-                  return raw ? <Cpu size={14} /> : <Sparkle size={14} />;
+                  return raw ? <Cpu size={16} /> : <Sparkle size={16} />;
               }
-            })()}
-          </div>
-        )}
+            })()
+          ) : (
+            <UserRound size={16} />
+          )}
+        </div>
 
         <div
-          className={cn('flex flex-col', {
-            'gap-2 md:gap-4': message.parts?.some(
-              (p) => p.type === 'text' && p.text?.trim()
-            ),
+          className={cn('flex w-full flex-col gap-3 md:gap-4', {
             'min-h-96': message.role === 'assistant' && requiresScrollPadding,
-            'w-full':
-              (message.role === 'assistant' &&
-                message.parts?.some(
-                  (p) => p.type === 'text' && p.text?.trim()
-                )) ||
-              mode === 'edit',
-            'max-w-[calc(100%-2.5rem)] sm:max-w-[min(fit-content,80%)]':
-              message.role === 'user' && mode !== 'edit',
           })}
         >
           {attachmentsFromMessage.length > 0 && (
             <div
-              className="flex flex-row justify-end gap-2"
+              className="flex flex-row justify-start gap-2"
               data-testid={'message-attachments'}
             >
               {attachmentsFromMessage.map((attachment) => (
@@ -148,18 +141,13 @@ const PurePreviewMessage = ({
                 return (
                   <div key={key}>
                     <MessageContent
-                      className={cn({
-                        'w-fit break-words rounded-2xl px-3 py-2 text-right text-white':
-                          message.role === 'user',
-                        'bg-transparent px-0 py-0 text-left':
-                          message.role === 'assistant',
-                      })}
-                      data-testid="message-content"
-                      style={
+                      className={cn(
+                        'w-full max-w-full break-words rounded-2xl border border-border/60 px-5 py-4 text-left text-base leading-relaxed transition-colors',
                         message.role === 'user'
-                          ? { backgroundColor: '#006cff' }
-                          : undefined
-                      }
+                          ? 'bg-primary/5 text-foreground dark:bg-primary/15'
+                          : 'bg-muted text-foreground/90 dark:bg-muted/40'
+                      )}
+                      data-testid="message-content"
                     >
                       <Response>{sanitizeText(part.text)}</Response>
                     </MessageContent>

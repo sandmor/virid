@@ -201,39 +201,10 @@ export function PureMessageActions({
     return null;
   }
 
-  // User messages get edit (on hover) and copy actions
-  if (message.role === 'user') {
-    return (
-      <Actions className="-mr-0.5 justify-end">
-        <div className="relative">
-          {onToggleSelect && (
-            <Action
-              aria-pressed={isSelected}
-              onClick={() => onToggleSelect(message.id)}
-              tooltip={isSelected ? 'Deselect' : 'Select'}
-            >
-              <SelectionIndicator checked={Boolean(isSelected)} />
-            </Action>
-          )}
-          {renderDeleteAction()}
-          {setMode && (
-            <Action onClick={() => setMode('edit')} tooltip="Edit">
-              <Pencil size={16} />
-            </Action>
-          )}
-          <Action onClick={handleCopy} tooltip="Copy">
-            <Copy size={16} />
-          </Action>
-        </div>
-      </Actions>
-    );
-  }
-
   return (
-    <div className="flex items-center gap-2 -ml-0.5">
+    <div className="flex items-center gap-2 mr-auto">
       <Actions>
         <div className="relative">
-          {/* Primary actions: Copy */}
           {onToggleSelect && (
             <Action
               aria-pressed={isSelected}
@@ -243,17 +214,19 @@ export function PureMessageActions({
               <SelectionIndicator checked={Boolean(isSelected)} />
             </Action>
           )}
+
           {renderDeleteAction()}
+
           <Action onClick={handleCopy} tooltip="Copy">
             <Copy size={16} />
           </Action>
 
-          {/* Secondary actions: Edit then Regenerate (last two) */}
           {setMode && (
             <Action onClick={() => setMode('edit')} tooltip="Edit">
               <Pencil size={16} />
             </Action>
           )}
+
           {onRegenerate && message.role === 'assistant' && (
             <Action
               onClick={() => !disableRegenerate && onRegenerate(message.id)}

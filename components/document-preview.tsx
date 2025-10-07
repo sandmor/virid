@@ -23,8 +23,8 @@ import { DocumentToolCall, DocumentToolResult } from './document';
 import { InlineDocumentSkeleton } from './document-skeleton';
 import { File, Image, Loader, Maximize } from 'lucide-react';
 import { ImageEditor } from './image-editor';
+import { Markdown } from './elements/markdown';
 import { SpreadsheetEditor } from './sheet-editor';
-import { Editor } from './text-editor';
 
 type DocumentPreviewProps = {
   isReadonly: boolean;
@@ -294,7 +294,9 @@ const DocumentContent = ({ document }: { document: Document }) => {
   return (
     <div className={containerClassName}>
       {document.kind === 'text' ? (
-        <Editor {...commonProps} onSaveContent={handleSaveContent} />
+        <Markdown className="prose dark:prose-invert max-w-none">
+          {document.content ?? ''}
+        </Markdown>
       ) : document.kind === 'code' ? (
         <div className="relative flex w-full flex-1">
           <div className="absolute inset-0">
