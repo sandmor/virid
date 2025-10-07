@@ -27,7 +27,7 @@ export const createDocument = ({
     inputSchema: z.object({
       title: z.string(),
       kind: z.enum(artifactKinds),
-      language: z.enum(CODE_LANGUAGE_IDS),
+      language: z.enum(CODE_LANGUAGE_IDS).optional(),
     }),
     execute: async ({ title, kind, language }, runtime) => {
       const id = generateUUID();
@@ -69,13 +69,20 @@ export const createDocument = ({
         throw new Error(`No document handler found for kind: ${kind}`);
       }
 
+      // If the artifact kind is 'code', language must be provided and valid.
+      if (kind === 'code' && !language) {
+        throw new Error(
+          'The "language" field is required when creating code artifacts.'
+        );
+      }
+
       const draftResult = await documentHandler.onCreateDocument({
         id,
         title,
         dataStream,
         session,
         context,
-        requestedLanguage: language as CodeLanguage,
+        requestedLanguage: language as CodeLanguage | undefined,
         invocationMessages,
         assistantPrelude,
       });

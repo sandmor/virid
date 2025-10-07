@@ -19,6 +19,7 @@ type ArtifactMessagesProps = {
   onToggleSelectMessage?: (messageId: string) => void;
   selectedMessageIds: Set<string>;
   isSelectionMode: boolean;
+  allowedModels?: import('@/lib/ai/models').ChatModelOption[];
 };
 
 function PureArtifactMessages({
@@ -31,6 +32,7 @@ function PureArtifactMessages({
   onToggleSelectMessage,
   selectedMessageIds,
   isSelectionMode,
+  allowedModels,
 }: ArtifactMessagesProps) {
   const {
     containerRef: messagesContainerRef,
@@ -62,6 +64,7 @@ function PureArtifactMessages({
           onToggleSelectMessage={onToggleSelectMessage}
           isSelected={selectedMessageIds.has(message.id)}
           isSelectionMode={isSelectionMode}
+          allowedModels={allowedModels}
         />
       ))}
 

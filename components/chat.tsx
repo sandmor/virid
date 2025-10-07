@@ -836,6 +836,7 @@ export function Chat({
           selectedModelId={currentModelId}
           status={status}
           disableRegenerate={isForking}
+          allowedModels={allowedModels}
         />
 
         {isSelectionMode && (

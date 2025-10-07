@@ -39,7 +39,7 @@ export type CreateDocumentCallbackProps = {
   dataStream: UIMessageStreamWriter<ChatMessage>;
   session: AppSession;
   context: ArtifactToolContext;
-  requestedLanguage: CodeLanguage;
+  requestedLanguage?: CodeLanguage;
   invocationMessages?: CoreMessage[];
   assistantPrelude?: string;
 };

@@ -359,6 +359,7 @@ function PureArtifact({
                   selectedMessageIds={selectedMessageIds}
                   isSelectionMode={isSelectionMode}
                   status={status}
+                  allowedModels={allowedModels}
                 />
 
                 <div className="relative flex w-full flex-row items-end gap-2 px-4 pb-4">

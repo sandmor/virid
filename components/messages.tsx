@@ -1,7 +1,6 @@
 import type { UseChatHelpers } from '@ai-sdk/react';
-import equal from 'fast-deep-equal';
 import { ArrowDownIcon } from 'lucide-react';
-import { memo, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useMessages } from '@/hooks/use-messages';
 import type { ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
@@ -25,6 +24,7 @@ type MessagesProps = {
   onToggleSelectMessage?: (messageId: string) => void;
   selectedMessageIds: Set<string>;
   isSelectionMode: boolean;
+  allowedModels?: import('@/lib/ai/models').ChatModelOption[];
 };
 
 export function Messages({
@@ -39,6 +39,7 @@ export function Messages({
   isSelectionMode,
   onRegenerateAssistant,
   disableRegenerate,
+  allowedModels,
 }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
@@ -95,6 +96,7 @@ export function Messages({
               isSelectionMode={isSelectionMode}
               onRegenerateAssistant={onRegenerateAssistant}
               disableRegenerate={disableRegenerate}
+              allowedModels={allowedModels}
             />
           ))}
 

@@ -18,6 +18,7 @@ import {
 } from './elements/tool';
 import { Sparkle, Cpu, UserRound } from 'lucide-react';
 import { LogoOpenAI, LogoGoogle, LogoOpenRouter } from './icons';
+import { type ChatModelOption, deriveChatModel } from '@/lib/ai/models';
 import { MessageActions } from './message-actions';
 import { MessageEditor } from './message-editor';
 import { MessageReasoning } from './message-reasoning';
@@ -38,6 +39,7 @@ const PurePreviewMessage = ({
   onToggleSelectMessage,
   isSelected,
   isSelectionMode,
+  allowedModels,
 }: {
   chatId: string;
   message: ChatMessage;
@@ -53,6 +55,7 @@ const PurePreviewMessage = ({
   onToggleSelectMessage?: (messageId: string) => void;
   isSelected?: boolean;
   isSelectionMode?: boolean;
+  allowedModels?: ChatModelOption[];
 }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
 
@@ -81,8 +84,13 @@ const PurePreviewMessage = ({
         >
           {message.role === 'assistant' ? (
             (() => {
-              const raw = message.metadata?.model;
-              const provider = raw ? raw.split(':')[0] : undefined;
+              const raw = message.metadata?.model as string | undefined;
+              const derived = raw ? deriveChatModel(raw) : undefined;
+              const provider = derived
+                ? derived.provider
+                : raw
+                  ? raw.split(':')[0]
+                  : undefined;
               switch (provider) {
                 case 'openai':
                   return <LogoOpenAI size={16} />;
@@ -505,8 +513,22 @@ const PurePreviewMessage = ({
                     {(() => {
                       const raw = message.metadata?.model as string | undefined;
                       if (!raw) return '';
-                      const parts = raw.split(':');
-                      return parts.length > 1 ? parts.slice(1).join(':') : raw;
+                      // If allowedModels provided, prefer authoritative name
+                      if (allowedModels && allowedModels.length > 0) {
+                        const found = allowedModels.find((m) => m.id === raw);
+                        if (found) return found.name;
+                      }
+                      try {
+                        const d = deriveChatModel(raw);
+                        return (
+                          d?.name ?? raw.split(':').slice(1).join(':') ?? raw
+                        );
+                      } catch {
+                        const parts = raw.split(':');
+                        return parts.length > 1
+                          ? parts.slice(1).join(':')
+                          : raw;
+                      }
                     })()}
                   </span>
                 ) : null
@@ -545,6 +567,7 @@ export const PreviewMessage = memo(
     if (prevProps.isSelectionMode !== nextProps.isSelectionMode) return false;
     if (prevProps.onToggleSelectMessage !== nextProps.onToggleSelectMessage)
       return false;
+    if (!equal(prevProps.allowedModels, nextProps.allowedModels)) return false;
 
     // otherwise skip rerender
     return true;
