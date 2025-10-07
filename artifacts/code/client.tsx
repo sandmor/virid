@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { CodeEditor } from '@/components/code-editor';
 import {
@@ -14,7 +15,15 @@ import {
   Redo,
   Undo,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { generateUUID } from '@/lib/utils';
+import {
+  CODE_LANGUAGES,
+  coerceCodeLanguage,
+  detectCodeLanguageFromText,
+  isExecutionSupported,
+  type CodeLanguage,
+} from '@/lib/code/languages';
 
 const OUTPUT_HANDLERS = {
   matplotlib: `
@@ -62,20 +71,35 @@ function detectRequiredHandlers(code: string): string[] {
   return handlers;
 }
 
+function buildDefaultMetadata(metadata?: Metadata | null): Metadata {
+  return {
+    outputs: metadata?.outputs ?? [],
+    language: metadata?.language ?? 'python',
+  };
+}
+
 type Metadata = {
   outputs: ConsoleOutput[];
+  language: CodeLanguage;
 };
 
 export const codeArtifact = new Artifact<'code', Metadata>({
   kind: 'code',
   description:
-    'Useful for code generation; Code execution is only available for python code.',
+    'Useful for multi-language code generation. Execution is available for Python snippets.',
   initialize: ({ setMetadata }) => {
-    setMetadata({
-      outputs: [],
-    });
+    setMetadata((current) => buildDefaultMetadata(current as Metadata | null));
   },
-  onStreamPart: ({ streamPart, setArtifact }) => {
+  onStreamPart: ({ streamPart, setArtifact, setMetadata }) => {
+    if (streamPart.type === 'data-codeLanguage') {
+      const language = (streamPart.data as CodeLanguage) ?? 'python';
+      setMetadata((metadata) => ({
+        ...buildDefaultMetadata(metadata as Metadata | null),
+        language,
+      }));
+      return;
+    }
+
     if (streamPart.type === 'data-codeDelta') {
       setArtifact((draftArtifact) => ({
         ...draftArtifact,
@@ -90,22 +114,58 @@ export const codeArtifact = new Artifact<'code', Metadata>({
       }));
     }
   },
-  content: ({ metadata, setMetadata, ...props }) => {
+  content: ({ metadata, setMetadata, content, ...props }) => {
+    const resolvedMetadata = buildDefaultMetadata(metadata);
+    const effectiveLanguage = useMemo(() => {
+      const metadataLanguage = coerceCodeLanguage(resolvedMetadata.language);
+      if (metadataLanguage) {
+        return metadataLanguage;
+      }
+
+      const detected = detectCodeLanguageFromText(content);
+      return detected ?? 'python';
+    }, [content, resolvedMetadata.language]);
+
+    const languageLabel =
+      CODE_LANGUAGES.find((definition) => definition.id === effectiveLanguage)
+        ?.label ?? effectiveLanguage;
+
+    useEffect(() => {
+      if (resolvedMetadata.language !== effectiveLanguage) {
+        setMetadata((current) => ({
+          ...buildDefaultMetadata(current as Metadata | null),
+          language: effectiveLanguage,
+        }));
+      }
+    }, [effectiveLanguage, resolvedMetadata.language, setMetadata]);
+
     return (
       <>
+        <div className="flex items-center justify-between px-4 pb-2 pt-3 text-xs text-muted-foreground">
+          <Badge variant="outline" className="font-mono uppercase">
+            {languageLabel}
+          </Badge>
+          {!isExecutionSupported(resolvedMetadata.language) && (
+            <span>Execution available for Python only</span>
+          )}
+        </div>
         <div className="px-1">
-          <CodeEditor {...props} />
+          <CodeEditor
+            {...props}
+            content={content}
+            language={effectiveLanguage}
+          />
         </div>
 
-        {metadata?.outputs && (
+        {resolvedMetadata.outputs.length > 0 && (
           <Console
-            consoleOutputs={metadata.outputs}
-            setConsoleOutputs={() => {
-              setMetadata({
-                ...metadata,
+            consoleOutputs={resolvedMetadata.outputs}
+            setConsoleOutputs={() =>
+              setMetadata((current) => ({
+                ...buildDefaultMetadata(current as Metadata | null),
                 outputs: [],
-              });
-            }}
+              }))
+            }
           />
         )}
       </>
@@ -116,21 +176,33 @@ export const codeArtifact = new Artifact<'code', Metadata>({
       icon: <Play size={18} />,
       label: 'Run',
       description: 'Execute code',
-      onClick: async ({ content, setMetadata }) => {
+      onClick: async ({ content, setMetadata, metadata }) => {
+        const resolvedMetadata = buildDefaultMetadata(
+          metadata as Metadata | null
+        );
+
+        if (!isExecutionSupported(resolvedMetadata.language)) {
+          toast.info('Execution is currently available only for Python code.');
+          return;
+        }
+
         const runId = generateUUID();
         const outputContent: ConsoleOutputContent[] = [];
 
-        setMetadata((metadata) => ({
-          ...metadata,
-          outputs: [
-            ...metadata.outputs,
-            {
-              id: runId,
-              contents: [],
-              status: 'in_progress',
-            },
-          ],
-        }));
+        setMetadata((current) => {
+          const nextMetadata = buildDefaultMetadata(current as Metadata | null);
+          return {
+            ...nextMetadata,
+            outputs: [
+              ...nextMetadata.outputs,
+              {
+                id: runId,
+                contents: [],
+                status: 'in_progress',
+              },
+            ],
+          };
+        });
 
         try {
           // @ts-expect-error - loadPyodide is not defined
@@ -151,17 +223,24 @@ export const codeArtifact = new Artifact<'code', Metadata>({
 
           await currentPyodideInstance.loadPackagesFromImports(content, {
             messageCallback: (message: string) => {
-              setMetadata((metadata) => ({
-                ...metadata,
-                outputs: [
-                  ...metadata.outputs.filter((output) => output.id !== runId),
-                  {
-                    id: runId,
-                    contents: [{ type: 'text', value: message }],
-                    status: 'loading_packages',
-                  },
-                ],
-              }));
+              setMetadata((current) => {
+                const nextMetadata = buildDefaultMetadata(
+                  current as Metadata | null
+                );
+                return {
+                  ...nextMetadata,
+                  outputs: [
+                    ...nextMetadata.outputs.filter(
+                      (output) => output.id !== runId
+                    ),
+                    {
+                      id: runId,
+                      contents: [{ type: 'text', value: message }],
+                      status: 'loading_packages',
+                    },
+                  ],
+                };
+              });
             },
           });
 
@@ -182,29 +261,39 @@ export const codeArtifact = new Artifact<'code', Metadata>({
 
           await currentPyodideInstance.runPythonAsync(content);
 
-          setMetadata((metadata) => ({
-            ...metadata,
-            outputs: [
-              ...metadata.outputs.filter((output) => output.id !== runId),
-              {
-                id: runId,
-                contents: outputContent,
-                status: 'completed',
-              },
-            ],
-          }));
+          setMetadata((current) => {
+            const nextMetadata = buildDefaultMetadata(
+              current as Metadata | null
+            );
+            return {
+              ...nextMetadata,
+              outputs: [
+                ...nextMetadata.outputs.filter((output) => output.id !== runId),
+                {
+                  id: runId,
+                  contents: outputContent,
+                  status: 'completed',
+                },
+              ],
+            };
+          });
         } catch (error: any) {
-          setMetadata((metadata) => ({
-            ...metadata,
-            outputs: [
-              ...metadata.outputs.filter((output) => output.id !== runId),
-              {
-                id: runId,
-                contents: [{ type: 'text', value: error.message }],
-                status: 'failed',
-              },
-            ],
-          }));
+          setMetadata((current) => {
+            const nextMetadata = buildDefaultMetadata(
+              current as Metadata | null
+            );
+            return {
+              ...nextMetadata,
+              outputs: [
+                ...nextMetadata.outputs.filter((output) => output.id !== runId),
+                {
+                  id: runId,
+                  contents: [{ type: 'text', value: error.message }],
+                  status: 'failed',
+                },
+              ],
+            };
+          });
         }
       },
     },
@@ -214,13 +303,7 @@ export const codeArtifact = new Artifact<'code', Metadata>({
       onClick: ({ handleVersionChange }) => {
         handleVersionChange('prev');
       },
-      isDisabled: ({ currentVersionIndex }) => {
-        if (currentVersionIndex === 0) {
-          return true;
-        }
-
-        return false;
-      },
+      isDisabled: ({ currentVersionIndex }) => currentVersionIndex === 0,
     },
     {
       icon: <Redo size={18} />,
@@ -228,13 +311,7 @@ export const codeArtifact = new Artifact<'code', Metadata>({
       onClick: ({ handleVersionChange }) => {
         handleVersionChange('next');
       },
-      isDisabled: ({ isCurrentVersion }) => {
-        if (isCurrentVersion) {
-          return true;
-        }
-
-        return false;
-      },
+      isDisabled: ({ isCurrentVersion }) => isCurrentVersion,
     },
     {
       icon: <Copy size={18} />,

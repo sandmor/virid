@@ -184,7 +184,8 @@ exports.Prisma.DocumentScalarFieldEnum = {
   title: 'title',
   content: 'content',
   kind: 'kind',
-  userId: 'userId'
+  userId: 'userId',
+  metadata: 'metadata'
 };
 
 exports.Prisma.SuggestionScalarFieldEnum = {

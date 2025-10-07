@@ -1,4 +1,4 @@
-import type { UIMessageStreamWriter } from 'ai';
+import type { CoreMessage, UIMessageStreamWriter } from 'ai';
 import type { AppSession } from '@/lib/auth/session';
 import { codeDocumentHandler } from '@/artifacts/code/server';
 import { sheetDocumentHandler } from '@/artifacts/sheet/server';
@@ -7,6 +7,22 @@ import type { ArtifactKind } from '@/components/artifact';
 import { saveDocument } from '../db/queries';
 import type { Document } from '../db/schema';
 import type { ChatMessage } from '../types';
+import type { CodeLanguage } from '../code/languages';
+import type { Prisma } from '../../generated/prisma-client';
+
+export type ArtifactToolContext = {
+  modelId?: string;
+  model?: unknown;
+  providerOptions?: Record<string, any>;
+  systemPrompt?: string;
+  messages?: CoreMessage[];
+  reasoningEffort?: 'low' | 'medium' | 'high';
+};
+
+export type DocumentDraftResult<M = Prisma.JsonValue> = {
+  content: string;
+  metadata?: M;
+};
 
 export type SaveDocumentProps = {
   id: string;
@@ -14,6 +30,7 @@ export type SaveDocumentProps = {
   kind: ArtifactKind;
   content: string;
   userId: string;
+  metadata?: Prisma.JsonValue | null;
 };
 
 export type CreateDocumentCallbackProps = {
@@ -21,6 +38,8 @@ export type CreateDocumentCallbackProps = {
   title: string;
   dataStream: UIMessageStreamWriter<ChatMessage>;
   session: AppSession;
+  context: ArtifactToolContext;
+  requestedLanguage: CodeLanguage;
 };
 
 export type UpdateDocumentCallbackProps = {
@@ -28,6 +47,7 @@ export type UpdateDocumentCallbackProps = {
   description: string;
   dataStream: UIMessageStreamWriter<ChatMessage>;
   session: AppSession;
+  context: ArtifactToolContext;
 };
 
 export type DocumentHandler<T = ArtifactKind> = {
@@ -36,48 +56,60 @@ export type DocumentHandler<T = ArtifactKind> = {
   onUpdateDocument: (args: UpdateDocumentCallbackProps) => Promise<void>;
 };
 
-export function createDocumentHandler<T extends ArtifactKind>(config: {
+export function createDocumentHandler<
+  T extends ArtifactKind,
+  M extends Prisma.JsonValue | undefined = Prisma.JsonValue,
+>(config: {
   kind: T;
-  onCreateDocument: (params: CreateDocumentCallbackProps) => Promise<string>;
-  onUpdateDocument: (params: UpdateDocumentCallbackProps) => Promise<string>;
+  onCreateDocument: (
+    params: CreateDocumentCallbackProps
+  ) => Promise<DocumentDraftResult<M>>;
+  onUpdateDocument: (
+    params: UpdateDocumentCallbackProps
+  ) => Promise<DocumentDraftResult<M>>;
 }): DocumentHandler<T> {
   return {
     kind: config.kind,
     onCreateDocument: async (args: CreateDocumentCallbackProps) => {
-      const draftContent = await config.onCreateDocument({
+      const draftResult = await config.onCreateDocument({
         id: args.id,
         title: args.title,
         dataStream: args.dataStream,
         session: args.session,
+        context: args.context,
+        requestedLanguage: args.requestedLanguage,
       });
 
       if (args.session?.user?.id) {
         await saveDocument({
           id: args.id,
           title: args.title,
-          content: draftContent,
+          content: draftResult.content,
           kind: config.kind,
           userId: args.session.user.id,
+          metadata: draftResult.metadata ?? null,
         });
       }
 
       return;
     },
     onUpdateDocument: async (args: UpdateDocumentCallbackProps) => {
-      const draftContent = await config.onUpdateDocument({
+      const draftResult = await config.onUpdateDocument({
         document: args.document,
         description: args.description,
         dataStream: args.dataStream,
         session: args.session,
+        context: args.context,
       });
 
       if (args.session?.user?.id) {
         await saveDocument({
           id: args.document.id,
           title: args.document.title,
-          content: draftContent,
+          content: draftResult.content,
           kind: config.kind,
           userId: args.session.user.id,
+          metadata: draftResult.metadata ?? null,
         });
       }
 

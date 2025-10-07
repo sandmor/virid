@@ -1,11 +1,12 @@
 'use client';
 
+import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import { EditorState, Transaction } from '@codemirror/state';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorView } from '@codemirror/view';
 import { basicSetup } from 'codemirror';
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import type { Suggestion } from '@/lib/db/schema';
 
 type EditorProps = {
@@ -15,17 +16,40 @@ type EditorProps = {
   isCurrentVersion: boolean;
   currentVersionIndex: number;
   suggestions: Suggestion[];
+  language: string;
 };
 
-function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {
+function getLanguageExtensions(language: string) {
+  switch (language) {
+    case 'python':
+      return [python()];
+    case 'typescript':
+      return [javascript({ typescript: true })];
+    case 'javascript':
+      return [javascript({ jsx: true })];
+    default:
+      return [];
+  }
+}
+
+function PureCodeEditor({
+  content,
+  onSaveContent,
+  status,
+  language,
+}: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<EditorView | null>(null);
+  const languageExtensions = useMemo(
+    () => getLanguageExtensions(language),
+    [language]
+  );
 
   useEffect(() => {
     if (containerRef.current && !editorRef.current) {
       const startState = EditorState.create({
         doc: content,
-        extensions: [basicSetup, python(), oneDark],
+        extensions: [basicSetup, oneDark, ...languageExtensions],
       });
 
       editorRef.current = new EditorView({
@@ -42,7 +66,7 @@ function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {
     };
     // NOTE: we only want to run this effect once
     // eslint-disable-next-line
-  }, [content]);
+  }, [content, languageExtensions]);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -63,13 +87,18 @@ function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {
 
       const newState = EditorState.create({
         doc: editorRef.current.state.doc,
-        extensions: [basicSetup, python(), oneDark, updateListener],
+        extensions: [
+          basicSetup,
+          oneDark,
+          ...languageExtensions,
+          updateListener,
+        ],
         selection: currentSelection,
       });
 
       editorRef.current.setState(newState);
     }
-  }, [onSaveContent]);
+  }, [onSaveContent, languageExtensions]);
 
   useEffect(() => {
     if (editorRef.current && content) {
@@ -112,6 +141,9 @@ function areEqual(prevProps: EditorProps, nextProps: EditorProps) {
     return false;
   }
   if (prevProps.content !== nextProps.content) {
+    return false;
+  }
+  if (prevProps.language !== nextProps.language) {
     return false;
   }
 

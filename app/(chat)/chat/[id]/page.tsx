@@ -9,7 +9,11 @@ import { resolveChatModelOptions } from '@/lib/ai/models.server';
 import { getTierForUserType } from '@/lib/ai/tiers';
 import { getChatById, getMessagesByChatId } from '@/lib/db/queries';
 import { convertToUIMessages } from '@/lib/utils';
-import { normalizeModelId } from '@/lib/agent-settings';
+import {
+  normalizeModelId,
+  normalizeReasoningEffort,
+} from '@/lib/agent-settings';
+import type { ChatSettings } from '@/lib/db/schema';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -55,6 +59,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get('chat-model');
+  const reasoningEffortFromCookie = cookieStore.get('chat-reasoning');
   const { modelIds: allowedModelIds } = await getTierForUserType(
     session.user.type
   );
@@ -62,11 +67,36 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const cookieCandidate = chatModelFromCookie
     ? chatModelFromCookie.value
     : undefined;
+  const cookieReasoningEffort = normalizeReasoningEffort(
+    reasoningEffortFromCookie?.value
+  );
 
   const chatSettingsModel = normalizeModelId(chat.settings?.modelId);
   const agentSettingsModel = normalizeModelId(
     (chat.agent?.settings as any)?.modelId
   );
+  const chatSettingsReasoning = normalizeReasoningEffort(
+    chat.settings?.reasoningEffort
+  );
+  const agentSettingsReasoning = normalizeReasoningEffort(
+    (chat.agent?.settings as any)?.reasoningEffort
+  );
+  const initialReasoningEffort =
+    chatSettingsReasoning ??
+    agentSettingsReasoning ??
+    cookieReasoningEffort ??
+    undefined;
+  const initialChatSettings = (() => {
+    const base: ChatSettings = {
+      ...(chat.settings ?? {}),
+    };
+    if (initialReasoningEffort) {
+      base.reasoningEffort = initialReasoningEffort;
+    } else {
+      delete base.reasoningEffort;
+    }
+    return Object.keys(base).length > 0 ? base : null;
+  })();
 
   const candidateOrder = [
     chatSettingsModel,
@@ -101,7 +131,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           allowedModels={allowedModels}
           agentId={chat.agent?.id}
           initialAgent={initialAgent}
-          initialSettings={chat.settings}
+          initialSettings={initialChatSettings}
           key={chat.id}
         />
         <DataStreamHandler />
@@ -122,7 +152,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         allowedModels={allowedModels}
         agentId={chat.agent?.id}
         initialAgent={initialAgent}
-        initialSettings={chat.settings}
+        initialSettings={initialChatSettings}
         key={chat.id}
       />
       <DataStreamHandler />

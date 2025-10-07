@@ -4,24 +4,32 @@ import { z } from 'zod';
 import {
   artifactKinds,
   documentHandlersByArtifactKind,
+  type ArtifactToolContext,
 } from '@/lib/artifacts/server';
 import type { ChatMessage } from '@/lib/types';
 import { generateUUID } from '@/lib/utils';
+import { CODE_LANGUAGE_IDS, type CodeLanguage } from '@/lib/code/languages';
 
 type CreateDocumentProps = {
   session: AppSession;
   dataStream: UIMessageStreamWriter<ChatMessage>;
+  context: ArtifactToolContext;
 };
 
-export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
+export const createDocument = ({
+  session,
+  dataStream,
+  context,
+}: CreateDocumentProps) =>
   tool({
     description:
       'Create a document for a writing or content creation activities. This tool will call other functions that will generate the contents of the document based on the title and kind.',
     inputSchema: z.object({
       title: z.string(),
       kind: z.enum(artifactKinds),
+      language: z.enum(CODE_LANGUAGE_IDS),
     }),
-    execute: async ({ title, kind }) => {
+    execute: async ({ title, kind, language }) => {
       const id = generateUUID();
 
       dataStream.write({
@@ -62,6 +70,8 @@ export const createDocument = ({ session, dataStream }: CreateDocumentProps) =>
         title,
         dataStream,
         session,
+        context,
+        requestedLanguage: language as CodeLanguage,
       });
 
       dataStream.write({ type: 'data-finish', data: null, transient: true });

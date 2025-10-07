@@ -7,10 +7,15 @@ import { createDocumentHandler } from '@/lib/artifacts/server';
 
 export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
   kind: 'sheet',
-  onCreateDocument: async ({ title, dataStream }) => {
+  onCreateDocument: async ({ title, dataStream, context }) => {
     let draftContent = '';
 
-    const model = await getLanguageModel(ARTIFACT_GENERATION_MODEL);
+    const model =
+      (context.model as any) ??
+      (await getLanguageModel(ARTIFACT_GENERATION_MODEL));
+    const providerOptions = context.providerOptions
+      ? { ...context.providerOptions }
+      : undefined;
     const { fullStream } = streamObject({
       model,
       system: sheetPrompt,
@@ -18,6 +23,7 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
       schema: z.object({
         csv: z.string().describe('CSV data'),
       }),
+      ...(providerOptions && { providerOptions }),
     });
 
     for await (const delta of fullStream) {
@@ -45,12 +51,17 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
       transient: true,
     });
 
-    return draftContent;
+    return { content: draftContent };
   },
-  onUpdateDocument: async ({ document, description, dataStream }) => {
+  onUpdateDocument: async ({ document, description, dataStream, context }) => {
     let draftContent = '';
 
-    const model = await getLanguageModel(ARTIFACT_GENERATION_MODEL);
+    const model =
+      (context.model as any) ??
+      (await getLanguageModel(ARTIFACT_GENERATION_MODEL));
+    const providerOptions = context.providerOptions
+      ? { ...context.providerOptions }
+      : undefined;
     const { fullStream } = streamObject({
       model,
       system: updateDocumentPrompt(document.content, 'sheet'),
@@ -58,6 +69,7 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
       schema: z.object({
         csv: z.string(),
       }),
+      ...(providerOptions && { providerOptions }),
     });
 
     for await (const delta of fullStream) {
@@ -79,6 +91,6 @@ export const sheetDocumentHandler = createDocumentHandler<'sheet'>({
       }
     }
 
-    return draftContent;
+    return { content: draftContent };
   },
 });

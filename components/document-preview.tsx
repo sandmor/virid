@@ -12,6 +12,10 @@ import {
 import useSWR from 'swr';
 import { useArtifact } from '@/hooks/use-artifact';
 import type { Document } from '@/lib/db/schema';
+import {
+  coerceCodeLanguage,
+  detectCodeLanguageFromText,
+} from '@/lib/code/languages';
 import { cn, fetcher } from '@/lib/utils';
 import type { ArtifactKind, UIArtifact } from './artifact';
 import { CodeEditor } from './code-editor';
@@ -33,7 +37,7 @@ export function DocumentPreview({
   result,
   args,
 }: DocumentPreviewProps) {
-  const { artifact, setArtifact } = useArtifact();
+  const { artifact, setArtifact, metadata: artifactMetadata } = useArtifact();
 
   const { data: documents, isLoading: isDocumentsFetching } = useSWR<
     Document[]
@@ -84,6 +88,13 @@ export function DocumentPreview({
     return <LoadingSkeleton artifactKind={result.kind ?? args.kind} />;
   }
 
+  const fallbackMetadata =
+    artifact.kind === 'code' &&
+    artifactMetadata &&
+    typeof artifactMetadata === 'object'
+      ? (artifactMetadata as Record<string, unknown>)
+      : null;
+
   const document: Document | null = previewDocument
     ? previewDocument
     : artifact.status === 'streaming'
@@ -94,6 +105,7 @@ export function DocumentPreview({
           id: artifact.documentId,
           createdAt: new Date(),
           userId: 'noop',
+          metadata: fallbackMetadata as Document['metadata'],
         }
       : null;
 
@@ -243,7 +255,7 @@ const DocumentHeader = memo(PureDocumentHeader, (prevProps, nextProps) => {
 });
 
 const DocumentContent = ({ document }: { document: Document }) => {
-  const { artifact } = useArtifact();
+  const { artifact, metadata: artifactMetadata } = useArtifact();
 
   const containerClassName = cn(
     'h-[257px] overflow-y-scroll rounded-b-2xl border border-t-0 dark:border-zinc-700 dark:bg-muted',
@@ -263,6 +275,21 @@ const DocumentContent = ({ document }: { document: Document }) => {
   };
 
   const handleSaveContent = () => null;
+  const artifactLanguage =
+    artifact.kind === 'code' &&
+    artifactMetadata &&
+    typeof artifactMetadata === 'object'
+      ? (artifactMetadata as Record<string, unknown>).language
+      : undefined;
+
+  const metadataLanguage =
+    document.metadata && typeof document.metadata === 'object'
+      ? (document.metadata as Record<string, unknown>).language
+      : artifactLanguage;
+  const resolvedCodeLanguage =
+    coerceCodeLanguage(metadataLanguage) ??
+    detectCodeLanguageFromText(document.content ?? '') ??
+    'python';
 
   return (
     <div className={containerClassName}>
@@ -271,7 +298,11 @@ const DocumentContent = ({ document }: { document: Document }) => {
       ) : document.kind === 'code' ? (
         <div className="relative flex w-full flex-1">
           <div className="absolute inset-0">
-            <CodeEditor {...commonProps} onSaveContent={handleSaveContent} />
+            <CodeEditor
+              {...commonProps}
+              language={resolvedCodeLanguage}
+              onSaveContent={handleSaveContent}
+            />
           </div>
         </div>
       ) : document.kind === 'sheet' ? (

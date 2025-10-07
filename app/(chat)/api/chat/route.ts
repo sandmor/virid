@@ -38,6 +38,7 @@ import { archiveUnpinEntry } from '@/lib/ai/tools/archive-unpin-entry';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { updateDocument } from '@/lib/ai/tools/update-document';
+import type { ArtifactToolContext } from '@/lib/artifacts/server';
 import { getChatSettings } from '@/lib/db/chat-settings';
 import { isProductionEnvironment } from '@/lib/constants';
 import {
@@ -381,6 +382,7 @@ export async function POST(request: Request) {
         ]);
 
         const uiMessages = [...convertToUIMessages(messagesFromDb), message];
+        const modelMessages = convertToModelMessages(uiMessages);
 
         // Check model capabilities for tool support
         const modelCapabilities = await getModelCapabilities(selectedChatModel);
@@ -397,32 +399,6 @@ export async function POST(request: Request) {
         // Determine reasoning effort (prefer provided value, then settings, then default medium)
         const effectiveReasoningEffort =
           reasoningEffort ?? settings.reasoningEffort ?? 'medium';
-
-        const allToolFactories: Record<string, any> = {
-          getWeather,
-          createDocument: createDocument({ session, dataStream }),
-          updateDocument: updateDocument({ session, dataStream }),
-          requestSuggestions: requestSuggestions({ session, dataStream }),
-          archiveCreateEntry: archiveCreateEntry({ session }),
-          archiveReadEntry: archiveReadEntry({ session }),
-          archiveUpdateEntry: archiveUpdateEntry({ session }),
-          archiveDeleteEntry: archiveDeleteEntry({ session }),
-          archiveLinkEntries: archiveLinkEntries({ session }),
-          archiveSearchEntries: archiveSearchEntries({ session }),
-          archiveApplyEdits: archiveApplyEdits({ session }),
-          archivePinEntry: archivePinEntry({ session, chatId: id }),
-          archiveUnpinEntry: archiveUnpinEntry({ session, chatId: id }),
-        };
-
-        // If model doesn't support tools, force empty tool list
-        const allowedToolIds = !modelSupportsTools
-          ? []
-          : effectiveAllowedTools === undefined
-            ? Object.keys(allToolFactories) // undefined => all tools
-            : effectiveAllowedTools.filter((k) => k in allToolFactories); // [] => none
-
-        const activeTools: Record<string, any> = {};
-        for (const k of allowedToolIds) activeTools[k] = allToolFactories[k];
 
         // Build provider-specific options for reasoning effort
         const [provider] = selectedChatModel.split(':');
@@ -454,14 +430,113 @@ export async function POST(request: Request) {
           };
         }
 
+        const allToolIds = [
+          'getWeather',
+          'createDocument',
+          'updateDocument',
+          'requestSuggestions',
+          'archiveCreateEntry',
+          'archiveReadEntry',
+          'archiveUpdateEntry',
+          'archiveDeleteEntry',
+          'archiveLinkEntries',
+          'archiveSearchEntries',
+          'archiveApplyEdits',
+          'archivePinEntry',
+          'archiveUnpinEntry',
+        ] as const;
+
+        const allToolIdsSet = new Set<string>(allToolIds);
+
+        // If model doesn't support tools, force empty tool list
+        const allowedToolIds = !modelSupportsTools
+          ? []
+          : effectiveAllowedTools === undefined
+            ? [...allToolIds]
+            : effectiveAllowedTools.filter((toolId) =>
+                allToolIdsSet.has(toolId)
+              );
+
+        const composedSystemPrompt = systemPrompt({
+          requestHints,
+          pinnedEntries: pinnedForPrompt,
+          allowedTools: allowedToolIds,
+        });
+
+        const artifactContext: ArtifactToolContext = {
+          modelId: selectedChatModel,
+          model,
+          providerOptions: Object.keys(providerOptions).length
+            ? providerOptions
+            : undefined,
+          systemPrompt: composedSystemPrompt,
+          messages: modelMessages,
+          reasoningEffort: effectiveReasoningEffort,
+        };
+
+        const activeTools: Record<string, any> = {};
+
+        if (allowedToolIds.includes('getWeather')) {
+          activeTools.getWeather = getWeather;
+        }
+        if (allowedToolIds.includes('createDocument')) {
+          activeTools.createDocument = createDocument({
+            session,
+            dataStream,
+            context: artifactContext,
+          });
+        }
+        if (allowedToolIds.includes('updateDocument')) {
+          activeTools.updateDocument = updateDocument({
+            session,
+            dataStream,
+            context: artifactContext,
+          });
+        }
+        if (allowedToolIds.includes('requestSuggestions')) {
+          activeTools.requestSuggestions = requestSuggestions({
+            session,
+            dataStream,
+          });
+        }
+        if (allowedToolIds.includes('archiveCreateEntry')) {
+          activeTools.archiveCreateEntry = archiveCreateEntry({ session });
+        }
+        if (allowedToolIds.includes('archiveReadEntry')) {
+          activeTools.archiveReadEntry = archiveReadEntry({ session });
+        }
+        if (allowedToolIds.includes('archiveUpdateEntry')) {
+          activeTools.archiveUpdateEntry = archiveUpdateEntry({ session });
+        }
+        if (allowedToolIds.includes('archiveDeleteEntry')) {
+          activeTools.archiveDeleteEntry = archiveDeleteEntry({ session });
+        }
+        if (allowedToolIds.includes('archiveLinkEntries')) {
+          activeTools.archiveLinkEntries = archiveLinkEntries({ session });
+        }
+        if (allowedToolIds.includes('archiveSearchEntries')) {
+          activeTools.archiveSearchEntries = archiveSearchEntries({ session });
+        }
+        if (allowedToolIds.includes('archiveApplyEdits')) {
+          activeTools.archiveApplyEdits = archiveApplyEdits({ session });
+        }
+        if (allowedToolIds.includes('archivePinEntry')) {
+          activeTools.archivePinEntry = archivePinEntry({
+            session,
+            chatId: id,
+          });
+        }
+        if (allowedToolIds.includes('archiveUnpinEntry')) {
+          activeTools.archiveUnpinEntry = archiveUnpinEntry({
+            session,
+            chatId: id,
+          });
+        }
+
         const result = streamText({
           model,
-          system: systemPrompt({
-            requestHints,
-            pinnedEntries: pinnedForPrompt,
-            allowedTools: allowedToolIds,
-          }),
-          messages: convertToModelMessages(uiMessages),
+          system: composedSystemPrompt,
+          messages: modelMessages,
           stopWhen: stepCountIs(20),
           experimental_activeTools: allowedToolIds,
           experimental_transform: smoothStream({ chunking: 'word' }),

@@ -60,8 +60,13 @@ export async function POST(request: Request) {
     content,
     title,
     kind,
-  }: { content: string; title: string; kind: ArtifactKind } =
-    await request.json();
+    metadata,
+  }: {
+    content: string;
+    title: string;
+    kind: ArtifactKind;
+    metadata?: unknown;
+  } = await request.json();
 
   const documents = await getDocumentsById({ id });
 
@@ -79,6 +84,7 @@ export async function POST(request: Request) {
     title,
     kind,
     userId: session.user.id,
+    metadata: metadata && typeof metadata === 'object' ? metadata : null,
   });
 
   return Response.json(document, { status: 200 });

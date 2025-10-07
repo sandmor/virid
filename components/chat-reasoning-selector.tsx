@@ -1,6 +1,12 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  startTransition,
+} from 'react';
 import {
   Popover,
   PopoverContent,
@@ -15,6 +21,7 @@ import {
   ChevronDown,
   Loader2,
 } from 'lucide-react';
+import { saveReasoningEffortAsCookie } from '@/app/(chat)/actions';
 
 export type ReasoningEffort = 'low' | 'medium' | 'high';
 
@@ -80,6 +87,9 @@ export function ReasoningEffortSelector({
           setIsApplying(true);
           await result;
           syncedEffortRef.current = effort;
+          startTransition(() => {
+            saveReasoningEffortAsCookie(effort);
+          });
         } catch (e) {
           // swallow here; caller is expected to show errors
         } finally {
@@ -87,6 +97,9 @@ export function ReasoningEffortSelector({
         }
       } else {
         syncedEffortRef.current = effort;
+        startTransition(() => {
+          saveReasoningEffortAsCookie(effort);
+        });
       }
       setOpen(false);
     },

@@ -18,6 +18,17 @@ export async function saveChatModelAsCookie(model: string) {
   cookieStore.set('chat-model', model);
 }
 
+export async function saveReasoningEffortAsCookie(
+  effort: 'low' | 'medium' | 'high' | null
+) {
+  const cookieStore = await cookies();
+  if (!effort) {
+    cookieStore.delete('chat-reasoning');
+    return;
+  }
+  cookieStore.set('chat-reasoning', effort);
+}
+
 export async function generateTitleFromChatHistory({
   messages,
 }: {

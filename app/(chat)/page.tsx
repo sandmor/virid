@@ -9,7 +9,10 @@ import { generateUUID } from '@/lib/utils';
 import { getAppSession } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import type { Agent as AgentModel } from '@/lib/db/schema';
-import { normalizeModelId } from '@/lib/agent-settings';
+import {
+  normalizeModelId,
+  normalizeReasoningEffort,
+} from '@/lib/agent-settings';
 
 export default async function Page({
   searchParams,
@@ -63,9 +66,23 @@ export default async function Page({
   const cookieCandidate = modelIdFromCookie
     ? modelIdFromCookie.value
     : undefined;
+  const reasoningEffortFromCookie = cookieStore.get('chat-reasoning');
+  const cookieReasoningEffort = normalizeReasoningEffort(
+    reasoningEffortFromCookie?.value
+  );
   const agentModelPreference = normalizeModelId(
     initialAgent?.settings ? (initialAgent.settings as any)?.modelId : undefined
   );
+  const agentReasoningPreference = normalizeReasoningEffort(
+    initialAgent?.settings
+      ? (initialAgent.settings as any)?.reasoningEffort
+      : undefined
+  );
+  const initialReasoningEffort =
+    agentReasoningPreference ?? cookieReasoningEffort ?? undefined;
+  const initialChatSettings = initialReasoningEffort
+    ? { reasoningEffort: initialReasoningEffort }
+    : null;
 
   const candidateOrder = [
     agentModelPreference,
@@ -99,7 +116,7 @@ export default async function Page({
           allowedModels={allowedModels}
           agentId={agentId}
           initialAgent={initialAgent}
-          initialSettings={null}
+          initialSettings={initialChatSettings}
         />
         <DataStreamHandler />
       </>
@@ -119,7 +136,7 @@ export default async function Page({
         allowedModels={allowedModels}
         agentId={agentId}
         initialAgent={initialAgent}
-        initialSettings={null}
+        initialSettings={initialChatSettings}
       />
       <DataStreamHandler />
     </>

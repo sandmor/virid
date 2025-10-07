@@ -10023,6 +10023,7 @@ export namespace Prisma {
     content: number
     kind: number
     userId: number
+    metadata: number
     _all: number
   }
 
@@ -10052,6 +10053,7 @@ export namespace Prisma {
     content?: true
     kind?: true
     userId?: true
+    metadata?: true
     _all?: true
   }
 
@@ -10134,6 +10136,7 @@ export namespace Prisma {
     content: string | null
     kind: string
     userId: string
+    metadata: JsonValue | null
     _count: DocumentCountAggregateOutputType | null
     _min: DocumentMinAggregateOutputType | null
     _max: DocumentMaxAggregateOutputType | null
@@ -10160,6 +10163,7 @@ export namespace Prisma {
     content?: boolean
     kind?: boolean
     userId?: boolean
+    metadata?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     suggestions?: boolean | Document$suggestionsArgs<ExtArgs>
     _count?: boolean | DocumentCountOutputTypeDefaultArgs<ExtArgs>
@@ -10172,6 +10176,7 @@ export namespace Prisma {
     content?: boolean
     kind?: boolean
     userId?: boolean
+    metadata?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["document"]>
 
@@ -10182,6 +10187,7 @@ export namespace Prisma {
     content?: boolean
     kind?: boolean
     userId?: boolean
+    metadata?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["document"]>
 
@@ -10192,9 +10198,10 @@ export namespace Prisma {
     content?: boolean
     kind?: boolean
     userId?: boolean
+    metadata?: boolean
   }
 
-  export type DocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "title" | "content" | "kind" | "userId", ExtArgs["result"]["document"]>
+  export type DocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "title" | "content" | "kind" | "userId" | "metadata", ExtArgs["result"]["document"]>
   export type DocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     suggestions?: boolean | Document$suggestionsArgs<ExtArgs>
@@ -10220,6 +10227,7 @@ export namespace Prisma {
       content: string | null
       kind: string
       userId: string
+      metadata: Prisma.JsonValue | null
     }, ExtArgs["result"]["document"]>
     composites: {}
   }
@@ -10651,6 +10659,7 @@ export namespace Prisma {
     readonly content: FieldRef<"Document", 'String'>
     readonly kind: FieldRef<"Document", 'String'>
     readonly userId: FieldRef<"Document", 'String'>
+    readonly metadata: FieldRef<"Document", 'Json'>
   }
     
 
@@ -17696,7 +17705,8 @@ export namespace Prisma {
     title: 'title',
     content: 'content',
     kind: 'kind',
-    userId: 'userId'
+    userId: 'userId',
+    metadata: 'metadata'
   };
 
   export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
@@ -18348,6 +18358,7 @@ export namespace Prisma {
     content?: StringNullableFilter<"Document"> | string | null
     kind?: StringFilter<"Document"> | string
     userId?: StringFilter<"Document"> | string
+    metadata?: JsonNullableFilter<"Document">
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     suggestions?: SuggestionListRelationFilter
   }
@@ -18359,6 +18370,7 @@ export namespace Prisma {
     content?: SortOrderInput | SortOrder
     kind?: SortOrder
     userId?: SortOrder
+    metadata?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     suggestions?: SuggestionOrderByRelationAggregateInput
   }
@@ -18374,6 +18386,7 @@ export namespace Prisma {
     content?: StringNullableFilter<"Document"> | string | null
     kind?: StringFilter<"Document"> | string
     userId?: StringFilter<"Document"> | string
+    metadata?: JsonNullableFilter<"Document">
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     suggestions?: SuggestionListRelationFilter
   }, "id_createdAt">
@@ -18385,6 +18398,7 @@ export namespace Prisma {
     content?: SortOrderInput | SortOrder
     kind?: SortOrder
     userId?: SortOrder
+    metadata?: SortOrderInput | SortOrder
     _count?: DocumentCountOrderByAggregateInput
     _max?: DocumentMaxOrderByAggregateInput
     _min?: DocumentMinOrderByAggregateInput
@@ -18400,6 +18414,7 @@ export namespace Prisma {
     content?: StringNullableWithAggregatesFilter<"Document"> | string | null
     kind?: StringWithAggregatesFilter<"Document"> | string
     userId?: StringWithAggregatesFilter<"Document"> | string
+    metadata?: JsonNullableWithAggregatesFilter<"Document">
   }
 
   export type SuggestionWhereInput = {
@@ -19248,6 +19263,7 @@ export namespace Prisma {
     title: string
     content?: string | null
     kind?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     user: UserCreateNestedOneWithoutDocumentsInput
     suggestions?: SuggestionCreateNestedManyWithoutDocumentInput
   }
@@ -19259,6 +19275,7 @@ export namespace Prisma {
     content?: string | null
     kind?: string
     userId: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutDocumentInput
   }
 
@@ -19268,6 +19285,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     user?: UserUpdateOneRequiredWithoutDocumentsNestedInput
     suggestions?: SuggestionUpdateManyWithoutDocumentNestedInput
   }
@@ -19279,6 +19297,7 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     suggestions?: SuggestionUncheckedUpdateManyWithoutDocumentNestedInput
   }
 
@@ -19289,6 +19308,7 @@ export namespace Prisma {
     content?: string | null
     kind?: string
     userId: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DocumentUpdateManyMutationInput = {
@@ -19297,6 +19317,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DocumentUncheckedUpdateManyInput = {
@@ -19306,6 +19327,7 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SuggestionCreateInput = {
@@ -20292,6 +20314,7 @@ export namespace Prisma {
     content?: SortOrder
     kind?: SortOrder
     userId?: SortOrder
+    metadata?: SortOrder
   }
 
   export type DocumentMaxOrderByAggregateInput = {
@@ -21696,6 +21719,7 @@ export namespace Prisma {
     title: string
     content?: string | null
     kind?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     suggestions?: SuggestionCreateNestedManyWithoutDocumentInput
   }
 
@@ -21705,6 +21729,7 @@ export namespace Prisma {
     title: string
     content?: string | null
     kind?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     suggestions?: SuggestionUncheckedCreateNestedManyWithoutDocumentInput
   }
 
@@ -21913,6 +21938,7 @@ export namespace Prisma {
     content?: StringNullableFilter<"Document"> | string | null
     kind?: StringFilter<"Document"> | string
     userId?: StringFilter<"Document"> | string
+    metadata?: JsonNullableFilter<"Document">
   }
 
   export type SuggestionUpsertWithWhereUniqueWithoutUserInput = {
@@ -22708,6 +22734,7 @@ export namespace Prisma {
     title: string
     content?: string | null
     kind?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     user: UserCreateNestedOneWithoutDocumentsInput
   }
 
@@ -22718,6 +22745,7 @@ export namespace Prisma {
     content?: string | null
     kind?: string
     userId: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DocumentCreateOrConnectWithoutSuggestionsInput = {
@@ -22775,6 +22803,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     user?: UserUpdateOneRequiredWithoutDocumentsNestedInput
   }
 
@@ -22785,6 +22814,7 @@ export namespace Prisma {
     content?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ChatCreateWithoutStreamsInput = {
@@ -23426,6 +23456,7 @@ export namespace Prisma {
     title: string
     content?: string | null
     kind?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SuggestionCreateManyUserInput = {
@@ -23516,6 +23547,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     suggestions?: SuggestionUpdateManyWithoutDocumentNestedInput
   }
 
@@ -23525,6 +23557,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     suggestions?: SuggestionUncheckedUpdateManyWithoutDocumentNestedInput
   }
 
@@ -23534,6 +23567,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     content?: NullableStringFieldUpdateOperationsInput | string | null
     kind?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SuggestionUpdateWithoutUserInput = {

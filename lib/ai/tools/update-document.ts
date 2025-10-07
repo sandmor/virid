@@ -1,16 +1,24 @@
 import { tool, type UIMessageStreamWriter } from 'ai';
 import type { AppSession } from '@/lib/auth/session';
 import { z } from 'zod';
-import { documentHandlersByArtifactKind } from '@/lib/artifacts/server';
+import {
+  documentHandlersByArtifactKind,
+  type ArtifactToolContext,
+} from '@/lib/artifacts/server';
 import { getDocumentById } from '@/lib/db/queries';
 import type { ChatMessage } from '@/lib/types';
 
 type UpdateDocumentProps = {
   session: AppSession;
   dataStream: UIMessageStreamWriter<ChatMessage>;
+  context: ArtifactToolContext;
 };
 
-export const updateDocument = ({ session, dataStream }: UpdateDocumentProps) =>
+export const updateDocument = ({
+  session,
+  dataStream,
+  context,
+}: UpdateDocumentProps) =>
   tool({
     description: 'Update a document with the given description.',
     inputSchema: z.object({
@@ -48,6 +56,7 @@ export const updateDocument = ({ session, dataStream }: UpdateDocumentProps) =>
         description,
         dataStream,
         session,
+        context,
       });
 
       dataStream.write({ type: 'data-finish', data: null, transient: true });

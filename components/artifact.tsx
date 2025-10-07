@@ -126,9 +126,16 @@ function PureArtifact({
           ...currentArtifact,
           content: mostRecentDocument.content ?? '',
         }));
+
+        if (mostRecentDocument.metadata) {
+          setMetadata((currentMetadata: Record<string, unknown> | null) => ({
+            ...(currentMetadata ?? {}),
+            ...(mostRecentDocument.metadata as Record<string, unknown>),
+          }));
+        }
       }
     }
-  }, [documents, setArtifact]);
+  }, [documents, setArtifact, setMetadata]);
 
   useEffect(() => {
     mutateDocuments();
@@ -158,12 +165,23 @@ function PureArtifact({
           }
 
           if (currentDocument.content !== updatedContent) {
+            const languageValue =
+              artifact.kind === 'code' &&
+              metadata &&
+              typeof metadata === 'object'
+                ? (metadata as Record<string, unknown>).language
+                : undefined;
+            const metadataToPersist =
+              typeof languageValue === 'string'
+                ? { language: languageValue }
+                : undefined;
             await fetch(`/api/document?id=${artifact.documentId}`, {
               method: 'POST',
               body: JSON.stringify({
                 title: artifact.title,
                 content: updatedContent,
                 kind: artifact.kind,
+                ...(metadataToPersist ? { metadata: metadataToPersist } : {}),
               }),
             });
 
@@ -182,7 +200,7 @@ function PureArtifact({
         { revalidate: false }
       );
     },
-    [artifact, mutate]
+    [artifact, metadata, mutate]
   );
 
   const debouncedHandleContentChange = useDebounceCallback(

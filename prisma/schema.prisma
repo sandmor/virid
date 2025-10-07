@@ -124,6 +124,7 @@ model Document {
   content   String?
   kind      String   @default("text")
   userId    String   @db.VarChar(191)
+  metadata  Json?
 
   user        User         @relation(fields: [userId], references: [id])
   suggestions Suggestion[]

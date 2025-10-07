@@ -737,16 +737,26 @@ export async function saveDocument({
   kind,
   content,
   userId,
+  metadata = null,
 }: {
   id: string;
   title: string;
   kind: ArtifactKind;
   content: string;
   userId: string;
+  metadata?: Prisma.InputJsonValue | null;
 }) {
   try {
     const created = await prisma.document.create({
-      data: { id, title, kind, content, userId, createdAt: new Date() },
+      data: {
+        id,
+        title,
+        kind,
+        content,
+        userId,
+        ...(metadata != null ? { metadata } : {}),
+        createdAt: new Date(),
+      },
     });
     const mapped: Document = {
       ...created,
