@@ -87,7 +87,10 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
     });
   };
 
-  const handleBlockUpdate = (index: number, patch: Partial<AgentPromptBlock>) => {
+  const handleBlockUpdate = (
+    index: number,
+    patch: Partial<AgentPromptBlock>
+  ) => {
     updateConfig((draft) => {
       const block = draft.blocks[index];
       if (!block) return;
@@ -124,7 +127,9 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
       const { active, over } = event;
       if (!over || active.id === over.id) return;
 
-      const oldIndex = value.blocks.findIndex((block) => block.id === active.id);
+      const oldIndex = value.blocks.findIndex(
+        (block) => block.id === active.id
+      );
       const newIndex = value.blocks.findIndex((block) => block.id === over.id);
       if (oldIndex < 0 || newIndex < 0) return;
 
@@ -178,7 +183,7 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
   };
 
   const activeBlock = activeBlockId
-    ? value.blocks.find((block) => block.id === activeBlockId) ?? null
+    ? (value.blocks.find((block) => block.id === activeBlockId) ?? null)
     : null;
 
   return (
@@ -192,16 +197,18 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {(['append', 'replace'] as AgentPromptConfig['mode'][]).map((mode) => (
-            <Button
-              key={mode}
-              type="button"
-              variant={value.mode === mode ? 'default' : 'outline'}
-              onClick={() => handleModeChange(mode)}
-            >
-              {MODE_LABELS[mode]}
-            </Button>
-          ))}
+          {(['append', 'replace'] as AgentPromptConfig['mode'][]).map(
+            (mode) => (
+              <Button
+                key={mode}
+                type="button"
+                variant={value.mode === mode ? 'default' : 'outline'}
+                onClick={() => handleModeChange(mode)}
+              >
+                {MODE_LABELS[mode]}
+              </Button>
+            )
+          )}
         </div>
         <div className="max-w-md space-y-1">
           <Label htmlFor="prompt-joiner">Block joiner</Label>
@@ -209,7 +216,7 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
             id="prompt-joiner"
             value={value.joiner}
             onChange={(event) => handleJoinerChange(event.target.value)}
-            placeholder={"\n\n"}
+            placeholder={'\n\n'}
           />
           <p className="text-xs text-muted-foreground">
             Inserted between prompt blocks when composing the final system
@@ -265,7 +272,9 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
                   ))}
                 </div>
               </SortableContext>
-              <DragOverlay dropAnimation={{ duration: 0.18, easing: 'ease-out' }}>
+              <DragOverlay
+                dropAnimation={{ duration: 0.18, easing: 'ease-out' }}
+              >
                 {activeBlock ? (
                   <motion.div
                     className={cn(
@@ -287,7 +296,9 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
                       )}
                     </div>
                     <div className="text-xs text-muted-foreground truncate">
-                      {(activeBlock.template ?? '').replace(/\s+/g, ' ').slice(0, 120) || 'Empty block'}
+                      {(activeBlock.template ?? '')
+                        .replace(/\s+/g, ' ')
+                        .slice(0, 120) || 'Empty block'}
                     </div>
                   </motion.div>
                 ) : null}
@@ -317,7 +328,10 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
             </div>
           ) : (
             value.variables.map((variable, index) => (
-              <Card key={`${variable.key}-${index}`} className="border-border/70">
+              <Card
+                key={`${variable.key}-${index}`}
+                className="border-border/70"
+              >
                 <CardContent className="space-y-4 pt-6">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-1">
@@ -335,7 +349,11 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
                       <Input
                         value={variable.label}
                         onChange={(event) =>
-                          handleVariableChange(index, 'label', event.target.value)
+                          handleVariableChange(
+                            index,
+                            'label',
+                            event.target.value
+                          )
                         }
                         placeholder="Project name"
                       />
@@ -377,7 +395,11 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
                         id={`variable-required-${variable.key}-${index}`}
                         checked={variable.required ?? false}
                         onCheckedChange={(checked) =>
-                          handleVariableChange(index, 'required', Boolean(checked))
+                          handleVariableChange(
+                            index,
+                            'required',
+                            Boolean(checked)
+                          )
                         }
                       />
                       <Label
@@ -426,13 +448,21 @@ function SortablePromptBlockCard({
   onChange,
   onRemove,
 }: SortablePromptBlockCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: block.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: block.id });
 
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    pointerEvents: isDragging ? ('none' as CSSProperties['pointerEvents']) : undefined,
+    pointerEvents: isDragging
+      ? ('none' as CSSProperties['pointerEvents'])
+      : undefined,
   };
 
   const previewSource = (block.template ?? '').replace(/\s+/g, ' ').trim();
@@ -551,7 +581,10 @@ function SortablePromptBlockCard({
                         })
                       }
                     />
-                    <Label htmlFor={`block-enabled-${block.id}`} className="text-sm">
+                    <Label
+                      htmlFor={`block-enabled-${block.id}`}
+                      className="text-sm"
+                    >
                       Enabled
                     </Label>
                   </div>

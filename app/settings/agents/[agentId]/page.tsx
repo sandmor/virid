@@ -1,7 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
-import AgentEditor, {
-  type AgentEditorAgent,
-} from '@/components/agent-editor';
+import AgentEditor, { type AgentEditorAgent } from '@/components/agent-editor';
 import { prisma } from '@/lib/db/prisma';
 import { getAppSession } from '@/lib/auth/session';
 import { getTierForUserType } from '@/lib/ai/tiers';
@@ -46,6 +44,10 @@ export default async function AgentDetailPage({
   };
 
   return (
-    <AgentEditor mode="edit" agent={serializedAgent} allowedModels={allowedModels} />
+    <AgentEditor
+      mode="edit"
+      agent={serializedAgent}
+      allowedModels={allowedModels}
+    />
   );
 }

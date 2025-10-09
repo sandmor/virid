@@ -22,7 +22,12 @@ import type { ChatSettings } from '@/lib/db/schema';
 import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
-import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
+import {
+  fetcher,
+  fetchWithErrorHandlers,
+  generateUUID,
+  isValidUUID,
+} from '@/lib/utils';
 import { Artifact } from './artifact';
 import { useDataStream } from './data-stream-provider';
 import { Messages } from './messages';
@@ -118,10 +123,19 @@ export function Chat({
   const [selectedAgent, setSelectedAgent] = useState<AgentPreset | null>(
     resolvedInitialAgent
   );
+  const initialAgentId = useMemo(() => {
+    if (resolvedInitialAgent?.id && isValidUUID(resolvedInitialAgent.id)) {
+      return resolvedInitialAgent.id;
+    }
+    if (agentId && isValidUUID(agentId)) {
+      return agentId;
+    }
+    return undefined;
+  }, [agentId, resolvedInitialAgent?.id]);
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(
-    resolvedInitialAgent?.id ?? agentId
+    initialAgentId
   );
-  const stagedAgentIdRef = useRef<string | undefined>(selectedAgentId);
+  const stagedAgentIdRef = useRef<string | undefined>(initialAgentId);
 
   // Provisional pinning (allow selecting archive entries before first message creates backend chat row)
   const [stagedPinnedSlugs, setStagedPinnedSlugs] = useState<string[]>(() =>
@@ -260,8 +274,18 @@ export function Chat({
       options?: { userInitiated?: boolean }
     ) => {
       const userInitiated = options?.userInitiated ?? false;
-      const newAgentId = agent?.id ?? null;
-      if (selectedAgentId === newAgentId) return;
+      const normalizedAgentId = agent?.id
+        ? isValidUUID(agent.id)
+          ? agent.id
+          : null
+        : null;
+      if (agent && !normalizedAgentId) {
+        console.warn('Ignoring agent selection with invalid id', agent.id);
+        return;
+      }
+
+      const comparisonId = normalizedAgentId ?? undefined;
+      if (selectedAgentId === comparisonId) return;
 
       const shouldPersistSelection = userInitiated && chatHasStartedRef.current;
 
@@ -270,7 +294,7 @@ export function Chat({
           await fetchWithErrorHandlers(`/api/chat/settings`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chatId: id, agentId: newAgentId }),
+            body: JSON.stringify({ chatId: id, agentId: normalizedAgentId }),
           });
         } catch (error) {
           console.error('Failed to update chat agent', error);
@@ -282,12 +306,12 @@ export function Chat({
       try {
         if (agent) {
           setSelectedAgent({
-            id: agent.id,
+            id: normalizedAgentId!,
             name: agent.name,
             description: agent.description,
             settings: agent.settings,
           });
-          setSelectedAgentId(agent.id);
+          setSelectedAgentId(normalizedAgentId!);
         } else {
           setSelectedAgent(null);
           setSelectedAgentId(undefined);

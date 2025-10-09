@@ -38,8 +38,8 @@ function buildSettingsSummary(settings: AgentSettingsValue) {
     allowedTools === undefined
       ? 'All tools'
       : allowedTools.length === 0
-      ? 'No tools'
-      : `${allowedTools.length} tool${allowedTools.length === 1 ? '' : 's'}`;
+        ? 'No tools'
+        : `${allowedTools.length} tool${allowedTools.length === 1 ? '' : 's'}`;
 
   const pinnedCount = settings.pinnedEntries.length;
   const pinnedSummary =
@@ -161,7 +161,10 @@ export function AgentsManagement() {
                       {agent.name}
                     </span>
                     {summary.promptHasCustom ? (
-                      <Badge variant="secondary" className="flex items-center gap-1">
+                      <Badge
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
                         <Sparkles className="h-3 w-3" /> Custom prompt
                       </Badge>
                     ) : (
@@ -181,7 +184,9 @@ export function AgentsManagement() {
                 <CardContent className="flex-1 space-y-3 text-sm">
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>Updated {updatedLabel}</span>
-                    <span className="capitalize">Mode: {summary.promptMode}</span>
+                    <span className="capitalize">
+                      Mode: {summary.promptMode}
+                    </span>
                   </div>
                   <Separator />
                   <div className="space-y-2">
@@ -190,11 +195,15 @@ export function AgentsManagement() {
                       <span>{summary.promptSummary}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Tools:</span>
+                      <span className="font-medium text-foreground">
+                        Tools:
+                      </span>
                       <span>{summary.toolSummary}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Pinned:</span>
+                      <span className="font-medium text-foreground">
+                        Pinned:
+                      </span>
                       <span>{summary.pinnedSummary}</span>
                     </div>
                   </div>
@@ -254,9 +263,7 @@ export function AgentsManagement() {
           </Button>
         </div>
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-6">
-        {content}
-      </div>
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-6">{content}</div>
     </div>
   );
 }

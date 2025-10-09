@@ -46,7 +46,8 @@ export class ChatSDKError extends Error {
     this.type = type as ErrorType;
     this.cause = cause;
     this.surface = surface as Surface;
-    this.message = getMessageByErrorCode(errorCode);
+    const defaultMessage = getMessageByErrorCode(errorCode);
+    this.message = cause ?? defaultMessage;
     this.statusCode = getStatusCodeByType(this.type);
   }
 

@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
+export const MAX_TEXT_PART_LENGTH = 16000;
+
 const textPartSchema = z.object({
   type: z.enum(['text']),
-  text: z.string().min(1).max(2000),
+  text: z.string().min(1).max(MAX_TEXT_PART_LENGTH),
 });
 
 const filePartSchema = z.object({

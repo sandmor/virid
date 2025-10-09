@@ -5,7 +5,7 @@ import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL, isModelIdAllowed } from '@/lib/ai/models';
 import { resolveChatModelOptions } from '@/lib/ai/models.server';
 import { getTierForUserType } from '@/lib/ai/tiers';
-import { generateUUID } from '@/lib/utils';
+import { generateUUID, isValidUUID } from '@/lib/utils';
 import { getAppSession } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import type { Agent as AgentModel } from '@/lib/db/schema';
@@ -37,10 +37,12 @@ export default async function Page({
   );
   const allowedModels = await resolveChatModelOptions(allowedModelIds);
   // Check for agentId
-  const agentId =
+  const rawAgentId =
     typeof resolvedSearchParams?.agentId === 'string'
       ? resolvedSearchParams.agentId
       : undefined;
+  const agentId =
+    rawAgentId && isValidUUID(rawAgentId) ? rawAgentId : undefined;
   let initialAgent: Pick<
     AgentModel,
     'id' | 'name' | 'description' | 'settings'

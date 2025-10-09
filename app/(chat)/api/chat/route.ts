@@ -69,7 +69,12 @@ import type { AppUsage } from '@/lib/usage';
 import { convertToUIMessages, generateUUID } from '@/lib/utils';
 import { generateTitleFromChatHistory } from '../../actions';
 import { updateChatTitleById } from '@/lib/db/queries';
-import { type PostRequestBody, postRequestBodySchema } from './schema';
+import { ZodError } from 'zod';
+import {
+  type PostRequestBody,
+  postRequestBodySchema,
+  MAX_TEXT_PART_LENGTH,
+} from './schema';
 import { prisma } from '@/lib/db/prisma';
 import { getModelCapabilities } from '@/lib/ai/model-capabilities';
 
@@ -119,7 +124,12 @@ export async function POST(request: Request) {
   try {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
-  } catch (_) {
+  } catch (error) {
+    if (error instanceof ZodError) {
+      const friendlyMessage = formatChatValidationError(error);
+      const err = new ChatSDKError('bad_request:api', friendlyMessage);
+      return err.toResponse();
+    }
     return new ChatSDKError('bad_request:api').toResponse();
   }
 
@@ -692,6 +702,30 @@ export async function POST(request: Request) {
     console.error('Unhandled error in chat API:', error, { vercelId });
     return new ChatSDKError('offline:chat').toResponse();
   }
+}
+
+function formatChatValidationError(error: ZodError): string {
+  const issue = error.issues[0];
+  if (!issue) {
+    return 'The chat request is missing required fields. Please try again.';
+  }
+
+  const path = issue.path.join('.') || 'request';
+
+  if (
+    issue.code === 'too_big' &&
+    typeof issue.maximum === 'number' &&
+    issue.maximum === MAX_TEXT_PART_LENGTH &&
+    issue.path.includes('text')
+  ) {
+    return `Your message is too long. Please shorten it to ${MAX_TEXT_PART_LENGTH.toLocaleString()} characters or fewer.`;
+  }
+
+  if (issue.code === 'invalid_type') {
+    return `The field "${path}" is missing or has the wrong type.`;
+  }
+
+  return `Invalid ${path}: ${issue.message}`;
 }
 
 export async function DELETE(request: Request) {

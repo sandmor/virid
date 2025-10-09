@@ -29,7 +29,11 @@ import type { ChatModelOption } from '@/lib/ai/models';
 import { CHAT_TOOL_IDS, type ChatToolId } from '@/lib/ai/tool-ids';
 import { cn } from '@/lib/utils';
 import AgentPromptEditor from '@/components/agent-prompt-editor';
-import { useCreateAgent, useDeleteAgent, useUpdateAgent } from '@/hooks/use-agents';
+import {
+  useCreateAgent,
+  useDeleteAgent,
+  useUpdateAgent,
+} from '@/hooks/use-agents';
 
 const REASONING_OPTIONS: Array<{
   value: 'low' | 'medium' | 'high';
@@ -133,11 +137,15 @@ export default function AgentEditor({
   }));
   const [pinnedInput, setPinnedInput] = useState('');
 
-  const initialSnapshot = useMemo(() => serializeSettingsSnapshot({
-    name: agent?.name ?? '',
-    description: agent?.description ?? '',
-    settings: initialSettings,
-  }), [agent?.description, agent?.name, initialSettings]);
+  const initialSnapshot = useMemo(
+    () =>
+      serializeSettingsSnapshot({
+        name: agent?.name ?? '',
+        description: agent?.description ?? '',
+        settings: initialSettings,
+      }),
+    [agent?.description, agent?.name, initialSettings]
+  );
 
   const currentSnapshot = serializeSettingsSnapshot(form);
   const isDirty = currentSnapshot !== initialSnapshot;
@@ -172,9 +180,7 @@ export default function AgentEditor({
         ...prev,
         settings: {
           ...prev.settings,
-          allowedTools: nextAllowed.length
-            ? nextAllowed
-            : [],
+          allowedTools: nextAllowed.length ? nextAllowed : [],
         },
       };
     });
@@ -215,7 +221,9 @@ export default function AgentEditor({
       ...prev,
       settings: {
         ...prev.settings,
-        pinnedEntries: prev.settings.pinnedEntries.filter((item) => item !== slug),
+        pinnedEntries: prev.settings.pinnedEntries.filter(
+          (item) => item !== slug
+        ),
       },
     }));
   };
@@ -296,7 +304,9 @@ export default function AgentEditor({
             )}
           </div>
           <h1 className="text-2xl font-semibold">
-            {mode === 'create' ? 'Create agent' : agent?.name ?? 'Untitled agent'}
+            {mode === 'create'
+              ? 'Create agent'
+              : (agent?.name ?? 'Untitled agent')}
           </h1>
           <p className="text-sm text-muted-foreground">
             Configure defaults, allowed tools, and prompt blocks for this agent.
@@ -366,7 +376,10 @@ export default function AgentEditor({
               id="agent-description"
               value={form.description}
               onChange={(event) =>
-                setForm((prev) => ({ ...prev, description: event.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  description: event.target.value,
+                }))
               }
               rows={3}
               placeholder="Summarize this agent’s purpose"
@@ -391,7 +404,9 @@ export default function AgentEditor({
             <div className="grid gap-2 sm:grid-cols-2">
               <Button
                 type="button"
-                variant={selectedModelId === '__DEFAULT__' ? 'default' : 'outline'}
+                variant={
+                  selectedModelId === '__DEFAULT__' ? 'default' : 'outline'
+                }
                 onClick={() =>
                   setForm((prev) => ({
                     ...prev,
@@ -464,8 +479,8 @@ export default function AgentEditor({
         <CardHeader>
           <CardTitle>Allowed tools</CardTitle>
           <CardDescription>
-            Restrict which tools this agent can invoke by default. Leave to allow
-            all tools supported by the selected model.
+            Restrict which tools this agent can invoke by default. Leave to
+            allow all tools supported by the selected model.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -490,12 +505,17 @@ export default function AgentEditor({
                     onClick={() => toggleTool(tool)}
                     className={cn(
                       'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm',
-                      selected ? 'border-primary bg-primary/10' : 'border-border'
+                      selected
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border'
                     )}
                     aria-pressed={selected}
                   >
                     <span>{TOOL_LABELS[tool]}</span>
-                    <Checkbox checked={selected} className="pointer-events-none" />
+                    <Checkbox
+                      checked={selected}
+                      className="pointer-events-none"
+                    />
                   </button>
                 );
               })}
@@ -554,8 +574,9 @@ export default function AgentEditor({
         <CardHeader>
           <CardTitle>Advanced prompt</CardTitle>
           <CardDescription>
-            Compose structured prompt blocks and reusable variables. These values
-            become the system prompt foundation whenever this agent is used.
+            Compose structured prompt blocks and reusable variables. These
+            values become the system prompt foundation whenever this agent is
+            used.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
