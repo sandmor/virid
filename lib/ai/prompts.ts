@@ -19,10 +19,12 @@ export type SystemPromptContext = {
   requestHints: RequestHints;
   allowedTools?: string[];
   pinnedEntries?: PinnedEntry[];
+  variables?: Record<string, string>;
 };
 
 export type SystemPromptOptions = SystemPromptContext & {
   parts?: PromptPart<SystemPromptContext>[];
+  joiner?: string;
 };
 
 const PINNED_MEMORY_CHAR_LIMIT = 20_000;
@@ -155,16 +157,29 @@ export const systemPrompt = ({
   requestHints,
   pinnedEntries,
   allowedTools,
+  variables,
   parts,
+  joiner,
 }: SystemPromptOptions) => {
   const context: SystemPromptContext = {
     requestHints,
     pinnedEntries,
     allowedTools,
+    variables,
   };
 
   if (parts) {
-    const customEngine = new PromptTemplateEngine<SystemPromptContext>(parts);
+    const customEngine = new PromptTemplateEngine<SystemPromptContext>(parts, {
+      joiner,
+    });
+    return customEngine.compose(context);
+  }
+
+  if (joiner) {
+    const customEngine = new PromptTemplateEngine<SystemPromptContext>(
+      defaultSystemPromptParts,
+      { joiner }
+    );
     return customEngine.compose(context);
   }
 

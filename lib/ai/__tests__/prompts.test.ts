@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'bun:test';
-import { systemPrompt, getRequestPromptFromHints } from '../prompts';
+import {
+  systemPrompt,
+  getRequestPromptFromHints,
+  getDefaultSystemPromptParts,
+} from '../prompts';
 import type { RequestHints } from '../prompts';
+import {
+  buildPromptPartsFromConfig,
+  getAgentPromptVariableMap,
+} from '@/lib/agent-prompt';
 
 const baseRequestHints: RequestHints = {
   latitude: '48.8566',
@@ -76,6 +84,83 @@ describe('systemPrompt', () => {
     expect(prompt).toContain('=== alpha — Project Alpha ===');
     expect(prompt).toContain('a'.repeat(20_000));
     expect(prompt).not.toContain('a'.repeat(20_001));
+  });
+
+  it('appends custom agent blocks and resolves variables', () => {
+    const baseParts = getDefaultSystemPromptParts();
+    const { parts, joiner, normalized } = buildPromptPartsFromConfig(
+      {
+        mode: 'append',
+        joiner: '\n---\n',
+        blocks: [
+          {
+            id: 'custom',
+            title: 'Custom',
+            template: 'Project context: {{variables.project}}',
+            enabled: true,
+            order: 0,
+          },
+        ],
+        variables: [
+          {
+            key: 'project',
+            label: 'Project',
+            defaultValue: 'Aurora',
+          },
+        ],
+      },
+      baseParts
+    );
+
+    const prompt = systemPrompt({
+      requestHints: baseRequestHints,
+      allowedTools: ['createDocument', 'updateDocument'],
+      variables: getAgentPromptVariableMap(normalized),
+      parts,
+      joiner,
+    });
+
+    expect(prompt).toContain('Artifacts workspace');
+    expect(prompt).toContain('Project context: Aurora');
+    expect(prompt).toContain('---');
+  });
+
+  it('replaces default prompt when agent mode is replace', () => {
+    const { parts, joiner, normalized } = buildPromptPartsFromConfig(
+      {
+        mode: 'replace',
+        joiner: '\n',
+        blocks: [
+          {
+            id: 'replace',
+            title: 'Minimal',
+            template: 'Minimal prompt for {{variables.role}}',
+            enabled: true,
+            order: 0,
+          },
+        ],
+        variables: [
+          {
+            key: 'role',
+            label: 'Role',
+            defaultValue: 'analysis',
+          },
+        ],
+      },
+      getDefaultSystemPromptParts()
+    );
+
+    const prompt = systemPrompt({
+      requestHints: baseRequestHints,
+      allowedTools: [],
+      variables: getAgentPromptVariableMap(normalized),
+      parts,
+      joiner,
+    });
+
+    expect(prompt).toContain('Minimal prompt for analysis');
+    expect(prompt).not.toContain('Artifacts workspace');
+    expect(prompt).not.toContain('You are a friendly');
   });
 });
 

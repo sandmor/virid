@@ -15,7 +15,17 @@ import type { VisibilityType } from '@/components/visibility-selector';
 import { getTierForUserType } from '@/lib/ai/tiers';
 import type { ChatModel } from '@/lib/ai/models';
 import { isModelIdAllowed } from '@/lib/ai/models';
-import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
+import {
+  getDefaultSystemPromptParts,
+  type RequestHints,
+  type SystemPromptOptions,
+  systemPrompt,
+} from '@/lib/ai/prompts';
+import {
+  agentPromptConfigIsDefault,
+  buildPromptPartsFromConfig,
+  getAgentPromptVariableMap,
+} from '@/lib/agent-prompt';
 import {
   createResumableStreamContext,
   type ResumableStreamContext,
@@ -457,11 +467,24 @@ export async function POST(request: Request) {
                 allToolIdsSet.has(toolId)
               );
 
-        const composedSystemPrompt = systemPrompt({
+        const basePromptParts = getDefaultSystemPromptParts();
+        const promptResolution = buildPromptPartsFromConfig(
+          settings.prompt,
+          basePromptParts
+        );
+        const promptOptions: SystemPromptOptions = {
           requestHints,
           pinnedEntries: pinnedForPrompt,
           allowedTools: allowedToolIds,
-        });
+          variables: getAgentPromptVariableMap(promptResolution.normalized),
+        };
+
+        if (!agentPromptConfigIsDefault(promptResolution.normalized)) {
+          promptOptions.parts = promptResolution.parts;
+          promptOptions.joiner = promptResolution.joiner;
+        }
+
+        const composedSystemPrompt = systemPrompt(promptOptions);
 
         const artifactContext: ArtifactToolContext = {
           modelId: selectedChatModel,

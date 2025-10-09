@@ -4,6 +4,39 @@ import { prisma } from '@/lib/db/prisma';
 import { normalizeAgentSettingsPayload } from '@/lib/agent-settings';
 import type { Prisma } from '@/generated/prisma-client';
 
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getAppSession();
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { id } = params;
+  if (!id) {
+    return NextResponse.json({ error: 'Agent ID required' }, { status: 400 });
+  }
+
+  try {
+    const agent = await prisma.agent.findFirst({
+      where: { id, userId: session.user.id },
+    });
+
+    if (!agent) {
+      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ agent });
+  } catch (error) {
+    console.error('Failed to fetch agent:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }

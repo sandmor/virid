@@ -1,11 +1,19 @@
 import type { ChatSettings } from '@/lib/db/schema';
 import type { ChatToolId } from '@/lib/ai/tool-ids';
+import {
+  DEFAULT_AGENT_PROMPT_CONFIG,
+  agentPromptConfigIsDefault,
+  cloneAgentPromptConfig,
+  normalizeAgentPromptConfig,
+  type AgentPromptConfig,
+} from './agent-prompt';
 
 export interface AgentSettingsValue {
   pinnedEntries: string[];
   allowedTools?: ChatToolId[];
   modelId?: string;
   reasoningEffort?: 'low' | 'medium' | 'high';
+  prompt: AgentPromptConfig;
 }
 
 export const DEFAULT_AGENT_SETTINGS: AgentSettingsValue = {
@@ -13,7 +21,20 @@ export const DEFAULT_AGENT_SETTINGS: AgentSettingsValue = {
   allowedTools: undefined,
   modelId: undefined,
   reasoningEffort: undefined,
+  prompt: cloneAgentPromptConfig(DEFAULT_AGENT_PROMPT_CONFIG),
 };
+
+export function cloneAgentSettingsValue(
+  value: AgentSettingsValue = DEFAULT_AGENT_SETTINGS
+): AgentSettingsValue {
+  return {
+    pinnedEntries: [...value.pinnedEntries],
+    allowedTools: value.allowedTools ? [...value.allowedTools] : undefined,
+    modelId: value.modelId,
+    reasoningEffort: value.reasoningEffort,
+    prompt: cloneAgentPromptConfig(value.prompt),
+  };
+}
 
 export function normalizePinnedEntries(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
@@ -69,6 +90,7 @@ export function agentSettingsFromChatSettings(
     reasoningEffort: normalizeReasoningEffort(
       settings?.reasoningEffort ?? undefined
     ),
+    prompt: normalizeAgentPromptConfig(settings?.prompt),
   };
 }
 
@@ -85,6 +107,9 @@ export function agentSettingsToChatSettings(
   }
   if (value.reasoningEffort) {
     result.reasoningEffort = value.reasoningEffort;
+  }
+  if (!agentPromptConfigIsDefault(value.prompt)) {
+    result.prompt = normalizeAgentPromptConfig(value.prompt);
   }
   if (!result.pinnedEntries.length) {
     delete result.pinnedEntries;
@@ -107,7 +132,8 @@ export function agentSettingsIsDefault(value: AgentSettingsValue): boolean {
     value.pinnedEntries.length === 0 &&
     value.allowedTools === undefined &&
     value.modelId === undefined &&
-    value.reasoningEffort === undefined
+    value.reasoningEffort === undefined &&
+    agentPromptConfigIsDefault(value.prompt)
   );
 }
 
@@ -130,10 +156,14 @@ export function normalizeAgentSettingsPayload(input: unknown): ChatSettings {
   const reasoningEffort = normalizeReasoningEffort(
     raw.reasoningEffort ?? (raw as any)?.settings?.reasoningEffort
   );
+  const prompt = normalizeAgentPromptConfig(
+    raw.prompt ?? (raw as any)?.settings?.prompt
+  );
   const settings: ChatSettings = {};
   if (pinnedEntries.length) settings.pinnedEntries = pinnedEntries;
   if (allowedTools !== undefined) settings.tools = { allow: allowedTools };
   if (modelId) settings.modelId = modelId;
   if (reasoningEffort) settings.reasoningEffort = reasoningEffort;
+  if (!agentPromptConfigIsDefault(prompt)) settings.prompt = prompt;
   return settings;
 }

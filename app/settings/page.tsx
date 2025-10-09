@@ -7,8 +7,6 @@ import { HydrationBoundary } from '@tanstack/react-query';
 import { isAdmin } from '@/lib/auth/admin';
 import SettingsView from './view';
 import AdminSections from './AdminSections';
-import { getTierForUserType } from '@/lib/ai/tiers';
-import { resolveChatModelOptions } from '@/lib/ai/models.server';
 
 export const metadata: Metadata = {
   title: 'Account Settings',
@@ -56,10 +54,6 @@ export default async function SettingsPage({
 }) {
   const session = await getAppSession();
   if (!session?.user) redirect('/login');
-  const { modelIds: allowedModelIds } = await getTierForUserType(
-    session.user.type
-  );
-  const allowedModels = await resolveChatModelOptions(allowedModelIds);
   const params = await searchParams;
   const tabParam = typeof params?.tab === 'string' ? params.tab : undefined;
   const adminAllowed = await isAdmin();
@@ -94,7 +88,6 @@ export default async function SettingsPage({
               defaultTab={defaultTab}
               isAdmin={adminAllowed}
               adminContent={adminContent}
-              allowedModels={allowedModels}
             />
           </Suspense>
         </HydrationBoundary>

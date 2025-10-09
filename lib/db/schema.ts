@@ -2,6 +2,7 @@ import type { Prisma } from '../../generated/prisma-client';
 import type { AppUsage } from '../usage';
 import type { VisibilityType } from '@/components/visibility-selector';
 import type { ArtifactKind } from '@/components/artifact';
+import type { AgentPromptConfig } from '@/lib/agent-prompt';
 
 // Re-export Prisma model types with the same names previously used across the app
 export type User = Prisma.UserGetPayload<{}>;
@@ -11,6 +12,7 @@ export type User = Prisma.UserGetPayload<{}>;
 // tools.allow: optional allow-list of tool identifiers; if absent => all tools enabled.
 // modelId: persistent chat-level model preference (provider:model slug)
 // reasoningEffort: controls how much computational effort the model uses for reasoning (low, medium, high)
+// prompt: optional agent-defined prompt configuration (blocks, variables, join behaviour)
 export interface ChatSettings {
   pinnedEntries?: string[]; // denormalized convenience cache
   tools?: {
@@ -18,6 +20,7 @@ export interface ChatSettings {
   };
   modelId?: string; // composite provider:model id
   reasoningEffort?: 'low' | 'medium' | 'high'; // reasoning effort level
+  prompt?: AgentPromptConfig;
 }
 
 export type Chat = Omit<
