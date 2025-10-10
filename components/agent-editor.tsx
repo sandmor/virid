@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
@@ -194,6 +194,20 @@ export default function AgentEditor({
         allowedTools: allowAll ? undefined : [],
       },
     }));
+  };
+
+  const handleToolChoiceKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+    tool: ChatToolId
+  ) => {
+    if (
+      event.key === ' ' ||
+      event.key === 'Spacebar' ||
+      event.key === 'Enter'
+    ) {
+      event.preventDefault();
+      toggleTool(tool);
+    }
   };
 
   const addPinnedEntry = () => {
@@ -499,24 +513,26 @@ export default function AgentEditor({
               {CHAT_TOOL_IDS.map((tool) => {
                 const selected = allowedTools?.includes(tool) ?? false;
                 return (
-                  <button
+                  <div
                     key={tool}
-                    type="button"
+                    role="checkbox"
+                    tabIndex={0}
+                    aria-checked={selected}
                     onClick={() => toggleTool(tool)}
+                    onKeyDown={(event) => handleToolChoiceKeyDown(event, tool)}
                     className={cn(
-                      'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm',
+                      'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background',
                       selected
                         ? 'border-primary bg-primary/10'
-                        : 'border-border'
+                        : 'border-border hover:border-primary/40'
                     )}
-                    aria-pressed={selected}
                   >
                     <span>{TOOL_LABELS[tool]}</span>
                     <Checkbox
                       checked={selected}
                       className="pointer-events-none"
                     />
-                  </button>
+                  </div>
                 );
               })}
             </div>
