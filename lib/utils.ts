@@ -56,13 +56,38 @@ export function getLocalStorage(key: string) {
 }
 
 export function generateUUID(): string {
-  // Use native crypto.randomUUID() if available (modern browsers including iOS Safari)
+  // Use native crypto.randomUUID() if available (modern browsers including iOS Safari 15.4+)
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
   
-  // Fallback for environments without crypto.randomUUID()
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  // Compliant UUID v4 fallback using crypto.getRandomValues()
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    
+    // Set version (4) and variant bits according to RFC 4122
+    bytes[6] = (bytes[6] & 0x0f) | 0x40; // Version 4
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // Variant 10
+    
+    // Convert to hex string with proper formatting
+    const hexString = Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    return [
+      hexString.slice(0, 8),
+      hexString.slice(8, 12),
+      hexString.slice(12, 16),
+      hexString.slice(16, 20),
+      hexString.slice(20, 32),
+    ].join('-');
+  }
+  
+  // Last resort fallback (should rarely be needed)
+  // This uses Math.random() but with proper UUID v4 bit manipulation
+  const template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
+  return template.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
