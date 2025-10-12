@@ -567,8 +567,8 @@ function PureModelSelectorCompact({
 
   return (
     <PromptInputModelSelect
-      onValueChange={(modelName) => {
-        const model = availableModels.find((m) => m.name === modelName);
+      onValueChange={(modelId) => {
+        const model = availableModels.find((m) => m.id === modelId);
         if (model) {
           if (chatHasAttachments && !modelSupportsAttachments(model)) {
             toast.error(
@@ -583,7 +583,7 @@ function PureModelSelectorCompact({
           });
         }
       }}
-      value={selectedModel?.name}
+      value={selectedModel?.id}
     >
       <Trigger
         className="flex h-8 items-center gap-2 rounded-lg border border-border/60 bg-background px-2 text-xs font-medium text-foreground shadow-none transition-colors hover:bg-accent focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -598,44 +598,48 @@ function PureModelSelectorCompact({
       </Trigger>
       <PromptInputModelSelectContent className="min-w-[280px] p-0">
         <div className="flex flex-col">
-          {Object.entries(modelsByProvider).map(([provider, models]) => (
-            <div
-              key={provider}
-              className="border-b border-border last:border-b-0"
-            >
-              <div className="flex items-center gap-2 px-3 py-2 bg-muted/50">
-                {getProviderIcon(provider)}
-                <span className="text-xs font-medium text-muted-foreground">
-                  {displayProviderName(provider)}
-                </span>
+          {Object.entries(modelsByProvider)
+            .sort(([a], [b]) =>
+              displayProviderName(a).localeCompare(displayProviderName(b))
+            )
+            .map(([provider, models]) => (
+              <div
+                key={provider}
+                className="border-b border-border last:border-b-0"
+              >
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/50">
+                  {getProviderIcon(provider)}
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {displayProviderName(provider)}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-px">
+                  {models.map((model) => (
+                    <SelectItem
+                      key={model.id}
+                      value={model.id}
+                      data-testid={`model-selector-item-${model.id}`}
+                      disabled={
+                        chatHasAttachments && !modelSupportsAttachments(model)
+                      }
+                      className="pl-8"
+                      title={
+                        chatHasAttachments && !modelSupportsAttachments(model)
+                          ? 'Remove attachments to select this model.'
+                          : undefined
+                      }
+                    >
+                      <div className="truncate font-medium text-xs">
+                        {model.name}
+                      </div>
+                      <div className="mt-px truncate text-[10px] text-muted-foreground leading-tight">
+                        {model.description}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-col gap-px">
-                {models.map((model) => (
-                  <SelectItem
-                    key={model.id}
-                    value={model.name}
-                    data-testid={`model-selector-item-${model.id}`}
-                    disabled={
-                      chatHasAttachments && !modelSupportsAttachments(model)
-                    }
-                    className="pl-8"
-                    title={
-                      chatHasAttachments && !modelSupportsAttachments(model)
-                        ? 'Remove attachments to select this model.'
-                        : undefined
-                    }
-                  >
-                    <div className="truncate font-medium text-xs">
-                      {model.name}
-                    </div>
-                    <div className="mt-px truncate text-[10px] text-muted-foreground leading-tight">
-                      {model.description}
-                    </div>
-                  </SelectItem>
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       </PromptInputModelSelectContent>
     </PromptInputModelSelect>
