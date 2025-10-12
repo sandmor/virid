@@ -1,3 +1,5 @@
+import { format as formatDate } from 'date-fns';
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (value === null || typeof value !== 'object') {
     return false;
@@ -10,6 +12,8 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 export type TemplateData = Record<string, unknown>;
 
 const PLACEHOLDER_REGEX = /\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g;
+const DATETIME_REGEX =
+  /\{\{\s*datetime(?:\s+"([^"]*)"(?:\s+"([^"]*)")?)?\s*\}\}/gi;
 
 const EACH_BLOCK_REGEX =
   /\{\{#each\s+([a-zA-Z0-9_.-]+)\s*\}\}([\s\S]*?)\{\{\/each\}\}/g;
@@ -88,10 +92,84 @@ function renderEachBlocks(template: string, data: TemplateData): string {
   });
 }
 
+function renderDatetimeBlocks(template: string, now = new Date()): string {
+  return template.replace(
+    DATETIME_REGEX,
+    (_matched: string, maybeFormat?: string, maybeTimezone?: string) => {
+      const formatString =
+        maybeFormat && maybeFormat.trim().length
+          ? maybeFormat.trim()
+          : "yyyy-MM-dd'T'HH:mm:ssXXX";
+      const timezone =
+        maybeTimezone && maybeTimezone.trim().length
+          ? maybeTimezone.trim()
+          : undefined;
+
+      try {
+        if (!timezone) {
+          return formatDate(now, formatString);
+        }
+
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: timezone,
+          hour12: false,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+        const parts = formatter.formatToParts(now);
+        const partMap = parts.reduce<Record<string, string>>((acc, part) => {
+          if (part.type !== 'literal') {
+            acc[part.type] = part.value;
+          }
+          return acc;
+        }, {});
+
+        const year = Number(partMap.year);
+        const month = Number(partMap.month);
+        const day = Number(partMap.day);
+        const hour = Number(partMap.hour);
+        const minute = Number(partMap.minute);
+        const second = Number(partMap.second);
+
+        if (
+          Number.isFinite(year) &&
+          Number.isFinite(month) &&
+          Number.isFinite(day) &&
+          Number.isFinite(hour) &&
+          Number.isFinite(minute) &&
+          Number.isFinite(second)
+        ) {
+          const zonedDate = new Date(
+            Date.UTC(
+              year,
+              month - 1,
+              day,
+              hour,
+              minute,
+              second,
+              now.getMilliseconds()
+            )
+          );
+          return formatDate(zonedDate, formatString);
+        }
+
+        return formatDate(now, formatString);
+      } catch (_error) {
+        return formatDate(now, formatString);
+      }
+    }
+  );
+}
+
 export function renderTemplate(template: string, data: TemplateData): string {
   const withEachBlocks = renderEachBlocks(template, data);
+  const withDatetimeBlocks = renderDatetimeBlocks(withEachBlocks);
 
-  return withEachBlocks.replace(
+  return withDatetimeBlocks.replace(
     PLACEHOLDER_REGEX,
     (_match: string, rawKey: string) => {
       const value = resolvePath(data, rawKey);
@@ -100,6 +178,8 @@ export function renderTemplate(template: string, data: TemplateData): string {
   );
 }
 
+export type PromptRole = 'system' | 'user' | 'assistant';
+
 export interface PromptPart<Context> {
   id: string;
   template: string;
@@ -107,10 +187,25 @@ export interface PromptPart<Context> {
   isEnabled?: (context: Context) => boolean;
   prepare?: (context: Context) => TemplateData;
   separator?: string;
+  role?: PromptRole;
+  depth?: number;
 }
 
 export interface PromptTemplateEngineOptions {
   joiner?: string;
+}
+
+export interface RenderedPromptSegment {
+  id: string;
+  role: PromptRole;
+  content: string;
+  separator?: string;
+  depth?: number;
+}
+
+export interface PromptCompositionResult {
+  segments: RenderedPromptSegment[];
+  joiner: string;
 }
 
 export class PromptTemplateEngine<Context> {
@@ -123,7 +218,7 @@ export class PromptTemplateEngine<Context> {
     this.joiner = options.joiner ?? '\n\n';
   }
 
-  compose(context: Context): string {
+  compose(context: Context): PromptCompositionResult {
     const baseData: TemplateData = cloneContext(context);
     const dataWithContext = mergeData(baseData, { context } as TemplateData);
 
@@ -136,21 +231,53 @@ export class PromptTemplateEngine<Context> {
           ? mergeData(dataWithContext, prepared)
           : dataWithContext;
         const rendered = renderTemplate(part.template, templateData).trim();
-        return { rendered, separator: part.separator };
+        const role: PromptRole = part.role ?? 'system';
+        const rawDepth = part.depth;
+        const depth =
+          typeof rawDepth === 'number' && Number.isFinite(rawDepth)
+            ? Math.max(0, Math.floor(rawDepth))
+            : undefined;
+        return {
+          rendered,
+          separator: part.separator,
+          role,
+          depth,
+          id: part.id,
+        };
       })
-      .filter(({ rendered }) => rendered.length > 0);
+      .filter(({ rendered }) => rendered.length > 0)
+      .map(({ rendered, separator, role, depth, id }) => ({
+        id,
+        role,
+        content: rendered,
+        separator,
+        depth,
+      }));
 
-    if (renderedParts.length === 0) {
-      return '';
-    }
-
-    return renderedParts
-      .map(({ rendered, separator }, index) => {
-        const suffix =
-          separator ?? (index === renderedParts.length - 1 ? '' : this.joiner);
-        return `${rendered}${suffix}`;
-      })
-      .join('')
-      .trim();
+    return {
+      segments: renderedParts,
+      joiner: this.joiner,
+    };
   }
+
+  composeText(context: Context): string {
+    const { segments, joiner } = this.compose(context);
+    return joinSegments(segments, joiner);
+  }
+}
+
+export function joinSegments(
+  segments: RenderedPromptSegment[],
+  joiner: string
+): string {
+  if (!segments.length) return '';
+
+  return segments
+    .map((segment, index) => {
+      const suffix =
+        segment.separator ?? (index === segments.length - 1 ? '' : joiner);
+      return `${segment.content}${suffix}`;
+    })
+    .join('')
+    .trim();
 }

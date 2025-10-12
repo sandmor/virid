@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import type { PromptPart } from '@/lib/ai/prompt-engine';
+import type { PromptPart, PromptRole } from '@/lib/ai/prompt-engine';
 
 type Primitive = string | number | boolean | null;
 
@@ -27,6 +27,20 @@ function sanitizeJoiner(raw: unknown): string {
   const trimmed = raw.trim();
   if (!trimmed) return DEFAULT_JOINER;
   return clampString(trimmed, 32);
+}
+
+function sanitizeRole(raw: unknown): PromptRole {
+  if (raw === 'assistant' || raw === 'user' || raw === 'system') {
+    return raw;
+  }
+  return 'system';
+}
+
+function sanitizeDepth(raw: unknown): number | undefined {
+  if (raw === null || raw === undefined) return undefined;
+  const numeric = Number(raw);
+  if (!Number.isFinite(numeric)) return undefined;
+  return Math.max(0, Math.floor(numeric));
 }
 
 const VARIABLE_KEY_REGEX = /^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$/;
@@ -85,6 +99,8 @@ export interface AgentPromptBlock {
   enabled: boolean;
   separator?: string;
   order: number;
+  role: PromptRole;
+  depth?: number;
 }
 
 export type AgentPromptMode = 'append' | 'replace';
@@ -135,6 +151,8 @@ export function normalizeAgentPromptConfig(raw: unknown): AgentPromptConfig {
     const candidate = block as Record<string, Primitive | undefined> & {
       separator?: unknown;
       enabled?: unknown;
+      role?: unknown;
+      depth?: unknown;
     };
     const fallbackId = `block-${index + 1}`;
     const id = sanitizeId(candidate.id, fallbackId);
@@ -145,6 +163,8 @@ export function normalizeAgentPromptConfig(raw: unknown): AgentPromptConfig {
     const template = sanitizeTemplate(candidate.template);
     const enabled = candidate.enabled === false ? false : true;
     const separator = sanitizeSeparator(candidate.separator);
+    const role = sanitizeRole(candidate.role);
+    const depth = sanitizeDepth(candidate.depth);
     let order = Number(candidate.order);
     if (!Number.isFinite(order)) {
       order = index;
@@ -157,6 +177,8 @@ export function normalizeAgentPromptConfig(raw: unknown): AgentPromptConfig {
       enabled,
       separator,
       order,
+      role,
+      depth,
     });
   });
 
@@ -246,6 +268,8 @@ export function buildPromptPartsFromConfig<Context>(
       template: block.template,
       priority: 200 + index,
       separator: block.separator,
+      role: block.role,
+      depth: block.depth,
     }));
 
     return {
@@ -268,6 +292,8 @@ export function buildPromptPartsFromConfig<Context>(
     template: block.template,
     priority: 200 + index,
     separator: block.separator,
+    role: block.role,
+    depth: block.depth,
   }));
 
   return {
@@ -284,6 +310,7 @@ export function createEmptyPromptBlock(): AgentPromptBlock {
     template: '',
     enabled: true,
     order: Date.now(),
+    role: 'system',
   };
 }
 

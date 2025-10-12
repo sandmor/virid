@@ -1,6 +1,13 @@
 import type { Geo } from '@vercel/functions';
 import type { ArtifactKind } from '@/components/artifact';
-import { PromptTemplateEngine, type PromptPart } from './prompt-engine';
+import {
+  PromptTemplateEngine,
+  type PromptPart,
+  type PromptCompositionResult,
+  type RenderedPromptSegment,
+  type PromptRole,
+  joinSegments,
+} from './prompt-engine';
 
 export type RequestHints = {
   latitude: Geo['latitude'];
@@ -26,6 +33,21 @@ export type SystemPromptOptions = SystemPromptContext & {
   parts?: PromptPart<SystemPromptContext>[];
   joiner?: string;
 };
+
+export interface PromptMessage {
+  id: string;
+  role: PromptRole;
+  content: string;
+  depth?: number;
+  order: number;
+}
+
+export interface SystemPromptComposition {
+  system: string;
+  messages: PromptMessage[];
+  segments: RenderedPromptSegment[];
+  joiner: string;
+}
 
 const PINNED_MEMORY_CHAR_LIMIT = 20_000;
 
@@ -153,6 +175,67 @@ export function getDefaultSystemPromptParts() {
   return defaultSystemPromptParts.map((part) => ({ ...part }));
 }
 
+function segregateSegments(composition: PromptCompositionResult): {
+  primarySystemSegments: RenderedPromptSegment[];
+  auxiliarySegments: RenderedPromptSegment[];
+} {
+  const primarySystemSegments: RenderedPromptSegment[] = [];
+  const auxiliarySegments: RenderedPromptSegment[] = [];
+
+  for (const segment of composition.segments) {
+    const depth = segment.depth;
+    if (segment.role === 'system' && (depth === undefined || depth === null)) {
+      primarySystemSegments.push(segment);
+    } else {
+      auxiliarySegments.push(segment);
+    }
+  }
+
+  return { primarySystemSegments, auxiliarySegments };
+}
+
+function groupSegmentsIntoMessages(
+  segments: RenderedPromptSegment[],
+  joiner: string
+): PromptMessage[] {
+  if (!segments.length) return [];
+
+  const grouped: PromptMessage[] = [];
+
+  segments.forEach((segment, index) => {
+    const depth = Number.isFinite(segment.depth)
+      ? Math.max(0, Math.floor(segment.depth as number))
+      : undefined;
+    const suffix =
+      segment.separator ?? (index === segments.length - 1 ? '' : joiner);
+    const chunk = `${segment.content}${suffix}`;
+    const previous = grouped.at(-1);
+
+    if (
+      previous &&
+      previous.role === segment.role &&
+      previous.depth === depth
+    ) {
+      previous.content = `${previous.content}${chunk}`;
+    } else {
+      grouped.push({
+        id: segment.id,
+        role: segment.role,
+        content: chunk,
+        depth,
+        order: grouped.length,
+      });
+    }
+  });
+
+  return grouped
+    .map((message) => ({
+      ...message,
+      content: message.content.trim(),
+    }))
+    .filter((message) => message.content.length > 0);
+}
+
 export const systemPrompt = ({
   requestHints,
   pinnedEntries,
@@ -160,7 +243,7 @@ export const systemPrompt = ({
   variables,
   parts,
   joiner,
-}: SystemPromptOptions) => {
+}: SystemPromptOptions): SystemPromptComposition => {
   const context: SystemPromptContext = {
     requestHints,
     pinnedEntries,
@@ -168,30 +251,49 @@ export const systemPrompt = ({
     variables,
   };
 
+  let composition: PromptCompositionResult;
+
   if (parts) {
     const customEngine = new PromptTemplateEngine<SystemPromptContext>(parts, {
       joiner,
     });
-    return customEngine.compose(context);
-  }
-
-  if (joiner) {
+    composition = customEngine.compose(context);
+  } else if (joiner) {
     const customEngine = new PromptTemplateEngine<SystemPromptContext>(
       defaultSystemPromptParts,
       { joiner }
     );
-    return customEngine.compose(context);
+    composition = customEngine.compose(context);
+  } else {
+    composition = defaultSystemPromptEngine.compose(context);
   }
 
-  return defaultSystemPromptEngine.compose(context);
+  const { primarySystemSegments, auxiliarySegments } =
+    segregateSegments(composition);
+
+  const system = joinSegments(primarySystemSegments, composition.joiner);
+  const messages = groupSegmentsIntoMessages(
+    auxiliarySegments,
+    composition.joiner
+  );
+
+  return {
+    system,
+    messages,
+    segments: composition.segments,
+    joiner: composition.joiner,
+  };
 };
 
-export const getRequestPromptFromHints = (requestHints: RequestHints) =>
-  requestPromptEngine.compose({
+export const getRequestPromptFromHints = (requestHints: RequestHints) => {
+  const composition = requestPromptEngine.compose({
     requestHints,
     allowedTools: undefined,
     pinnedEntries: undefined,
   });
+
+  return joinSegments(composition.segments, composition.joiner);
+};
 
 export const codePrompt = `
 You are a Python code generator that creates self-contained, executable code snippets. When writing code:

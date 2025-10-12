@@ -25,6 +25,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import {
   cloneAgentPromptConfig,
@@ -42,6 +50,12 @@ interface AgentPromptEditorProps {
 const MODE_LABELS: Record<AgentPromptConfig['mode'], string> = {
   append: 'Append to workspace defaults',
   replace: 'Replace workspace defaults',
+};
+
+const ROLE_LABELS: Record<AgentPromptBlock['role'], string> = {
+  system: 'System',
+  user: 'User',
+  assistant: 'Assistant',
 };
 
 export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
@@ -231,7 +245,9 @@ export function AgentPromptEditor({ value, onChange }: AgentPromptEditorProps) {
             <h3 className="text-base font-semibold">Prompt blocks</h3>
             <p className="text-sm text-muted-foreground">
               Blocks render sequentially. Use <code>{'{{variables.key}}'}</code>
-              to reference variable values.
+              to reference variable values or{' '}
+              <code>{'{{datetime "MMMM dd, yyyy hh:mm:ss"}}'}</code> to insert
+              the current time.
             </p>
           </div>
           <Button type="button" variant="outline" onClick={handleAddBlock}>
@@ -471,6 +487,12 @@ function SortablePromptBlockCard({
       ? `${previewSource.slice(0, 140)}…`
       : previewSource
     : 'Empty block';
+  const depthDescriptor =
+    block.depth === undefined
+      ? 'auto'
+      : block.depth === 0
+        ? 'append'
+        : block.depth;
 
   return (
     <motion.div
@@ -492,13 +514,13 @@ function SortablePromptBlockCard({
       >
         <CardHeader className="space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
+            <div className="flex min-w-0 items-start gap-2">
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
                 className={cn(
-                  'cursor-grab text-muted-foreground hover:text-foreground',
+                  'mt-1 cursor-grab text-muted-foreground hover:text-foreground',
                   isDragging && 'cursor-grabbing'
                 )}
                 aria-label="Reorder block"
@@ -507,12 +529,32 @@ function SortablePromptBlockCard({
               >
                 <GripVertical className="h-4 w-4" />
               </Button>
-              <CardTitle className="truncate text-base">
-                {block.title || `Block ${index + 1}`}
-              </CardTitle>
-              {!block.enabled && <Badge variant="secondary">Disabled</Badge>}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="truncate text-base">
+                    {block.title || `Block ${index + 1}`}
+                  </CardTitle>
+                  {!block.enabled && (
+                    <Badge variant="secondary">Disabled</Badge>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                  <span>{ROLE_LABELS[block.role]}</span>
+                  <span>· Depth {depthDescriptor}</span>
+                </div>
+              </div>
             </div>
             <div className="flex items-center gap-1">
+              <Switch
+                id={`block-enabled-${block.id}`}
+                checked={block.enabled}
+                onCheckedChange={(checked: boolean) =>
+                  onChange({
+                    enabled: Boolean(checked),
+                  })
+                }
+                aria-label={block.enabled ? 'Disable block' : 'Enable block'}
+              />
               <Button
                 type="button"
                 size="icon"
@@ -543,6 +585,9 @@ function SortablePromptBlockCard({
               layout="position"
               className="truncate text-sm text-muted-foreground"
             >
+              <span className="font-medium text-muted-foreground">
+                {ROLE_LABELS[block.role]} · Depth {depthDescriptor} ·{' '}
+              </span>
               {preview}
             </motion.p>
           )}
@@ -557,7 +602,7 @@ function SortablePromptBlockCard({
               transition={{ duration: 0.2, ease: 'easeInOut' }}
             >
               <CardContent className="space-y-4 border-t border-border/60 pt-6">
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 lg:grid-cols-3">
                   <div className="space-y-1">
                     <Label htmlFor={`block-title-${block.id}`}>Title</Label>
                     <Input
@@ -571,22 +616,55 @@ function SortablePromptBlockCard({
                       placeholder="e.g. Memory context"
                     />
                   </div>
-                  <div className="flex items-center gap-2 pt-5">
-                    <Checkbox
-                      id={`block-enabled-${block.id}`}
-                      checked={block.enabled}
-                      onCheckedChange={(checked) =>
+                  <div className="space-y-1">
+                    <Label htmlFor={`block-role-${block.id}`}>Role</Label>
+                    <Select
+                      value={block.role}
+                      onValueChange={(value) =>
                         onChange({
-                          enabled: Boolean(checked),
+                          role: value as AgentPromptBlock['role'],
                         })
                       }
-                    />
-                    <Label
-                      htmlFor={`block-enabled-${block.id}`}
-                      className="text-sm"
                     >
-                      Enabled
-                    </Label>
+                      <SelectTrigger id={`block-role-${block.id}`}>
+                        <SelectValue placeholder="System" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="system">System</SelectItem>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="assistant">Assistant</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor={`block-depth-${block.id}`}>Depth</Label>
+                    <Input
+                      id={`block-depth-${block.id}`}
+                      type="number"
+                      min={0}
+                      value={typeof block.depth === 'number' ? block.depth : ''}
+                      onChange={(event) => {
+                        const raw = event.target.value;
+                        if (raw === '') {
+                          onChange({ depth: undefined });
+                          return;
+                        }
+                        const numeric = Number(raw);
+                        if (!Number.isFinite(numeric)) {
+                          onChange({ depth: undefined });
+                          return;
+                        }
+                        const normalized = Math.max(0, Math.floor(numeric));
+                        onChange({ depth: normalized });
+                      }}
+                      placeholder="Auto"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Overrides where the message inserts in the chat history.
+                      Depth 0 appends after the last message; higher values
+                      insert nearer the top. Leave blank to append
+                      automatically.
+                    </p>
                   </div>
                 </div>
                 <div className="space-y-1">

@@ -4,6 +4,7 @@ import {
   getRequestPromptFromHints,
   getDefaultSystemPromptParts,
 } from '../prompts';
+import { renderTemplate } from '../prompt-engine';
 import type { RequestHints } from '../prompts';
 import {
   buildPromptPartsFromConfig,
@@ -19,10 +20,12 @@ const baseRequestHints: RequestHints = {
 
 describe('systemPrompt', () => {
   it('includes artifacts guidance when artifact tools are enabled', () => {
-    const prompt = systemPrompt({
+    const composition = systemPrompt({
       requestHints: baseRequestHints,
       allowedTools: ['createDocument', 'updateDocument'],
     });
+
+    const prompt = composition.system;
 
     expect(prompt).toContain(
       'Artifacts workspace (side-by-side document view)'
@@ -30,10 +33,12 @@ describe('systemPrompt', () => {
   });
 
   it('omits artifacts guidance when artifact tools are disabled', () => {
-    const prompt = systemPrompt({
+    const composition = systemPrompt({
       requestHints: baseRequestHints,
       allowedTools: [],
     });
+
+    const prompt = composition.system;
 
     expect(prompt).not.toContain(
       'Artifacts workspace (side-by-side document view)'
@@ -41,27 +46,31 @@ describe('systemPrompt', () => {
   });
 
   it('includes archive guidance only when archive tools are allowed', () => {
-    const withoutArchive = systemPrompt({
+    const withoutArchiveComposition = systemPrompt({
       requestHints: baseRequestHints,
       allowedTools: [],
     });
 
-    const withArchive = systemPrompt({
+    const withArchiveComposition = systemPrompt({
       requestHints: baseRequestHints,
       allowedTools: ['archiveReadEntry'],
     });
 
-    expect(withoutArchive).not.toContain(
+    expect(withoutArchiveComposition.system).not.toContain(
       'Archive tools (long-form knowledge base)'
     );
-    expect(withArchive).toContain('Archive tools (long-form knowledge base)');
+    expect(withArchiveComposition.system).toContain(
+      'Archive tools (long-form knowledge base)'
+    );
   });
 
   it('always includes formatting guidance', () => {
-    const prompt = systemPrompt({
+    const composition = systemPrompt({
       requestHints: baseRequestHints,
       allowedTools: [],
     });
+
+    const prompt = composition.system;
 
     expect(prompt).toContain('Render math with KaTeX syntax');
     expect(prompt).toContain('```mermaid');
@@ -69,7 +78,7 @@ describe('systemPrompt', () => {
 
   it('adds pinned entries respecting size guard', () => {
     const longBody = 'a'.repeat(21_000);
-    const prompt = systemPrompt({
+    const composition = systemPrompt({
       requestHints: baseRequestHints,
       allowedTools: [],
       pinnedEntries: [
@@ -80,6 +89,8 @@ describe('systemPrompt', () => {
         },
       ],
     });
+
+    const prompt = composition.system;
 
     expect(prompt).toContain('=== alpha — Project Alpha ===');
     expect(prompt).toContain('a'.repeat(20_000));
@@ -99,6 +110,7 @@ describe('systemPrompt', () => {
             template: 'Project context: {{variables.project}}',
             enabled: true,
             order: 0,
+            role: 'system',
           },
         ],
         variables: [
@@ -112,13 +124,15 @@ describe('systemPrompt', () => {
       baseParts
     );
 
-    const prompt = systemPrompt({
+    const composition = systemPrompt({
       requestHints: baseRequestHints,
       allowedTools: ['createDocument', 'updateDocument'],
       variables: getAgentPromptVariableMap(normalized),
       parts,
       joiner,
     });
+
+    const prompt = composition.system;
 
     expect(prompt).toContain('Artifacts workspace');
     expect(prompt).toContain('Project context: Aurora');
@@ -137,6 +151,7 @@ describe('systemPrompt', () => {
             template: 'Minimal prompt for {{variables.role}}',
             enabled: true,
             order: 0,
+            role: 'system',
           },
         ],
         variables: [
@@ -150,7 +165,7 @@ describe('systemPrompt', () => {
       getDefaultSystemPromptParts()
     );
 
-    const prompt = systemPrompt({
+    const composition = systemPrompt({
       requestHints: baseRequestHints,
       allowedTools: [],
       variables: getAgentPromptVariableMap(normalized),
@@ -158,9 +173,55 @@ describe('systemPrompt', () => {
       joiner,
     });
 
+    const prompt = composition.system;
+
     expect(prompt).toContain('Minimal prompt for analysis');
     expect(prompt).not.toContain('Artifacts workspace');
     expect(prompt).not.toContain('You are a friendly');
+  });
+
+  it('produces additional messages when blocks target non-system roles', () => {
+    const baseParts = getDefaultSystemPromptParts();
+    const { parts, joiner, normalized } = buildPromptPartsFromConfig(
+      {
+        mode: 'append',
+        joiner: '\n',
+        blocks: [
+          {
+            id: 'assistant-prelude',
+            title: 'Assistant prelude',
+            template: 'Remember to stay concise.',
+            enabled: true,
+            order: 0,
+            role: 'assistant',
+            depth: 1,
+          },
+        ],
+        variables: [],
+      },
+      baseParts
+    );
+
+    const composition = systemPrompt({
+      requestHints: baseRequestHints,
+      allowedTools: [],
+      variables: getAgentPromptVariableMap(normalized),
+      parts,
+      joiner,
+    });
+
+    expect(composition.system).toContain('You are a friendly');
+    if (composition.messages.length !== 1) {
+      throw new Error('Expected a single auxiliary prompt message');
+    }
+    const assistantPrelude = composition.messages[0];
+    if (assistantPrelude.role !== 'assistant') {
+      throw new Error('Expected auxiliary message to target assistant role');
+    }
+    expect(assistantPrelude.content).toContain('Remember to stay concise.');
+    if (assistantPrelude.depth !== 1) {
+      throw new Error('Expected auxiliary message depth to equal 1');
+    }
   });
 });
 
@@ -177,5 +238,13 @@ describe('getRequestPromptFromHints', () => {
     expect(prompt).toContain('- lon: undefined');
     expect(prompt).toContain('- city: Madrid');
     expect(prompt).toContain('- country: undefined');
+  });
+});
+
+describe('renderTemplate', () => {
+  it('supports datetime insertables', () => {
+    const result = renderTemplate('Timestamp: {{datetime "yyyy"}}', {});
+    const currentYear = String(new Date().getFullYear());
+    expect(result).toContain(currentYear);
   });
 });

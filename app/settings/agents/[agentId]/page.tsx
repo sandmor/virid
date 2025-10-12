@@ -9,14 +9,14 @@ import type { ChatSettings } from '@/lib/db/schema';
 export default async function AgentDetailPage({
   params,
 }: {
-  params: { agentId: string };
+  params: Promise<{ agentId: string }>;
 }) {
   const session = await getAppSession();
   if (!session?.user) {
     redirect('/login');
   }
 
-  const { agentId } = params;
+  const { agentId } = await params;
   if (!agentId) {
     notFound();
   }

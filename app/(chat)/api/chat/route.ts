@@ -7,6 +7,7 @@ import {
   stepCountIs,
   streamText,
 } from 'ai';
+import type { CoreMessage } from 'ai';
 import { unstable_cache as cache } from 'next/cache';
 import { after } from 'next/server';
 import { getAppSession } from '@/lib/auth/session';
@@ -494,7 +495,65 @@ export async function POST(request: Request) {
           promptOptions.joiner = promptResolution.joiner;
         }
 
-        const composedSystemPrompt = systemPrompt(promptOptions);
+        const promptComposition = systemPrompt(promptOptions);
+        const composedSystemPrompt = promptComposition.system;
+
+        let mergedModelMessages: CoreMessage[] = [...modelMessages];
+
+        if (promptComposition.messages.length > 0) {
+          const baseMessageCount = modelMessages.length;
+          const insertsByIndex = new Map<number, CoreMessage[]>();
+          const appendedMessages: CoreMessage[] = [];
+
+          for (const message of promptComposition.messages) {
+            const normalizedDepth =
+              typeof message.depth === 'number' &&
+              Number.isFinite(message.depth)
+                ? Math.max(0, Math.floor(message.depth))
+                : 0;
+
+            const coreMessage: CoreMessage = {
+              role: message.role,
+              content: message.content,
+            };
+
+            if (normalizedDepth === 0) {
+              appendedMessages.push(coreMessage);
+              continue;
+            }
+
+            const targetIndex = Math.max(0, baseMessageCount - normalizedDepth);
+            const bucket = insertsByIndex.get(targetIndex);
+            if (bucket) {
+              bucket.push(coreMessage);
+            } else {
+              insertsByIndex.set(targetIndex, [coreMessage]);
+            }
+          }
+
+          const merged: CoreMessage[] = [];
+
+          if (baseMessageCount === 0) {
+            const bucket = insertsByIndex.get(0);
+            if (bucket) {
+              merged.push(...bucket);
+            }
+          } else {
+            for (let index = 0; index < baseMessageCount; index += 1) {
+              const bucket = insertsByIndex.get(index);
+              if (bucket) {
+                merged.push(...bucket);
+              }
+              merged.push(modelMessages[index]);
+            }
+          }
+
+          if (appendedMessages.length > 0) {
+            merged.push(...appendedMessages);
+          }
+
+          mergedModelMessages = merged;
+        }
 
         const artifactContext: ArtifactToolContext = {
           modelId: selectedChatModel,
@@ -503,7 +562,7 @@ export async function POST(request: Request) {
             ? providerOptions
             : undefined,
           systemPrompt: composedSystemPrompt,
-          messages: modelMessages,
+          messages: mergedModelMessages,
           reasoningEffort: effectiveReasoningEffort,
         };
 
@@ -566,10 +625,15 @@ export async function POST(request: Request) {
           });
         }
 
+        console.log(
+          'Merged Model Messages:',
+          JSON.stringify(mergedModelMessages, null, 2)
+        );
+
         const result = streamText({
           model,
           system: composedSystemPrompt,
-          messages: modelMessages,
+          messages: mergedModelMessages,
           stopWhen: stepCountIs(20),
           experimental_activeTools: allowedToolIds,
           experimental_transform: smoothStream({ chunking: 'word' }),
