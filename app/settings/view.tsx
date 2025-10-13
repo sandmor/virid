@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArchiveExplorer } from '../profile/view'; // reuse existing implementation
+import { ArchiveExplorer } from '@/components/archive/archive-explorer';
 import { AgentsManagement } from '@/components/agents-management';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
