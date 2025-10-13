@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { AnimatedButtonLabel } from '@/components/ui/animated-button';
+import { useFeedbackState } from '@/hooks/use-feedback-state';
 import {
   Search,
   Plus,
@@ -42,6 +44,7 @@ export function ArchiveExplorer() {
     'idle' | 'created' | 'updated' | 'error'
   >('idle');
   const statusTimerRef = useRef<number | null>(null);
+  const [saveFeedback, setSaveFeedback] = useFeedbackState();
 
   const { data: selected } = useArchiveEntry(current);
   const createMutation = useCreateArchiveEntry();
@@ -152,6 +155,7 @@ export function ArchiveExplorer() {
 
   const handleUpdate = editForm.handleSubmit(async (values) => {
     if (!current) return;
+    setSaveFeedback('loading');
     try {
       const original = selected?.tags || [];
       const addTags = values.tags.filter((t) => !original.includes(t));
@@ -166,9 +170,11 @@ export function ArchiveExplorer() {
       toast.success('Entry updated');
       setOpenEdit(false);
       showStatus('updated');
+      setSaveFeedback('success', 1600);
     } catch (e: any) {
       toast.error(e?.message || 'Failed to update entry');
       showStatus('error', 2400);
+      setSaveFeedback('error', 2200);
     }
   });
 
@@ -508,8 +514,18 @@ export function ArchiveExplorer() {
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={updateMutation.isPending}>
-                      {updateMutation.isPending ? 'Saving…' : 'Save'}
+                    <Button
+                      type="submit"
+                      disabled={updateMutation.isPending}
+                      className="relative"
+                    >
+                      <AnimatedButtonLabel
+                        state={saveFeedback}
+                        idleLabel="Save"
+                        loadingLabel="Saving…"
+                        successLabel="Saved"
+                        errorLabel="Error"
+                      />
                     </Button>
                   </DialogFooter>
                 </form>

@@ -245,6 +245,11 @@ exports.Prisma.ModelScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SettingScalarFieldEnum = {
+  id: 'id',
+  value: 'value'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -290,7 +295,8 @@ exports.Prisma.ModelName = {
   ArchiveEntry: 'ArchiveEntry',
   ChatPinnedArchiveEntry: 'ChatPinnedArchiveEntry',
   ArchiveLink: 'ArchiveLink',
-  Model: 'Model'
+  Model: 'Model',
+  Setting: 'Setting'
 };
 
 /**

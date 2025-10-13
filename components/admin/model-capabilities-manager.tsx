@@ -26,6 +26,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { AnimatedButtonLabel } from '@/components/ui/animated-button';
+import { useFeedbackState } from '@/hooks/use-feedback-state';
 import {
   Dialog,
   DialogContent,
@@ -251,6 +253,7 @@ export function ModelCapabilitiesManager({
   }>({ name: '', supportsTools: false, supportedFormats: [], pricing: null });
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [saveFeedback, setSaveFeedback] = useFeedbackState();
   const statusTimeoutRef = useRef<number | null>(null);
 
   const modelsByProvider = useMemo(() => {
@@ -518,6 +521,7 @@ export function ModelCapabilitiesManager({
     if (!activeModel) return;
 
     setSaving(true);
+    setSaveFeedback('loading');
     setStatusMessage(null);
 
     try {
@@ -546,11 +550,13 @@ export function ModelCapabilitiesManager({
           message: `Updated capabilities for ${data.model?.name ?? activeModel.name}`,
         });
         closeDialog();
+        setSaveFeedback('success', 1600);
       } else {
         setStatusMessage({
           type: 'error',
           message: data.error || 'Failed to update model capabilities',
         });
+        setSaveFeedback('error', 2200);
       }
     } catch (error) {
       setStatusMessage({
@@ -560,6 +566,7 @@ export function ModelCapabilitiesManager({
             ? error.message
             : 'Network error while saving model',
       });
+      setSaveFeedback('error', 2200);
     } finally {
       setSaving(false);
     }
@@ -1260,10 +1267,15 @@ export function ModelCapabilitiesManager({
             <Button
               onClick={handleSaveEdit}
               disabled={saving}
-              className="gap-2"
+              className="relative gap-2"
             >
-              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              Save changes
+              <AnimatedButtonLabel
+                state={saveFeedback}
+                idleLabel="Save changes"
+                loadingLabel="Saving…"
+                successLabel="Saved"
+                errorLabel="Error"
+              />
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,4 +1,4 @@
-import { tool, type CoreMessage, type UIMessageStreamWriter } from 'ai';
+import { tool, type ModelMessage, type UIMessageStreamWriter } from 'ai';
 import type { AppSession } from '@/lib/auth/session';
 import { z } from 'zod';
 import {
@@ -57,7 +57,7 @@ export const createDocument = ({
       });
 
       const invocationMessages =
-        (runtime?.messages as CoreMessage[]) ?? undefined;
+        (runtime?.messages as ModelMessage[]) ?? undefined;
       const assistantPrelude = extractAssistantPrelude(invocationMessages);
 
       const documentHandler = documentHandlersByArtifactKind.find(
@@ -99,7 +99,9 @@ export const createDocument = ({
     },
   });
 
-function extractAssistantPrelude(messages?: CoreMessage[]): string | undefined {
+function extractAssistantPrelude(
+  messages?: ModelMessage[]
+): string | undefined {
   if (!messages || messages.length === 0) {
     return undefined;
   }

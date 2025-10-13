@@ -232,3 +232,11 @@ model Model {
   @@index([provider])
   @@map("Model")
 }
+
+// Global application settings
+model Setting {
+  id    String @id @db.VarChar(128) // Setting key
+  value String @db.Text // Setting value as string (JSON serialized for complex types)
+
+  @@map("Setting")
+}

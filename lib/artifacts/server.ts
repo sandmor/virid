@@ -1,4 +1,4 @@
-import type { CoreMessage, UIMessageStreamWriter } from 'ai';
+import type { ModelMessage, UIMessageStreamWriter } from 'ai';
 import type { AppSession } from '@/lib/auth/session';
 import { codeDocumentHandler } from '@/artifacts/code/server';
 import { sheetDocumentHandler } from '@/artifacts/sheet/server';
@@ -15,7 +15,7 @@ export type ArtifactToolContext = {
   model?: unknown;
   providerOptions?: Record<string, any>;
   systemPrompt?: string;
-  messages?: CoreMessage[];
+  messages?: ModelMessage[];
   reasoningEffort?: 'low' | 'medium' | 'high';
 };
 
@@ -40,7 +40,7 @@ export type CreateDocumentCallbackProps = {
   session: AppSession;
   context: ArtifactToolContext;
   requestedLanguage?: CodeLanguage;
-  invocationMessages?: CoreMessage[];
+  invocationMessages?: ModelMessage[];
   assistantPrelude?: string;
 };
 
@@ -50,7 +50,7 @@ export type UpdateDocumentCallbackProps = {
   dataStream: UIMessageStreamWriter<ChatMessage>;
   session: AppSession;
   context: ArtifactToolContext;
-  invocationMessages?: CoreMessage[];
+  invocationMessages?: ModelMessage[];
   assistantPrelude?: string;
 };
 

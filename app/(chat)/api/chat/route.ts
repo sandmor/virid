@@ -7,7 +7,7 @@ import {
   stepCountIs,
   streamText,
 } from 'ai';
-import type { CoreMessage } from 'ai';
+import type { ModelMessage } from 'ai';
 import { unstable_cache as cache } from 'next/cache';
 import { after } from 'next/server';
 import { getAppSession } from '@/lib/auth/session';
@@ -71,13 +71,10 @@ import { convertToUIMessages, generateUUID } from '@/lib/utils';
 import { generateTitleFromChatHistory } from '../../actions';
 import { updateChatTitleById } from '@/lib/db/queries';
 import { ZodError } from 'zod';
-import {
-  type PostRequestBody,
-  postRequestBodySchema,
-  MAX_TEXT_PART_LENGTH,
-} from './schema';
+import { type PostRequestBody, createPostRequestBodySchema } from './schema';
 import { prisma } from '@/lib/db/prisma';
 import { getModelCapabilities } from '@/lib/ai/model-capabilities';
+import { getMaxMessageLength } from '@/lib/settings';
 
 export const maxDuration = 300;
 
@@ -124,10 +121,12 @@ export async function POST(request: Request) {
 
   try {
     const json = await request.json();
-    requestBody = postRequestBodySchema.parse(json);
+    // Use dynamic schema for validation with current settings
+    const dynamicSchema = await createPostRequestBodySchema();
+    requestBody = dynamicSchema.parse(json);
   } catch (error) {
     if (error instanceof ZodError) {
-      const friendlyMessage = formatChatValidationError(error);
+      const friendlyMessage = await formatChatValidationError(error);
       const err = new ChatSDKError('bad_request:api', friendlyMessage);
       return err.toResponse();
     }
@@ -498,12 +497,12 @@ export async function POST(request: Request) {
         const promptComposition = systemPrompt(promptOptions);
         const composedSystemPrompt = promptComposition.system;
 
-        let mergedModelMessages: CoreMessage[] = [...modelMessages];
+        let mergedModelMessages: ModelMessage[] = [...modelMessages];
 
         if (promptComposition.messages.length > 0) {
           const baseMessageCount = modelMessages.length;
-          const insertsByIndex = new Map<number, CoreMessage[]>();
-          const appendedMessages: CoreMessage[] = [];
+          const insertsByIndex = new Map<number, ModelMessage[]>();
+          const appendedMessages: ModelMessage[] = [];
 
           for (const message of promptComposition.messages) {
             const normalizedDepth =
@@ -512,26 +511,26 @@ export async function POST(request: Request) {
                 ? Math.max(0, Math.floor(message.depth))
                 : 0;
 
-            const coreMessage: CoreMessage = {
+            const modelMessage: ModelMessage = {
               role: message.role,
               content: message.content,
             };
 
             if (normalizedDepth === 0) {
-              appendedMessages.push(coreMessage);
+              appendedMessages.push(modelMessage);
               continue;
             }
 
             const targetIndex = Math.max(0, baseMessageCount - normalizedDepth);
             const bucket = insertsByIndex.get(targetIndex);
             if (bucket) {
-              bucket.push(coreMessage);
+              bucket.push(modelMessage);
             } else {
-              insertsByIndex.set(targetIndex, [coreMessage]);
+              insertsByIndex.set(targetIndex, [modelMessage]);
             }
           }
 
-          const merged: CoreMessage[] = [];
+          const merged: ModelMessage[] = [];
 
           if (baseMessageCount === 0) {
             const bucket = insertsByIndex.get(0);
@@ -768,7 +767,7 @@ export async function POST(request: Request) {
   }
 }
 
-function formatChatValidationError(error: ZodError): string {
+async function formatChatValidationError(error: ZodError): Promise<string> {
   const issue = error.issues[0];
   if (!issue) {
     return 'The chat request is missing required fields. Please try again.';
@@ -779,10 +778,12 @@ function formatChatValidationError(error: ZodError): string {
   if (
     issue.code === 'too_big' &&
     typeof issue.maximum === 'number' &&
-    issue.maximum === MAX_TEXT_PART_LENGTH &&
     issue.path.includes('text')
   ) {
-    return `Your message is too long. Please shorten it to ${MAX_TEXT_PART_LENGTH.toLocaleString()} characters or fewer.`;
+    const maxLength = await getMaxMessageLength();
+    if (issue.maximum === maxLength) {
+      return `Your message is too long. Please shorten it to ${maxLength.toLocaleString()} characters or fewer.`;
+    }
   }
 
   if (issue.code === 'invalid_type') {

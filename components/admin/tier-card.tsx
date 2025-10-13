@@ -7,6 +7,7 @@ import { CheckCircle2, CircleAlert, Loader2 } from 'lucide-react';
 import { ModelPickerFormFields } from '@/components/admin/model-picker-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AnimatedButtonLabel } from '@/components/ui/animated-button';
 import type { TierRecord } from '@/lib/ai/tiers';
 
 export type TierActionState = {
@@ -135,32 +136,21 @@ export function TierCard({ id, tier, action }: TierCardProps) {
             transition={{ type: 'spring', stiffness: 380, damping: 25 }}
             className="flex items-center gap-2"
           >
-            <AnimatePresence initial={false} mode="popLayout">
-              {isPending ? (
-                <motion.span
-                  key="saving"
-                  className="flex items-center gap-2"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.18 }}
-                >
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving…
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="idle"
-                  className="flex items-center gap-2"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.18 }}
-                >
-                  Save {id}
-                </motion.span>
-              )}
-            </AnimatePresence>
+            <AnimatedButtonLabel
+              state={
+                isPending
+                  ? 'loading'
+                  : showSuccess
+                    ? 'success'
+                    : state.status === 'error'
+                      ? 'error'
+                      : 'idle'
+              }
+              idleLabel={`Save ${id}`}
+              loadingLabel="Saving…"
+              successLabel="Saved"
+              errorLabel="Error"
+            />
           </motion.button>
         </Button>
 

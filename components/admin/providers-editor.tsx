@@ -15,6 +15,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { toast } from '@/components/toast';
+import { AnimatedButtonLabel } from '@/components/ui/animated-button';
 import { SUPPORTED_PROVIDERS, displayProviderName } from '@/lib/ai/registry';
 
 type FeedbackState = 'idle' | 'saved' | 'deleted' | 'error';
@@ -255,13 +256,20 @@ export function ProvidersEditor({
                               }}
                               className="flex items-center gap-2"
                             >
-                              <ButtonLabel
-                                state={status}
-                                isBusy={isSaving}
-                                busyLabel="Saving…"
+                              <AnimatedButtonLabel
+                                state={
+                                  isSaving
+                                    ? 'loading'
+                                    : status === 'saved'
+                                      ? 'success'
+                                      : status === 'error'
+                                        ? 'error'
+                                        : 'idle'
+                                }
                                 idleLabel="Save"
+                                loadingLabel="Saving…"
                                 successLabel="Saved"
-                                successStates={['saved']}
+                                errorLabel="Error"
                               />
                             </motion.button>
                           </Button>
@@ -281,13 +289,20 @@ export function ProvidersEditor({
                               }}
                               className="flex items-center gap-2"
                             >
-                              <ButtonLabel
-                                state={status === 'saved' ? 'idle' : status}
-                                isBusy={isDeleting}
-                                busyLabel="Removing…"
+                              <AnimatedButtonLabel
+                                state={
+                                  isDeleting
+                                    ? 'loading'
+                                    : status === 'deleted'
+                                      ? 'success'
+                                      : status === 'error'
+                                        ? 'error'
+                                        : 'idle'
+                                }
                                 idleLabel="Delete"
+                                loadingLabel="Removing…"
                                 successLabel="Removed"
-                                successStates={['deleted']}
+                                errorLabel="Error"
                               />
                             </motion.button>
                           </Button>
@@ -322,64 +337,5 @@ export function ProvidersEditor({
       })}
       <Separator />
     </div>
-  );
-}
-
-function ButtonLabel({
-  state,
-  isBusy,
-  busyLabel,
-  idleLabel,
-  successLabel,
-  successStates = ['saved', 'deleted'],
-}: {
-  state: FeedbackState;
-  isBusy: boolean;
-  busyLabel: string;
-  idleLabel: string;
-  successLabel: string;
-  successStates?: FeedbackState[];
-}) {
-  const isSuccess = successStates.includes(state);
-
-  return (
-    <AnimatePresence initial={false} mode="popLayout">
-      {isBusy ? (
-        <motion.span
-          key="busy"
-          className="flex items-center gap-2"
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.18 }}
-        >
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {busyLabel}
-        </motion.span>
-      ) : isSuccess ? (
-        <motion.span
-          key="success"
-          className="flex items-center gap-2"
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.18 }}
-        >
-          <CheckCircle2 className="h-4 w-4" />
-          {successLabel}
-        </motion.span>
-      ) : (
-        <motion.span
-          key="idle"
-          className="flex items-center gap-2"
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.18 }}
-        >
-          {idleLabel}
-        </motion.span>
-      )}
-    </AnimatePresence>
   );
 }

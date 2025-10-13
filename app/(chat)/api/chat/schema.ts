@@ -1,73 +1,76 @@
 import { z } from 'zod';
-
-export const MAX_TEXT_PART_LENGTH = 16000;
-
-const textPartSchema = z.object({
-  type: z.enum(['text']),
-  text: z.string().min(1).max(MAX_TEXT_PART_LENGTH),
-});
+import { getMaxMessageLength } from '@/lib/settings';
 
 const filePartSchema = z.object({
   type: z.enum(['file']),
   mediaType: z.enum(['image/jpeg', 'image/png']),
   name: z.string().min(1).max(100),
-  url: z.string().url(),
+  url: z.url(),
 });
 
-const partSchema = z.union([textPartSchema, filePartSchema]);
+export async function createPostRequestBodySchema() {
+  const maxLength = await getMaxMessageLength();
+  const textPartSchema = z.object({
+    type: z.enum(['text']),
+    text: z.string().min(1).max(maxLength),
+  });
+  const partSchema = z.union([textPartSchema, filePartSchema]);
 
-export const postRequestBodySchema = z.object({
-  id: z.string().uuid(),
-  message: z.object({
+  return z.object({
     id: z.string().uuid(),
-    role: z.enum(['user']),
-    parts: z.array(partSchema),
-  }),
-  // Accept any composite provider:model id; entitlement check is enforced server-side.
-  // Examples: 'openai:gpt-5', 'google:gemini-2.5-pro', 'openrouter:openai/gpt-5', 'openrouter:x-ai/grok-4'
-  selectedChatModel: z
-    .string()
-    .min(3)
-    .max(200)
-    .refine((v) => v.includes(':'), {
-      message:
-        "selectedChatModel must be a composite id of the form 'provider:model'",
+    message: z.object({
+      id: z.string().uuid(),
+      role: z.enum(['user']),
+      parts: z.array(partSchema),
     }),
-  selectedVisibilityType: z.enum(['public', 'private']),
-  // Optional list of archive entry slugs to include immediately (will also be persisted if chat is new).
-  // These are additive to whatever is already pinned in the database.
-  pinnedSlugs: z
-    .array(
-      z
-        .string()
-        .min(1)
-        .max(128)
-        .regex(/^[a-zA-Z0-9._:-]+$/, {
-          message: 'Slug contains invalid characters',
-        })
-    )
-    .max(12)
-    .optional(),
-  // Optional allow list of tool ids.
-  // Semantics: omitted (undefined) => ALL tools allowed (no restriction stored)
-  //            [] => NO tools (explicit empty allow list)
-  //            ['toolA', 'toolB'] => only those tools
-  allowedTools: z
-    .array(
-      z
-        .string()
-        .min(1)
-        .max(64)
-        .regex(/^[a-zA-Z0-9_-]+$/, {
-          message: 'Tool id contains invalid characters',
-        })
-    )
-    .max(32)
-    .optional(),
-  agentId: z.string().uuid().optional(),
-  // Optional reasoning effort level (low, medium, high)
-  // Controls how much computational effort the model uses for reasoning
-  reasoningEffort: z.enum(['low', 'medium', 'high']).optional(),
-});
+    // Accept any composite provider:model id; entitlement check is enforced server-side.
+    // Examples: 'openai:gpt-5', 'google:gemini-2.5-pro', 'openrouter:openai/gpt-5', 'openrouter:x-ai/grok-4'
+    selectedChatModel: z
+      .string()
+      .min(3)
+      .max(200)
+      .refine((v) => v.includes(':'), {
+        message:
+          "selectedChatModel must be a composite id of the form 'provider:model'",
+      }),
+    selectedVisibilityType: z.enum(['public', 'private']),
+    // Optional list of archive entry slugs to include immediately (will also be persisted if chat is new).
+    // These are additive to whatever is already pinned in the database.
+    pinnedSlugs: z
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(128)
+          .regex(/^[a-zA-Z0-9._:-]+$/, {
+            message: 'Slug contains invalid characters',
+          })
+      )
+      .max(12)
+      .optional(),
+    // Optional allow list of tool ids.
+    // Semantics: omitted (undefined) => ALL tools allowed (no restriction stored)
+    //            [] => NO tools (explicit empty allow list)
+    //            ['toolA', 'toolB'] => only those tools
+    allowedTools: z
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(64)
+          .regex(/^[a-zA-Z0-9_-]+$/, {
+            message: 'Tool id contains invalid characters',
+          })
+      )
+      .max(32)
+      .optional(),
+    agentId: z.string().uuid().optional(),
+    // Optional reasoning effort level (low, medium, high)
+    // Controls how much computational effort the model uses for reasoning
+    reasoningEffort: z.enum(['low', 'medium', 'high']).optional(),
+  });
+}
 
-export type PostRequestBody = z.infer<typeof postRequestBodySchema>;
+export type PostRequestBody = z.infer<
+  Awaited<ReturnType<typeof createPostRequestBodySchema>>
+>;

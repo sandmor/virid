@@ -1,9 +1,9 @@
-import type { CoreMessage } from 'ai';
+import type { ModelMessage } from 'ai';
 
 const DEFAULT_CONTEXT_CHAR_LIMIT = 1800;
 
 export type ConversationSummaryInput = {
-  messages?: CoreMessage[];
+  messages?: ModelMessage[];
   assistantPrelude?: string;
   recentUserLimit?: number;
   charLimit?: number;
@@ -57,7 +57,7 @@ export function buildConversationSummary({
 }
 
 export function collectRecentUserTexts(
-  messages: CoreMessage[],
+  messages: ModelMessage[],
   limit: number
 ): string[] {
   const userTexts: string[] = [];
@@ -81,7 +81,7 @@ export function collectRecentUserTexts(
   return userTexts;
 }
 
-export function toPlainText(content: CoreMessage['content']): string {
+export function toPlainText(content: ModelMessage['content']): string {
   if (typeof content === 'string') {
     return content;
   }

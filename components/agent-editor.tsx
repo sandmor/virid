@@ -1,6 +1,12 @@
 'use client';
 
-import { useMemo, useState, type KeyboardEvent } from 'react';
+import {
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  type KeyboardEvent,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
@@ -17,6 +23,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { AnimatedButtonLabel } from '@/components/ui/animated-button';
 import {
   agentSettingsFromChatSettings,
   agentSettingsIsDefault,
@@ -30,6 +37,7 @@ import { CHAT_TOOL_IDS, type ChatToolId } from '@/lib/ai/tool-ids';
 import { cn } from '@/lib/utils';
 import { displayProviderName } from '@/lib/ai/registry';
 import { LogoOpenAI, LogoGoogle, LogoOpenRouter } from '@/components/icons';
+import { useFeedbackState } from '@/hooks/use-feedback-state';
 import {
   Tooltip,
   TooltipContent,
@@ -173,6 +181,7 @@ export default function AgentEditor({
 
   const isSaving = createAgent.isPending || updateAgent.isPending;
   const isDeleting = deleteAgent.isPending;
+  const [saveFeedback, setSaveFeedback] = useFeedbackState();
 
   const toggleTool = (tool: ChatToolId) => {
     setForm((prev) => {
@@ -265,6 +274,7 @@ export default function AgentEditor({
       toast.error('Agent name is required');
       return;
     }
+    setSaveFeedback('loading');
     try {
       if (mode === 'create') {
         const payload = agentSettingsToChatSettings(form.settings);
@@ -275,6 +285,7 @@ export default function AgentEditor({
         });
         toast.success('Agent created');
         router.replace(`/settings/agents/${response.agent.id}`);
+        setSaveFeedback('success', 1600);
       } else if (agent) {
         const payload = agentSettingsToChatSettings(form.settings);
         await updateAgent.mutateAsync({
@@ -286,11 +297,13 @@ export default function AgentEditor({
           },
         });
         toast.success('Agent updated');
+        setSaveFeedback('success', 1600);
       }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Failed to save agent';
       toast.error(message);
+      setSaveFeedback('error', 2200);
     }
   };
 
@@ -365,11 +378,15 @@ export default function AgentEditor({
               type="button"
               onClick={handleSave}
               disabled={isSaving || !form.name.trim()}
+              className="relative"
             >
-              {isSaving ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              {mode === 'create' ? 'Create agent' : 'Save changes'}
+              <AnimatedButtonLabel
+                state={saveFeedback}
+                idleLabel={mode === 'create' ? 'Create agent' : 'Save changes'}
+                loadingLabel={mode === 'create' ? 'Creating…' : 'Saving…'}
+                successLabel="Saved"
+                errorLabel="Error"
+              />
             </Button>
           </div>
         </div>
