@@ -7,6 +7,7 @@ import { HydrationBoundary } from '@tanstack/react-query';
 import { isAdmin } from '@/lib/auth/admin';
 import SettingsView from './view';
 import AdminSections from './AdminSections';
+import SettingsHeader from '@/components/settings-header';
 
 export const metadata: Metadata = {
   title: 'Account Settings',
@@ -72,16 +73,13 @@ export default async function SettingsPage({
   const adminContent = adminAllowed ? <AdminSections /> : null;
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="px-6 pt-6 space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Account Settings
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your knowledge archive, AI agents, and administrative
-          configuration.
-        </p>
+      <header className="px-6 pt-6">
+        <SettingsHeader
+          title="Account Settings"
+          subtitle="Manage your knowledge archive, AI agents, and administrative configuration."
+        />
       </header>
-      <div className="flex-1 flex flex-col min-h-0 px-4 pb-4">
+      <div className="flex-1 flex flex-col min-h-0 px-4 pb-4 mt-4">
         <HydrationBoundary state={dehydrated}>
           <Suspense fallback={<div className="flex-1 rounded-md border" />}>
             <SettingsView
