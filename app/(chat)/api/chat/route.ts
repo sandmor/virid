@@ -428,6 +428,7 @@ export async function POST(request: Request) {
           // OpenAI uses reasoningEffort: 'minimal' | 'low' | 'medium' | 'high'
           providerOptions.openai = {
             reasoningEffort: effectiveReasoningEffort,
+            reasoningSummary: 'detailed' as const,
           };
         } else if (provider === 'google') {
           // Google uses thinkingConfig with thinkingBudget (number of tokens)
