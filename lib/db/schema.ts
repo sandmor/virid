@@ -3,6 +3,7 @@ import type { AppUsage } from '../usage';
 import type { VisibilityType } from '@/components/visibility-selector';
 import type { ArtifactKind } from '@/components/artifact';
 import type { AgentPromptConfig } from '@/lib/agent-prompt';
+import type { ChatToolId } from '@/lib/ai/tool-ids';
 
 // Re-export Prisma model types with the same names previously used across the app
 export type User = Prisma.UserGetPayload<{}>;
@@ -16,7 +17,7 @@ export type User = Prisma.UserGetPayload<{}>;
 export interface ChatSettings {
   pinnedEntries?: string[]; // denormalized convenience cache
   tools?: {
-    allow?: string[]; // tool ids
+    allow?: ChatToolId[]; // tool ids
   };
   modelId?: string; // composite provider:model id
   reasoningEffort?: 'low' | 'medium' | 'high'; // reasoning effort level

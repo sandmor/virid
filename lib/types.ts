@@ -14,6 +14,7 @@ import type { archiveSearchEntries } from './ai/tools/archive-search-entries';
 import type { archiveApplyEdits } from './ai/tools/archive-apply-edits';
 import type { archivePinEntry } from './ai/tools/archive-pin-entry';
 import type { archiveUnpinEntry } from './ai/tools/archive-unpin-entry';
+import type { runCode } from './ai/tools/run-code';
 import type { Suggestion } from './db/schema';
 import type { AppUsage } from './usage';
 
@@ -51,6 +52,7 @@ type archiveSearchEntriesTool = InferUITool<
 type archiveApplyEditsTool = InferUITool<ReturnType<typeof archiveApplyEdits>>;
 type archivePinEntryTool = InferUITool<ReturnType<typeof archivePinEntry>>;
 type archiveUnpinEntryTool = InferUITool<ReturnType<typeof archiveUnpinEntry>>;
+type runCodeTool = InferUITool<ReturnType<typeof runCode>>;
 
 export type ChatTools = {
   getWeather: weatherTool;
@@ -66,6 +68,7 @@ export type ChatTools = {
   archiveApplyEdits: archiveApplyEditsTool;
   archivePinEntry: archivePinEntryTool;
   archiveUnpinEntry: archiveUnpinEntryTool;
+  runCode: runCodeTool;
 };
 
 export type CustomUIDataTypes = {

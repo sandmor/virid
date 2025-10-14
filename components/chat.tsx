@@ -41,6 +41,7 @@ import {
   normalizeModelId,
   normalizeReasoningEffort,
 } from '@/lib/agent-settings';
+import type { ChatToolId } from '@/lib/ai/tool-ids';
 import { Button } from './ui/button';
 import type { ChatModelOption } from '@/lib/ai/models';
 
@@ -148,13 +149,13 @@ export function Chat({
   const stagedPinnedSlugsRef = useRef<string[]>(stagedPinnedSlugs);
   // Provisional tool allow list (undefined => all, subset array => restrict)
   const [stagedAllowedTools, setStagedAllowedTools] = useState<
-    string[] | undefined
+    ChatToolId[] | undefined
   >(() =>
     normalizeAllowedTools(
       initialSettings?.tools?.allow ?? initialAgentSettings?.tools?.allow
     )
   );
-  const stagedAllowedToolsRef = useRef<string[] | undefined>(
+  const stagedAllowedToolsRef = useRef<ChatToolId[] | undefined>(
     stagedAllowedTools
   );
   // Provisional reasoning effort
@@ -801,7 +802,7 @@ export function Chat({
   }, []);
 
   const handleUpdateStagedAllowedTools = useCallback(
-    (tools: string[] | undefined) => {
+    (tools: ChatToolId[] | undefined) => {
       setStagedAllowedTools(tools);
     },
     []

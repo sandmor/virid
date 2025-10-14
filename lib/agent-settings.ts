@@ -1,5 +1,6 @@
 import type { ChatSettings } from '@/lib/db/schema';
 import type { ChatToolId } from '@/lib/ai/tool-ids';
+import { normalizeChatToolIds } from '@/lib/ai/tool-ids';
 import {
   DEFAULT_AGENT_PROMPT_CONFIG,
   agentPromptConfigIsDefault,
@@ -52,16 +53,14 @@ export function normalizePinnedEntries(raw: unknown): string[] {
 export function normalizeAllowedTools(raw: unknown): ChatToolId[] | undefined {
   if (raw === undefined || raw === null) return undefined;
   if (!Array.isArray(raw)) return undefined;
-  const deduped = Array.from(
-    new Set(
-      raw.filter(
-        (item): item is ChatToolId =>
-          typeof item === 'string' && item.trim().length > 0
-      )
-    )
-  );
-  if (deduped.length === 0) return [];
-  return deduped.slice(0, 64);
+  const cleaned = raw
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+  const normalized = normalizeChatToolIds(cleaned);
+  if (normalized === undefined) return undefined;
+  if (normalized.length === 0) return [];
+  return normalized.slice(0, 64);
 }
 
 export function normalizeModelId(raw: unknown): string | undefined {

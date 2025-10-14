@@ -13,6 +13,7 @@ import { ChatToolSelector } from './chat-tool-selector';
 import { ChatAgentSelector, type AgentPreset } from './chat-agent-selector';
 import { motion } from 'framer-motion';
 import type { ChatModelCapabilitiesSummary } from '@/lib/ai/models';
+import type { ChatToolId } from '@/lib/ai/tool-ids';
 
 function PureChatHeader({
   chatId,
@@ -37,8 +38,8 @@ function PureChatHeader({
   onAddStagedPin: (slug: string) => void;
   onRemoveStagedPin: (slug: string) => void;
   chatHasStarted: boolean;
-  stagedAllowedTools?: string[] | undefined;
-  onUpdateStagedAllowedTools?: (tools: string[] | undefined) => void;
+  stagedAllowedTools?: ChatToolId[] | undefined;
+  onUpdateStagedAllowedTools?: (tools: ChatToolId[] | undefined) => void;
   selectedAgentId?: string;
   selectedAgentLabel?: string | null;
   onSelectAgent?: (

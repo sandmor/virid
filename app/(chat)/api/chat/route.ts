@@ -49,6 +49,7 @@ import { archiveUnpinEntry } from '@/lib/ai/tools/archive-unpin-entry';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { updateDocument } from '@/lib/ai/tools/update-document';
+import { runCode } from '@/lib/ai/tools/run-code';
 import type { ArtifactToolContext } from '@/lib/artifacts/server';
 import { getChatSettings } from '@/lib/db/chat-settings';
 import { isProductionEnvironment } from '@/lib/constants';
@@ -75,6 +76,7 @@ import { type PostRequestBody, createPostRequestBodySchema } from './schema';
 import { prisma } from '@/lib/db/prisma';
 import { getModelCapabilities } from '@/lib/ai/model-capabilities';
 import { getMaxMessageLength } from '@/lib/settings';
+import { CHAT_TOOL_IDS, normalizeChatToolIds } from '@/lib/ai/tool-ids';
 
 export const maxDuration = 300;
 
@@ -154,7 +156,10 @@ export async function POST(request: Request) {
       reasoningEffort?: 'low' | 'medium' | 'high';
     } = requestBody;
 
-    const allowedTools = rawAllowedTools ?? undefined;
+    const allowedTools =
+      rawAllowedTools === undefined || rawAllowedTools === null
+        ? undefined
+        : (normalizeChatToolIds(rawAllowedTools) ?? []).slice(0, 64);
 
     const session = await getAppSession();
 
@@ -248,15 +253,11 @@ export async function POST(request: Request) {
             console.warn('Agent fetch failed during initialization', e);
           }
         }
-        // Deduplicate allowedTools if present before passing down
-        const normalizedAllowed = allowedTools
-          ? Array.from(new Set(allowedTools)).slice(0, 64)
-          : allowedTools;
         await applyInitialSettingsPreset({
           chatId: id,
           base,
           overrides: {
-            allowedTools: normalizedAllowed,
+            allowedTools,
             // pinnedSlugs are applied to settings cache only; join creation handled below asynchronously.
             pinnedSlugs:
               pinnedSlugs && pinnedSlugs.length
@@ -451,30 +452,20 @@ export async function POST(request: Request) {
           };
         }
 
-        const allToolIds = [
-          'getWeather',
-          'createDocument',
-          'updateDocument',
-          'requestSuggestions',
-          'archiveCreateEntry',
-          'archiveReadEntry',
-          'archiveUpdateEntry',
-          'archiveDeleteEntry',
-          'archiveLinkEntries',
-          'archiveSearchEntries',
-          'archiveApplyEdits',
-          'archivePinEntry',
-          'archiveUnpinEntry',
-        ] as const;
+        const allToolIds = CHAT_TOOL_IDS;
 
         const allToolIdsSet = new Set<string>(allToolIds);
 
         // If model doesn't support tools, force empty tool list
+        const normalizedAllowedTools = normalizeChatToolIds(
+          effectiveAllowedTools
+        );
+
         const allowedToolIds = !modelSupportsTools
           ? []
-          : effectiveAllowedTools === undefined
+          : normalizedAllowedTools === undefined
             ? [...allToolIds]
-            : effectiveAllowedTools.filter((toolId) =>
+            : normalizedAllowedTools.filter((toolId) =>
                 allToolIdsSet.has(toolId)
               );
 
@@ -570,6 +561,11 @@ export async function POST(request: Request) {
 
         if (allowedToolIds.includes('getWeather')) {
           activeTools.getWeather = getWeather;
+        }
+        if (allowedToolIds.includes('runCode')) {
+          activeTools.runCode = runCode({
+            requestHints,
+          });
         }
         if (allowedToolIds.includes('createDocument')) {
           activeTools.createDocument = createDocument({

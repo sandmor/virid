@@ -8,6 +8,8 @@ import {
   type PromptRole,
   joinSegments,
 } from './prompt-engine';
+import { RUN_CODE_TOOL_PROMPT } from './tool-prompts/run-code';
+import type { ChatToolId } from './tool-ids';
 
 export type RequestHints = {
   latitude: Geo['latitude'];
@@ -24,7 +26,7 @@ export type PinnedEntry = {
 
 export type SystemPromptContext = {
   requestHints: RequestHints;
-  allowedTools?: string[];
+  allowedTools?: ChatToolId[];
   pinnedEntries?: PinnedEntry[];
   variables?: Record<string, string>;
 };
@@ -74,6 +76,8 @@ Formatting expectations
 - Prefer clear headings, tight prose, and cite tools or artifacts when you use them
 `;
 
+const runCodePrompt = RUN_CODE_TOOL_PROMPT;
+
 const requestOriginTemplate = `About the origin of user's request:
 - lat: {{latitude}}
 - lon: {{longitude}}
@@ -114,6 +118,14 @@ const formattingPart: PromptPart<SystemPromptContext> = {
   id: 'formatting',
   template: formattingPrompt,
   priority: 15,
+};
+
+const runCodePart: PromptPart<SystemPromptContext> = {
+  id: 'run-code',
+  template: runCodePrompt,
+  priority: 18,
+  isEnabled: ({ allowedTools }) =>
+    isToolGroupEnabled(allowedTools, ['runCode']),
 };
 
 const requestOriginPart: PromptPart<SystemPromptContext> = {
@@ -157,6 +169,7 @@ const pinnedMemoryPart: PromptPart<SystemPromptContext> = {
 const defaultSystemPromptParts: PromptPart<SystemPromptContext>[] = [
   baseBehaviorPart,
   formattingPart,
+  runCodePart,
   requestOriginPart,
   artifactsPart,
   archivePart,

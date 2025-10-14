@@ -20,6 +20,7 @@ import type { ChatModelCapabilitiesSummary } from '@/lib/ai/models';
 // Human friendly labels (fallback to id if not present)
 const LABELS: Record<ChatToolId, string> = {
   getWeather: 'Weather',
+  runCode: 'Run Code',
   createDocument: 'Create Doc',
   updateDocument: 'Update Doc',
   requestSuggestions: 'Suggestions',
@@ -59,7 +60,7 @@ const TOOL_GROUPS: { id: string; label: string; tools: ChatToolId[] }[] = [
   {
     id: 'other',
     label: 'Other',
-    tools: ['getWeather'],
+    tools: ['getWeather', 'runCode'],
   },
 ];
 
@@ -75,8 +76,8 @@ export function ChatToolSelector({
   chatId: string;
   className?: string;
   chatHasStarted?: boolean;
-  stagedAllowedTools?: string[] | undefined;
-  onUpdateStagedAllowedTools?: (tools: string[] | undefined) => void;
+  stagedAllowedTools?: ChatToolId[] | undefined;
+  onUpdateStagedAllowedTools?: (tools: ChatToolId[] | undefined) => void;
   selectedModelId?: string;
   selectedModelCapabilities?: ChatModelCapabilitiesSummary | null;
 }) {

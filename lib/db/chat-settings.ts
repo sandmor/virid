@@ -2,6 +2,7 @@ import { prisma } from './prisma';
 import type { ChatSettings } from './schema';
 import type { Prisma } from '../../generated/prisma-client';
 import { ChatSDKError } from '../errors';
+import { normalizeChatToolIds } from '../ai/tool-ids';
 
 // Default empty settings object (do not persist unless mutations occur)
 const EMPTY: ChatSettings = {};
@@ -14,7 +15,17 @@ export async function getChatSettings(chatId: string): Promise<ChatSettings> {
   if (!chat) return EMPTY;
   try {
     if (!chat.settings || typeof chat.settings !== 'object') return EMPTY;
-    return chat.settings as ChatSettings;
+    const settings = chat.settings as ChatSettings;
+    if (Array.isArray(settings.tools?.allow)) {
+      const normalizedAllow = normalizeChatToolIds(settings.tools.allow);
+      if (normalizedAllow !== undefined) {
+        return {
+          ...settings,
+          tools: { ...(settings.tools ?? {}), allow: normalizedAllow },
+        };
+      }
+    }
+    return settings;
   } catch {
     return EMPTY;
   }
@@ -46,11 +57,15 @@ export async function setAllowedTools(
   chatId: string,
   toolIds: string[] | undefined
 ) {
+  const normalized =
+    toolIds === undefined
+      ? undefined
+      : (normalizeChatToolIds(toolIds) ?? []).slice(0, 64);
   return updateChatSettings(chatId, (prev) => ({
     tools: {
       ...(prev.tools ?? {}),
       // New semantics: undefined => all tools; [] => no tools
-      allow: toolIds === undefined ? undefined : toolIds,
+      allow: normalized,
     },
   }));
 }
@@ -132,7 +147,18 @@ export async function applyInitialSettingsPreset({
       // leave merged.tools.allow undefined (no restriction)
       if (merged.tools && 'allow' in merged.tools) delete merged.tools.allow;
     } else {
-      merged.tools = { ...(merged.tools || {}), allow: list };
+      const normalized = (normalizeChatToolIds(list) ?? []).slice(0, 64);
+      merged.tools = { ...(merged.tools || {}), allow: normalized };
+    }
+  }
+
+  if (Array.isArray(merged.tools?.allow)) {
+    const normalized = (normalizeChatToolIds(merged.tools.allow) ?? []).slice(
+      0,
+      64
+    );
+    if (normalized !== undefined) {
+      merged.tools = { ...(merged.tools || {}), allow: normalized };
     }
   }
 
