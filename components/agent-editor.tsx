@@ -1,16 +1,11 @@
 'use client';
 
-import {
-  useMemo,
-  useState,
-  useRef,
-  useEffect,
-  type KeyboardEvent,
-} from 'react';
+import { useMemo, useState, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { CheckCircle2, ChevronLeft, Loader2, Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,6 +39,17 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import AgentPromptEditor from '@/components/agent-prompt-editor';
 import {
   useCreateAgent,
@@ -182,6 +188,7 @@ export default function AgentEditor({
   const isSaving = createAgent.isPending || updateAgent.isPending;
   const isDeleting = deleteAgent.isPending;
   const [saveFeedback, setSaveFeedback] = useFeedbackState();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const toggleTool = (tool: ChatToolId) => {
     setForm((prev) => {
@@ -309,10 +316,6 @@ export default function AgentEditor({
 
   const handleDelete = async () => {
     if (!agent || isDeleting) return;
-    const confirmed = window.confirm(
-      `Delete “${agent.name}”? This action cannot be undone.`
-    );
-    if (!confirmed) return;
     try {
       await deleteAgent.mutateAsync(agent.id);
       toast.success('Agent deleted');
@@ -334,14 +337,16 @@ export default function AgentEditor({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => router.push('/settings?tab=agents')}
-                className="px-2"
-              >
-                <ChevronLeft className="mr-1 h-4 w-4" /> Agents overview
-              </Button>
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => router.push('/settings?tab=agents')}
+                  className="px-2"
+                >
+                  <ChevronLeft className="mr-1 h-4 w-4" /> Agents overview
+                </Button>
+              </motion.div>
               {mode === 'edit' && !isDirty && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Up to date
@@ -360,34 +365,64 @@ export default function AgentEditor({
           </div>
           <div className="flex items-center gap-2">
             {mode === 'edit' && (
+              <AlertDialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+              >
+                <AlertDialogTrigger asChild>
+                  <motion.div whileTap={{ scale: 0.95 }}>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
+                      Delete
+                    </Button>
+                  </motion.div>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Agent</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete &ldquo;{agent?.name}
+                      &rdquo;? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+            <motion.div whileTap={{ scale: 0.95 }}>
               <Button
                 type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isDeleting}
+                onClick={handleSave}
+                disabled={isSaving || !form.name.trim()}
+                className="relative"
               >
-                {isDeleting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="mr-2 h-4 w-4" />
-                )}
-                Delete
+                <AnimatedButtonLabel
+                  state={saveFeedback}
+                  idleLabel={
+                    mode === 'create' ? 'Create agent' : 'Save changes'
+                  }
+                  loadingLabel={mode === 'create' ? 'Creating…' : 'Saving…'}
+                  successLabel="Saved"
+                  errorLabel="Error"
+                />
               </Button>
-            )}
-            <Button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving || !form.name.trim()}
-              className="relative"
-            >
-              <AnimatedButtonLabel
-                state={saveFeedback}
-                idleLabel={mode === 'create' ? 'Create agent' : 'Save changes'}
-                loadingLabel={mode === 'create' ? 'Creating…' : 'Saving…'}
-                successLabel="Saved"
-                errorLabel="Error"
-              />
-            </Button>
+            </motion.div>
           </div>
         </div>
 
@@ -456,67 +491,74 @@ export default function AgentEditor({
                 Preferred model
               </label>
               <div className="grid gap-2 sm:grid-cols-2">
-                <Button
-                  type="button"
-                  variant={
-                    selectedModelId === '__DEFAULT__' ? 'default' : 'outline'
-                  }
-                  onClick={() =>
-                    setForm((prev) => ({
-                      ...prev,
-                      settings: { ...prev.settings, modelId: undefined },
-                    }))
-                  }
-                >
-                  Workspace default
-                </Button>
-                {modelOptions.map((model) => (
+                <motion.div whileTap={{ scale: 0.95 }}>
                   <Button
-                    key={model.id}
                     type="button"
                     variant={
-                      selectedModelId === model.id ? 'default' : 'outline'
+                      selectedModelId === '__DEFAULT__' ? 'default' : 'outline'
                     }
                     onClick={() =>
                       setForm((prev) => ({
                         ...prev,
-                        settings: { ...prev.settings, modelId: model.id },
+                        settings: { ...prev.settings, modelId: undefined },
                       }))
                     }
+                    className="w-full justify-center"
                   >
-                    <div className="relative flex w-full items-center justify-center">
-                      {hasDuplicateModelNames ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span
-                              className="absolute left-3 flex items-center cursor-pointer"
-                              aria-hidden={false}
-                            >
-                              {model.provider === 'openai' ? (
-                                <LogoOpenAI size={16} />
-                              ) : model.provider === 'google' ? (
-                                <LogoGoogle size={16} />
-                              ) : (
-                                <LogoOpenRouter size={16} />
-                              )}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {displayProviderName(model.provider)}
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : null}
-
-                      <span
-                        className={cn(
-                          'truncate',
-                          hasDuplicateModelNames && 'px-6'
-                        )}
-                      >
-                        {model.name}
+                    <div className="flex w-full items-center gap-2">
+                      <span className="w-4" aria-hidden />
+                      <span className="flex-1 text-center truncate">
+                        Workspace default
                       </span>
                     </div>
                   </Button>
+                </motion.div>
+                {modelOptions.map((model) => (
+                  <motion.div key={model.id} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      type="button"
+                      variant={
+                        selectedModelId === model.id ? 'default' : 'outline'
+                      }
+                      onClick={() =>
+                        setForm((prev) => ({
+                          ...prev,
+                          settings: { ...prev.settings, modelId: model.id },
+                        }))
+                      }
+                      className="w-full justify-center"
+                    >
+                      <div className="flex w-full items-center gap-2">
+                        {hasDuplicateModelNames ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                className="flex w-4 justify-center"
+                                aria-hidden={false}
+                              >
+                                {model.provider === 'openai' ? (
+                                  <LogoOpenAI size={16} />
+                                ) : model.provider === 'google' ? (
+                                  <LogoGoogle size={16} />
+                                ) : (
+                                  <LogoOpenRouter size={16} />
+                                )}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {displayProviderName(model.provider)}
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className="w-4" aria-hidden />
+                        )}
+
+                        <span className={cn('flex-1 truncate text-center')}>
+                          {model.name}
+                        </span>
+                      </div>
+                    </Button>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -537,8 +579,9 @@ export default function AgentEditor({
                       },
                     }))
                   }
+                  className="justify-center"
                 >
-                  Workspace default
+                  <span className="truncate">Workspace default</span>
                 </Button>
                 {REASONING_OPTIONS.map((option) => (
                   <Button
@@ -558,8 +601,9 @@ export default function AgentEditor({
                         },
                       }))
                     }
+                    className="justify-center"
                   >
-                    {option.label}
+                    <span className="truncate">{option.label}</span>
                   </Button>
                 ))}
               </div>
@@ -657,9 +701,11 @@ export default function AgentEditor({
                 placeholder="archive-entry-slug"
                 className="sm:flex-1"
               />
-              <Button type="button" onClick={addPinnedEntry}>
-                Add
-              </Button>
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <Button type="button" onClick={addPinnedEntry}>
+                  Add
+                </Button>
+              </motion.div>
             </div>
             <p className="text-xs text-muted-foreground">
               Slugs must match existing archive entries. Maximum of 12 pinned

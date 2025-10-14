@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import {
   Blocks,
   Loader2,
@@ -31,6 +32,17 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 function buildSettingsSummary(settings: AgentSettingsValue) {
   const allowedTools = settings.allowedTools;
@@ -71,25 +83,31 @@ export function AgentsManagement() {
   const deleteAgent = useDeleteAgent();
 
   const agents = data?.agents ?? [];
+  const [deleteDialogState, setDeleteDialogState] = useState<{
+    isOpen: boolean;
+    agentId: string | null;
+    agentName: string | null;
+  }>({ isOpen: false, agentId: null, agentName: null });
 
   const handleCreate = () => {
     router.push('/settings/agents/new');
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (deleteAgent.isPending) return;
-    const confirmed = window.confirm(
-      `Delete “${name}”? This cannot be undone.`
-    );
-    if (!confirmed) return;
+  const handleDelete = async () => {
+    if (!deleteDialogState.agentId || deleteAgent.isPending) return;
     try {
-      await deleteAgent.mutateAsync(id);
+      await deleteAgent.mutateAsync(deleteDialogState.agentId);
       toast.success('Agent deleted');
+      setDeleteDialogState({ isOpen: false, agentId: null, agentName: null });
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Failed to delete agent';
       toast.error(message);
     }
+  };
+
+  const openDeleteDialog = (id: string, name: string) => {
+    setDeleteDialogState({ isOpen: true, agentId: id, agentName: name });
   };
 
   let content;
@@ -116,9 +134,11 @@ export function AgentsManagement() {
         <p className="text-sm font-medium text-destructive">
           Failed to load agents.
         </p>
-        <Button variant="outline" onClick={() => refetch()}>
-          Try again
-        </Button>
+        <motion.div whileTap={{ scale: 0.95 }}>
+          <Button variant="outline" onClick={() => refetch()}>
+            Try again
+          </Button>
+        </motion.div>
       </div>
     );
   } else if (agents.length === 0) {
@@ -132,9 +152,11 @@ export function AgentsManagement() {
             chat presets for your workspace.
           </p>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Create agent
-        </Button>
+        <motion.div whileTap={{ scale: 0.95 }}>
+          <Button onClick={handleCreate}>
+            <Plus className="mr-2 h-4 w-4" /> Create agent
+          </Button>
+        </motion.div>
       </div>
     );
   } else {
@@ -209,22 +231,26 @@ export function AgentsManagement() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex items-center justify-between">
-                  <Button variant="outline" asChild>
-                    <Link href={`/settings/agents/${agent.id}`}>Open</Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(agent.id, agent.name)}
-                    disabled={deleteAgent.isPending}
-                  >
-                    {deleteAgent.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">Delete agent</span>
-                  </Button>
+                  <motion.div whileTap={{ scale: 0.95 }}>
+                    <Button variant="outline" asChild>
+                      <Link href={`/settings/agents/${agent.id}`}>Open</Link>
+                    </Button>
+                  </motion.div>
+                  <motion.div whileTap={{ scale: 0.95 }}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openDeleteDialog(agent.id, agent.name)}
+                      disabled={deleteAgent.isPending}
+                    >
+                      {deleteAgent.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">Delete agent</span>
+                    </Button>
+                  </motion.div>
                 </CardFooter>
               </Card>
             </motion.div>
@@ -245,25 +271,56 @@ export function AgentsManagement() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            {isFetching ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCcw className="h-4 w-4" />
-            )}
-            <span className="sr-only">Refresh agents</span>
-          </Button>
-          <Button onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" /> New agent
-          </Button>
+          <motion.div whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              {isFetching ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCcw className="h-4 w-4" />
+              )}
+              <span className="sr-only">Refresh agents</span>
+            </Button>
+          </motion.div>
+          <motion.div whileTap={{ scale: 0.95 }}>
+            <Button onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" /> New agent
+            </Button>
+          </motion.div>
         </div>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-6">{content}</div>
+
+      <AlertDialog
+        open={deleteDialogState.isOpen}
+        onOpenChange={(open) =>
+          setDeleteDialogState((prev) => ({ ...prev, isOpen: open }))
+        }
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Agent</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &ldquo;
+              {deleteDialogState.agentName}&rdquo;? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -2,7 +2,8 @@
 
 import cx from 'classnames';
 import { format, isWithinInterval } from 'date-fns';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Cloud, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
 
 type WeatherAtLocation = {
   latitude: number;
@@ -12,6 +13,7 @@ type WeatherAtLocation = {
   timezone: string;
   timezone_abbreviation: string;
   elevation: number;
+  cityName?: string;
   current_units: {
     time: string;
     interval: string;
@@ -42,7 +44,7 @@ type WeatherAtLocation = {
   };
 };
 
-const SAMPLE = {
+const SAMPLE: WeatherAtLocation = {
   latitude: 37.763_283,
   longitude: -122.412_86,
   generationtime_ms: 0.027_894_973_754_882_812,
@@ -50,6 +52,7 @@ const SAMPLE = {
   timezone: 'GMT',
   timezone_abbreviation: 'GMT',
   elevation: 18,
+  cityName: 'San Francisco, CA',
   current_units: { time: 'iso8601', interval: 'seconds', temperature_2m: '°C' },
   current: { time: '2024-10-07T19:30', interval: 900, temperature_2m: 29.3 },
   hourly_units: { time: 'iso8601', temperature_2m: '°C' },
@@ -197,26 +200,44 @@ const SAMPLE = {
   },
 };
 
-function n(num: number): number {
-  return Math.ceil(num);
+function toInteger(num: number): number {
+  return Math.round(num);
 }
+
+const safeSlice = <T,>(input: T[], start: number, end: number) => {
+  if (!input.length) return [];
+  const offset = Math.max(start, 0);
+  const target = Math.max(end, offset + 1);
+  return input.slice(offset, target);
+};
 
 export function Weather({
   weatherAtLocation = SAMPLE,
 }: {
   weatherAtLocation?: WeatherAtLocation;
 }) {
-  const currentHigh = Math.max(
-    ...weatherAtLocation.hourly.temperature_2m.slice(0, 24)
+  const currentTime = useMemo(
+    () => new Date(weatherAtLocation.current.time),
+    [weatherAtLocation.current.time]
   );
-  const currentLow = Math.min(
-    ...weatherAtLocation.hourly.temperature_2m.slice(0, 24)
-  );
-
-  const isDay = isWithinInterval(new Date(weatherAtLocation.current.time), {
+  const isDay = isWithinInterval(currentTime, {
     start: new Date(weatherAtLocation.daily.sunrise[0]),
     end: new Date(weatherAtLocation.daily.sunset[0]),
   });
+
+  const firstDayTemperatures = safeSlice(
+    weatherAtLocation.hourly.temperature_2m,
+    0,
+    24
+  );
+  const currentHigh =
+    firstDayTemperatures.length > 0
+      ? Math.max(...firstDayTemperatures)
+      : weatherAtLocation.current.temperature_2m;
+  const currentLow =
+    firstDayTemperatures.length > 0
+      ? Math.min(...firstDayTemperatures)
+      : weatherAtLocation.current.temperature_2m;
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -233,78 +254,164 @@ export function Weather({
 
   const hoursToShow = isMobile ? 5 : 6;
 
-  // Find the index of the current time or the next closest time
   const currentTimeIndex = weatherAtLocation.hourly.time.findIndex(
-    (time) => new Date(time) >= new Date(weatherAtLocation.current.time)
+    (time) => new Date(time) >= currentTime
+  );
+  const fallbackIndex = currentTimeIndex === -1 ? 0 : currentTimeIndex;
+  const displayTimes = safeSlice(
+    weatherAtLocation.hourly.time,
+    fallbackIndex,
+    fallbackIndex + hoursToShow
+  );
+  const displayTemperatures = safeSlice(
+    weatherAtLocation.hourly.temperature_2m,
+    fallbackIndex,
+    fallbackIndex + hoursToShow
   );
 
-  // Slice the arrays to get the desired number of items
-  const displayTimes = weatherAtLocation.hourly.time.slice(
-    currentTimeIndex,
-    currentTimeIndex + hoursToShow
-  );
-  const displayTemperatures = weatherAtLocation.hourly.temperature_2m.slice(
-    currentTimeIndex,
-    currentTimeIndex + hoursToShow
-  );
+  const locationLabel = weatherAtLocation.cityName
+    ? weatherAtLocation.cityName
+    : `${weatherAtLocation.latitude?.toFixed(1)}°, ${weatherAtLocation.longitude?.toFixed(1)}°`;
+
+  const palette = isDay
+    ? {
+        foreground: 'text-slate-900',
+        muted: 'text-slate-600',
+        subtle: 'text-slate-500',
+        accent: 'text-sky-600',
+      }
+    : {
+        foreground: 'text-slate-50',
+        muted: 'text-slate-300',
+        subtle: 'text-slate-400',
+        accent: 'text-sky-300',
+      };
 
   return (
-    <div
-      className={cx(
-        'skeleton-bg flex max-w-[500px] flex-col gap-4 rounded-2xl p-4',
-        {
-          'bg-blue-400': isDay,
-        },
-        {
-          'bg-indigo-900': !isDay,
-        }
-      )}
-    >
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center gap-2">
-          <div
-            className={cx(
-              'skeleton-div size-10 rounded-full',
-              {
-                'bg-yellow-300': isDay,
-              },
-              {
-                'bg-indigo-100': !isDay,
-              }
-            )}
-          />
-          <div className="font-medium text-4xl text-blue-50">
-            {n(weatherAtLocation.current.temperature_2m)}
-            {weatherAtLocation.current_units.temperature_2m}
+    <div className="relative w-full max-w-[28rem] overflow-hidden rounded-3xl border border-border/40 bg-background/95 shadow-xl">
+      <div
+        aria-hidden="true"
+        className={cx(
+          'absolute inset-0 opacity-90 transition-colors',
+          isDay
+            ? 'bg-gradient-to-br from-sky-100 via-sky-200 to-sky-300 dark:from-sky-500/40 dark:via-sky-600/30 dark:to-indigo-800/40'
+            : 'bg-gradient-to-br from-slate-900 via-indigo-950 to-black/80'
+        )}
+      />
+
+      <div className="relative z-10 flex flex-col gap-6 p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <p
+              className={cx(
+                'text-xs font-semibold uppercase tracking-wide',
+                palette.subtle
+              )}
+            >
+              Local Weather
+            </p>
+            <p className={cx('text-lg font-semibold', palette.foreground)}>
+              {locationLabel}
+            </p>
+            <p className={cx('text-xs', palette.muted)}>
+              {format(currentTime, 'MMM d • h:mm a')}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span
+              className={cx(
+                'rounded-full bg-white/30 p-2 backdrop-blur-sm',
+                palette.accent
+              )}
+            >
+              {isDay ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </span>
+            <div className="text-right">
+              <p
+                className={cx(
+                  'text-4xl font-semibold leading-none',
+                  palette.foreground
+                )}
+              >
+                {toInteger(weatherAtLocation.current.temperature_2m)}
+                <span className="ml-1 text-base">
+                  {weatherAtLocation.current_units.temperature_2m}
+                </span>
+              </p>
+              <p className={cx('text-xs font-medium', palette.muted)}>
+                H: {toInteger(currentHigh)}° • L: {toInteger(currentLow)}°
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="text-blue-50">{`H:${n(currentHigh)}° L:${n(currentLow)}°`}</div>
-      </div>
+        <div className="grid gap-3 rounded-2xl bg-white/25 p-4 backdrop-blur-sm dark:bg-white/10">
+          <p
+            className={cx(
+              'text-xs font-semibold uppercase tracking-wide',
+              palette.muted
+            )}
+          >
+            Next hours
+          </p>
+          <div className="grid grid-cols-5 gap-2 text-center sm:grid-cols-6">
+            {displayTimes.map((time, index) => {
+              const slotTime = new Date(time);
+              const label = index === 0 ? 'Now' : format(slotTime, 'ha');
+              const temperature =
+                displayTemperatures[index] ??
+                weatherAtLocation.current.temperature_2m;
 
-      <div className="flex flex-row justify-between">
-        {displayTimes.map((time, index) => (
-          <div className="flex flex-col items-center gap-1" key={time}>
-            <div className="text-blue-100 text-xs">
-              {format(new Date(time), 'ha')}
-            </div>
-            <div
-              className={cx(
-                'skeleton-div size-6 rounded-full',
-                {
-                  'bg-yellow-300': isDay,
-                },
-                {
-                  'bg-indigo-200': !isDay,
-                }
-              )}
-            />
-            <div className="text-blue-50 text-sm">
-              {n(displayTemperatures[index])}
-              {weatherAtLocation.hourly_units.temperature_2m}
-            </div>
+              return (
+                <div
+                  className="flex flex-col items-center gap-2 rounded-xl border border-white/20 bg-white/10 p-2 text-xs backdrop-blur-sm dark:border-white/10 dark:bg-white/5"
+                  key={time}
+                >
+                  <span
+                    className={cx(
+                      'font-medium uppercase tracking-tight',
+                      palette.subtle
+                    )}
+                  >
+                    {label}
+                  </span>
+                  <Cloud className={cx('h-5 w-5', palette.accent)} />
+                  <span
+                    className={cx('text-sm font-semibold', palette.foreground)}
+                  >
+                    {toInteger(temperature)}°
+                  </span>
+                </div>
+              );
+            })}
           </div>
-        ))}
+        </div>
+
+        <div className="flex items-center justify-between rounded-2xl bg-white/15 p-4 text-xs backdrop-blur-sm dark:bg-white/10">
+          <div className="flex items-center gap-2">
+            <Sunrise className={cx('h-4 w-4', palette.accent)} />
+            <span className={palette.muted}>
+              Sunrise
+              <span className={cx('ml-2 font-semibold', palette.foreground)}>
+                {format(new Date(weatherAtLocation.daily.sunrise[0]), 'h:mm a')}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Sunset className={cx('h-4 w-4', palette.accent)} />
+            <span className={palette.muted}>
+              Sunset
+              <span className={cx('ml-2 font-semibold', palette.foreground)}>
+                {format(new Date(weatherAtLocation.daily.sunset[0]), 'h:mm a')}
+              </span>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

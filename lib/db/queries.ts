@@ -635,6 +635,9 @@ export async function forkChat({
         forkedFromMessageId: pivotMessageId,
         forkDepth: (sourceChat.forkDepth || 0) + 1,
         agentId: sourceChat.agentId,
+        ...(sourceChat.settings
+          ? { settings: sourceChat.settings as Prisma.InputJsonValue }
+          : {}),
       } as any,
     });
 

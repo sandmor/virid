@@ -59,11 +59,39 @@ const PurePreviewMessage = ({
 }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
 
-  const attachmentsFromMessage = message.parts.filter(
-    (part) => part.type === 'file'
+  const parts = message.parts ?? [];
+  const attachmentsFromMessage = parts.filter((part) => part.type === 'file');
+  const reasoningParts = parts.filter(
+    (part): part is ChatMessage['parts'][number] & { text: string } =>
+      part.type === 'reasoning' &&
+      typeof part.text === 'string' &&
+      part.text.trim().length > 0
+  );
+  const inlineReasoningElements = reasoningParts.map((part, rIndex) => (
+    <MessageReasoning
+      appearance="inline"
+      isLoading={isLoading}
+      key={`message-${message.id}-reasoning-${rIndex}`}
+      reasoning={part.text.trim()}
+    />
+  ));
+  const hasTextPart = parts.some(
+    (part) =>
+      part.type === 'text' &&
+      typeof part.text === 'string' &&
+      part.text.trim().length > 0
   );
 
   useDataStream();
+
+  const messageBubbleClass = cn(
+    'w-full max-w-full break-words rounded-2xl border border-border/60 px-5 py-4 text-left text-base leading-relaxed transition-colors',
+    message.role === 'user'
+      ? 'bg-primary/5 text-foreground dark:bg-primary/15'
+      : 'bg-muted text-foreground/90 dark:bg-muted/40'
+  );
+  let inlineReasoningAttached = false;
+  let reasoningOnlyRendered = false;
 
   return (
     <motion.div
@@ -114,7 +142,10 @@ const PurePreviewMessage = ({
         >
           {attachmentsFromMessage.length > 0 && (
             <div
-              className="flex flex-row justify-start gap-2"
+              className={cn(
+                'flex flex-row gap-2',
+                message.role === 'assistant' ? 'justify-start' : 'justify-end'
+              )}
               data-testid={'message-attachments'}
             >
               {attachmentsFromMessage.map((attachment) => (
@@ -130,33 +161,55 @@ const PurePreviewMessage = ({
             </div>
           )}
 
-          {message.parts?.map((part, index) => {
+          {parts.map((part, index) => {
             const { type } = part;
             const key = `message-${message.id}-part-${index}`;
 
-            if (type === 'reasoning' && part.text?.trim().length > 0) {
+            if (type === 'reasoning') {
+              if (hasTextPart) {
+                return null;
+              }
+
+              if (reasoningOnlyRendered) {
+                return null;
+              }
+
+              if (!inlineReasoningElements.length) {
+                return null;
+              }
+
+              reasoningOnlyRendered = true;
+
               return (
-                <MessageReasoning
-                  isLoading={isLoading}
-                  key={key}
-                  reasoning={part.text}
-                />
+                <div key={key}>
+                  <MessageContent
+                    className={messageBubbleClass}
+                    data-testid="message-content"
+                  >
+                    {inlineReasoningElements}
+                  </MessageContent>
+                </div>
               );
             }
 
             if (type === 'text') {
               if (mode === 'view') {
+                const shouldIncludeReasoning =
+                  message.role === 'assistant' &&
+                  !inlineReasoningAttached &&
+                  inlineReasoningElements.length > 0;
+
+                if (shouldIncludeReasoning) {
+                  inlineReasoningAttached = true;
+                }
+
                 return (
                   <div key={key}>
                     <MessageContent
-                      className={cn(
-                        'w-full max-w-full break-words rounded-2xl border border-border/60 px-5 py-4 text-left text-base leading-relaxed transition-colors',
-                        message.role === 'user'
-                          ? 'bg-primary/5 text-foreground dark:bg-primary/15'
-                          : 'bg-muted text-foreground/90 dark:bg-muted/40'
-                      )}
+                      className={messageBubbleClass}
                       data-testid="message-content"
                     >
+                      {shouldIncludeReasoning ? inlineReasoningElements : null}
                       <Response>{sanitizeText(part.text)}</Response>
                     </MessageContent>
                   </div>
@@ -184,36 +237,43 @@ const PurePreviewMessage = ({
 
             if (type === 'tool-getWeather') {
               const { toolCallId, state } = part;
+              const output = part.output as any;
+              const isRecord =
+                output && typeof output === 'object' && !Array.isArray(output);
+              const isOutputError = isRecord && 'error' in output;
+              const errorText =
+                state === 'output-error'
+                  ? (part.errorText ??
+                    (isOutputError ? String(output.error) : undefined))
+                  : isOutputError
+                    ? String(output.error)
+                    : undefined;
+              const canRenderWeather = Boolean(!errorText && isRecord);
 
               return (
                 <Tool defaultOpen={true} key={toolCallId}>
                   <ToolHeader state={state} type="tool-getWeather" />
                   <ToolContent>
-                    <ToolInput input={part.input ?? {}} />
-                    {(state === 'output-available' ||
-                      state === 'output-error') && (
+                    {state === 'input-available' ? (
+                      <ToolInput input={part.input ?? {}} />
+                    ) : null}
+                    {state === 'output-available' ? (
                       <ToolOutput
-                        errorText={
-                          state === 'output-error'
-                            ? part.errorText
-                            : part.output &&
-                                typeof part.output === 'object' &&
-                                'error' in part.output
-                              ? String(part.output.error)
-                              : undefined
-                        }
+                        errorText={errorText}
                         output={
-                          state === 'output-available' &&
-                          part.output &&
-                          !(
-                            typeof part.output === 'object' &&
-                            'error' in part.output
-                          ) ? (
-                            <Weather weatherAtLocation={part.output} />
+                          canRenderWeather ? (
+                            <Weather weatherAtLocation={output} />
                           ) : null
                         }
                       />
-                    )}
+                    ) : null}
+                    {state === 'output-error' ? (
+                      <ToolOutput
+                        errorText={
+                          errorText ?? 'Unable to retrieve weather data.'
+                        }
+                      />
+                    ) : null}
                   </ToolContent>
                 </Tool>
               );
