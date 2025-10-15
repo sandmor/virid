@@ -8,7 +8,8 @@ import {
   streamText,
 } from 'ai';
 import type { ModelMessage } from 'ai';
-import { unstable_cache as cache } from 'next/cache';
+import type { SharedV2ProviderOptions } from '@ai-sdk/provider';
+import { unstable_cache as nextCache } from 'next/cache';
 import { after } from 'next/server';
 import { getAppSession } from '@/lib/auth/session';
 import type { UserType } from '@/lib/auth/types';
@@ -77,12 +78,35 @@ import { prisma } from '@/lib/db/prisma';
 import { getModelCapabilities } from '@/lib/ai/model-capabilities';
 import { getMaxMessageLength } from '@/lib/settings';
 import { CHAT_TOOL_IDS, normalizeChatToolIds } from '@/lib/ai/tool-ids';
+import type { ChatSettings } from '@/lib/db/schema';
 
 export const maxDuration = 300;
 
+type PromptPinnedEntry = {
+  slug: string;
+  entity: string;
+  body: string;
+};
+
+const getCachedModelCapabilities = (modelId: string) =>
+  nextCache(
+    async () => getModelCapabilities(modelId),
+    ['model-capabilities', modelId], // Key for cache invalidation
+    { revalidate: 300 } // 5 minutes
+  );
+
+function isErrorWithMessage(error: unknown): error is { message: string } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message?: unknown }).message === 'string'
+  );
+}
+
 let globalStreamContext: ResumableStreamContext | null = null;
 
-const getTokenlensCatalog = cache(
+const getTokenlensCatalog = nextCache(
   async (): Promise<ModelCatalog | undefined> => {
     try {
       return await fetchModels();
@@ -104,8 +128,8 @@ export function getStreamContext() {
       globalStreamContext = createResumableStreamContext({
         waitUntil: after,
       });
-    } catch (error: any) {
-      if (error.message.includes('REDIS_URL')) {
+    } catch (error: unknown) {
+      if (isErrorWithMessage(error) && error.message.includes('REDIS_URL')) {
         console.log(
           ' > Resumable streams are disabled due to missing REDIS_URL'
         );
@@ -160,6 +184,11 @@ export async function POST(request: Request) {
       rawAllowedTools === undefined || rawAllowedTools === null
         ? undefined
         : (normalizeChatToolIds(rawAllowedTools) ?? []).slice(0, 64);
+
+    const normalizedPinnedSlugs =
+      pinnedSlugs && pinnedSlugs.length > 0
+        ? Array.from(new Set(pinnedSlugs)).slice(0, 12)
+        : undefined;
 
     const session = await getAppSession();
 
@@ -259,10 +288,7 @@ export async function POST(request: Request) {
           overrides: {
             allowedTools,
             // pinnedSlugs are applied to settings cache only; join creation handled below asynchronously.
-            pinnedSlugs:
-              pinnedSlugs && pinnedSlugs.length
-                ? pinnedSlugs.slice(0, 12)
-                : undefined,
+            pinnedSlugs: normalizedPinnedSlugs,
             reasoningEffort,
             modelId: selectedChatModel,
           },
@@ -286,9 +312,9 @@ export async function POST(request: Request) {
       })();
 
       // Initial pinning executes in background; we don't block stream start.
-      if (pinnedSlugs && pinnedSlugs.length) {
+      if (normalizedPinnedSlugs && normalizedPinnedSlugs.length) {
         (async () => {
-          const unique = Array.from(new Set(pinnedSlugs)).slice(0, 12);
+          const unique = normalizedPinnedSlugs;
           try {
             const { pinArchiveEntryToChat } = await import('@/lib/db/queries');
             await Promise.all(
@@ -324,6 +350,26 @@ export async function POST(request: Request) {
       country,
     };
 
+    const messagesPromise = loadActiveMessagesOrEmpty(id);
+    const pinnedEntriesPromise = resolvePinnedPromptEntries({
+      chatId: id,
+      userId: session.user.id,
+      providedSlugs: normalizedPinnedSlugs,
+      createdNewChat,
+    });
+    const settingsPromise: Promise<ChatSettings> = getChatSettings(id).catch(
+      (error) => {
+        console.warn('Failed to load chat settings for prompt preparation', {
+          chatId: id,
+          error,
+        });
+        return {};
+      }
+    );
+    const modelPromise = getLanguageModel(selectedChatModel);
+    const modelCapabilitiesPromise =
+      getCachedModelCapabilities(selectedChatModel)();
+
     // For a regeneration request we do NOT persist the user message again
     // (same id) – otherwise we'd trigger a unique key violation. The
     // downstream logic only needs the existing persisted user message plus
@@ -357,60 +403,25 @@ export async function POST(request: Request) {
           (e) => console.warn('Failed to persist stream id (non-fatal)', e)
         );
 
-        const messagesPromise = getActiveMessagesByChatId({ id }).catch((e) => {
-          console.warn(
-            'Failed to load messages, proceeding with only user message',
-            e
-          );
-          return [];
-        });
-        const modelPromise = getLanguageModel(selectedChatModel);
-        const pinnedPromise = (async () => {
-          try {
-            const dbPinned = createdNewChat
-              ? []
-              : await getPinnedArchiveEntriesForChat({
-                  userId: session.user.id,
-                  chatId: id,
-                });
-            const supplied = pinnedSlugs
-              ? Array.from(new Set(pinnedSlugs))
-              : [];
-            if (!dbPinned.length && !supplied.length) return undefined;
-            // Merge: db first (stable order by pinnedAt asc), then any supplied not already present
-            const existingSlugSet = new Set(dbPinned.map((p) => p.slug));
-            const merged = [
-              ...dbPinned.map((p) => ({
-                slug: p.slug,
-                entity: p.entity,
-                body: p.body,
-              })),
-              ...supplied
-                .filter((slug) => !existingSlugSet.has(slug))
-                .map((slug) => ({ slug, entity: 'archive', body: '' })), // body blank; model prompt handler can trim / request body later if needed
-            ];
-            return merged;
-          } catch (e) {
-            console.warn('Failed to load/merge pinned entries for chat', id, e);
-            return undefined;
-          }
-        })();
-
-        const [messagesFromDb, model, pinnedForPrompt] = await Promise.all([
+        const [
+          messagesFromDb,
+          model,
+          pinnedForPrompt,
+          settings,
+          modelCapabilities,
+        ] = await Promise.all([
           messagesPromise,
           modelPromise,
-          pinnedPromise,
+          pinnedEntriesPromise,
+          settingsPromise,
+          modelCapabilitiesPromise,
         ]);
 
         const uiMessages = [...convertToUIMessages(messagesFromDb), message];
         const modelMessages = convertToModelMessages(uiMessages);
 
-        // Check model capabilities for tool support
-        const modelCapabilities = await getModelCapabilities(selectedChatModel);
         const modelSupportsTools = modelCapabilities?.supportsTools ?? true; // Default to true if not found
 
-        // Determine allowed tools (chat settings allow-list or default = all)
-        const settings = await getChatSettings(id);
         // If chat just created and we received a provisional allowedTools list, prefer it over settings
         const effectiveAllowedTools =
           createdNewChat && allowedTools !== undefined
@@ -423,21 +434,26 @@ export async function POST(request: Request) {
 
         // Build provider-specific options for reasoning effort
         const [provider] = selectedChatModel.split(':');
-        const providerOptions: Record<string, any> = {};
+        const providerOptions: SharedV2ProviderOptions = {};
 
         if (provider === 'openai') {
           // OpenAI uses reasoningEffort: 'minimal' | 'low' | 'medium' | 'high'
           providerOptions.openai = {
             reasoningEffort: effectiveReasoningEffort,
-            reasoningSummary: 'detailed' as const,
+            reasoningSummary: 'detailed',
           };
         } else if (provider === 'google') {
           // Google uses thinkingConfig with thinkingBudget (number of tokens)
           // Map effort levels to token budgets
-          const budgetMap = { low: 2048, medium: 4096, high: 8192 };
+          const budgetMap: Record<'low' | 'medium' | 'high', number> = {
+            low: 2048,
+            medium: 4096,
+            high: 8192,
+          };
+          const thinkingBudget = budgetMap[effectiveReasoningEffort];
           providerOptions.google = {
             thinkingConfig: {
-              thinkingBudget: budgetMap[effectiveReasoningEffort],
+              thinkingBudget,
               includeThoughts: true,
             },
           };
@@ -625,7 +641,6 @@ export async function POST(request: Request) {
           'Merged Model Messages:',
           JSON.stringify(mergedModelMessages, null, 2)
         );
-
         const result = streamText({
           model,
           system: composedSystemPrompt,
@@ -761,6 +776,84 @@ export async function POST(request: Request) {
 
     console.error('Unhandled error in chat API:', error, { vercelId });
     return new ChatSDKError('offline:chat').toResponse();
+  }
+}
+
+async function loadActiveMessagesOrEmpty(chatId: string) {
+  try {
+    return await getActiveMessagesByChatId({ id: chatId });
+  } catch (error) {
+    console.warn('Failed to load messages, proceeding with only user message', {
+      chatId,
+      error,
+    });
+    return [];
+  }
+}
+
+async function resolvePinnedPromptEntries({
+  chatId,
+  userId,
+  providedSlugs,
+  createdNewChat,
+}: {
+  chatId: string;
+  userId: string;
+  providedSlugs?: string[];
+  createdNewChat: boolean;
+}): Promise<PromptPinnedEntry[] | undefined> {
+  const sanitizedSlugs = providedSlugs
+    ? Array.from(new Set(providedSlugs)).slice(0, 12)
+    : [];
+
+  if (createdNewChat) {
+    return sanitizedSlugs.length
+      ? sanitizedSlugs.map((slug) => ({ slug, entity: 'archive', body: '' }))
+      : undefined;
+  }
+
+  try {
+    const pinnedEntries = await getPinnedArchiveEntriesForChat({
+      userId,
+      chatId,
+    });
+
+    if (!pinnedEntries.length && !sanitizedSlugs.length) {
+      return undefined;
+    }
+
+    const normalizedPinned = pinnedEntries.map((entry) => ({
+      slug: entry.slug,
+      entity: entry.entity,
+      body: entry.body ?? '',
+    }));
+
+    if (!sanitizedSlugs.length) {
+      return normalizedPinned.length ? normalizedPinned : undefined;
+    }
+
+    const existingSlugSet = new Set(
+      normalizedPinned.map((entry) => entry.slug)
+    );
+    const supplemental = sanitizedSlugs
+      .filter((slug) => !existingSlugSet.has(slug))
+      .map<PromptPinnedEntry>((slug) => ({
+        slug,
+        entity: 'archive',
+        body: '',
+      }));
+
+    const merged = [...normalizedPinned, ...supplemental];
+    return merged.length ? merged : undefined;
+  } catch (error) {
+    console.warn('Failed to resolve pinned entries for prompt', {
+      chatId,
+      error,
+    });
+
+    return sanitizedSlugs.length
+      ? sanitizedSlugs.map((slug) => ({ slug, entity: 'archive', body: '' }))
+      : undefined;
   }
 }
 
