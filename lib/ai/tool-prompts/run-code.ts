@@ -1,3 +1,11 @@
+/**
+ * Dynamic tool prompts for the runCode sandbox.
+ * Generated from API metadata to ensure documentation stays in sync with implementation.
+ */
+
+import { SANDBOX_CONFIG } from '../tools/sandbox/config';
+import { getApiMetadata } from '../tools/sandbox/api-bridge';
+
 type TsDocBlock =
   | {
       kind: 'interface';
@@ -12,6 +20,7 @@ type TsDocBlock =
       description?: string;
       type: string;
     };
+
 type TsInterfaceMember = {
   kind: 'property' | 'method';
   name: string;
@@ -57,6 +66,10 @@ function renderDocBlock(block: TsDocBlock): string {
 
   return `${header}interface ${block.name}${extendsClause} {\n${members}\n}`;
 }
+
+/**
+ * Core type definitions for runCode
+ */
 const RUN_CODE_TS_DOCS: TsDocBlock[] = [
   {
     kind: 'type',
@@ -81,48 +94,14 @@ const RUN_CODE_TS_DOCS: TsDocBlock[] = [
         kind: 'property',
         name: 'code',
         type: 'string',
-        description: 'QuickJS-compatible JavaScript source.',
+        description: `QuickJS-compatible JavaScript source (max ${SANDBOX_CONFIG.MAX_CODE_LENGTH} characters).`,
       },
       {
         kind: 'property',
         name: 'timeoutMs',
         optional: true,
         type: 'number',
-        description:
-          'Optional execution limit (250 ms to 5000 ms). Defaults to 1500 ms.',
-      },
-    ],
-  },
-  {
-    kind: 'interface',
-    name: 'RunCodeEstimatedLocation',
-    description:
-      'Approximate request location derived from platform hints. Values may be null when unavailable.',
-    members: [
-      { kind: 'property', name: 'latitude', type: 'number | null' },
-      { kind: 'property', name: 'longitude', type: 'number | null' },
-      { kind: 'property', name: 'city', type: 'string | null' },
-      { kind: 'property', name: 'country', type: 'string | null' },
-    ],
-  },
-  {
-    kind: 'interface',
-    name: 'RunCodeApi',
-    description: 'Bridge exposed as global `api` inside runCode.',
-    members: [
-      {
-        kind: 'method',
-        name: 'getEstimatedLocation',
-        signature: '(): RunCodeEstimatedLocation',
-        description: 'Returns location data or throws if unavailable.',
-      },
-      {
-        kind: 'method',
-        name: 'getWeather',
-        signature:
-          '(options?: { latitude?: number; longitude?: number }): Promise<unknown>',
-        description:
-          'Fetches Open-Meteo weather JSON for the provided or estimated coordinates.',
+        description: `Optional execution limit (${SANDBOX_CONFIG.MIN_TIMEOUT_MS} ms to ${SANDBOX_CONFIG.MAX_TIMEOUT_MS} ms). Defaults to ${SANDBOX_CONFIG.DEFAULT_TIMEOUT_MS} ms.`,
       },
     ],
   },
@@ -137,12 +116,12 @@ const RUN_CODE_TS_DOCS: TsDocBlock[] = [
       {
         kind: 'property',
         name: 'limits',
-        type: '{ maxCodeLength: number; maxLogLines: number; maxCollectionItems: number }',
+        type: `{ maxCodeLength: ${SANDBOX_CONFIG.MAX_CODE_LENGTH}; maxLogLines: ${SANDBOX_CONFIG.MAX_LOG_LINES}; maxCollectionItems: ${SANDBOX_CONFIG.MAX_COLLECTION_ITEMS} }`,
       },
       {
         kind: 'property',
         name: 'locationHints',
-        type: 'RunCodeEstimatedLocation | null',
+        type: '{ latitude: number | null; longitude: number | null; city: string | null; country: string | null } | null',
       },
       { kind: 'property', name: 'warnings', type: 'string[]' },
     ],
@@ -151,18 +130,43 @@ const RUN_CODE_TS_DOCS: TsDocBlock[] = [
     kind: 'type',
     name: 'RunCodeToolError',
     description: 'Structured error payload when execution fails.',
-    type: '{ name: string; message: string; stack?: string | null; [key: string]: unknown }',
+    type: '{ name: string; message: string; stack?: string | null }',
   },
   {
     kind: 'interface',
     name: 'RunCodeToolResultBase',
     description: 'Fields shared by successful and failed executions.',
     members: [
-      { kind: 'property', name: 'stdout', type: 'string[]' },
-      { kind: 'property', name: 'stderr', type: 'string[]' },
-      { kind: 'property', name: 'truncatedStdout', type: 'number' },
-      { kind: 'property', name: 'truncatedStderr', type: 'number' },
-      { kind: 'property', name: 'runtimeMs', type: 'number' },
+      {
+        kind: 'property',
+        name: 'stdout',
+        type: 'string[]',
+        description: `Console.log output (max ${SANDBOX_CONFIG.MAX_LOG_LINES} lines).`,
+      },
+      {
+        kind: 'property',
+        name: 'stderr',
+        type: 'string[]',
+        description: `Console.error output (max ${SANDBOX_CONFIG.MAX_LOG_LINES} lines).`,
+      },
+      {
+        kind: 'property',
+        name: 'truncatedStdout',
+        type: 'number',
+        description: 'Number of stdout lines truncated.',
+      },
+      {
+        kind: 'property',
+        name: 'truncatedStderr',
+        type: 'number',
+        description: 'Number of stderr lines truncated.',
+      },
+      {
+        kind: 'property',
+        name: 'runtimeMs',
+        type: 'number',
+        description: 'Actual execution time in milliseconds.',
+      },
       { kind: 'property', name: 'codeSize', type: 'number' },
       {
         kind: 'property',
@@ -178,7 +182,12 @@ const RUN_CODE_TS_DOCS: TsDocBlock[] = [
     description: 'Response payload when the script completes without throwing.',
     members: [
       { kind: 'property', name: 'status', type: '"ok"' },
-      { kind: 'property', name: 'result', type: 'unknown' },
+      {
+        kind: 'property',
+        name: 'result',
+        type: 'unknown',
+        description: 'The value returned by the user code.',
+      },
       { kind: 'property', name: 'error', type: 'null' },
     ],
   },
@@ -201,12 +210,36 @@ const RUN_CODE_TS_DOCS: TsDocBlock[] = [
   },
 ];
 
-const RUN_CODE_API_TS = RUN_CODE_TS_DOCS.map(renderDocBlock).join('\n\n');
+/**
+ * Generate API interface documentation from metadata
+ */
+function generateApiDocs(): TsDocBlock {
+  const apiMethods = getApiMetadata();
+
+  return {
+    kind: 'interface',
+    name: 'RunCodeApi',
+    description:
+      'Global `api` object exposed inside the sandbox. Provides access to external services.',
+    members: apiMethods.map((method) => ({
+      kind: 'method' as const,
+      name: method.name,
+      signature: method.signature,
+      description: method.description,
+    })),
+  };
+}
+
+const RUN_CODE_API_TS = [
+  ...RUN_CODE_TS_DOCS.map(renderDocBlock),
+  renderDocBlock(generateApiDocs()),
+].join('\n\n');
 
 export const RUN_CODE_TOOL_PROMPT = [
   'runCode sandbox (default tool)',
   '- Reach for runCode before other tools. Write JavaScript (Promises supported) and return the result.',
   '- Use the `api` bridge for external data; console output is surfaced back to the user.',
+  `- Code is limited to ${SANDBOX_CONFIG.MAX_CODE_LENGTH} characters with a timeout of ${SANDBOX_CONFIG.MIN_TIMEOUT_MS}-${SANDBOX_CONFIG.MAX_TIMEOUT_MS}ms.`,
   '',
   'TypeScript API:',
   '```ts',

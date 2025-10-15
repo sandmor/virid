@@ -279,6 +279,185 @@ const PurePreviewMessage = ({
               );
             }
 
+            if (type === 'tool-runCode') {
+              const { toolCallId, state } = part;
+              const input = part.input as any;
+              const output = part.output as any;
+              const isOutputError =
+                output && typeof output === 'object' && 'error' in output;
+              const errorText =
+                state === 'output-error'
+                  ? (part.errorText ??
+                    (isOutputError
+                      ? String(output.error?.message || output.error)
+                      : undefined))
+                  : isOutputError
+                    ? String(output.error?.message || output.error)
+                    : undefined;
+
+              return (
+                <Tool defaultOpen={true} key={toolCallId}>
+                  <ToolHeader state={state} type="tool-runCode" />
+                  <ToolContent>
+                    {(state === 'input-available' ||
+                      state === 'output-available' ||
+                      state === 'output-error') &&
+                      input?.code && (
+                        <div className="space-y-2 overflow-hidden p-4">
+                          <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                            Code Executed
+                          </h4>
+                          <div className="rounded-md bg-muted/50">
+                            <div className="relative w-full overflow-hidden rounded-md border bg-background text-foreground">
+                              <pre className="overflow-x-auto p-4 font-mono text-xs">
+                                <code>{input.code}</code>
+                              </pre>
+                            </div>
+                          </div>
+                          {input.timeoutMs && (
+                            <p className="text-muted-foreground text-xs">
+                              Timeout: {input.timeoutMs}ms
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    {state === 'output-available' && output && (
+                      <div className="space-y-4 p-4 pt-0">
+                        {output.status === 'ok' &&
+                          output.result !== null &&
+                          output.result !== undefined && (
+                            <div className="space-y-2">
+                              <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                                Result
+                              </h4>
+                              <div className="rounded-md bg-green-500/10 p-3">
+                                <pre className="overflow-x-auto font-mono text-xs">
+                                  {typeof output.result === 'object'
+                                    ? JSON.stringify(output.result, null, 2)
+                                    : String(output.result)}
+                                </pre>
+                              </div>
+                            </div>
+                          )}
+                        {output.stdout && output.stdout.length > 0 && (
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                              Console Output
+                            </h4>
+                            <div className="rounded-md bg-muted/50 p-3">
+                              <pre className="overflow-x-auto font-mono text-xs">
+                                {output.stdout.join('\n')}
+                              </pre>
+                            </div>
+                            {output.truncatedStdout > 0 && (
+                              <p className="text-muted-foreground text-xs">
+                                +{output.truncatedStdout} more lines truncated
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {output.stderr && output.stderr.length > 0 && (
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                              Error Output
+                            </h4>
+                            <div className="rounded-md bg-red-500/10 p-3">
+                              <pre className="overflow-x-auto font-mono text-xs text-red-600 dark:text-red-400">
+                                {output.stderr.join('\n')}
+                              </pre>
+                            </div>
+                            {output.truncatedStderr > 0 && (
+                              <p className="text-muted-foreground text-xs">
+                                +{output.truncatedStderr} more lines truncated
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {output.environment && (
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                              Execution Info
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="rounded-md bg-muted/30 p-2">
+                                <span className="text-muted-foreground">
+                                  Runtime:
+                                </span>{' '}
+                                <span className="font-medium">
+                                  {output.runtimeMs}ms
+                                </span>
+                              </div>
+                              <div className="rounded-md bg-muted/30 p-2">
+                                <span className="text-muted-foreground">
+                                  Language:
+                                </span>{' '}
+                                <span className="font-medium">
+                                  {output.environment.language}
+                                </span>
+                              </div>
+                              <div className="rounded-md bg-muted/30 p-2">
+                                <span className="text-muted-foreground">
+                                  Timeout:
+                                </span>{' '}
+                                <span className="font-medium">
+                                  {output.environment.timeoutMs}ms
+                                </span>
+                              </div>
+                              <div className="rounded-md bg-muted/30 p-2">
+                                <span className="text-muted-foreground">
+                                  Code Size:
+                                </span>{' '}
+                                <span className="font-medium">
+                                  {output.codeSize} chars
+                                </span>
+                              </div>
+                            </div>
+                            {output.environment.warnings &&
+                              output.environment.warnings.length > 0 && (
+                                <div className="mt-2 rounded-md bg-yellow-500/10 p-2">
+                                  <p className="font-medium text-xs text-yellow-700 dark:text-yellow-400">
+                                    ⚠️ Warnings:
+                                  </p>
+                                  <ul className="ml-4 mt-1 list-disc text-xs text-yellow-600 dark:text-yellow-300">
+                                    {output.environment.warnings.map(
+                                      (warning: string, idx: number) => (
+                                        <li key={idx}>{warning}</li>
+                                      )
+                                    )}
+                                  </ul>
+                                </div>
+                              )}
+                          </div>
+                        )}
+                        {output.error && (
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+                              Execution Error
+                            </h4>
+                            <div className="rounded-md bg-red-500/10 p-3">
+                              <p className="font-medium text-xs text-red-600 dark:text-red-400">
+                                {output.error.name}: {output.error.message}
+                              </p>
+                              {output.error.stack && (
+                                <pre className="mt-2 overflow-x-auto font-mono text-xs text-red-500">
+                                  {output.error.stack}
+                                </pre>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {state === 'output-error' && (
+                      <ToolOutput
+                        errorText={errorText ?? 'Code execution failed.'}
+                      />
+                    )}
+                  </ToolContent>
+                </Tool>
+              );
+            }
+
             if (
               type === 'tool-archiveCreateEntry' ||
               type === 'tool-archiveReadEntry' ||
