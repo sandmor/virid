@@ -24,9 +24,9 @@ export const getSharedQuickJS = memoizePromiseFactory(
     try {
       // Import getQuickJS dynamically to avoid bundling issues
       const { getQuickJS } = await import('quickjs-emscripten');
-      const module = await getQuickJS();
+      const quickJSModule = await getQuickJS();
       logger.debug('QuickJS module initialized successfully');
-      return module;
+      return quickJSModule;
     } catch (error) {
       logger.error('Failed to initialize QuickJS module', {
         error: error instanceof Error ? error.message : String(error),
