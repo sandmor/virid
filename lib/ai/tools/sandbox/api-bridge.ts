@@ -3,13 +3,9 @@
  * Provides a clean abstraction for adding new APIs without modifying core code.
  */
 
-import type {
-  QuickJSContext,
-  QuickJSHandle,
-  QuickJSRuntime,
-} from 'quickjs-emscripten';
+import type { VMContext } from './vm-utils';
+import { setContextValue, getContextValue } from './vm-utils';
 import { fetchWeather, type WeatherCoordinates } from './external-apis';
-import { safeDrainRuntimeJobs } from './quickjs-utils';
 import {
   coerceFiniteNumber,
   normalizeText,
@@ -55,13 +51,12 @@ export function extractLocationHints(hints: {
 }
 
 /**
- * Bridge handler function type
+ * Bridge handler function type for VM context
  */
 type BridgeHandler = (
-  context: QuickJSContext,
-  runtime: QuickJSRuntime,
-  payloadHandle?: QuickJSHandle
-) => QuickJSHandle;
+  vmContext: VMContext,
+  payload?: unknown
+) => Promise<unknown>;
 
 /**
  * API bridge configuration
@@ -77,63 +72,22 @@ export interface ApiBridgeConfig {
  * Creates a weather API bridge handler
  */
 export function createWeatherBridge(deadlineMs: number): ApiBridgeConfig {
-  const handler: BridgeHandler = (context, runtime, payloadHandle) => {
-    const deferred = context.newPromise();
-
-    const scheduleFailure = (message: string, name = 'Error') => {
-      const errorHandle = context.newError({ name, message });
-      deferred.reject(errorHandle);
-      errorHandle.dispose();
-      safeDrainRuntimeJobs(runtime, context);
-    };
-
+  const handler: BridgeHandler = async (vmContext, payload) => {
     try {
-      const payloadJson =
-        payloadHandle && payloadHandle.alive
-          ? context.getString(payloadHandle)
-          : '';
-
-      let payload: unknown;
-      try {
-        payload = payloadJson ? JSON.parse(payloadJson) : {};
-      } catch {
-        scheduleFailure('Invalid JSON payload', 'SyntaxError');
-        return deferred.handle;
-      }
-
       const coordinates = validateCoordinates(payload);
       if (!coordinates) {
-        scheduleFailure(
-          'latitude and longitude must be finite numbers within valid ranges',
-          'ValidationError'
+        throw new ValidationError(
+          'latitude and longitude must be finite numbers within valid ranges'
         );
-        return deferred.handle;
       }
 
       const remaining = deadlineMs - Date.now();
       if (remaining <= 0) {
-        scheduleFailure(
-          'Weather request timed out before it could be sent',
-          'TimeoutError'
-        );
-        return deferred.handle;
+        throw new Error('Weather request timed out before it could be sent');
       }
 
-      void fetchWeather(coordinates, remaining)
-        .then((text) => {
-          const textHandle = context.newString(text);
-          deferred.resolve(textHandle);
-          textHandle.dispose();
-          safeDrainRuntimeJobs(runtime, context);
-        })
-        .catch((error) => {
-          const message =
-            error instanceof Error
-              ? error.message
-              : String(error ?? 'Unknown error');
-          const name = error instanceof Error ? error.name : 'Error';
-          scheduleFailure(message, name);
-        });
+      const text = await fetchWeather(coordinates, remaining);
+      return text;
     } catch (error) {
       const message =
         error instanceof Error
@@ -143,10 +97,8 @@ export function createWeatherBridge(deadlineMs: number): ApiBridgeConfig {
         message,
         error: error instanceof Error ? error.stack : String(error),
       });
-      scheduleFailure(message);
+      throw error;
     }
-
-    return deferred.handle;
   };
 
   return {
@@ -156,21 +108,39 @@ export function createWeatherBridge(deadlineMs: number): ApiBridgeConfig {
 }
 
 /**
- * Installs API bridges into the QuickJS context
+ * Installs API bridges into the VM context
+ * Creates async bridge functions that can be called from within the sandbox
  */
 export function installApiBridges(
-  context: QuickJSContext,
-  runtime: QuickJSRuntime,
+  vmContext: VMContext,
   bridges: ApiBridgeConfig[]
 ): void {
-  for (const bridge of bridges) {
-    const bridgeHandle = context.newFunction(
-      bridge.functionName,
-      (payloadHandle) => bridge.handler(context, runtime, payloadHandle)
-    );
+  // Store bridge handlers in a map accessible from the VM
+  const bridgeMap = new Map<string, BridgeHandler>();
 
-    context.setProp(context.global, bridge.functionName, bridgeHandle);
-    bridgeHandle.dispose();
+  for (const bridge of bridges) {
+    bridgeMap.set(bridge.functionName, bridge.handler);
+
+    // Create a wrapper function in the VM context that returns a promise
+    // The actual handler runs in the host environment with full access
+    const wrapperFn = async (payloadJson: string) => {
+      const handler = bridgeMap.get(bridge.functionName);
+      if (!handler) {
+        throw new Error(`Bridge function ${bridge.functionName} not found`);
+      }
+
+      let payload: unknown;
+      try {
+        payload = payloadJson ? JSON.parse(payloadJson) : {};
+      } catch {
+        throw new SyntaxError('Invalid JSON payload');
+      }
+
+      return await handler(vmContext, payload);
+    };
+
+    // Set the wrapper function in the VM context
+    setContextValue(vmContext, bridge.functionName, wrapperFn);
   }
 }
 

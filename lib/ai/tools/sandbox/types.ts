@@ -11,7 +11,7 @@ import type { LocationHints } from './api-bridge';
 export type SupportedLanguage = 'javascript';
 
 /**
- * Execution summary from QuickJS
+ * Execution summary from sandbox
  */
 export interface ExecutionSummary {
   status: 'ok' | 'error';
@@ -28,7 +28,7 @@ export interface ExecutionSummary {
  */
 export interface ExecutionEnvironment {
   language: SupportedLanguage;
-  runtime: 'quickjs-emscripten';
+  runtime: 'nodejs-vm';
   timeoutMs: number;
   limits: {
     maxCodeLength: number;

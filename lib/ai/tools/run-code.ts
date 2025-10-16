@@ -15,7 +15,7 @@ type RunCodeOptions = {
 export function runCode({ requestHints }: RunCodeOptions) {
   return tool({
     description:
-      'Execute sandboxed JavaScript using QuickJS (Promises supported). Use the global `api` helpers to access external data. Console output is captured and returned.',
+      'Execute sandboxed JavaScript using Node.js VM (Promises supported). Use the global `api` helpers to access external data. Console output is captured and returned.',
     inputSchema: z.object({
       language: z.literal('javascript').optional().default('javascript'),
       code: z.string().min(1).max(SANDBOX_CONFIG.MAX_CODE_LENGTH),

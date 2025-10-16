@@ -37,10 +37,10 @@ export class ValidationError extends SandboxError {
   }
 }
 
-export class QuickJSError extends SandboxError {
+export class VMError extends SandboxError {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);
-    this.name = 'QuickJSError';
+    this.name = 'VMError';
   }
 }
 

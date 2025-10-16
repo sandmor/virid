@@ -1,17 +1,19 @@
 /**
  * Core sandbox execution logic.
- * Orchestrates QuickJS setup, script execution, and result collection.
+ * Orchestrates VM setup, script execution, and result collection.
  */
 
 import { SANDBOX_CONFIG } from './config';
 import { ValidationError, isTimeoutError, serializeError } from './errors';
 import { logger } from './logger';
 import {
-  getSharedQuickJS,
-  createRuntime,
+  createVMContext,
   evaluateScript,
-  awaitQuickJSPromise,
-} from './quickjs-utils';
+  awaitVMPromise,
+  getContextValue,
+  disposeVMContext,
+  type VMContext,
+} from './vm-utils';
 import {
   createWeatherBridge,
   installApiBridges,
@@ -70,7 +72,7 @@ function createEnvironmentDescription(
 ): ExecutionEnvironment {
   return {
     language: 'javascript',
-    runtime: 'quickjs-emscripten',
+    runtime: 'nodejs-vm',
     timeoutMs,
     limits: {
       maxCodeLength: SANDBOX_CONFIG.MAX_CODE_LENGTH,
@@ -138,61 +140,47 @@ export async function executeSandboxCode(
     timeoutMs: effectiveTimeout,
   });
 
-  const quickjs = await getSharedQuickJS();
-  const runtime = createRuntime(quickjs, deadline);
-  const context = runtime.newContext();
+  const vmContext = createVMContext(deadline);
 
   try {
     // Install API bridges
     const weatherBridge = createWeatherBridge(deadline);
-    installApiBridges(context, runtime, [weatherBridge]);
+    installApiBridges(vmContext, [weatherBridge]);
 
     // Execute bootstrap script
-    const bootstrapHandle = evaluateScript(
-      context,
-      createBootstrapScript(),
-      'bootstrap.js'
-    );
-    bootstrapHandle.dispose();
+    evaluateScript(vmContext, createBootstrapScript(), 'bootstrap.js');
 
     // Execute API setup script
-    const apiHandle = evaluateScript(
-      context,
-      createApiScript(locationHints),
-      'api.js'
-    );
-    apiHandle.dispose();
+    evaluateScript(vmContext, createApiScript(locationHints), 'api.js');
 
-    // Execute user code
-    const executionHandle = evaluateScript(
-      context,
+    // Execute user code wrapped in async IIFE
+    const executionPromise = evaluateScript(
+      vmContext,
       createExecutionScript(input.code),
       'execute.js'
     );
 
-    try {
-      await awaitQuickJSPromise(
-        context,
-        runtime,
-        executionHandle,
-        deadline,
+    // If the execution returns a promise, await it
+    if (
+      executionPromise &&
+      typeof executionPromise === 'object' &&
+      'then' in executionPromise
+    ) {
+      await awaitVMPromise(
+        vmContext,
+        executionPromise as Promise<unknown>,
         effectiveTimeout
       );
-    } finally {
-      executionHandle.dispose();
     }
 
     // Collect results
-    const summaryHandle = evaluateScript(
-      context,
+    const summaryJson = evaluateScript(
+      vmContext,
       createSummaryScript(),
       'summary.js'
     );
 
-    const summaryJson = context.getString(summaryHandle);
-    summaryHandle.dispose();
-
-    const summary = JSON.parse(summaryJson) as ExecutionSummary;
+    const summary = JSON.parse(String(summaryJson)) as ExecutionSummary;
     const runtimeMs = Date.now() - startTime;
 
     logger.debug('Execution completed', {
@@ -262,7 +250,6 @@ export async function executeSandboxCode(
       environment,
     };
   } finally {
-    context.dispose();
-    runtime.dispose();
+    disposeVMContext(vmContext);
   }
 }

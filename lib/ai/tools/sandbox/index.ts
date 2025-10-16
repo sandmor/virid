@@ -11,7 +11,7 @@ export {
   TimeoutError,
   WeatherAPIError,
   ValidationError,
-  QuickJSError,
+  VMError,
   serializeError,
   isTimeoutError,
 } from './errors';

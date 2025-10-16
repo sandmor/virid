@@ -96,7 +96,7 @@ export function createApiScript(locationHints: LocationHints | null): string {
     '      if (typeof url !== "string" || url.length === 0) {',
     '        throw new TypeError("URL must be a non-empty string");',
     '      }',
-    '      // In QuickJS, fetch is not available by default',
+    '      // Fetch is not available in the sandbox for security reasons',
     '      // This is a placeholder for future implementation',
     '      throw new Error("fetch is not yet available in this sandbox");',
     '    },',

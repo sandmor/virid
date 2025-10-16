@@ -34,7 +34,6 @@ export function parseCompositeModelId(id: string): {
 } {
   const idx = id.indexOf(':');
   if (idx === -1) {
-    // Backwards compatibility: assume openrouter if legacy id without provider
     return { provider: 'openrouter', model: id };
   }
   return { provider: id.slice(0, idx), model: id.slice(idx + 1) };

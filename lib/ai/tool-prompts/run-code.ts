@@ -94,7 +94,7 @@ const RUN_CODE_TS_DOCS: TsDocBlock[] = [
         kind: 'property',
         name: 'code',
         type: 'string',
-        description: `QuickJS-compatible JavaScript source (max ${SANDBOX_CONFIG.MAX_CODE_LENGTH} characters).`,
+        description: `JavaScript source code to execute in Node.js VM (max ${SANDBOX_CONFIG.MAX_CODE_LENGTH} characters).`,
       },
       {
         kind: 'property',
@@ -111,7 +111,7 @@ const RUN_CODE_TS_DOCS: TsDocBlock[] = [
     description: 'Metadata attached to every runCode response.',
     members: [
       { kind: 'property', name: 'language', type: 'RunCodeLanguage' },
-      { kind: 'property', name: 'runtime', type: '"quickjs-emscripten"' },
+      { kind: 'property', name: 'runtime', type: '"nodejs-vm"' },
       { kind: 'property', name: 'timeoutMs', type: 'number' },
       {
         kind: 'property',

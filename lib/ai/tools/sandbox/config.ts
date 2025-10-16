@@ -25,10 +25,10 @@ export const SANDBOX_CONFIG = {
   /** Maximum depth for object serialization to prevent stack overflow */
   MAX_SERIALIZATION_DEPTH: 6,
 
-  /** QuickJS memory limit in bytes (16 MB) */
+  /** VM memory limit awareness (16 MB soft limit for monitoring) */
   MEMORY_LIMIT_BYTES: 16 * 1024 * 1024,
 
-  /** QuickJS stack size limit in bytes (512 KB) */
+  /** VM stack size awareness (512 KB soft limit for monitoring) */
   STACK_SIZE_BYTES: 512 * 1024,
 
   /** Maximum length of error body snippets to include in error messages */
