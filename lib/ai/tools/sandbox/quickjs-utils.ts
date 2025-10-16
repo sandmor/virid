@@ -9,25 +9,35 @@ import type {
   QuickJSRuntime,
   QuickJSWASMModule,
 } from 'quickjs-emscripten';
-import { getQuickJS } from 'quickjs-emscripten';
+import { memoizePromiseFactory } from 'quickjs-emscripten';
 import { SANDBOX_CONFIG } from './config';
 import { QuickJSError, TimeoutError } from './errors';
 import { logger } from './logger';
 
 /**
- * Singleton instance for the QuickJS module
+ * Gets or initializes the shared QuickJS module.
+ * Uses memoizePromiseFactory to ensure single instance and better
+ * compatibility with serverless environments like Vercel.
  */
-let quickJSModulePromise: Promise<QuickJSWASMModule> | null = null;
-
-/**
- * Gets or initializes the shared QuickJS module
- */
-export async function getSharedQuickJS(): Promise<QuickJSWASMModule> {
-  if (!quickJSModulePromise) {
-    quickJSModulePromise = getQuickJS();
+export const getSharedQuickJS = memoizePromiseFactory(
+  async (): Promise<QuickJSWASMModule> => {
+    try {
+      // Import getQuickJS dynamically to avoid bundling issues
+      const { getQuickJS } = await import('quickjs-emscripten');
+      const module = await getQuickJS();
+      logger.debug('QuickJS module initialized successfully');
+      return module;
+    } catch (error) {
+      logger.error('Failed to initialize QuickJS module', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw new QuickJSError(
+        `Failed to initialize QuickJS: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
-  return quickJSModulePromise;
-}
+);
 
 /**
  * Creates a new QuickJS runtime with configured limits
