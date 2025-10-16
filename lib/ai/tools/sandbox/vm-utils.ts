@@ -14,7 +14,6 @@ import { logger } from './logger';
 export interface VMContext {
   context: vm.Context;
   deadline: number;
-  timeoutHandle?: NodeJS.Timeout;
 }
 
 /**
@@ -94,6 +93,70 @@ export function evaluateScript(
 }
 
 /**
+ * Evaluates an async script and waits for its completion.
+ * Required for running async user code that awaits host-provided promises.
+ */
+export async function evaluateAsyncScript(
+  vmContext: VMContext,
+  source: string,
+  filename: string,
+  timeoutMs: number
+): Promise<unknown> {
+  try {
+    const remainingTime = Math.max(0, vmContext.deadline - Date.now());
+
+    logger.debug('Evaluating async script', {
+      filename,
+      sourceLength: source.length,
+      remainingTime,
+    });
+
+    const script = new vm.Script(source, {
+      filename,
+    });
+
+    const result = script.runInContext(vmContext.context, {
+      timeout: remainingTime,
+      breakOnSigint: false,
+    });
+
+    logger.debug('Script execution returned', {
+      filename,
+      resultType: typeof result,
+      isPromise: result && typeof result === 'object' && 'then' in result,
+    });
+
+    if (result && typeof result === 'object' && 'then' in result) {
+      logger.debug('Awaiting promise result', { filename });
+      const awaited = await promiseWithTimeout(
+        result as Promise<unknown>,
+        Math.min(remainingTime, timeoutMs),
+        `Execution timed out after ${timeoutMs} ms`
+      );
+      logger.debug('Promise resolved', {
+        filename,
+        awaitedType: typeof awaited,
+      });
+      return awaited;
+    }
+
+    return result;
+  } catch (error) {
+    logger.error('Async script evaluation failed', {
+      filename,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    if (error instanceof Error && error.message.includes('timed out')) {
+      throw new TimeoutError(timeoutMs);
+    }
+
+    throw buildVMError(error);
+  }
+}
+
+/**
  * Wraps a promise with a timeout
  */
 export function promiseWithTimeout<T>(
@@ -122,32 +185,6 @@ export function promiseWithTimeout<T>(
     }),
     timeout,
   ]);
-}
-
-/**
- * Awaits a promise from VM context with timeout
- * This handles promises created inside the VM that need to be resolved in the host
- */
-export async function awaitVMPromise(
-  vmContext: VMContext,
-  promise: Promise<unknown>,
-  timeoutMs: number
-): Promise<void> {
-  const remaining = vmContext.deadline - Date.now();
-
-  if (remaining <= 0) {
-    throw new TimeoutError(timeoutMs);
-  }
-
-  try {
-    await promiseWithTimeout(
-      promise,
-      Math.min(remaining, timeoutMs),
-      `Execution timed out after ${timeoutMs} ms`
-    );
-  } catch (error) {
-    throw buildVMError(error);
-  }
 }
 
 /**
@@ -186,10 +223,6 @@ export function setContextValue(
 /**
  * Disposes of the VM context resources
  */
-export function disposeVMContext(vmContext: VMContext): void {
-  if (vmContext.timeoutHandle) {
-    clearTimeout(vmContext.timeoutHandle);
-    vmContext.timeoutHandle = undefined;
-  }
+export function disposeVMContext(_vmContext: VMContext): void {
   // VM contexts are garbage collected, no explicit disposal needed
 }

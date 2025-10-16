@@ -9,7 +9,7 @@ import { logger } from './logger';
 import {
   createVMContext,
   evaluateScript,
-  awaitVMPromise,
+  evaluateAsyncScript,
   getContextValue,
   disposeVMContext,
   type VMContext,
@@ -147,31 +147,42 @@ export async function executeSandboxCode(
     const weatherBridge = createWeatherBridge(deadline);
     installApiBridges(vmContext, [weatherBridge]);
 
+    logger.debug('API bridges installed', {
+      bridgeCount: 1,
+      functionName: weatherBridge.functionName,
+    });
+
     // Execute bootstrap script
     evaluateScript(vmContext, createBootstrapScript(), 'bootstrap.js');
+    logger.debug('Bootstrap script executed');
 
     // Execute API setup script
     evaluateScript(vmContext, createApiScript(locationHints), 'api.js');
+    logger.debug('API setup script executed');
 
     // Execute user code wrapped in async IIFE
-    const executionPromise = evaluateScript(
+    logger.debug('Starting user code execution');
+    const executionResult = await evaluateAsyncScript(
       vmContext,
       createExecutionScript(input.code),
-      'execute.js'
+      'execute.js',
+      effectiveTimeout
     );
+    logger.debug('User code execution completed', {
+      resultType: typeof executionResult,
+      hasResult: executionResult !== undefined,
+    });
 
-    // If the execution returns a promise, await it
-    if (
-      executionPromise &&
-      typeof executionPromise === 'object' &&
-      'then' in executionPromise
-    ) {
-      await awaitVMPromise(
-        vmContext,
-        executionPromise as Promise<unknown>,
-        effectiveTimeout
-      );
-    }
+    // Check what's in the context before collecting
+    const lastResult = getContextValue(vmContext, '__virid_last_result__');
+    const stdout = getContextValue(vmContext, '__virid_stdout__');
+    const stderr = getContextValue(vmContext, '__virid_stderr__');
+    logger.debug('Context state before summary', {
+      hasLastResult: !!lastResult,
+      lastResult: JSON.stringify(lastResult),
+      stdoutLength: Array.isArray(stdout) ? stdout.length : 0,
+      stderrLength: Array.isArray(stderr) ? stderr.length : 0,
+    });
 
     // Collect results
     const summaryJson = evaluateScript(
@@ -179,6 +190,9 @@ export async function executeSandboxCode(
       createSummaryScript(),
       'summary.js'
     );
+    logger.debug('Summary collected', {
+      summaryLength: String(summaryJson).length,
+    });
 
     const summary = JSON.parse(String(summaryJson)) as ExecutionSummary;
     const runtimeMs = Date.now() - startTime;

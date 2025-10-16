@@ -1,4 +1,10 @@
-# Sandbox Architecture Diagram
+# Sandbox Architecture
+
+## Overview
+
+The sandbox provides a secure, isolated JavaScript execution environment using Node.js's built-in `vm` module. It enables AI models to run user code safely while providing controlled access to external APIs like weather data.
+
+## Architecture Diagram
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -19,11 +25,11 @@
 │                    sandbox/executor.ts                           │
 │                  (Main Orchestrator)                             │
 │  ┌────────────────────────────────────────────────────────────┐  │
-│  │ 1. Validate input                                          │  │
-│  │ 2. Setup Node.js VM context with timeout tracking          │  │
-│  │ 3. Install API bridges                                     │  │
-│  │ 4. Execute scripts (bootstrap → api → user code)           │  │
-│  │ 5. Collect and return results                              │  │
+│  │ 1. Validate input & clamp timeout                          │  │
+│  │ 2. Create VM context with deadline tracking                │  │
+│  │ 3. Install API bridges (weather, etc.)                     │  │
+│  │ 4. Execute scripts: bootstrap → api → user code → summary  │  │
+│  │ 5. Collect sanitized results and return                    │  │
 │  └────────────────────────────────────────────────────────────┘  │
 └───┬─────────────┬──────────────┬──────────────┬─────────────┬────┘
     │             │              │              │             │
@@ -31,9 +37,9 @@
 ┌────────┐  ┌──────────┐  ┌───────────┐  ┌──────────┐  ┌─────────┐
 │config  │  │ errors   │  │  logger   │  │  types   │  │vm-utils │
 │        │  │          │  │           │  │          │  │         │
-│Constants│ │Custom    │  │Structured │  │Type      │  │Runtime  │
-│& Limits│  │Error     │  │Logging    │  │Definitions│ │Helpers  │
-│        │  │Hierarchy │  │           │  │          │  │         │
+│Constants│ │Custom    │  │Structured │  │Type      │  │VM       │
+│& Limits│  │Error     │  │Logging    │  │Definitions│ │Context  │
+│        │  │Hierarchy │  │           │  │          │  │Helpers  │
 └────────┘  └──────────┘  └───────────┘  └──────────┘  └─────────┘
     │             │              │              │             │
     └─────────────┴──────────────┴──────────────┴─────────────┘
@@ -57,6 +63,7 @@
             │ ┌────────────────────────────┐ │
             │ │ createWeatherBridge()      │ │
             │ │ installApiBridges()        │ │
+            │ │ extractLocationHints()     │ │
             │ │ getApiMetadata()           │ │
             │ └────────────────────────────┘ │
             └───────────┬────────────────────┘
@@ -67,7 +74,7 @@
             │  (External Services)           │
             │ ┌────────────────────────────┐ │
             │ │ fetchWeather()             │ │
-            │ │ (future: fetchHttp, etc.)  │ │
+            │ │ (future: other APIs)       │ │
             │ └────────────────────────────┘ │
             └────────────────────────────────┘
                         │
@@ -82,54 +89,70 @@
 │                   Node.js VM Sandbox Environment                │
 │                                                                 │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │  Global Scope                                              │ │
-│  │  ├── console (captured)                                    │ │
+│  │  Global Scope (Isolated Context)                          │ │
+│  │  ├── console (captured → stdout/stderr)                   │ │
 │  │  ├── api                                                   │ │
-│  │  │   ├── fetch() → __virid_host_fetch__ (future)           │ │
-│  │  │   └── getWeather() → __virid_host_get_weather__         │ │
-│  │  └── User Code                                             │ │
+│  │  │   ├── getWeather(coords) → Promise<WeatherData>        │ │
+│  │  │   └── fetch(url) → Not yet implemented                 │ │
+│  │  └── User Code (async execution with result capture)      │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                 │
-│  Resource Limits:                                               │
-│  • Memory: Monitored (16 MB soft limit)                         │
-│  • Stack: Monitored (512 KB soft limit)                         │
-│  • Timeout: 250ms - 5000ms (enforced)                           │
-│  • Code Size: 12,000 chars                                      │
-│  • Isolated context (no access to Node globals)                 │
+│  Security & Limits:                                             │
+│  • Memory: 16 MB soft limit                                     │
+│  • Stack: 512 KB soft limit                                     │
+│  • Timeout: 250ms - 5000ms (configurable, enforced)             │
+│  • Code Size: 12,000 chars max                                  │
+│  • Isolated context (no Node.js globals/require)                │
+│  • No filesystem or network access (except via bridges)         │
 └─────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│                  tool-prompts/run-code.ts                       │
-│              (Auto-Generated Documentation)                     │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │ • Reads metadata from api-bridge.ts                        │ │
-│  │ • Generates TypeScript interfaces                          │ │
-│  │ • Creates model prompt with latest API info                │ │
-│  │ • Documentation always in sync with code                   │ │
-│  └────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-
-Data Flow:
-──────────
-1. AI Model calls runCode tool
-2. run-code.ts validates schema
-3. executor.ts orchestrates execution
-4. Node.js VM context is created with timeout tracking
-5. API bridges are installed
-6. Scripts are executed in sequence
-7. User code runs in isolated VM sandbox
-8. Results are collected and sanitized
-9. Response returned to AI Model
-
-Extension Flow:
-───────────────
-1. Create service function (external-apis.ts)
-2. Create bridge handler (api-bridge.ts)
-3. Add metadata entry (api-bridge.ts)
-4. Update API script (scripts.ts)
-5. Install bridge (executor.ts)
-6. Documentation auto-updates! ✨
 ```
+
+## Execution Flow
+
+### 1. Request Validation
+
+```typescript
+AI Model → runCode(code, hints) → Zod validation → executor
+```
+
+### 2. VM Context Setup
+
+```typescript
+createVMContext(deadline) → Isolated sandbox with timeout tracking
+```
+
+### 3. Bridge Installation
+
+```typescript
+installApiBridges([weatherBridge]) → VM-native promises for async APIs
+```
+
+### 4. Script Execution Sequence
+
+```typescript
+1. Bootstrap: Console capture, result container
+2. API Setup: Install api.getWeather() with validation
+3. User Code: Execute in async IIFE with try/catch
+4. Summary: Collect stdout, stderr, result (sanitized)
+```
+
+### 5. Promise Bridge Mechanism
+
+**Host-to-VM Promise Bridge:**
+
+```
+User calls api.getWeather(coords)
+  ↓
+VM creates Promise via __virid_bridge_executor__.dispatch()
+  ↓
+Host executes async handler (fetchWeather)
+  ↓
+Host resolves VM promise via evaluateScript()
+  ↓
+User code receives awaited result
+```
+
+This ensures promises created in the VM can await host-side async operations without realm crossing issues.
 
 ## Key Design Principles
 
@@ -137,10 +160,13 @@ Extension Flow:
 
 Each module has a single, clear responsibility:
 
-- Config = Constants only
-- Errors = Error types only
-- Logger = Logging only
-- etc.
+- `config.ts` → Constants only
+- `errors.ts` → Error types only
+- `logger.ts` → Logging only
+- `vm-utils.ts` → VM context management
+- `scripts.ts` → Code generation
+- `api-bridge.ts` → External API integration
+- `executor.ts` → Orchestration
 
 ### 2. **Dependency Flow**
 
@@ -152,26 +178,221 @@ executor → api-bridge → external-apis
   config    errors, logger, types
 ```
 
-No circular dependencies!
+No circular dependencies.
 
 ### 3. **Type Safety**
 
-- Every function has explicit types
-- No `any` types anywhere
+- Explicit types everywhere
+- No `any` types
 - Runtime validation with type guards
 - Compile-time safety with TypeScript
 
 ### 4. **Extensibility**
 
-- New APIs added without modifying core
-- Bridge system is pluggable
-- Metadata drives documentation
-- Scripts are generated, not hardcoded
+- New APIs added via bridge pattern
+- Metadata-driven documentation
+- Generated scripts (not hardcoded)
+- Pluggable architecture
 
 ### 5. **Security**
 
-- Multiple layers of validation
+- Multiple validation layers
 - Resource limits enforced
-- Sandboxed execution
-- No access to host environment
-- Controlled external API access
+- Sandboxed execution (vm module)
+- No host environment access
+- Controlled API access via bridges
+
+## Module Reference
+
+### executor.ts
+
+**Purpose:** Main orchestration layer
+
+**Key Functions:**
+
+- `executeSandboxCode(input, hints)` → Coordinates full execution pipeline
+- `validateLanguage()` → Ensures JavaScript only
+- `clampTimeout()` → Enforces timeout limits
+- `generateWarnings()` → Creates user-facing warnings
+
+### vm-utils.ts
+
+**Purpose:** VM context and script execution
+
+**Key Functions:**
+
+- `createVMContext(deadline)` → Creates isolated sandbox
+- `evaluateScript()` → Synchronous script execution
+- `evaluateAsyncScript()` → Async script execution with promise handling
+- `promiseWithTimeout()` → Wraps promises with timeout
+- `getContextValue()` / `setContextValue()` → Context manipulation
+- `disposeVMContext()` → Cleanup (GC-based)
+
+### scripts.ts
+
+**Purpose:** Generate JavaScript code for VM execution
+
+**Key Functions:**
+
+- `createBootstrapScript()` → Console capture, result container
+- `createApiScript(hints)` → Exposes `api` global with methods
+- `createExecutionScript(code)` → Wraps user code with error handling
+- `createSummaryScript()` → Collects and sanitizes results
+
+### api-bridge.ts
+
+**Purpose:** Bridge host APIs to VM sandbox
+
+**Key Functions:**
+
+- `createWeatherBridge(deadline)` → Weather API handler
+- `installApiBridges(context, bridges)` → Sets up promise dispatch system
+- `extractLocationHints(hints)` → Parses request context
+- `getApiMetadata()` → Returns API documentation
+
+**Bridge Pattern:**
+
+1. Define `BridgeHandler` async function
+2. Create bridge config with `functionName` and `handler`
+3. Install via `installApiBridges()`
+4. VM-side wrapper returns native promises
+5. Host resolves promises via `evaluateScript()`
+
+### external-apis.ts
+
+**Purpose:** External service integrations
+
+**Key Functions:**
+
+- `fetchWeather(coords, timeout)` → Calls Open-Meteo API
+
+### types.ts
+
+**Purpose:** TypeScript type definitions
+
+**Key Types:**
+
+- `ExecutionInput` → User request
+- `ExecutionResult` → Execution outcome
+- `ExecutionEnvironment` → Runtime metadata
+- `RequestHints` → Location/context hints
+
+### errors.ts
+
+**Purpose:** Custom error hierarchy
+
+**Error Types:**
+
+- `SandboxError` → Base class
+- `ValidationError` → Invalid input
+- `TimeoutError` → Execution timeout
+- `VMError` → VM runtime error
+
+### config.ts
+
+**Purpose:** Configuration constants
+
+**Key Constants:**
+
+- `DEFAULT_TIMEOUT_MS` → 3000
+- `MAX_CODE_LENGTH` → 12000
+- `MAX_LOG_LINES` → 100
+- `MAX_SERIALIZATION_DEPTH` → 10
+
+### logger.ts
+
+**Purpose:** Structured logging
+
+**Log Levels:**
+
+- `debug()` → Verbose execution details
+- `info()` → Key execution events
+- `warn()` → Non-fatal issues
+- `error()` → Failures
+
+## Adding New APIs
+
+To add a new external API (e.g., HTTP fetch):
+
+1. **Add service function** (`external-apis.ts`):
+
+```typescript
+export async function fetchHttp(url: string, timeout: number): Promise<string> {
+  // Implementation
+}
+```
+
+2. **Create bridge** (`api-bridge.ts`):
+
+```typescript
+export function createHttpBridge(deadline: number): ApiBridgeConfig {
+  return {
+    functionName: '__virid_host_fetch__',
+    handler: async (vmContext, payload) => {
+      const { url } = validatePayload(payload);
+      return await fetchHttp(url, deadline - Date.now());
+    },
+  };
+}
+```
+
+3. **Update API script** (`scripts.ts`):
+
+```typescript
+// In createApiScript():
+globalThis.api = {
+  // ...existing methods
+  async fetch(url) {
+    const hostFetch = globalThis.__virid_host_fetch__;
+    return await hostFetch(JSON.stringify({ url }));
+  },
+};
+```
+
+4. **Install bridge** (`executor.ts`):
+
+```typescript
+const httpBridge = createHttpBridge(deadline);
+installApiBridges(vmContext, [weatherBridge, httpBridge]);
+```
+
+5. **Add metadata** (`api-bridge.ts`):
+
+```typescript
+export function getApiMetadata(): ApiMethodMetadata[] {
+  return [
+    // ...existing entries
+    {
+      name: 'fetch',
+      signature: '(url: string): Promise<string>',
+      description: 'Fetch data from HTTP endpoints',
+      returnType: 'Promise<string>',
+    },
+  ];
+}
+```
+
+Documentation auto-updates! ✨
+
+## Migration from QuickJS
+
+The sandbox was originally built with `quickjs-emscripten` but migrated to Node.js `vm` module for:
+
+1. **Better Promise Support:** Native async/await without realm crossing issues
+2. **Simpler Maintenance:** No WASM/Emscripten dependencies
+3. **Performance:** Native V8 execution
+4. **Debugging:** Better error messages and stack traces
+
+**Key Changes:**
+
+- Replaced `QuickJSContext` with `vm.Context`
+- Migrated from `evalCodeAsync()` to `vm.Script.runInContext()`
+- Redesigned bridge system for VM-native promises
+- Added pending promise map for async resolution
+
+**Preserved:**
+
+- Same API surface for user code
+- Security model and resource limits
+- Bridge pattern and extensibility
+- Test coverage and behavior

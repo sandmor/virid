@@ -4,7 +4,7 @@
  */
 
 import type { VMContext } from './vm-utils';
-import { setContextValue, getContextValue } from './vm-utils';
+import { setContextValue, evaluateScript } from './vm-utils';
 import { fetchWeather, type WeatherCoordinates } from './external-apis';
 import {
   coerceFiniteNumber,
@@ -73,6 +73,7 @@ export interface ApiBridgeConfig {
  */
 export function createWeatherBridge(deadlineMs: number): ApiBridgeConfig {
   const handler: BridgeHandler = async (vmContext, payload) => {
+    logger.debug('Weather bridge called', { payload });
     try {
       const coordinates = validateCoordinates(payload);
       if (!coordinates) {
@@ -86,7 +87,9 @@ export function createWeatherBridge(deadlineMs: number): ApiBridgeConfig {
         throw new Error('Weather request timed out before it could be sent');
       }
 
+      logger.debug('Fetching weather', { coordinates, remaining });
       const text = await fetchWeather(coordinates, remaining);
+      logger.debug('Weather fetched successfully', { textLength: text.length });
       return text;
     } catch (error) {
       const message =
@@ -109,38 +112,238 @@ export function createWeatherBridge(deadlineMs: number): ApiBridgeConfig {
 
 /**
  * Installs API bridges into the VM context
- * Creates async bridge functions that can be called from within the sandbox
+ * Exposes async bridge functions that return VM-native promises so sandbox code
+ * can `await` host-side operations without leaking across realms
  */
 export function installApiBridges(
   vmContext: VMContext,
   bridges: ApiBridgeConfig[]
 ): void {
-  // Store bridge handlers in a map accessible from the VM
-  const bridgeMap = new Map<string, BridgeHandler>();
+  const bridgeHandlers = new Map<string, BridgeHandler>();
 
   for (const bridge of bridges) {
-    bridgeMap.set(bridge.functionName, bridge.handler);
+    bridgeHandlers.set(bridge.functionName, bridge.handler);
+  }
 
-    // Create a wrapper function in the VM context that returns a promise
-    // The actual handler runs in the host environment with full access
-    const wrapperFn = async (payloadJson: string) => {
-      const handler = bridgeMap.get(bridge.functionName);
-      if (!handler) {
-        throw new Error(`Bridge function ${bridge.functionName} not found`);
-      }
+  // Ensure the VM has a map to track pending bridge promises
+  const pendingMapInit = `
+(function() {
+  if (!globalThis.__virid_pending_bridges__) {
+    globalThis.__virid_pending_bridges__ = new Map();
+  }
+})();
+`;
 
-      let payload: unknown;
-      try {
-        payload = payloadJson ? JSON.parse(payloadJson) : {};
-      } catch {
-        throw new SyntaxError('Invalid JSON payload');
-      }
+  evaluateScript(vmContext, pendingMapInit, 'bridge-pending-init.js');
 
-      return await handler(vmContext, payload);
+  const pendingResultKey = '__virid_bridge_result__';
+  const pendingErrorKey = '__virid_bridge_error__';
+  let nextRequestId = 1;
+
+  const resolveBridgePromise = (
+    functionName: string,
+    requestId: number,
+    resultStr: string
+  ) => {
+    logger.debug('Resolving bridge promise', {
+      functionName,
+      requestId,
+      resultStrLength: resultStr.length,
+    });
+
+    setContextValue(vmContext, pendingResultKey, resultStr);
+
+    try {
+      evaluateScript(
+        vmContext,
+        `(() => {
+          const pending = globalThis.__virid_pending_bridges__;
+          if (!pending) {
+            return;
+          }
+          const entry = pending.get(${requestId});
+          if (!entry) {
+            return;
+          }
+          pending.delete(${requestId});
+          try {
+            const value = globalThis.${pendingResultKey};
+            entry.resolve(value);
+          } finally {
+            globalThis.${pendingResultKey} = undefined;
+          }
+        })();`,
+        `${functionName}-resolve-${requestId}.js`
+      );
+    } catch (error) {
+      logger.error('Failed to resolve bridge promise inside VM', {
+        functionName,
+        requestId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setContextValue(vmContext, pendingResultKey, undefined);
+    }
+  };
+
+  const rejectBridgePromise = (
+    functionName: string,
+    requestId: number,
+    error: unknown
+  ) => {
+    const rejection =
+      error instanceof Error
+        ? {
+            message: error.message,
+            name: error.name,
+            stack: error.stack,
+          }
+        : {
+            message: String(error ?? 'Bridge error'),
+            name: 'Error',
+            stack: null,
+          };
+
+    logger.error('Bridge handler error', {
+      functionName,
+      requestId,
+      message: rejection.message,
+    });
+
+    setContextValue(vmContext, pendingErrorKey, rejection);
+
+    try {
+      evaluateScript(
+        vmContext,
+        `(() => {
+          const pending = globalThis.__virid_pending_bridges__;
+          if (!pending) {
+            return;
+          }
+          const entry = pending.get(${requestId});
+          if (!entry) {
+            return;
+          }
+          pending.delete(${requestId});
+          try {
+            const info = globalThis.${pendingErrorKey};
+            const error = new Error(info && info.message ? String(info.message) : 'Bridge error');
+            if (info && info.name) {
+              error.name = String(info.name);
+            }
+            if (info && info.stack) {
+              error.stack = String(info.stack);
+            }
+            entry.reject(error);
+          } finally {
+            globalThis.${pendingErrorKey} = undefined;
+          }
+        })();`,
+        `${functionName}-reject-${requestId}.js`
+      );
+    } catch (invokeError) {
+      logger.error('Failed to reject bridge promise inside VM', {
+        functionName,
+        requestId,
+        error:
+          invokeError instanceof Error
+            ? invokeError.message
+            : String(invokeError),
+      });
+    } finally {
+      setContextValue(vmContext, pendingErrorKey, undefined);
+    }
+  };
+
+  const bridgeExecutor = {
+    dispatch: (functionName: string, payloadJson: string) => {
+      const requestId = nextRequestId++;
+
+      logger.debug('Bridge executor dispatched', {
+        functionName,
+        payloadJson,
+        requestId,
+      });
+
+      (async () => {
+        try {
+          const handler = bridgeHandlers.get(functionName);
+          if (!handler) {
+            throw new Error(`Bridge function ${functionName} not found`);
+          }
+
+          let payload: unknown;
+          try {
+            payload = payloadJson ? JSON.parse(payloadJson) : {};
+          } catch {
+            throw new SyntaxError('Invalid JSON payload');
+          }
+
+          logger.debug('Calling bridge handler', {
+            functionName,
+            requestId,
+            payload,
+          });
+          const result = await handler(vmContext, payload);
+          logger.debug('Bridge handler returned', {
+            functionName,
+            requestId,
+            resultType: typeof result,
+            resultLength:
+              typeof result === 'string' ? result.length : undefined,
+          });
+          const resultStr =
+            typeof result === 'string'
+              ? result
+              : JSON.stringify(result ?? null);
+
+          resolveBridgePromise(functionName, requestId, resultStr);
+        } catch (handlerError) {
+          rejectBridgePromise(functionName, requestId, handlerError);
+        }
+      })();
+
+      return requestId;
+    },
+  };
+
+  // Set the bridge executor in the VM context
+  setContextValue(vmContext, '__virid_bridge_executor__', bridgeExecutor);
+
+  // For each bridge, inject a VM-native wrapper that returns a VM Promise
+  for (const bridge of bridges) {
+    const wrapperSetupCode = `
+  (function() {
+    const executor = globalThis.__virid_bridge_executor__;
+    if (!executor || typeof executor.dispatch !== 'function') {
+      throw new Error('Bridge executor is unavailable');
+    }
+
+    const pending = globalThis.__virid_pending_bridges__;
+    if (!pending) {
+      throw new Error('Pending bridge map is unavailable');
+    }
+
+    const functionName = ${JSON.stringify(bridge.functionName)};
+
+    globalThis[functionName] = function(payloadJson) {
+      return new Promise((resolve, reject) => {
+        const requestId = executor.dispatch(functionName, payloadJson ?? '');
+        pending.set(requestId, { resolve, reject });
+      });
     };
+  })();
+  `;
 
-    // Set the wrapper function in the VM context
-    setContextValue(vmContext, bridge.functionName, wrapperFn);
+    evaluateScript(
+      vmContext,
+      wrapperSetupCode,
+      `${bridge.functionName}-bridge.js`
+    );
+
+    logger.debug('Bridge function set in context', {
+      functionName: bridge.functionName,
+    });
   }
 }
 
