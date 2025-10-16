@@ -60,27 +60,65 @@ const PurePreviewMessage = ({
   const [mode, setMode] = useState<'view' | 'edit'>('view');
 
   const parts = message.parts ?? [];
-  const attachmentsFromMessage = parts.filter((part) => part.type === 'file');
-  const reasoningParts = parts.filter(
-    (part): part is ChatMessage['parts'][number] & { text: string } =>
-      part.type === 'reasoning' &&
-      typeof part.text === 'string' &&
-      part.text.trim().length > 0
+
+  // Merge consecutive reasoning parts
+  const processedParts = parts.reduce(
+    (acc, part) => {
+      if (
+        part.type === 'reasoning' &&
+        typeof part.text === 'string' &&
+        part.text.trim().length > 0
+      ) {
+        const lastPart = acc[acc.length - 1];
+        if (
+          lastPart &&
+          lastPart.type === 'reasoning' &&
+          typeof lastPart.text === 'string'
+        ) {
+          // Merge with previous reasoning part
+          lastPart.text += '\n\n' + part.text.trim();
+        } else {
+          // Add new reasoning part
+          acc.push({
+            ...part,
+            text: part.text.trim(),
+          });
+        }
+      } else {
+        acc.push(part);
+      }
+      return acc;
+    },
+    [] as typeof parts
   );
-  const inlineReasoningElements = reasoningParts.map((part, rIndex) => (
-    <MessageReasoning
-      appearance="inline"
-      isLoading={isLoading}
-      key={`message-${message.id}-reasoning-${rIndex}`}
-      reasoning={part.text.trim()}
-    />
-  ));
-  const hasTextPart = parts.some(
+
+  const attachmentsFromMessage = processedParts.filter(
+    (part) => part.type === 'file'
+  );
+  const hasTextPart = processedParts.some(
     (part) =>
       part.type === 'text' &&
       typeof part.text === 'string' &&
       part.text.trim().length > 0
   );
+
+  // Find reasoning parts before the first text part for inline reasoning
+  const firstTextIndex = processedParts.findIndex(
+    (part) =>
+      part.type === 'text' &&
+      typeof part.text === 'string' &&
+      part.text.trim().length > 0
+  );
+  const inlineReasoningText = processedParts
+    .slice(0, firstTextIndex === -1 ? processedParts.length : firstTextIndex)
+    .filter(
+      (part): part is typeof part & { text: string } =>
+        part.type === 'reasoning' &&
+        typeof part.text === 'string' &&
+        part.text.trim().length > 0
+    )
+    .map((part) => part.text)
+    .join('\n\n');
 
   useDataStream();
 
@@ -91,7 +129,6 @@ const PurePreviewMessage = ({
       : 'bg-muted text-foreground/90 dark:bg-muted/40'
   );
   let inlineReasoningAttached = false;
-  let reasoningOnlyRendered = false;
 
   return (
     <motion.div
@@ -161,24 +198,15 @@ const PurePreviewMessage = ({
             </div>
           )}
 
-          {parts.map((part, index) => {
+          {processedParts.map((part, index) => {
             const { type } = part;
             const key = `message-${message.id}-part-${index}`;
 
             if (type === 'reasoning') {
-              if (hasTextPart) {
+              // Skip reasoning parts that are included inline with text
+              if (hasTextPart && index < firstTextIndex) {
                 return null;
               }
-
-              if (reasoningOnlyRendered) {
-                return null;
-              }
-
-              if (!inlineReasoningElements.length) {
-                return null;
-              }
-
-              reasoningOnlyRendered = true;
 
               return (
                 <div key={key}>
@@ -186,7 +214,12 @@ const PurePreviewMessage = ({
                     className={messageBubbleClass}
                     data-testid="message-content"
                   >
-                    {inlineReasoningElements}
+                    <MessageReasoning
+                      appearance="inline"
+                      isLoading={isLoading}
+                      key={`message-${message.id}-reasoning-${index}`}
+                      reasoning={part.text}
+                    />
                   </MessageContent>
                 </div>
               );
@@ -197,7 +230,7 @@ const PurePreviewMessage = ({
                 const shouldIncludeReasoning =
                   message.role === 'assistant' &&
                   !inlineReasoningAttached &&
-                  inlineReasoningElements.length > 0;
+                  inlineReasoningText.trim().length > 0;
 
                 if (shouldIncludeReasoning) {
                   inlineReasoningAttached = true;
@@ -209,7 +242,14 @@ const PurePreviewMessage = ({
                       className={messageBubbleClass}
                       data-testid="message-content"
                     >
-                      {shouldIncludeReasoning ? inlineReasoningElements : null}
+                      {shouldIncludeReasoning ? (
+                        <MessageReasoning
+                          appearance="inline"
+                          isLoading={isLoading}
+                          key={`message-${message.id}-reasoning`}
+                          reasoning={inlineReasoningText}
+                        />
+                      ) : null}
                       <Response>{sanitizeText(part.text)}</Response>
                     </MessageContent>
                   </div>
