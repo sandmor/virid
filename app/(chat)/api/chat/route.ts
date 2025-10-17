@@ -104,13 +104,78 @@ function isErrorWithMessage(error: unknown): error is { message: string } {
   );
 }
 
-function jsonEqual(a: unknown, b: unknown) {
-  if (a === b) return true;
-  try {
-    return JSON.stringify(a) === JSON.stringify(b);
-  } catch {
-    return false;
+type ComparableUserContent = {
+  textParts: string[];
+  fileParts: Array<{
+    mediaType?: string;
+    name?: string;
+    url?: string;
+  }>;
+};
+
+function extractComparableUserContent(parts: unknown): ComparableUserContent {
+  const comparable: ComparableUserContent = {
+    textParts: [],
+    fileParts: [],
+  };
+
+  if (!Array.isArray(parts)) {
+    return comparable;
   }
+
+  for (const part of parts) {
+    if (!part || typeof part !== 'object') continue;
+
+    const kind = (part as Record<string, unknown>).type;
+    if (kind === 'text') {
+      const text = (part as Record<string, unknown>).text;
+      if (typeof text === 'string') {
+        comparable.textParts.push(text);
+      }
+      continue;
+    }
+
+    if (kind === 'file') {
+      const filePart = part as Record<string, unknown>;
+      comparable.fileParts.push({
+        mediaType:
+          typeof filePart.mediaType === 'string'
+            ? filePart.mediaType
+            : undefined,
+        name: typeof filePart.name === 'string' ? filePart.name : undefined,
+        url: typeof filePart.url === 'string' ? filePart.url : undefined,
+      });
+    }
+  }
+
+  return comparable;
+}
+
+function comparableUserContentEqual(
+  a: ComparableUserContent,
+  b: ComparableUserContent
+): boolean {
+  if (a.textParts.length !== b.textParts.length) return false;
+  for (let index = 0; index < a.textParts.length; index += 1) {
+    if (a.textParts[index] !== b.textParts[index]) {
+      return false;
+    }
+  }
+
+  if (a.fileParts.length !== b.fileParts.length) return false;
+  for (let index = 0; index < a.fileParts.length; index += 1) {
+    const left = a.fileParts[index];
+    const right = b.fileParts[index];
+    if (
+      left.mediaType !== right.mediaType ||
+      left.name !== right.name ||
+      left.url !== right.url
+    ) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 let globalStreamContext: ResumableStreamContext | null = null;
@@ -411,26 +476,21 @@ export async function POST(request: Request) {
 
         const dbUiMessages = convertToUIMessages(messagesFromDb);
         const lastPersistedDbMessage = messagesFromDb.at(-1);
-        const lastPersistedUiMessage = dbUiMessages.at(-1);
-
-        const persistedAttachments = Array.isArray(
-          lastPersistedDbMessage?.attachments
-        )
-          ? (lastPersistedDbMessage?.attachments as unknown[])
-          : [];
-        const incomingAttachments = Array.isArray((message as any)?.attachments)
-          ? ((message as any)?.attachments as unknown[])
-          : [];
-        const attachmentsMatch =
-          persistedAttachments.length || incomingAttachments.length
-            ? jsonEqual(persistedAttachments, incomingAttachments)
-            : true;
+        const comparablePersistedContent = extractComparableUserContent(
+          lastPersistedDbMessage?.parts
+        );
+        const comparableIncomingContent = extractComparableUserContent(
+          message.parts
+        );
 
         const duplicateUserTailExists =
+          Boolean(chat?.forkedFromMessageId) &&
           lastPersistedDbMessage?.role === 'user' &&
-          (message as any)?.role === 'user' &&
-          jsonEqual(lastPersistedUiMessage?.parts, message.parts) &&
-          attachmentsMatch;
+          message.role === 'user' &&
+          comparableUserContentEqual(
+            comparablePersistedContent,
+            comparableIncomingContent
+          );
 
         const persistUserMessagePromise = duplicateUserTailExists
           ? Promise.resolve()
