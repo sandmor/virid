@@ -104,6 +104,15 @@ function isErrorWithMessage(error: unknown): error is { message: string } {
   );
 }
 
+function jsonEqual(a: unknown, b: unknown) {
+  if (a === b) return true;
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
+
 let globalStreamContext: ResumableStreamContext | null = null;
 
 const getTokenlensCatalog = nextCache(
@@ -370,10 +379,7 @@ export async function POST(request: Request) {
     const modelCapabilitiesPromise =
       getCachedModelCapabilities(selectedChatModel)();
 
-    // For a regeneration request we do NOT persist the user message again
-    // (same id) – otherwise we'd trigger a unique key violation. The
-    // downstream logic only needs the existing persisted user message plus
-    // the previous assistant message id for lineage mutation.
+    // Regeneration replays an existing user turn; avoid duplicating it in persistence.
     let finalMergedUsage: AppUsage | undefined;
 
     const stream = createUIMessageStream({
@@ -404,11 +410,29 @@ export async function POST(request: Request) {
         ]);
 
         const dbUiMessages = convertToUIMessages(messagesFromDb);
-        const isRegenerationRequest = messagesFromDb.some(
-          (dbMessage) => dbMessage.id === message.id
-        );
+        const lastPersistedDbMessage = messagesFromDb.at(-1);
+        const lastPersistedUiMessage = dbUiMessages.at(-1);
 
-        const persistUserMessagePromise = isRegenerationRequest
+        const persistedAttachments = Array.isArray(
+          lastPersistedDbMessage?.attachments
+        )
+          ? (lastPersistedDbMessage?.attachments as unknown[])
+          : [];
+        const incomingAttachments = Array.isArray((message as any)?.attachments)
+          ? ((message as any)?.attachments as unknown[])
+          : [];
+        const attachmentsMatch =
+          persistedAttachments.length || incomingAttachments.length
+            ? jsonEqual(persistedAttachments, incomingAttachments)
+            : true;
+
+        const duplicateUserTailExists =
+          lastPersistedDbMessage?.role === 'user' &&
+          (message as any)?.role === 'user' &&
+          jsonEqual(lastPersistedUiMessage?.parts, message.parts) &&
+          attachmentsMatch;
+
+        const persistUserMessagePromise = duplicateUserTailExists
           ? Promise.resolve()
           : saveMessages({
               messages: [
@@ -425,7 +449,7 @@ export async function POST(request: Request) {
               console.warn('Failed to persist user message (non-fatal)', e);
             });
 
-        const uiMessages = isRegenerationRequest
+        const uiMessages = duplicateUserTailExists
           ? dbUiMessages
           : [...dbUiMessages, message];
         const modelMessages = convertToModelMessages(uiMessages);
