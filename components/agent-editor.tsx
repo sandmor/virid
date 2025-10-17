@@ -106,15 +106,9 @@ const TOOL_LABELS: Record<ChatToolId, string> = {
   createDocument: 'Create document',
   updateDocument: 'Update document',
   requestSuggestions: 'Suggestions',
-  archiveCreateEntry: 'Archive: create entry',
-  archiveReadEntry: 'Archive: read entry',
-  archiveUpdateEntry: 'Archive: update entry',
-  archiveDeleteEntry: 'Archive: delete entry',
-  archiveLinkEntries: 'Archive: link entries',
-  archiveSearchEntries: 'Archive: search entries',
-  archiveApplyEdits: 'Archive: apply edits',
-  archivePinEntry: 'Archive: pin entry',
-  archiveUnpinEntry: 'Archive: unpin entry',
+  readArchive: 'Read Archive',
+  writeArchive: 'Write Archive',
+  manageChatPins: 'Manage Chat Pins',
 };
 
 function serializeSettingsSnapshot(state: AgentFormState) {

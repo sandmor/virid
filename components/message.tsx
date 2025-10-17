@@ -499,14 +499,9 @@ const PurePreviewMessage = ({
             }
 
             if (
-              type === 'tool-archiveCreateEntry' ||
-              type === 'tool-archiveReadEntry' ||
-              type === 'tool-archiveUpdateEntry' ||
-              type === 'tool-archiveDeleteEntry' ||
-              type === 'tool-archiveLinkEntries' ||
-              type === 'tool-archiveSearchEntries' ||
-              type === 'tool-archivePinEntry' ||
-              type === 'tool-archiveUnpinEntry'
+              type === 'tool-readArchive' ||
+              type === 'tool-writeArchive' ||
+              type === 'tool-manageChatPins'
             ) {
               const { toolCallId, state } = part;
               const output = part.output as any;

@@ -55,15 +55,9 @@ const PINNED_MEMORY_CHAR_LIMIT = 20_000;
 
 const ARTIFACT_TOOL_IDS = ['createDocument', 'updateDocument'] as const;
 const ARCHIVE_TOOL_IDS = [
-  'archiveCreateEntry',
-  'archiveReadEntry',
-  'archiveUpdateEntry',
-  'archiveDeleteEntry',
-  'archiveLinkEntries',
-  'archiveSearchEntries',
-  'archiveApplyEdits',
-  'archivePinEntry',
-  'archiveUnpinEntry',
+  'readArchive',
+  'writeArchive',
+  'manageChatPins',
 ] as const;
 
 export const regularPrompt =

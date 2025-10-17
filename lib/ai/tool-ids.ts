@@ -5,15 +5,9 @@ export const CHAT_TOOL_IDS = [
   'createDocument',
   'updateDocument',
   'requestSuggestions',
-  'archiveCreateEntry',
-  'archiveReadEntry',
-  'archiveUpdateEntry',
-  'archiveDeleteEntry',
-  'archiveLinkEntries',
-  'archiveSearchEntries',
-  'archiveApplyEdits',
-  'archivePinEntry',
-  'archiveUnpinEntry',
+  'readArchive',
+  'writeArchive',
+  'manageChatPins',
 ] as const;
 export type ChatToolId = (typeof CHAT_TOOL_IDS)[number];
 

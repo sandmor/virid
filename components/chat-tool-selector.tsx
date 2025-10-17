@@ -24,15 +24,9 @@ const LABELS: Record<ChatToolId, string> = {
   createDocument: 'Create Doc',
   updateDocument: 'Update Doc',
   requestSuggestions: 'Suggestions',
-  archiveCreateEntry: 'Archive Create',
-  archiveReadEntry: 'Archive Read',
-  archiveUpdateEntry: 'Archive Update',
-  archiveDeleteEntry: 'Archive Delete',
-  archiveLinkEntries: 'Archive Link',
-  archiveSearchEntries: 'Archive Search',
-  archiveApplyEdits: 'Archive Apply',
-  archivePinEntry: 'Archive Pin',
-  archiveUnpinEntry: 'Archive Unpin',
+  readArchive: 'Read Archive',
+  writeArchive: 'Write Archive',
+  manageChatPins: 'Manage Chat Pins',
 };
 
 // Define logical groups (order preserved)
@@ -45,17 +39,7 @@ const TOOL_GROUPS: { id: string; label: string; tools: ChatToolId[] }[] = [
   {
     id: 'archive',
     label: 'Archive',
-    tools: [
-      'archiveCreateEntry',
-      'archiveReadEntry',
-      'archiveUpdateEntry',
-      'archiveDeleteEntry',
-      'archiveLinkEntries',
-      'archiveSearchEntries',
-      'archiveApplyEdits',
-      'archivePinEntry',
-      'archiveUnpinEntry',
-    ],
+    tools: ['readArchive', 'writeArchive', 'manageChatPins'],
   },
   {
     id: 'other',

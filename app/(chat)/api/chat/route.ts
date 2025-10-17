@@ -38,15 +38,9 @@ import { getUsage } from 'tokenlens/helpers';
 import { getModelCost } from '@/lib/ai/pricing';
 import { getLanguageModel } from '@/lib/ai/providers';
 import { createDocument } from '@/lib/ai/tools/create-document';
-import { archiveCreateEntry } from '@/lib/ai/tools/archive-create-entry';
-import { archiveReadEntry } from '@/lib/ai/tools/archive-read-entry';
-import { archiveUpdateEntry } from '@/lib/ai/tools/archive-update-entry';
-import { archiveDeleteEntry } from '@/lib/ai/tools/archive-delete-entry';
-import { archiveLinkEntries } from '@/lib/ai/tools/archive-link-entries';
-import { archiveSearchEntries } from '@/lib/ai/tools/archive-search-entries';
-import { archiveApplyEdits } from '@/lib/ai/tools/archive-apply-edits';
-import { archivePinEntry } from '@/lib/ai/tools/archive-pin-entry';
-import { archiveUnpinEntry } from '@/lib/ai/tools/archive-unpin-entry';
+import { readArchive } from '@/lib/ai/tools/readArchive';
+import { writeArchive } from '@/lib/ai/tools/writeArchive';
+import { manageChatPins } from '@/lib/ai/tools/manageChatPins';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { updateDocument } from '@/lib/ai/tools/update-document';
@@ -697,35 +691,14 @@ export async function POST(request: Request) {
             dataStream,
           });
         }
-        if (allowedToolIds.includes('archiveCreateEntry')) {
-          activeTools.archiveCreateEntry = archiveCreateEntry({ session });
+        if (allowedToolIds.includes('readArchive')) {
+          activeTools.readArchive = readArchive({ session });
         }
-        if (allowedToolIds.includes('archiveReadEntry')) {
-          activeTools.archiveReadEntry = archiveReadEntry({ session });
+        if (allowedToolIds.includes('writeArchive')) {
+          activeTools.writeArchive = writeArchive({ session });
         }
-        if (allowedToolIds.includes('archiveUpdateEntry')) {
-          activeTools.archiveUpdateEntry = archiveUpdateEntry({ session });
-        }
-        if (allowedToolIds.includes('archiveDeleteEntry')) {
-          activeTools.archiveDeleteEntry = archiveDeleteEntry({ session });
-        }
-        if (allowedToolIds.includes('archiveLinkEntries')) {
-          activeTools.archiveLinkEntries = archiveLinkEntries({ session });
-        }
-        if (allowedToolIds.includes('archiveSearchEntries')) {
-          activeTools.archiveSearchEntries = archiveSearchEntries({ session });
-        }
-        if (allowedToolIds.includes('archiveApplyEdits')) {
-          activeTools.archiveApplyEdits = archiveApplyEdits({ session });
-        }
-        if (allowedToolIds.includes('archivePinEntry')) {
-          activeTools.archivePinEntry = archivePinEntry({
-            session,
-            chatId: id,
-          });
-        }
-        if (allowedToolIds.includes('archiveUnpinEntry')) {
-          activeTools.archiveUnpinEntry = archiveUnpinEntry({
+        if (allowedToolIds.includes('manageChatPins')) {
+          activeTools.manageChatPins = manageChatPins({
             session,
             chatId: id,
           });
