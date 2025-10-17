@@ -119,26 +119,28 @@ export function createApiScript(locationHints: LocationHints | null): string {
 /**
  * Creates the execution wrapper script for user code.
  * Attempts to evaluate as an expression first (to capture return values),
- * falling back to statement execution if a SyntaxError occurs.
+ * falling back to statement execution when the snippet is not expression-safe.
  */
 export function createExecutionScript(code: string): string {
+  const serializedSource = JSON.stringify(code);
+
   return [
     '"use strict";',
     '',
     '(async function () {',
+    '  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;',
+    `  const source = ${serializedSource};`,
+    '  const expressionSource = "return (\\n" + source + "\\n);";',
     '  try {',
     '    let result;',
-    '    // Try evaluating as expression first (captures return values)',
     '    try {',
-    '      result = await (async () => (',
-    code,
-    '      ))();',
+    '      const expressionFn = new AsyncFunction(expressionSource);',
+    '      result = await expressionFn.call(globalThis);',
     '    } catch (expressionError) {',
-    '      // Fall back to statement execution if syntax error',
-    '      if (!(expressionError instanceof SyntaxError)) throw expressionError;',
-    '      result = await (async () => {',
-    code,
-    '      })();',
+    '      const errorName = expressionError?.name || expressionError?.constructor?.name;',
+    '      if (errorName !== "SyntaxError") throw expressionError;',
+    '      const statementFn = new AsyncFunction(source);',
+    '      result = await statementFn.call(globalThis);',
     '    }',
     '    globalThis.__virid_last_result__ = { status: "ok", value: result };',
     '  } catch (error) {',
