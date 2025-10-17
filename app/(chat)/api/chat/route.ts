@@ -383,22 +383,8 @@ export async function POST(request: Request) {
           type: 'data-init',
           data: { chatId: id, createdNewChat },
         });
-        // Kick off persistence & context gathering in parallel.
+        // Kick off context gathering in parallel while we prepare persistence.
         const streamId = generateUUID();
-        const persistUserMessagePromise = saveMessages({
-          messages: [
-            {
-              chatId: id,
-              id: message.id,
-              role: 'user',
-              parts: message.parts,
-              attachments: [],
-              createdAt: new Date(),
-            },
-          ],
-        }).catch((e) => {
-          console.warn('Failed to persist user message (non-fatal)', e);
-        });
         const streamIdPromise = createStreamId({ streamId, chatId: id }).catch(
           (e) => console.warn('Failed to persist stream id (non-fatal)', e)
         );
@@ -417,7 +403,31 @@ export async function POST(request: Request) {
           modelCapabilitiesPromise,
         ]);
 
-        const uiMessages = [...convertToUIMessages(messagesFromDb), message];
+        const dbUiMessages = convertToUIMessages(messagesFromDb);
+        const isRegenerationRequest = messagesFromDb.some(
+          (dbMessage) => dbMessage.id === message.id
+        );
+
+        const persistUserMessagePromise = isRegenerationRequest
+          ? Promise.resolve()
+          : saveMessages({
+              messages: [
+                {
+                  chatId: id,
+                  id: message.id,
+                  role: 'user',
+                  parts: message.parts,
+                  attachments: [],
+                  createdAt: new Date(),
+                },
+              ],
+            }).catch((e) => {
+              console.warn('Failed to persist user message (non-fatal)', e);
+            });
+
+        const uiMessages = isRegenerationRequest
+          ? dbUiMessages
+          : [...dbUiMessages, message];
         const modelMessages = convertToModelMessages(uiMessages);
 
         const modelSupportsTools = modelCapabilities?.supportsTools ?? true; // Default to true if not found
