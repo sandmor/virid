@@ -10,6 +10,13 @@ import { ArchiveList } from '@/components/archive/archive-list';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -17,6 +24,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { AnimatedButtonLabel } from '@/components/ui/animated-button';
@@ -28,11 +46,17 @@ import {
   CheckCircle2,
   CircleAlert,
   Loader2,
+  Trash2,
+  X,
+  CheckSquare,
 } from 'lucide-react';
 import {
   useArchiveEntry,
   useCreateArchiveEntry,
   useUpdateArchiveEntry,
+  useDeleteArchiveEntries,
+  useArchiveSearch,
+  type ArchiveListEntry,
 } from '@/hooks/use-archive';
 
 export function ArchiveExplorer() {
@@ -40,15 +64,26 @@ export function ArchiveExplorer() {
   const [current, setCurrent] = useState<string | undefined>();
   const [openNew, setOpenNew] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [status, setStatus] = useState<
     'idle' | 'created' | 'updated' | 'error'
   >('idle');
   const statusTimerRef = useRef<number | null>(null);
   const [saveFeedback, setSaveFeedback] = useFeedbackState();
 
+  // Multi-selection state
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
+  const longPressTimerRef = useRef<number | null>(null);
+  const [isDeletingMultiple, setIsDeletingMultiple] = useState(false);
+
   const { data: selected } = useArchiveEntry(current);
   const createMutation = useCreateArchiveEntry();
   const updateMutation = useUpdateArchiveEntry();
+  const bulkDeleteMutation = useDeleteArchiveEntries();
+  const { data: archiveData } = useArchiveSearch({ q });
+  const archives: ArchiveListEntry[] =
+    (archiveData as any)?.pages?.flatMap((page: any) => page.entries) || [];
 
   const tagSchema = z
     .string()
@@ -189,7 +224,106 @@ export function ArchiveExplorer() {
     setOpenEdit(true);
   }
 
-  const mutationInFlight = createMutation.isPending || updateMutation.isPending;
+  // Multi-selection functions
+  const startSelectionMode = useCallback(() => {
+    setIsSelectionMode(true);
+  }, []);
+
+  const stopSelectionMode = useCallback(() => {
+    setIsSelectionMode(false);
+    setSelectedSlugs(new Set());
+  }, []);
+
+  const toggleSelection = useCallback((slug: string) => {
+    setSelectedSlugs((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(slug)) {
+        newSet.delete(slug);
+        // If no items selected after deselection, exit selection mode
+        if (newSet.size === 0) {
+          setIsSelectionMode(false);
+        }
+      } else {
+        newSet.add(slug);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleLongPressStart = useCallback(
+    (slug: string, onInitiated?: () => void) => {
+      if (isSelectionMode) return;
+
+      longPressTimerRef.current = window.setTimeout(() => {
+        if (onInitiated) onInitiated();
+        startSelectionMode();
+        toggleSelection(slug);
+      }, 500); // 500ms for long press
+    },
+    [isSelectionMode, startSelectionMode, toggleSelection]
+  );
+
+  const handleLongPressEnd = useCallback(() => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    if (!archives || archives.length === 0) return;
+
+    if (!isSelectionMode) {
+      startSelectionMode();
+    }
+
+    const allSlugs = new Set(
+      archives.map((archive: ArchiveListEntry) => archive.slug)
+    );
+    setSelectedSlugs(allSlugs);
+  }, [archives, isSelectionMode, startSelectionMode]);
+
+  const handleConfirmDeleteSelected = useCallback(async () => {
+    if (selectedSlugs.size === 0) return;
+
+    setOpenDeleteConfirm(false);
+    setIsDeletingMultiple(true);
+    try {
+      await bulkDeleteMutation.mutateAsync({
+        slugs: Array.from(selectedSlugs),
+      });
+
+      toast.success(
+        `Deleted ${selectedSlugs.size} ${selectedSlugs.size === 1 ? 'entry' : 'entries'}`
+      );
+      stopSelectionMode();
+
+      // Clear current selection if it was deleted
+      if (current && selectedSlugs.has(current)) {
+        setCurrent(undefined);
+      }
+    } catch (error) {
+      toast.error('Failed to delete some entries');
+    } finally {
+      setIsDeletingMultiple(false);
+    }
+  }, [selectedSlugs, current, stopSelectionMode, bulkDeleteMutation]);
+
+  const handleShiftClick = useCallback(
+    (slug: string) => {
+      if (!isSelectionMode) {
+        startSelectionMode();
+      }
+      toggleSelection(slug);
+    },
+    [isSelectionMode, startSelectionMode, toggleSelection]
+  );
+
+  const mutationInFlight =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    bulkDeleteMutation.isPending ||
+    isDeletingMultiple;
   const statusLabel =
     status === 'created'
       ? 'Entry created'
@@ -205,7 +339,7 @@ export function ArchiveExplorer() {
       transition={{ duration: 0.35, ease: [0.21, 1.02, 0.73, 1] }}
     >
       <motion.section
-        className="flex w-full max-w-xs flex-col overflow-hidden rounded-2xl border border-border/60 bg-background/75 shadow-sm backdrop-blur-sm"
+        className="flex w-full max-w-xs flex-col overflow-hidden rounded-2xl border border-border/60 bg-background/75 shadow-sm backdrop-blur-sm h-full"
         initial={{ opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3, delay: 0.05, ease: [0.21, 1.02, 0.73, 1] }}
@@ -271,16 +405,29 @@ export function ArchiveExplorer() {
                   <div className="space-y-1">
                     <label className="text-sm font-medium">Tags</label>
                     <div className="flex flex-wrap gap-2 pb-1">
-                      {createForm.watch('tags').map((t) => (
-                        <Badge
-                          key={t}
-                          variant="secondary"
-                          className="cursor-pointer"
-                          onClick={() => removeTag(createForm, t)}
-                        >
-                          {t}
-                        </Badge>
-                      ))}
+                      <AnimatePresence>
+                        {createForm.watch('tags').map((t) => (
+                          <motion.div
+                            key={t}
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{
+                              type: 'spring',
+                              stiffness: 500,
+                              damping: 30,
+                            }}
+                          >
+                            <Badge
+                              variant="secondary"
+                              className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                              onClick={() => removeTag(createForm, t)}
+                            >
+                              {t}
+                            </Badge>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
                     </div>
                     <div className="flex gap-2">
                       <Input
@@ -294,13 +441,15 @@ export function ArchiveExplorer() {
                         }}
                       />
                       {createForm.watch('tagInput') && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => addTag(createForm)}
-                        >
-                          Add
-                        </Button>
+                        <motion.div whileTap={{ scale: 0.95 }}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => addTag(createForm)}
+                          >
+                            Add
+                          </Button>
+                        </motion.div>
                       )}
                     </div>
                     {createForm.formState.errors.tags && (
@@ -356,12 +505,117 @@ export function ArchiveExplorer() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
           </div>
+
+          {/* Selection Mode Controls */}
+          <AnimatePresence>
+            {isSelectionMode && selectedSlugs.size > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="mt-3 p-3 bg-muted/50 rounded-lg border"
+              >
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <CheckSquare className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">
+                      {selectedSlugs.size} of {archives?.length || 0} selected
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSelectAll}
+                      disabled={isDeletingMultiple}
+                      className="flex-1 min-w-0"
+                    >
+                      All
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={stopSelectionMode}
+                      disabled={isDeletingMultiple}
+                      className="flex-1 min-w-0"
+                    >
+                      Cancel
+                    </Button>
+                    <AlertDialog
+                      open={openDeleteConfirm}
+                      onOpenChange={setOpenDeleteConfirm}
+                    >
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={
+                            selectedSlugs.size === 0 || isDeletingMultiple
+                          }
+                          className="flex-1 min-w-0"
+                        >
+                          {isDeletingMultiple ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Delete Archive Entries
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete {selectedSlugs.size}{' '}
+                            archive{' '}
+                            {selectedSlugs.size === 1 ? 'entry' : 'entries'}?
+                            This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel
+                            disabled={bulkDeleteMutation.isPending}
+                          >
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleConfirmDeleteSelected}
+                            disabled={bulkDeleteMutation.isPending}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            {bulkDeleteMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Deleting...
+                              </>
+                            ) : (
+                              'Delete'
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+
         <div className="flex-1 min-h-0">
           <ArchiveList
             q={q || undefined}
             onSelect={setCurrent}
             activeSlug={current}
+            isSelectionMode={isSelectionMode}
+            selectedSlugs={selectedSlugs}
+            onToggleSelection={toggleSelection}
+            onLongPressStart={handleLongPressStart}
+            onLongPressEnd={handleLongPressEnd}
+            onShiftClick={handleShiftClick}
+            archiveData={archiveData}
           />
         </div>
       </motion.section>
@@ -458,16 +712,29 @@ export function ArchiveExplorer() {
                       Tags (remove by click)
                     </label>
                     <div className="flex flex-wrap gap-2 pb-1">
-                      {editForm.watch('tags').map((t) => (
-                        <Badge
-                          key={t}
-                          variant="secondary"
-                          className="cursor-pointer"
-                          onClick={() => removeTag(editForm, t)}
-                        >
-                          {t}
-                        </Badge>
-                      ))}
+                      <AnimatePresence>
+                        {editForm.watch('tags').map((t) => (
+                          <motion.div
+                            key={t}
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{
+                              type: 'spring',
+                              stiffness: 500,
+                              damping: 30,
+                            }}
+                          >
+                            <Badge
+                              variant="secondary"
+                              className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                              onClick={() => removeTag(editForm, t)}
+                            >
+                              {t}
+                            </Badge>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
                     </div>
                     <div className="flex gap-2">
                       <Input
@@ -481,13 +748,15 @@ export function ArchiveExplorer() {
                         }}
                       />
                       {editForm.watch('tagInput') && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => addTag(editForm)}
-                        >
-                          Add
-                        </Button>
+                        <motion.div whileTap={{ scale: 0.95 }}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => addTag(editForm)}
+                          >
+                            Add
+                          </Button>
+                        </motion.div>
                       )}
                     </div>
                     {editForm.formState.errors.tags && (

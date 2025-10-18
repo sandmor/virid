@@ -1072,6 +1072,57 @@ export async function deleteArchiveEntry({
   }
 }
 
+export async function deleteArchiveEntries({
+  userId,
+  slugs,
+}: {
+  userId: string;
+  slugs: string[];
+}) {
+  try {
+    // First, get all entries to verify they exist and belong to the user
+    const existingEntries = await prisma.archiveEntry.findMany({
+      where: {
+        userId,
+        slug: { in: slugs },
+      },
+      select: { id: true, slug: true },
+    });
+
+    if (existingEntries.length === 0) {
+      return { deleted: [], removedLinks: 0 };
+    }
+
+    const existingIds = existingEntries.map((e) => e.id);
+    const existingSlugs = existingEntries.map((e) => e.slug);
+
+    // Delete all links associated with these entries
+    const removedLinks = await prisma.archiveLink.deleteMany({
+      where: {
+        OR: [
+          { sourceId: { in: existingIds } },
+          { targetId: { in: existingIds } },
+        ],
+      },
+    });
+
+    // Delete the entries
+    await prisma.archiveEntry.deleteMany({
+      where: {
+        userId,
+        slug: { in: existingSlugs },
+      },
+    });
+
+    return { deleted: existingSlugs, removedLinks: removedLinks.count };
+  } catch (e) {
+    throw mapPrismaError(e, {
+      model: 'ArchiveEntry',
+      operation: 'bulk-delete',
+    });
+  }
+}
+
 export async function linkArchiveEntries({
   userId,
   sourceSlug,

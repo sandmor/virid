@@ -143,6 +143,24 @@ export function useDeleteArchiveEntry() {
   });
 }
 
+export function useDeleteArchiveEntries() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { slugs: string[] }) => {
+      const res = await fetch('/api/archive/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) throw new Error('Failed to delete entries');
+      return res.json() as Promise<{ deleted: string[]; removedLinks: number }>;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['archive', 'search'] });
+    },
+  });
+}
+
 export function useLinkArchiveEntries() {
   const qc = useQueryClient();
   return useMutation({

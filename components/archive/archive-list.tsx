@@ -5,23 +5,48 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArchiveSearch } from '@/hooks/use-archive';
 import { cn } from '@/lib/utils';
+import { CheckSquare, Square } from 'lucide-react';
 
 export function ArchiveList({
   q,
   tags,
   onSelect,
   activeSlug,
+  isSelectionMode = false,
+  selectedSlugs = new Set(),
+  onToggleSelection,
+  onLongPressStart,
+  onLongPressEnd,
+  onShiftClick,
+  archiveData,
 }: {
   q?: string;
   tags?: string[];
   onSelect: (slug: string) => void;
   activeSlug?: string;
+  isSelectionMode?: boolean;
+  selectedSlugs?: Set<string>;
+  onToggleSelection?: (slug: string) => void;
+  onLongPressStart?: (slug: string, onInitiated?: () => void) => void;
+  onLongPressEnd?: () => void;
+  onShiftClick?: (slug: string) => void;
+  onLongPressInitiated?: () => void;
+  archiveData?: any;
 }) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useArchiveSearch({ q, tags });
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const longPressInitiatedRef = useRef(false);
+
+  // Use passed archiveData if available, otherwise use local data
+  const currentData = archiveData || data;
+  const pages = (currentData as any)?.pages ?? [];
+  const entries = pages.flatMap((p: { entries: any[] }) => p.entries as any[]);
 
   useEffect(() => {
+    // Only set up infinite scrolling if we're using local data (not passed archiveData)
+    if (archiveData) return;
+
     const el = sentinelRef.current;
     if (!el) return;
     if (!hasNextPage || isFetchingNextPage) return;
@@ -34,14 +59,11 @@ export function ArchiveList({
     });
     io.observe(el);
     return () => io.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const pages = (data as any)?.pages ?? [];
-  const entries = pages.flatMap((p: { entries: any[] }) => p.entries as any[]);
+  }, [archiveData, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="flex h-full flex-col">
-      <ScrollArea className="flex-1">
+      <ScrollArea className="h-full">
         <div className="flex flex-col gap-2 p-2">
           {isLoading &&
             Array.from({ length: 6 }).map((_, i) => (
@@ -54,21 +76,79 @@ export function ArchiveList({
           {entries.map((e: any) => (
             <button
               key={e.slug}
-              onClick={() => onSelect(e.slug)}
+              onClick={(event) => {
+                // Prevent click if long-press was initiated
+                if (longPressInitiatedRef.current) {
+                  longPressInitiatedRef.current = false;
+                  return;
+                }
+
+                if (event.shiftKey && onShiftClick) {
+                  onShiftClick(e.slug);
+                } else if (isSelectionMode && onToggleSelection) {
+                  onToggleSelection(e.slug);
+                } else {
+                  onSelect(e.slug);
+                }
+              }}
+              onTouchStart={() => {
+                if (!isSelectionMode && onLongPressStart) {
+                  longPressInitiatedRef.current = false;
+                  onLongPressStart(e.slug, () => {
+                    longPressInitiatedRef.current = true;
+                  });
+                }
+              }}
+              onTouchEnd={() => {
+                if (!isSelectionMode && onLongPressEnd) {
+                  onLongPressEnd();
+                }
+              }}
+              onMouseDown={() => {
+                if (!isSelectionMode && onLongPressStart) {
+                  longPressInitiatedRef.current = false;
+                  onLongPressStart(e.slug, () => {
+                    longPressInitiatedRef.current = true;
+                  });
+                }
+              }}
+              onMouseUp={() => {
+                if (!isSelectionMode && onLongPressEnd) {
+                  onLongPressEnd();
+                }
+              }}
+              onMouseLeave={() => {
+                if (!isSelectionMode && onLongPressEnd) {
+                  onLongPressEnd();
+                }
+              }}
               className={cn(
                 'group flex flex-col items-start gap-1 rounded-md border p-3 text-left transition hover:bg-accent',
-                activeSlug === e.slug && 'border-primary ring-1 ring-primary'
+                activeSlug === e.slug &&
+                  !isSelectionMode &&
+                  'border-primary ring-1 ring-primary',
+                isSelectionMode &&
+                  selectedSlugs.has(e.slug) &&
+                  'border-primary bg-primary/5 ring-1 ring-primary'
               )}
             >
               <div className="flex w-full items-center justify-between">
                 <div className="font-medium line-clamp-1" title={e.entity}>
                   {e.entity}
                 </div>
-                {e.linkCount > 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    {e.linkCount} link{e.linkCount === 1 ? '' : 's'}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {isSelectionMode &&
+                    (selectedSlugs.has(e.slug) ? (
+                      <CheckSquare className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Square className="h-4 w-4 text-muted-foreground" />
+                    ))}
+                  {e.linkCount > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {e.linkCount} link{e.linkCount === 1 ? '' : 's'}
+                    </span>
+                  )}
+                </div>
               </div>
               <div
                 className="line-clamp-2 text-sm text-muted-foreground"
@@ -97,6 +177,14 @@ export function ArchiveList({
           {isFetchingNextPage && (
             <div className="py-4 text-center text-xs text-muted-foreground">
               Loading more…
+            </div>
+          )}
+          {hasNextPage && !archiveData && (
+            <div ref={sentinelRef} className="py-4 text-center">
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="h-3 w-3 animate-spin rounded-full border border-muted-foreground/30 border-t-muted-foreground"></div>
+                Loading more...
+              </div>
             </div>
           )}
           {!hasNextPage && entries.length > 0 && (

@@ -91,7 +91,6 @@ Artifacts workspace (side-by-side document view)
 const archivePrompt = `
 Archive tools (long-form knowledge base)
 - Search/read before creating; one entry per entity with a stable lowercase-hyphen slug
-- Prefer archiveUpdateEntry or archiveApplyEdits to extend existing files; avoid duplicates
 - Keep each body as a cohesive essay: weave new facts into place and revise outdated text
 - Surface contradictions to the user before overwriting; never store secrets or volatile tokens
 - Use links only for relationships between distinct entries; keep subtopics inside the main file
