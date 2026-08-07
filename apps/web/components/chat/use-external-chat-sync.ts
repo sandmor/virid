@@ -1,98 +1,139 @@
 import { useEncryptedCache } from '@/components/encrypted-cache-provider';
 import { getSyncManager } from '@/lib/cache/sync-manager';
 import type { ChatMessage } from '@/lib/types';
-import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef } from 'react';
+import { buildMessageTree } from '@/lib/utils/message-tree';
+import { convertToUIMessages } from '@/lib/utils';
+import type { ExistingChatBootstrap } from '@/types/chat-bootstrap';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 type UseExternalChatSyncArgs = {
   chatId: string;
   messages: ChatMessage[];
   setMessages: (fn: (prev: ChatMessage[]) => ChatMessage[]) => void;
   isStreaming: boolean;
+  /** Keep the branch operation state in step with an authoritative snapshot. */
+  onSnapshotApplied?: (snapshot: ExistingChatBootstrap) => void;
+  /** The authoritative cache removed a chat that was previously mounted. */
+  onChatDeleted?: () => void;
 };
 
 /**
- * Hook to detect and merge external message updates into useChat state.
- *
- * This hook listens for cross-tab sync events via the SyncManager's tab-leader
- * BroadcastChannel and triggers a cache refresh when external changes are detected.
- *
- * Key behaviors:
- * - Does NOT sync while streaming (local state is authoritative during generation)
- * - Ignores own updates within a 2-second window to avoid echo loops
- * - Invalidates the bootstrap query cache to trigger fresh data fetch
- * - Integrates with existing tab-leader election system
+ * Reconciles the mounted useChat state with the authoritative encrypted-cache
+ * snapshot. BroadcastChannel messages deliberately carry no data: they only
+ * ask the sync leader to refresh IndexedDB. This prevents a transient event or
+ * a timestamp heuristic from becoming a second source of truth.
  */
 export function useExternalChatSync({
   chatId,
-  messages,
+  messages: _messages,
   setMessages,
   isStreaming,
+  onSnapshotApplied,
+  onChatDeleted,
 }: UseExternalChatSyncArgs) {
-  const queryClient = useQueryClient();
-  const { subscribeToMessageUpdates } = useEncryptedCache();
-  const lastLocalUpdateRef = useRef(Date.now());
-  const isStreamingRef = useRef(isStreaming);
+  const { cachedChats = [], subscribeToMessageUpdates } = useEncryptedCache();
   const chatIdRef = useRef(chatId);
+  const isStreamingRef = useRef(isStreaming);
+  const wasStreamingRef = useRef(isStreaming);
+  const pendingSnapshotRef = useRef<ExistingChatBootstrap | null>(null);
+  const awaitingPostStreamSnapshotRef = useRef(false);
+  const lastAppliedSnapshotRef = useRef<string | null>(null);
+  const hasSeenSnapshotRef = useRef(false);
 
-  // Keep refs in sync
-  useEffect(() => {
-    isStreamingRef.current = isStreaming;
-  }, [isStreaming]);
+  const cachedSnapshot = useMemo(() => {
+    const record = cachedChats.find((entry) => entry.chatId === chatId);
+    const bootstrap = record?.data.bootstrap;
+    if (!bootstrap || bootstrap.kind !== 'existing') {
+      return null;
+    }
+    return {
+      bootstrap,
+      // cachedAt distinguishes a freshly committed snapshot even when a
+      // database timestamp has millisecond precision.
+      identity: `${record.lastUpdatedAt}:${record.cachedAt}`,
+    };
+  }, [cachedChats, chatId]);
+
+  const applySnapshot = useCallback(
+    (snapshot: ExistingChatBootstrap, identity: string) => {
+      const tree = buildMessageTree(snapshot.initialMessages, {
+        rootMessageIndex: snapshot.initialBranchState.rootMessageIndex ?? null,
+      });
+      const nextMessages = convertToUIMessages(tree.branch);
+
+      setMessages(() => nextMessages);
+      onSnapshotApplied?.(snapshot);
+      lastAppliedSnapshotRef.current = identity;
+    },
+    [onSnapshotApplied, setMessages]
+  );
 
   useEffect(() => {
     chatIdRef.current = chatId;
+    pendingSnapshotRef.current = null;
+    awaitingPostStreamSnapshotRef.current = false;
+    lastAppliedSnapshotRef.current = null;
+    hasSeenSnapshotRef.current = false;
   }, [chatId]);
 
-  // Subscribe to message update events from other tabs
   useEffect(() => {
-    if (!chatId) {
+    const wasStreaming = wasStreamingRef.current;
+    isStreamingRef.current = isStreaming;
+    wasStreamingRef.current = isStreaming;
+
+    if (!wasStreaming || isStreaming) {
       return;
     }
 
-    const handleMessagesUpdated = async (
-      updatedChatId: string,
-      updatedAt: number
-    ) => {
-      // Only handle updates for our chat
-      if (updatedChatId !== chatIdRef.current) {
-        return;
+    // Do not replay a snapshot received during generation: it can contain the
+    // persisted user turn but not the final assistant turn. Ask for a fresh
+    // cache commit and accept the next resulting snapshot instead.
+    pendingSnapshotRef.current = null;
+    awaitingPostStreamSnapshotRef.current = true;
+    getSyncManager()?.requestSync('tab-request', chatId);
+  }, [chatId, isStreaming]);
+
+  // Cross-tab events are invalidations. SyncManager also requests this sync at
+  // the coordinator level so a leader viewing another chat cannot miss it.
+  useEffect(() => {
+    if (!chatId) return;
+
+    return subscribeToMessageUpdates((updatedChatId) => {
+      if (updatedChatId !== chatIdRef.current) return;
+      getSyncManager()?.requestSync('tab-request', updatedChatId);
+    });
+  }, [chatId, subscribeToMessageUpdates]);
+
+  useEffect(() => {
+    if (!cachedSnapshot) {
+      if (hasSeenSnapshotRef.current && !isStreamingRef.current) {
+        hasSeenSnapshotRef.current = false;
+        setMessages(() => []);
+        onChatDeleted?.();
       }
+      return;
+    }
+    const { bootstrap, identity } = cachedSnapshot;
 
-      // Don't sync while streaming - local state is authoritative
-      if (isStreamingRef.current) {
-        return;
-      }
+    if (isStreamingRef.current) {
+      pendingSnapshotRef.current = bootstrap;
+      return;
+    }
 
-      // Ignore if this was our own update (within 2 seconds)
-      const timeSinceLocalUpdate = updatedAt - lastLocalUpdateRef.current;
-      if (timeSinceLocalUpdate < 2000 && timeSinceLocalUpdate >= 0) {
-        return;
-      }
+    if (awaitingPostStreamSnapshotRef.current) {
+      // This effect only observes snapshots committed after the stream-end
+      // effect set the barrier. The first one is the requested fresh sync.
+      awaitingPostStreamSnapshotRef.current = false;
+    }
 
-      // Invalidate the bootstrap query cache to trigger a fresh fetch
-      // This will cause the Chat component to re-render with updated data
-      await queryClient.invalidateQueries({
-        queryKey: ['chat', 'bootstrap', updatedChatId],
-      });
+    if (lastAppliedSnapshotRef.current === identity) return;
+    applySnapshot(bootstrap, identity);
+    hasSeenSnapshotRef.current = true;
+  }, [applySnapshot, cachedSnapshot, onChatDeleted, setMessages]);
 
-      // Request an incremental sync through the SyncManager.
-      // This ensures IndexedDB gets updated and follows the proper sync flow
-      // (debouncing, echo filtering, protection). The sync will update
-      // lastSyncedAt only after successful completion.
-      const syncManager = getSyncManager();
-      syncManager?.requestSync('tab-request', updatedChatId);
-    };
-
-    const unsubscribe = subscribeToMessageUpdates(handleMessagesUpdated);
-
-    return unsubscribe;
-  }, [chatId, queryClient, subscribeToMessageUpdates]);
-
-  // Mark local updates to filter out echo events
-  const markLocalUpdate = useCallback(() => {
-    lastLocalUpdateRef.current = Date.now();
-  }, []);
+  // Kept for existing callers. Echo filtering is intentionally gone: another
+  // tab can create a legitimate update immediately after a local mutation.
+  const markLocalUpdate = useCallback(() => {}, []);
 
   return { markLocalUpdate };
 }

@@ -24,7 +24,11 @@ import {
   buildSelectionSnapshot,
   cloneSelectionSnapshot,
 } from '@/lib/utils/selection-snapshot';
-import type { BranchSelectionSnapshot } from '@/types/chat-bootstrap';
+import { buildMessageTree } from '@/lib/utils/message-tree';
+import type {
+  BranchSelectionSnapshot,
+  ExistingChatBootstrap,
+} from '@/types/chat-bootstrap';
 import { useChat } from '@ai-sdk/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMachine } from '@xstate/react';
@@ -268,14 +272,6 @@ export function useChatMessaging({
     messagesRef.current = messages;
   }, [messages]);
 
-  // Listen for external updates from other tabs via BroadcastChannel
-  const { markLocalUpdate } = useExternalChatSync({
-    chatId,
-    messages,
-    setMessages,
-    isStreaming: isStreamingStatus(status),
-  });
-
   // Fetch tree function for the machine
   const fetchTree = useCallback(async (): Promise<MessageTreeResult> => {
     if (IS_E2E) {
@@ -341,6 +337,45 @@ export function useChatMessaging({
     }
   );
 
+  const handleChatDeleted = useCallback(() => {
+    if (chatDeletedRef.current) {
+      return;
+    }
+
+    chatDeletedRef.current = true;
+    clearSelection();
+    setMessages(() => []);
+    selectionRef.current = { rootMessageIndex: null };
+    router.replace('/chat');
+    queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
+  }, [clearSelection, queryClient, router, setMessages]);
+
+  const handleExternalSnapshot = useCallback(
+    (snapshot: ExistingChatBootstrap) => {
+      const tree = buildMessageTree(snapshot.initialMessages, {
+        rootMessageIndex:
+          snapshot.initialBranchState.rootMessageIndex ?? null,
+      });
+      const selection = buildSelectionSnapshot(tree);
+      currentMessageTreeRef.current = tree;
+      selectionRef.current = selection;
+      sendOperations({ type: 'UPDATE_TREE', tree, selection });
+    },
+    [sendOperations]
+  );
+
+  // Cache snapshots are authoritative after local activity settles. Keep the
+  // state machine's tree and selection aligned with the useChat messages that
+  // useExternalChatSync replaces.
+  const { markLocalUpdate } = useExternalChatSync({
+    chatId,
+    messages,
+    setMessages,
+    isStreaming: isStreamingStatus(status),
+    onSnapshotApplied: handleExternalSnapshot,
+    onChatDeleted: handleChatDeleted,
+  });
+
   // Debug: Log state machine transitions and invalidate cache when operations complete
   useEffect(() => {
     let previousOperation: string = 'idle';
@@ -384,7 +419,7 @@ export function useChatMessaging({
       sendOperations({ type: 'STREAM_FINISHED' });
       // Notify SyncManager that generation ended - protection window begins
       markGenerationEnded();
-      // Record local change for echo filtering
+      // Compatibility no-op; duplicate invalidations are coalesced centrally.
       recordLocalChange(chatId);
       // Bump this chat to top of sidebar (optimistic UI update)
       bumpChatToTop(chatId);
@@ -458,19 +493,6 @@ export function useChatMessaging({
     });
   }, [operationsActor]);
 
-  const handleChatDeleted = useCallback(() => {
-    if (chatDeletedRef.current) {
-      return;
-    }
-
-    chatDeletedRef.current = true;
-    clearSelection();
-    setMessages([]);
-    selectionRef.current = { rootMessageIndex: null };
-    router.replace('/chat');
-    queryClient.invalidateQueries({ queryKey: ['chat', 'history'] });
-  }, [clearSelection, queryClient, router, setMessages]);
-
   const handleDeleteMessage = useCallback(
     async (messageId: string, mode: MessageDeletionMode) => {
       if (isReadonly) {
@@ -496,8 +518,11 @@ export function useChatMessaging({
           return { chatDeleted: true } as const;
         }
 
-        // Record local change for sync echo filtering
+        // Compatibility no-op; duplicate invalidations are coalesced centrally.
         recordLocalChange(chatId);
+        // Surface the chat update immediately in local and other tabs
+        bumpChatToTop(chatId);
+        getSyncManager()?.notifyMessagesUpdated(chatId);
 
         // Request tree sync after deletion
         sendOperations({ type: 'SYNC_TREE' });
@@ -519,6 +544,7 @@ export function useChatMessaging({
     },
     [
       assignSelection,
+      bumpChatToTop,
       chatId,
       getSelectedIds,
       handleChatDeleted,
@@ -562,8 +588,11 @@ export function useChatMessaging({
           return;
         }
 
-        // Record local change for sync echo filtering
+        // Compatibility no-op; duplicate invalidations are coalesced centrally.
         recordLocalChange(chatId);
+        // Surface the chat update immediately in local and other tabs
+        bumpChatToTop(chatId);
+        getSyncManager()?.notifyMessagesUpdated(chatId);
 
         // Request tree sync after deletion
         sendOperations({ type: 'SYNC_TREE' });
@@ -592,6 +621,7 @@ export function useChatMessaging({
     },
     [
       assignSelection,
+      bumpChatToTop,
       chatId,
       clearSelection,
       getSelectedIds,
@@ -691,7 +721,7 @@ export function useChatMessaging({
 
   const sendMessageWithGuard = useCallback<typeof sendMessage>(
     (payload) => {
-      // Mark local update to filter out echo events from other tabs
+      // Compatibility no-op; external invalidations are no longer timestamp-filtered.
       markLocalUpdate();
 
       const readiness = ensureOperationsReady();
@@ -839,7 +869,7 @@ export function useChatMessaging({
           editedText: trimmed,
         });
 
-        // Record local change for sync echo filtering
+        // Compatibility no-op; duplicate invalidations are coalesced centrally.
         recordLocalChange(chatId);
         // Bump chat to top of sidebar
         bumpChatToTop(chatId);
@@ -974,7 +1004,7 @@ export function useChatMessaging({
           editedText: trimmed,
         });
 
-        // Record local change for sync echo filtering
+        // Compatibility no-op; duplicate invalidations are coalesced centrally.
         recordLocalChange(chatId);
         // Bump chat to top of sidebar
         bumpChatToTop(chatId);

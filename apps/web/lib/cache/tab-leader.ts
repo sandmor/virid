@@ -43,7 +43,6 @@ type BroadcastMessage =
   | { type: 'leader-heartbeat'; tabId: string; expiresAt: number }
   | { type: 'leader-resigning'; tabId: string }
   | { type: 'sync-complete'; tabId: string; timestamp: string }
-  | { type: 'settings-updated'; tabId: string; timestamp: string }
   | {
       type: 'request-sync';
       tabId: string;
@@ -67,8 +66,6 @@ type TabLeaderOptions = {
   onLoseLeadership?: () => void;
   /** Callback when another tab completes a sync */
   onSyncComplete?: (timestamp: string) => void;
-  /** Callback when settings are updated in another tab */
-  onSettingsUpdated?: (timestamp: string) => void;
   /** Callback when another tab requests a sync */
   onSyncRequested?: (
     reason: string,
@@ -464,12 +461,6 @@ export class TabLeaderElection {
         }
         break;
 
-      case 'settings-updated':
-        if (message.tabId !== this.tabId) {
-          this.options.onSettingsUpdated?.(message.timestamp);
-        }
-        break;
-
       case 'request-sync':
         if (message.tabId !== this.tabId && this.state === 'leader') {
           this.options.onSyncRequested?.(message.reason, {
@@ -544,13 +535,6 @@ export class TabLeaderElection {
    */
   notifySyncComplete(timestamp: string): void {
     this.broadcast({ type: 'sync-complete', tabId: this.tabId, timestamp });
-  }
-
-  /**
-   * Broadcast that settings have been updated.
-   */
-  notifySettingsUpdated(timestamp: string): void {
-    this.broadcast({ type: 'settings-updated', tabId: this.tabId, timestamp });
   }
 
   /**

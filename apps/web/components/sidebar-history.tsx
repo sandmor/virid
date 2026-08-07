@@ -237,7 +237,7 @@ export function SidebarHistory({
         queryClient.invalidateQueries({ queryKey: ['chat', 'search'] });
 
         // Trigger cache refresh to update state
-        await refreshCache({ force: true });
+        await refreshCache({ force: true, broadcastOnSuccess: true });
 
         if (selectedSet.has(chatIdToDelete)) {
           const remainingIds = Array.from(selectedSet).filter(
@@ -322,7 +322,7 @@ export function SidebarHistory({
         queryClient.invalidateQueries({ queryKey: ['chat', 'search'] });
 
         // Trigger cache refresh to update state
-        await refreshCache({ force: true });
+        await refreshCache({ force: true, broadcastOnSuccess: true });
 
         if (currentChatId && idsSet.has(currentChatId)) {
           router.push('/chat');

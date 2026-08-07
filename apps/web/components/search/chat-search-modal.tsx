@@ -148,7 +148,7 @@ export function ChatSearchModal({
         queryClient.invalidateQueries({ queryKey: ['chat', 'search'] });
 
         // Trigger cache refresh to update state
-        await refreshCache({ force: true });
+        await refreshCache({ force: true, broadcastOnSuccess: true });
       } catch (error) {
         await handleChatActionFailure({
           chatId: chatIdToDelete,

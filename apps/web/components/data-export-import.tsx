@@ -124,7 +124,7 @@ export function DataExportImport() {
       setImportResults(data.results);
 
       // Refresh cache to pick up imported data
-      await refreshCache({ force: true });
+      await refreshCache({ force: true, broadcastOnSuccess: true });
 
       toast({
         type: 'success',

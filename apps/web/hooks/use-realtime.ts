@@ -48,8 +48,10 @@ const IS_ENABLED = !!GATEWAY_URL;
  *
  * ## Race Condition Prevention
  *
- * - Realtime events for own changes are filtered out (echo filtering via SyncManager)
- * - Active chats being edited are protected from sync updates during generation
+ * - Realtime echoes are safely coalesced by SyncManager rather than filtered
+ *   by timestamp, preserving concurrent updates from other clients.
+ * - Mounted chats defer snapshot reconciliation during generation while the
+ *   shared cache continues to store every server result.
  * - React Query invalidation is safe because it just triggers refetch from server
  * - The sync is the single source of truth for cache timestamp progression
  *
@@ -88,8 +90,8 @@ export function useRealtimeConnection() {
           // Step 2: Request incremental sync through SyncManager.
           // This will (after debouncing) fetch all changes since lastSyncedAt,
           // update IndexedDB, and advance the sync timestamp.
-          // The SyncManager handles echo filtering (ignoring own changes)
-          // and active chat protection (not overwriting during generation).
+          // The SyncManager coalesces duplicate invalidations. Mounted chat
+          // state handles generation-time snapshot deferral.
           syncManager?.requestSync('realtime', chatId);
           break;
 

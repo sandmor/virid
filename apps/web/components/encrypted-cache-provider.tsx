@@ -74,7 +74,6 @@ type SyncSource =
   | 'periodic'
   | 'manual'
   | 'cache-miss'
-  | 'settings-change'
   | 'tab-request';
 
 type ChatRepairResult = {
@@ -642,9 +641,9 @@ type CacheContextValue = {
   cachedChats: CachedChatPayload<CachedChatRecord>[];
   refreshCache: (options?: {
     force?: boolean;
-    excludeChatIds?: Set<string>;
     lastSyncedAtHint?: string | null;
     source?: SyncSource;
+    broadcastOnSuccess?: boolean;
   }) => Promise<void>;
   upsertChatRecord: (
     record: CachedChatRecord,
@@ -680,7 +679,8 @@ type CacheContextValue = {
    */
   markGenerationEnded: () => void;
   /**
-   * Record a local change to a chat (for echo filtering).
+   * @deprecated Invalidations are now idempotent and are never filtered by
+   * timestamp. Retained while callers migrate to direct invalidation.
    */
   recordLocalChange: (chatId: string) => void;
   /**
@@ -1295,19 +1295,15 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
    *   - Cache corruption recovery
    *   - Manual "refresh all" action
    *
-   * @param options.excludeChatIds - Chat IDs to exclude from sync results.
-   *   Used to protect active chats during message generation from being
-   *   overwritten by sync data.
-   *
    * @see SyncManager for sync coordination and protection logic
    * @see useRealtimeConnection for realtime trigger integration
    */
   const refreshCache = useCallback(
     (options?: {
       force?: boolean;
-      excludeChatIds?: Set<string>;
       lastSyncedAtHint?: string | null;
       source?: SyncSource;
+      broadcastOnSuccess?: boolean;
     }): Promise<void> => {
       const currentState = stateRef.current;
       const currentIsLoggedIn = isLoggedInRef.current;
@@ -1350,8 +1346,6 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
         return syncPromiseRef.current;
       }
 
-      const excludeChatIds = options?.excludeChatIds;
-
       const promise = (async () => {
         // Re-read state at start of async operation
         const state = stateRef.current;
@@ -1365,7 +1359,6 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
             forced: Boolean(options?.force),
             priorStatus: state.status,
             hasExistingMetadata: Boolean(state.metadata),
-            excludedChats: excludeChatIds ? Array.from(excludeChatIds) : [],
           });
           // Don't set status to initializing if we already have data
           // This prevents UI skeletons/blocking during background sync
@@ -1394,24 +1387,11 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
             totalChats: syncResult.totalChats,
           });
 
-          // Filter out excluded chats from upserts (protected chats)
-          const filteredUpserts = excludeChatIds
-            ? syncResult.upserts.filter((u) => !excludeChatIds.has(u.chatId))
-            : syncResult.upserts;
-
-          // Filter out excluded chats from deletions (protected chats)
-          const filteredDeletions = excludeChatIds
-            ? syncResult.deletions.filter((id) => !excludeChatIds.has(id))
-            : syncResult.deletions;
-
-          if (excludeChatIds && excludeChatIds.size > 0) {
-            cacheDebug('refreshCache: filtered out protected chats', {
-              originalUpserts: syncResult.upserts.length,
-              filteredUpserts: filteredUpserts.length,
-              originalDeletions: syncResult.deletions.length,
-              filteredDeletions: filteredDeletions.length,
-            });
-          }
+          // Never filter a server result at the cache layer. Advancing the
+          // global watermark after dropping one chat makes that update
+          // unrecoverable. Mounted chat state defers reconciliation instead.
+          const filteredUpserts = syncResult.upserts;
+          const filteredDeletions = syncResult.deletions;
 
           // Handle deletions
           if (filteredDeletions.length > 0) {
@@ -1516,6 +1496,10 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
           // We use the exact same logic as loadFromCache
           primeChatHistoryQuery(qc, nextCachedChats, updatedMetadata, true);
           primeBootstrapQueries(qc, nextCachedChats, true);
+
+          if (options?.broadcastOnSuccess) {
+            syncManager?.notifySyncComplete(syncResult.serverTimestamp);
+          }
         } catch (error) {
           if (error instanceof DOMException && error.name === 'AbortError') {
             cacheDebug('refreshCache: sync aborted');
@@ -1706,8 +1690,8 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
     }
 
     const syncManager = initializeSyncManager({
-      onSync: async ({ force, excludeChatIds, source }) => {
-        await refreshCacheRef.current({ force, excludeChatIds, source });
+      onSync: async ({ force, source }) => {
+        await refreshCacheRef.current({ force, source });
       },
       onCacheReload: async () => {
         // This is called when another tab completes a sync

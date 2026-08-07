@@ -4,8 +4,9 @@
  * ## Design Principles
  *
  * - **Single point of coordination**: All sync operations flow through here
- * - **Active chat protection**: Prevents external syncs from overwriting
- *   in-flight changes during message generation
+ * - **Cache completeness**: A successful sync always commits every server
+ *   result before its watermark advances. Mounted chats decide when it is safe
+ *   to reconcile a snapshot into local streaming state.
  * - **Debouncing and coalescing**: Multiple sync requests within a window
  *   are coalesced into a single operation
  * - **Sovereignty**: The active chat's local state is authoritative during generation
@@ -38,10 +39,8 @@
  *
  * ## Race Condition Prevention
  *
- * - **Echo filtering**: Own changes are tracked for 5 seconds to ignore
- *   realtime notifications that echo back our own changes.
- * - **Generation protection**: Active chats being edited are excluded from
- *   sync updates during generation and for 2 seconds after.
+ * - **Idempotent invalidation**: Realtime and cross-tab notifications may be
+ *   delivered more than once. They are coalesced, never timestamp-filtered.
  * - **Debouncing**: Multiple rapid events are coalesced into single sync.
  * - **Sync serialization**: Only one sync runs at a time; new requests queue.
  *
@@ -62,13 +61,7 @@ type SyncCallback = (options: {
 }) => Promise<void>;
 
 type SyncRequest = {
-  source:
-    | 'realtime'
-    | 'periodic'
-    | 'manual'
-    | 'cache-miss'
-    | 'settings-change' // Legacy: kept for backwards compatibility, treated as regular sync
-    | 'tab-request';
+  source: 'realtime' | 'periodic' | 'manual' | 'cache-miss' | 'tab-request';
   chatId?: string;
   force?: boolean;
   timestamp: number;
@@ -77,10 +70,10 @@ type SyncRequest = {
 interface ActiveChatState {
   chatId: string;
   isGenerating: boolean;
-  /** Timestamp when generation started - used to determine sovereignty window */
+  /** Timestamp when generation started - used for observability */
   generationStartedAt: number | null;
-  /** Timestamp of last local update - used to defer syncs */
-  lastLocalUpdateAt: number;
+  /** Timestamp when generation ended - used for post-generation protection */
+  generationEndedAt: number | null;
 }
 
 /**
@@ -99,14 +92,13 @@ type SyncManagerOptions = {
   onMessagesUpdated?: (chatId: string, updatedAt: number) => void;
   /** Debounce window in ms for coalescing sync requests */
   debounceMs?: number;
-  /** How long after generation ends to protect the active chat (ms) */
+  /** @deprecated Kept temporarily for callers configuring older clients. */
   postGenerationProtectionMs?: number;
   /** Enable debug logging */
   debug?: boolean;
 };
 
 const DEFAULT_DEBOUNCE_MS = 500;
-const DEFAULT_POST_GENERATION_PROTECTION_MS = 2000;
 const SYNC_MANAGER_TAG = '[SyncManager]';
 
 export class SyncManager {
@@ -114,7 +106,6 @@ export class SyncManager {
   private onCacheReload?: () => Promise<void>;
   private onMessagesUpdated?: (chatId: string, updatedAt: number) => void;
   private debounceMs: number;
-  private postGenerationProtectionMs: number;
   private debug: boolean;
 
   // Sync state
@@ -126,10 +117,6 @@ export class SyncManager {
   // Active chat tracking
   private activeChat: ActiveChatState | null = null;
 
-  // Track recent own changes to filter out realtime echoes
-  private recentOwnChanges = new Map<string, number>();
-  private readonly ownChangeWindowMs = 5000; // 5 second window to ignore echoes
-
   // Tab leader coordination
   private tabLeader: TabLeaderElection | null = null;
   private electionPromise: Promise<void> | null = null;
@@ -139,9 +126,9 @@ export class SyncManager {
     this.onCacheReload = options.onCacheReload;
     this.onMessagesUpdated = options.onMessagesUpdated;
     this.debounceMs = options.debounceMs ?? DEFAULT_DEBOUNCE_MS;
-    this.postGenerationProtectionMs =
-      options.postGenerationProtectionMs ??
-      DEFAULT_POST_GENERATION_PROTECTION_MS;
+    // Kept as an accepted option while callers are migrated. Snapshot
+    // reconciliation, rather than cache filtering, owns this protection now.
+    void options.postGenerationProtectionMs;
     this.debug = options.debug ?? false;
 
     // Initialize tab leader election
@@ -185,11 +172,6 @@ export class SyncManager {
         // Reload cache from storage to pick up changes
         this.onCacheReload?.();
       },
-      onSettingsUpdated: (timestamp) => {
-        this.log('Settings updated by another tab at:', timestamp);
-        // Reload cache to pick up settings changes
-        this.onCacheReload?.();
-      },
       onSyncRequested: (reason, options) => {
         this.log('Sync requested by another tab:', reason);
         // Handle the sync request
@@ -199,6 +181,10 @@ export class SyncManager {
       },
       onMessagesUpdated: (chatId, updatedAt) => {
         this.log('Messages updated by another tab for chat:', chatId);
+        // A BroadcastChannel event is an invalidation, not a payload. Always
+        // enqueue it here so a leader viewing another chat still refreshes it.
+        // Duplicate requests are harmless and coalesced by scheduleSync().
+        this.requestSync('tab-request', chatId);
         // Forward to the registered callback
         this.onMessagesUpdated?.(chatId, updatedAt);
       },
@@ -259,17 +245,13 @@ export class SyncManager {
   }
 
   /**
-   * Notify other tabs that settings have been updated.
-   */
-  notifySettingsUpdated(timestamp: string): void {
-    this.tabLeader?.notifySettingsUpdated(timestamp);
-  }
-
-  /**
    * Notify other tabs that messages have been updated for a specific chat.
    * This is used for real-time cross-tab message sync.
    */
   notifyMessagesUpdated(chatId: string): void {
+    // The sender does not receive its own BroadcastChannel event. Queue a
+    // local refresh as well, otherwise a leader can leave its own cache stale.
+    this.requestSync('tab-request', chatId);
     this.tabLeader?.notifyMessagesUpdated(chatId);
   }
 
@@ -293,13 +275,13 @@ export class SyncManager {
       chatId,
       isGenerating: false,
       generationStartedAt: null,
-      lastLocalUpdateAt: Date.now(),
+      generationEndedAt: null,
     };
   }
 
   /**
    * Mark that the active chat has started generating a response.
-   * During generation, the active chat is protected from external sync updates.
+   * This remains observability-only. Cache sync must not exclude this chat.
    */
   markGenerationStarted(): void {
     if (!this.activeChat) {
@@ -310,11 +292,12 @@ export class SyncManager {
     this.log('Generation started for chat:', this.activeChat.chatId);
     this.activeChat.isGenerating = true;
     this.activeChat.generationStartedAt = Date.now();
+    this.activeChat.generationEndedAt = null;
   }
 
   /**
    * Mark that the active chat has finished generating.
-   * A protection window remains to prevent race conditions with server-side saves.
+   * Mounted chat reconciliation handles the post-stream handoff.
    */
   markGenerationEnded(): void {
     if (!this.activeChat) {
@@ -324,80 +307,16 @@ export class SyncManager {
 
     this.log('Generation ended for chat:', this.activeChat.chatId);
     this.activeChat.isGenerating = false;
-    // Keep generationStartedAt to calculate protection window
+    this.activeChat.generationEndedAt = Date.now();
   }
 
   /**
-   * Record that the user made a local change to the active chat.
-   * This updates the protection timestamp and marks it as a recent own change.
+   * @deprecated Sync invalidations are idempotent; do not suppress them by
+   * timestamp because a concurrent tab can make a valid change in the same
+   * window.
    */
   recordLocalChange(chatId: string): void {
-    const now = Date.now();
-
-    // Track in recent own changes to filter realtime echoes
-    this.recentOwnChanges.set(chatId, now);
-
-    // Clean up old entries
-    this.cleanupOwnChanges();
-
-    if (this.activeChat?.chatId === chatId) {
-      this.activeChat.lastLocalUpdateAt = now;
-      this.log('Recorded local change for active chat:', chatId);
-    }
-  }
-
-  private cleanupOwnChanges(): void {
-    const cutoff = Date.now() - this.ownChangeWindowMs;
-    for (const [chatId, timestamp] of this.recentOwnChanges) {
-      if (timestamp < cutoff) {
-        this.recentOwnChanges.delete(chatId);
-      }
-    }
-  }
-
-  /**
-   * Check if a chat is currently protected from external sync updates.
-   */
-  private isChatProtected(chatId: string): boolean {
-    if (!this.activeChat || this.activeChat.chatId !== chatId) {
-      return false;
-    }
-
-    const now = Date.now();
-
-    // Protected during active generation
-    if (this.activeChat.isGenerating) {
-      return true;
-    }
-
-    // Protected during post-generation window
-    if (this.activeChat.generationStartedAt !== null) {
-      const timeSinceGeneration = now - this.activeChat.generationStartedAt;
-      if (timeSinceGeneration < this.postGenerationProtectionMs) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Check if a realtime notification should be ignored as an echo of own change.
-   */
-  private isRealtimeEcho(chatId: string): boolean {
-    const ownChangeTime = this.recentOwnChanges.get(chatId);
-    if (!ownChangeTime) {
-      return false;
-    }
-
-    const timeSinceOwnChange = Date.now() - ownChangeTime;
-    const isEcho = timeSinceOwnChange < this.ownChangeWindowMs;
-
-    if (isEcho) {
-      this.log('Ignoring realtime echo for chat:', chatId);
-    }
-
-    return isEcho;
+    void chatId;
   }
 
   /**
@@ -407,10 +326,11 @@ export class SyncManager {
    * Design Notes:
    * - Settings data is included in every sync via the metadata field,
    *   so there's no need for separate settings-only syncs.
-   * - Realtime events trigger syncs with echo filtering to avoid
-   *   syncing changes that originated from this tab.
+   * - Realtime events trigger idempotent syncs; echoes are coalesced rather
+   *   than dropped so concurrent updates cannot be lost.
    * - Non-leader tabs delegate sync requests to the leader via BroadcastChannel.
-   * - Active chats are protected from external updates during generation.
+   * - Active chat UI reconciliation is deferred by the mounted chat, never by
+   *   excluding data from the shared cache.
    *
    * @param source - What triggered the sync request
    * @param chatId - Optional chat ID that triggered the sync (for realtime)
@@ -421,11 +341,6 @@ export class SyncManager {
     options?: { force?: boolean }
   ): void {
     this.log('Sync requested:', { source, chatId });
-
-    // Filter out realtime echoes for own changes
-    if (source === 'realtime' && chatId && this.isRealtimeEcho(chatId)) {
-      return;
-    }
 
     // If not the leader, request the leader to sync
     if (!this.isLeader()) {
@@ -536,39 +451,21 @@ export class SyncManager {
       primarySource,
     });
 
-    // Determine which chats to exclude from sync (protected chats)
-    const excludeChatIds = new Set<string>();
-
-    // Check if any requests are for the protected active chat
-    for (const request of requests) {
-      if (request.chatId && this.isChatProtected(request.chatId)) {
-        excludeChatIds.add(request.chatId);
-        this.log('Excluding protected chat from sync:', request.chatId);
-      }
-    }
-
-    // If active chat is protected, always exclude it
-    if (this.activeChat && this.isChatProtected(this.activeChat.chatId)) {
-      excludeChatIds.add(this.activeChat.chatId);
-    }
-
     this.isSyncing = true;
     const syncStartTime = new Date().toISOString();
 
     // Monitoring: Log sync execution in dev environment
     if (this.debug) {
       const tabRole = this.isLeader() ? 'LEADER' : 'FOLLOWER';
-      const excludedCount = excludeChatIds.size;
       // eslint-disable-next-line no-console
       console.info(
         `[SYNC-MONITOR] Incremental sync triggered by ${tabRole} tab`,
-        { requestCount: requests.length, excludedChats: excludedCount, force }
+        { requestCount: requests.length, force }
       );
     }
 
     this.syncPromise = this.onSync({
       force: requestedForce,
-      excludeChatIds: excludeChatIds.size > 0 ? excludeChatIds : undefined,
       source: primarySource,
     })
       .then(() => {
@@ -602,7 +499,6 @@ export class SyncManager {
       this.debounceTimer = null;
     }
     this.pendingRequests = [];
-    this.recentOwnChanges.clear();
     this.activeChat = null;
 
     // Clean up tab leader
