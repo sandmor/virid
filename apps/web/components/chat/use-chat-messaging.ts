@@ -36,7 +36,7 @@ import type { DataUIPart } from 'ai';
 import { DefaultChatTransport } from 'ai';
 import { useRouter } from 'next/navigation';
 import type React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { VisibilityType } from '../visibility-selector';
 import type { ChatPreferences } from './use-chat-preferences';
 import { useExternalChatSync } from './use-external-chat-sync';
@@ -1071,18 +1071,6 @@ export function useChatMessaging({
     }
   }, [messages, sendOperations, status]);
 
-  // Deduplicate messages (defensive)
-  const dedupedMessages = useMemo(() => {
-    const seenIds = new Set<string>();
-    return messages.filter((message) => {
-      if (seenIds.has(message.id)) {
-        return false;
-      }
-      seenIds.add(message.id);
-      return true;
-    });
-  }, [messages]);
-
   // Compute disabled state from machine
   const disableRegenerate =
     isStreamingStatus(status) ||
@@ -1090,7 +1078,7 @@ export function useChatMessaging({
     operationsState.context.activeOperation !== 'idle';
 
   return {
-    messages: dedupedMessages,
+    messages,
     setMessages,
     sendMessage: sendMessageWithGuard,
     status,

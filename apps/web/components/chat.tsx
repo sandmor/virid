@@ -246,6 +246,7 @@ export function Chat({
     !initialRegenerateHandledRef.current;
 
   useAutoResume({
+    chatId: id,
     autoResume: effectiveAutoResume,
     initialMessages,
     resumeStream,
