@@ -12,7 +12,6 @@ export class EnvHealthIndicator {
   private readonly requiredVars = [
     'CLERK_SECRET_KEY',
     'CORS_ORIGINS',
-    'DATABASE_URL',
   ];
 
   constructor(
@@ -23,6 +22,9 @@ export class EnvHealthIndicator {
     const indicator = this.healthIndicatorService.check('env');
 
     const missing = this.requiredVars.filter((key) => !process.env[key]);
+    if (!process.env.DATABASE_URL && !process.env.DATABASE_URL_UNPOOLED) {
+      missing.push('DATABASE_URL or DATABASE_URL_UNPOOLED');
+    }
 
     if (missing.length === 0) {
       return indicator.up();

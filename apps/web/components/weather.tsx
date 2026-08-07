@@ -1,6 +1,6 @@
 'use client';
 
-import cx from 'classnames';
+import { cn } from '@/lib/utils';
 import { format, isWithinInterval } from 'date-fns';
 import { useEffect, useMemo, useState } from 'react';
 import { Cloud, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
@@ -291,7 +291,7 @@ export function Weather({
     <div className="relative w-full max-w-[28rem] overflow-hidden rounded-3xl border border-border/40 bg-background/95 shadow-xl">
       <div
         aria-hidden="true"
-        className={cx(
+        className={cn(
           'absolute inset-0 opacity-90 transition-colors',
           isDay
             ? 'bg-gradient-to-br from-sky-100 via-sky-200 to-sky-300 dark:from-sky-500/40 dark:via-sky-600/30 dark:to-indigo-800/40'
@@ -303,24 +303,24 @@ export function Weather({
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <p
-              className={cx(
+              className={cn(
                 'text-xs font-semibold uppercase tracking-wide',
                 palette.subtle
               )}
             >
               Local Weather
             </p>
-            <p className={cx('text-lg font-semibold', palette.foreground)}>
+            <p className={cn('text-lg font-semibold', palette.foreground)}>
               {locationLabel}
             </p>
-            <p className={cx('text-xs', palette.muted)}>
+            <p className={cn('text-xs', palette.muted)}>
               {format(currentTime, 'MMM d • h:mm a')}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <span
-              className={cx(
+              className={cn(
                 'rounded-full bg-white/30 p-2 backdrop-blur-sm',
                 palette.accent
               )}
@@ -333,7 +333,7 @@ export function Weather({
             </span>
             <div className="text-right">
               <p
-                className={cx(
+                className={cn(
                   'text-4xl font-semibold leading-none',
                   palette.foreground
                 )}
@@ -343,7 +343,7 @@ export function Weather({
                   {weatherAtLocation.current_units.temperature_2m}
                 </span>
               </p>
-              <p className={cx('text-xs font-medium', palette.muted)}>
+              <p className={cn('text-xs font-medium', palette.muted)}>
                 H: {toInteger(currentHigh)}° • L: {toInteger(currentLow)}°
               </p>
             </div>
@@ -352,7 +352,7 @@ export function Weather({
 
         <div className="grid gap-3 rounded-2xl bg-white/25 p-4 backdrop-blur-sm dark:bg-white/10">
           <p
-            className={cx(
+            className={cn(
               'text-xs font-semibold uppercase tracking-wide',
               palette.muted
             )}
@@ -373,16 +373,16 @@ export function Weather({
                   key={time}
                 >
                   <span
-                    className={cx(
+                    className={cn(
                       'font-medium uppercase tracking-tight',
                       palette.subtle
                     )}
                   >
                     {label}
                   </span>
-                  <Cloud className={cx('h-5 w-5', palette.accent)} />
+                  <Cloud className={cn('h-5 w-5', palette.accent)} />
                   <span
-                    className={cx('text-sm font-semibold', palette.foreground)}
+                    className={cn('text-sm font-semibold', palette.foreground)}
                   >
                     {toInteger(temperature)}°
                   </span>
@@ -394,19 +394,19 @@ export function Weather({
 
         <div className="flex items-center justify-between rounded-2xl bg-white/15 p-4 text-xs backdrop-blur-sm dark:bg-white/10">
           <div className="flex items-center gap-2">
-            <Sunrise className={cx('h-4 w-4', palette.accent)} />
+            <Sunrise className={cn('h-4 w-4', palette.accent)} />
             <span className={palette.muted}>
               Sunrise
-              <span className={cx('ml-2 font-semibold', palette.foreground)}>
+              <span className={cn('ml-2 font-semibold', palette.foreground)}>
                 {format(new Date(weatherAtLocation.daily.sunrise[0]), 'h:mm a')}
               </span>
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Sunset className={cx('h-4 w-4', palette.accent)} />
+            <Sunset className={cn('h-4 w-4', palette.accent)} />
             <span className={palette.muted}>
               Sunset
-              <span className={cx('ml-2 font-semibold', palette.foreground)}>
+              <span className={cn('ml-2 font-semibold', palette.foreground)}>
                 {format(new Date(weatherAtLocation.daily.sunset[0]), 'h:mm a')}
               </span>
             </span>

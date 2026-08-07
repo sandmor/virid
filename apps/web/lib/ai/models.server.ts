@@ -114,45 +114,9 @@ export async function resolveChatModelOptions(
       : [];
   const dbModelMap = new Map(dbModels.map((m) => [m.id, m]));
 
-  // Also fetch platform custom models (admin-defined)
-  const platformCustomModels =
-    platformIds.length > 0
-      ? await prisma.platformCustomModel.findMany({
-          where: { modelSlug: { in: platformIds }, enabled: true },
-          include: { provider: { select: { enabled: true } } },
-        })
-      : [];
-  // Filter to only include enabled providers
-  const enabledCustomModels = platformCustomModels.filter(
-    (m) => m.provider.enabled
-  );
-  const customModelMap = new Map(
-    enabledCustomModels.map((m) => [m.modelSlug, m])
-  );
-
   // Build options for platform models
   const platformEntries = await Promise.all(
     platformIds.map(async (id) => {
-      // Check platform custom models first (admin-defined)
-      const customModel = customModelMap.get(id);
-      if (customModel) {
-        // Parse the model slug to extract creator
-        const parsed = parseModelId(id);
-        return buildChatModelOption(
-          id,
-          {
-            name: customModel.displayName,
-            creator: parsed?.creator ?? 'custom',
-          },
-          {
-            supportsTools: customModel.supportsTools,
-            supportedFormats: customModel.supportedFormats,
-          },
-          false // Platform custom models are not BYOK
-        );
-      }
-
-      // Fall back to regular Model table
       const dbModel = dbModelMap.get(id);
       const capabilities = dbModel
         ? {

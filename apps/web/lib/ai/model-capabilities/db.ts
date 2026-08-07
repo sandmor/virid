@@ -3,10 +3,6 @@
  */
 
 import { prisma, Prisma } from '@vero/db';
-import { parseModelId } from '../model-id';
-import { getProviderDefaults, inferProviderFromCreator } from '../registry';
-import { getTier } from '../tiers';
-import { DEFAULT_TIER_IDS } from './constants';
 import type {
   ManagedModelCapabilities,
   ModelCapabilities,
@@ -65,10 +61,7 @@ export async function getModelCapabilities(
     },
   });
 
-  if (!model) {
-    // Fallback for models not in database
-    return getModelCapabilitiesFallback(modelId);
-  }
+  if (!model) return null;
 
   // Find the provider to use
   let providerAssoc = model.providers[0]; // Default to first (default provider)
@@ -80,10 +73,7 @@ export async function getModelCapabilities(
     if (preferred) providerAssoc = preferred;
   }
 
-  if (!providerAssoc) {
-    // Model exists but has no provider associations - use fallback
-    return getModelCapabilitiesFallback(modelId, model);
-  }
+  if (!providerAssoc) return null;
 
   return {
     id: model.id,
@@ -95,47 +85,6 @@ export async function getModelCapabilities(
     provider: providerAssoc.providerId,
     providerModelId: providerAssoc.providerModelId,
     pricing: providerAssoc.pricing as ModelPricing | null,
-  };
-}
-
-/**
- * Fallback for models not fully configured in database
- */
-async function getModelCapabilitiesFallback(
-  modelId: string,
-  partialModel?: {
-    name: string;
-    creator: string;
-    supportsTools: boolean;
-    supportedFormats: string[];
-    maxOutputTokens?: number | null;
-  }
-): Promise<ResolvedModelCapabilities | null> {
-  const parsed = parseModelId(modelId);
-  if (!parsed) return null;
-
-  const { creator, modelName } = parsed;
-
-  // Use centralized registry to determine provider
-  const { providerId, needsCreatorPrefix } = inferProviderFromCreator(creator);
-  const providerModelId = needsCreatorPrefix
-    ? `${creator}/${modelName}`
-    : modelName;
-
-  const defaults = getProviderDefaults(providerId);
-
-  return {
-    id: modelId,
-    name: partialModel?.name ?? modelName,
-    creator: partialModel?.creator ?? creator,
-    supportsTools: partialModel?.supportsTools ?? defaults.supportsTools,
-    supportedFormats:
-      (partialModel?.supportedFormats as ModelFormat[]) ??
-      defaults.supportedFormats,
-    maxOutputTokens: partialModel?.maxOutputTokens ?? null,
-    provider: providerId,
-    providerModelId,
-    pricing: null,
   };
 }
 
@@ -269,10 +218,6 @@ export async function getAllModels(): Promise<ModelCapabilities[]> {
  *
  * @param modelId - The canonical model ID
  * @param data - Provider association data
- * @param data.customPlatformProviderId - Optional ID of a PlatformCustomProvider to route through.
- *   When set, the model will use this custom provider instead of the standard provider endpoint.
- *   This allows admins to change a model's backend provider without changing the model ID
- *   that users see or have in their settings.
  */
 export async function upsertModelProvider(
   modelId: string,
@@ -282,7 +227,6 @@ export async function upsertModelProvider(
     pricing?: ModelPricing | null;
     isDefault?: boolean;
     enabled?: boolean;
-    customPlatformProviderId?: string | null;
   }
 ): Promise<void> {
   const pricingData = data.pricing ? data.pricing : Prisma.JsonNull;
@@ -306,14 +250,12 @@ export async function upsertModelProvider(
       pricing: pricingData,
       isDefault: data.isDefault ?? false,
       enabled: data.enabled ?? true,
-      customPlatformProviderId: data.customPlatformProviderId ?? null,
     },
     update: {
       providerModelId: data.providerModelId,
       pricing: pricingData,
       isDefault: data.isDefault,
       enabled: data.enabled,
-      customPlatformProviderId: data.customPlatformProviderId,
     },
   });
 }
@@ -348,22 +290,6 @@ export async function getTierModelIds(): Promise<string[]> {
     modelIds.add(tm.modelId);
   }
 
-  // Also check fallback tiers for model IDs (from env vars)
-  const tiersInDb = await prisma.tier.findMany({ select: { id: true } });
-  const tierIdsInDb = new Set(tiersInDb.map((t) => t.id));
-
-  for (const fallbackTierId of DEFAULT_TIER_IDS) {
-    if (tierIdsInDb.has(fallbackTierId)) continue;
-    try {
-      const fallbackTier = await getTier(fallbackTierId);
-      fallbackTier.modelIds.forEach((id) => {
-        if (id) modelIds.add(id);
-      });
-    } catch {
-      // Ignore missing fallback tiers
-    }
-  }
-
   return Array.from(modelIds);
 }
 
@@ -374,13 +300,7 @@ export async function getManagedModels(): Promise<ManagedModelCapabilities[]> {
   const [dbModels, tierModelIds] = await Promise.all([
     prisma.model.findMany({
       include: {
-        providers: {
-          include: {
-            customPlatformProvider: {
-              select: { name: true },
-            },
-          },
-        },
+        providers: true,
       },
       orderBy: [{ creator: 'asc' }, { name: 'asc' }],
     }),
@@ -400,8 +320,6 @@ export async function getManagedModels(): Promise<ManagedModelCapabilities[]> {
       pricing: p.pricing as ModelPricing | null,
       isDefault: p.isDefault,
       enabled: p.enabled,
-      customPlatformProviderId: p.customPlatformProviderId,
-      customProviderName: p.customPlatformProvider?.name,
     })),
     isPersisted: true,
     inUse: tierSet.has(model.id),
@@ -425,66 +343,4 @@ export async function getModelsForTierSelection(): Promise<
  */
 export async function getModelsForByok(): Promise<ManagedModelCapabilities[]> {
   return getManagedModels();
-}
-
-/**
- * Get model IDs accessible via BYOK for a list of provider IDs.
- * DEPRECATED: Use getUserByokModelIds from user-keys.ts instead.
- * This is kept for backward compatibility but returns empty since
- * BYOK model access is now explicit (stored per-user in UserApiKey.modelIds).
- */
-export async function getByokAccessibleModelIds(
-  providerIds: string[]
-): Promise<string[]> {
-  // BYOK access is now explicit per user - this function can't determine access
-  // without a userId. Return empty array for safety.
-  // Callers should migrate to getUserByokModelIds(userId) from user-keys.ts
-  console.warn(
-    'getByokAccessibleModelIds is deprecated. Use getUserByokModelIds(userId) instead.'
-  );
-  return [];
-}
-
-/**
- * Ensure model capabilities exist for all tier models
- * Creates placeholder entries for missing models
- */
-export async function ensureModelCapabilities(): Promise<void> {
-  const [tierModelIds, existingModels] = await Promise.all([
-    getTierModelIds(),
-    prisma.model.findMany({ select: { id: true } }),
-  ]);
-
-  const existingIds = new Set(existingModels.map((m) => m.id));
-
-  for (const modelId of tierModelIds) {
-    if (existingIds.has(modelId)) continue;
-
-    const parsed = parseModelId(modelId);
-    if (!parsed) continue;
-
-    // Create a placeholder model
-    await upsertModel({
-      id: modelId,
-      name: parsed.modelName,
-      creator: parsed.creator,
-      supportsTools: true,
-      supportedFormats: ['text'],
-    });
-
-    // Use centralized registry to infer default provider association
-    const { providerId, needsCreatorPrefix } = inferProviderFromCreator(
-      parsed.creator
-    );
-    const providerModelId = needsCreatorPrefix
-      ? `${parsed.creator}/${parsed.modelName}`
-      : parsed.modelName;
-
-    await upsertModelProvider(modelId, {
-      providerId,
-      providerModelId,
-      isDefault: true,
-      enabled: true,
-    });
-  }
 }

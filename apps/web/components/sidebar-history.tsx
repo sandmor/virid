@@ -129,17 +129,7 @@ export function SidebarHistory({
     updateChatTitle,
     removeOptimisticChat,
     bumpChatToTop,
-    subscribeToMessageUpdates,
   } = useEncryptedCache();
-
-  // Subscribe to cross-tab message updates to bump chats to top
-  useEffect(() => {
-    const unsubscribe = subscribeToMessageUpdates((chatId) => {
-      // When another tab updates a chat, bump it to the top in this tab too
-      bumpChatToTop(chatId);
-    });
-    return unsubscribe;
-  }, [subscribeToMessageUpdates, bumpChatToTop]);
 
   // Derive chat list directly from cache (includes optimistic state)
   const allChats = useMemo(() => {

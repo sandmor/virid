@@ -21,7 +21,6 @@ export type BranchSelectionSnapshot = {
 
 export type NewChatBootstrap = ChatBootstrapCommon & {
   kind: 'new';
-  autoResume: false;
   isReadonly: false;
   agentId?: undefined;
   initialMessages?: undefined;
@@ -31,7 +30,6 @@ export type NewChatBootstrap = ChatBootstrapCommon & {
 
 export type ExistingChatBootstrap = ChatBootstrapCommon & {
   kind: 'existing';
-  autoResume: boolean;
   isReadonly: boolean;
   agentId?: string | null;
   initialMessages: DBMessage[];

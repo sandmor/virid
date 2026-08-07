@@ -31,7 +31,7 @@ export function useExternalChatSync({
   onSnapshotApplied,
   onChatDeleted,
 }: UseExternalChatSyncArgs) {
-  const { cachedChats = [], subscribeToMessageUpdates } = useEncryptedCache();
+  const { cachedChats = [] } = useEncryptedCache();
   const chatIdRef = useRef(chatId);
   const isStreamingRef = useRef(isStreaming);
   const wasStreamingRef = useRef(isStreaming);
@@ -93,17 +93,6 @@ export function useExternalChatSync({
     getSyncManager()?.requestSync('tab-request', chatId);
   }, [chatId, isStreaming]);
 
-  // Cross-tab events are invalidations. SyncManager also requests this sync at
-  // the coordinator level so a leader viewing another chat cannot miss it.
-  useEffect(() => {
-    if (!chatId) return;
-
-    return subscribeToMessageUpdates((updatedChatId) => {
-      if (updatedChatId !== chatIdRef.current) return;
-      getSyncManager()?.requestSync('tab-request', updatedChatId);
-    });
-  }, [chatId, subscribeToMessageUpdates]);
-
   useEffect(() => {
     if (!cachedSnapshot) {
       if (hasSeenSnapshotRef.current && !isStreamingRef.current) {
@@ -131,9 +120,5 @@ export function useExternalChatSync({
     hasSeenSnapshotRef.current = true;
   }, [applySnapshot, cachedSnapshot, onChatDeleted, setMessages]);
 
-  // Kept for existing callers. Echo filtering is intentionally gone: another
-  // tab can create a legitimate update immediately after a local mutation.
-  const markLocalUpdate = useCallback(() => {}, []);
-
-  return { markLocalUpdate };
+  return undefined;
 }

@@ -2,6 +2,7 @@ import { createClerkClient } from '@clerk/backend';
 import { parseGuestSession } from '@vero/shared/auth';
 import { deriveEncryptionKey } from '@vero/shared/encryption';
 import { ExecutionContext, Hono } from 'hono';
+import { getCookie } from 'hono/cookie';
 import { cors } from 'hono/cors';
 
 export interface Env {
@@ -19,10 +20,11 @@ const api = new Hono<{ Bindings: Env }>();
 api.use('*', async (c, next) => {
   const corsMiddleware = cors({
     origin: (origin) => {
-      if (!c.env.ALLOWED_ORIGINS) return origin; // Allow all if not configured
-
-      const allowedList = c.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim());
-      return allowedList.includes(origin) ? origin : 'null';
+      const allowedList = (c.env.ALLOWED_ORIGINS ?? '')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+      return allowedList.includes(origin) ? origin : undefined;
     },
     allowMethods: ['POST', 'GET', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Cookie', 'Authorization'],
@@ -42,13 +44,7 @@ api.get('/health', (c) => {
 
 api.post('/v1/keys', async (c) => {
   try {
-    const cookieHeader = c.req.header('Cookie') ?? '';
-
-    // Resolve Session ID
-    const guestCookie = cookieHeader
-      .split('; ')
-      .find((s) => s.trim().startsWith('guest_session='))
-      ?.slice('guest_session='.length);
+    const guestCookie = getCookie(c, 'guest_session');
 
     let decodedGuestCookie: string | undefined;
     if (guestCookie) {

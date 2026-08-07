@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 
 export type GuestSessionPayload = {
   uid: string;
@@ -26,7 +26,12 @@ export function verifyGuestSignature(
   secret: string
 ): boolean {
   const expected = createHmac(GUEST_ALGO, secret).update(json).digest('hex');
-  return expected === signature;
+  const expectedBuffer = Buffer.from(expected, 'utf8');
+  const signatureBuffer = Buffer.from(signature, 'utf8');
+  return (
+    expectedBuffer.length === signatureBuffer.length &&
+    timingSafeEqual(expectedBuffer, signatureBuffer)
+  );
 }
 
 /**
@@ -45,12 +50,20 @@ export function parseGuestSession(
     const json = Buffer.from(b64, 'base64').toString('utf8');
     if (!verifyGuestSignature(json, sig, secret)) return null;
 
-    const parsed = JSON.parse(json) as GuestSessionPayload;
-    // Check expiry
-    if (typeof parsed.exp === 'number' && parsed.exp < Date.now()) {
+    const parsed: unknown = JSON.parse(json);
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      typeof (parsed as GuestSessionPayload).uid !== 'string' ||
+      typeof (parsed as GuestSessionPayload).email !== 'string' ||
+      (parsed as GuestSessionPayload).type !== 'guest' ||
+      !Number.isFinite((parsed as GuestSessionPayload).iat) ||
+      !Number.isFinite((parsed as GuestSessionPayload).exp) ||
+      (parsed as GuestSessionPayload).exp <= Date.now()
+    ) {
       return null;
     }
-    return parsed;
+    return parsed as GuestSessionPayload;
   } catch {
     return null;
   }

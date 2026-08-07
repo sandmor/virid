@@ -11,7 +11,7 @@ export default async function ProvidersSection() {
   const rows = await prisma.provider.findMany({ orderBy: { id: 'asc' } });
   const initialKeys: Record<string, string | undefined> = {};
   for (const p of providers) {
-    initialKeys[p.id] = rows.find((r) => r.id === p.id)?.apiKey;
+    initialKeys[p.id] = rows.find((r) => r.id === p.id)?.apiKey ?? undefined;
   }
   return (
     <section className="space-y-5 rounded-3xl border border-border/40 bg-card/50 p-6 shadow-sm backdrop-blur-sm">

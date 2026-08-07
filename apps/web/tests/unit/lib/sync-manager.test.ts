@@ -20,14 +20,12 @@ afterEach(() => {
 });
 
 describe('SyncManager cache completeness', () => {
-  it('does not exclude the active streaming chat from a cache sync', async () => {
+  it('passes a complete manual sync request to the cache callback', async () => {
     let syncOptions: unknown;
     const manager = createManager(async (options) => {
       syncOptions = options;
     });
 
-    manager.setActiveChat('chat-1');
-    manager.markGenerationStarted();
     await manager.forceSync();
 
     expect(syncOptions).toEqual({ force: true, source: 'manual' });

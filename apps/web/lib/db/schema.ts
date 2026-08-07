@@ -48,7 +48,6 @@ export type Chat = Omit<
 };
 export type Agent = Prisma.AgentGetPayload<{}>;
 
-export type Stream = Prisma.StreamGetPayload<{}>;
 export type ArchiveEntry = Prisma.ArchiveEntryGetPayload<{}>;
 export type ArchiveLink = Prisma.ArchiveLinkGetPayload<{}>;
 export type SystemAgent = Prisma.SystemAgentGetPayload<{}>;

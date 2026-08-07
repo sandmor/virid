@@ -4,7 +4,6 @@ import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatHeader } from '@/components/chat-header';
 
-import { useAutoResume } from '@/hooks/use-auto-resume';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useMultiSelection } from '@/hooks/use-multi-selection';
 import type {
@@ -46,7 +45,6 @@ export function Chat({
   initialChatModel,
   initialVisibilityType,
   isReadonly,
-  autoResume,
   initialLastContext,
   allowedModels,
   agentId,
@@ -59,7 +57,6 @@ export function Chat({
   initialChatModel: string;
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
-  autoResume: boolean;
   initialLastContext?: AppUsage;
   allowedModels: ChatModelOption[];
   agentId?: string;
@@ -144,7 +141,6 @@ export function Chat({
     sendMessage,
     status,
     stop,
-    resumeStream,
     regenerate,
     chatError,
     clearChatError,
@@ -237,21 +233,6 @@ export function Chat({
     regenerate();
     window.history.replaceState({}, '', `/chat/${id}`);
   }, [regenerateParam, messages, regenerate, id]);
-
-  const effectiveAutoResume =
-    autoResume &&
-    !query &&
-    !regenerateParam &&
-    !initialQueryHandledRef.current &&
-    !initialRegenerateHandledRef.current;
-
-  useAutoResume({
-    chatId: id,
-    autoResume: effectiveAutoResume,
-    initialMessages,
-    resumeStream,
-    setMessages,
-  });
 
   const handleRetryOnError = useCallback(() => {
     if (clearChatError) {

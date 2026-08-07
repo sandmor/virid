@@ -56,7 +56,6 @@ import {
 
 type SyncCallback = (options: {
   force: boolean;
-  excludeChatIds?: Set<string>;
   source: SyncRequest['source'];
 }) => Promise<void>;
 
@@ -66,15 +65,6 @@ type SyncRequest = {
   force?: boolean;
   timestamp: number;
 };
-
-interface ActiveChatState {
-  chatId: string;
-  isGenerating: boolean;
-  /** Timestamp when generation started - used for observability */
-  generationStartedAt: number | null;
-  /** Timestamp when generation ended - used for post-generation protection */
-  generationEndedAt: number | null;
-}
 
 /**
  * Options for initializing the SyncManager.
@@ -88,12 +78,8 @@ type SyncManagerOptions = {
   onSync: SyncCallback;
   /** Callback when cache should be reloaded from storage (for follower tabs) */
   onCacheReload?: () => Promise<void>;
-  /** Callback when messages are updated in another tab */
-  onMessagesUpdated?: (chatId: string, updatedAt: number) => void;
   /** Debounce window in ms for coalescing sync requests */
   debounceMs?: number;
-  /** @deprecated Kept temporarily for callers configuring older clients. */
-  postGenerationProtectionMs?: number;
   /** Enable debug logging */
   debug?: boolean;
 };
@@ -104,7 +90,6 @@ const SYNC_MANAGER_TAG = '[SyncManager]';
 export class SyncManager {
   private onSync: SyncCallback;
   private onCacheReload?: () => Promise<void>;
-  private onMessagesUpdated?: (chatId: string, updatedAt: number) => void;
   private debounceMs: number;
   private debug: boolean;
 
@@ -114,9 +99,6 @@ export class SyncManager {
   private isSyncing = false;
   private syncPromise: Promise<void> | null = null;
 
-  // Active chat tracking
-  private activeChat: ActiveChatState | null = null;
-
   // Tab leader coordination
   private tabLeader: TabLeaderElection | null = null;
   private electionPromise: Promise<void> | null = null;
@@ -124,11 +106,7 @@ export class SyncManager {
   constructor(options: SyncManagerOptions) {
     this.onSync = options.onSync;
     this.onCacheReload = options.onCacheReload;
-    this.onMessagesUpdated = options.onMessagesUpdated;
     this.debounceMs = options.debounceMs ?? DEFAULT_DEBOUNCE_MS;
-    // Kept as an accepted option while callers are migrated. Snapshot
-    // reconciliation, rather than cache filtering, owns this protection now.
-    void options.postGenerationProtectionMs;
     this.debug = options.debug ?? false;
 
     // Initialize tab leader election
@@ -185,8 +163,6 @@ export class SyncManager {
         // enqueue it here so a leader viewing another chat still refreshes it.
         // Duplicate requests are harmless and coalesced by scheduleSync().
         this.requestSync('tab-request', chatId);
-        // Forward to the registered callback
-        this.onMessagesUpdated?.(chatId, updatedAt);
       },
       onFollowerJoined: () => {
         this.log(
@@ -253,70 +229,6 @@ export class SyncManager {
     // local refresh as well, otherwise a leader can leave its own cache stale.
     this.requestSync('tab-request', chatId);
     this.tabLeader?.notifyMessagesUpdated(chatId);
-  }
-
-  /**
-   * Set the active chat being viewed/edited by the user.
-   * This chat receives special protection during syncs.
-   */
-  setActiveChat(chatId: string | null): void {
-    if (chatId === null) {
-      this.log('Clearing active chat');
-      this.activeChat = null;
-      return;
-    }
-
-    if (this.activeChat?.chatId === chatId) {
-      return;
-    }
-
-    this.log('Setting active chat:', chatId);
-    this.activeChat = {
-      chatId,
-      isGenerating: false,
-      generationStartedAt: null,
-      generationEndedAt: null,
-    };
-  }
-
-  /**
-   * Mark that the active chat has started generating a response.
-   * This remains observability-only. Cache sync must not exclude this chat.
-   */
-  markGenerationStarted(): void {
-    if (!this.activeChat) {
-      this.log('Warning: markGenerationStarted called with no active chat');
-      return;
-    }
-
-    this.log('Generation started for chat:', this.activeChat.chatId);
-    this.activeChat.isGenerating = true;
-    this.activeChat.generationStartedAt = Date.now();
-    this.activeChat.generationEndedAt = null;
-  }
-
-  /**
-   * Mark that the active chat has finished generating.
-   * Mounted chat reconciliation handles the post-stream handoff.
-   */
-  markGenerationEnded(): void {
-    if (!this.activeChat) {
-      this.log('Warning: markGenerationEnded called with no active chat');
-      return;
-    }
-
-    this.log('Generation ended for chat:', this.activeChat.chatId);
-    this.activeChat.isGenerating = false;
-    this.activeChat.generationEndedAt = Date.now();
-  }
-
-  /**
-   * @deprecated Sync invalidations are idempotent; do not suppress them by
-   * timestamp because a concurrent tab can make a valid change in the same
-   * window.
-   */
-  recordLocalChange(chatId: string): void {
-    void chatId;
   }
 
   /**
@@ -499,7 +411,6 @@ export class SyncManager {
       this.debounceTimer = null;
     }
     this.pendingRequests = [];
-    this.activeChat = null;
 
     // Clean up tab leader
     if (this.tabLeader) {

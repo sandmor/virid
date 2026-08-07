@@ -13,10 +13,6 @@ import type {
   WorkerResponse,
   WorkerSearchOptions,
 } from '@/lib/search/search-index.types';
-import {
-  createSearchCoordinator,
-  type SearchTabCoordinator,
-} from '@/lib/search/search-coordinator';
 
 const WORKER_TIMEOUT_MS = 20000;
 const WORKER_URL = new URL('./search-worker.ts', import.meta.url);
@@ -92,10 +88,6 @@ class SearchIndexService {
 
   private initPromise: Promise<void> | null = null;
 
-  private coordinator: SearchTabCoordinator | null = null;
-
-  // Callback for cross-tab notifications
-  private onIndexReloadNeeded: (() => void) | null = null;
 
   isReady(): boolean {
     return this.ready;
@@ -105,12 +97,22 @@ class SearchIndexService {
     return this.indexing || Boolean(this.syncPromise);
   }
 
-  /**
-   * Set a callback to be called when another tab updates the index.
-   * This can be used to trigger a re-sync or re-search.
-   */
-  setOnIndexReloadNeeded(callback: (() => void) | null): void {
-    this.onIndexReloadNeeded = callback;
+  /** Terminate the worker before a user or encryption-key transition. */
+  reset(): void {
+    for (const pending of this.pendingRequests.values()) {
+      clearTimeout(pending.timeout);
+      pending.reject(new Error('Search worker reset'));
+    }
+    this.pendingRequests.clear();
+    void this.workerPromise?.then((worker) => worker.terminate());
+    this.workerPromise = null;
+    this.initPromise = null;
+    this.loadPromise = null;
+    this.syncPromise = null;
+    this.snapshotLoaded = false;
+    this.ready = false;
+    this.indexing = false;
+    this.workerInitialized = false;
   }
 
   private async getWorker(): Promise<Worker> {
@@ -191,23 +193,6 @@ class SearchIndexService {
       if (!isInitializedResponse(response)) {
         throw new Error('Unexpected worker response while initializing');
       }
-
-      // Setup cross-tab coordinator (main thread side)
-      // Worker handles its own coordinator for the persistence layer
-      this.coordinator = createSearchCoordinator({
-        onIndexUpdated: () => {
-          // Another tab updated the index, notify callback if registered
-          if (this.onIndexReloadNeeded) {
-            this.onIndexReloadNeeded();
-          }
-        },
-        onIndexCleared: () => {
-          // Index cleared by another tab, reset local state
-          this.snapshotLoaded = false;
-          this.ready = false;
-        },
-        debug: false,
-      });
 
       this.workerInitialized = true;
     })().finally(() => {

@@ -227,7 +227,7 @@ function ProviderRow({
   onSetDefault: () => void;
 }) {
   const [unlinkDialogOpen, setUnlinkDialogOpen] = useState(false);
-  const isCustomProvider = !!provider.customPlatformProviderId;
+  const isCustomProvider = !['openai', 'google', 'openrouter', 'xai'].includes(provider.providerId);
 
   const handleUnlink = () => {
     onRemove();
@@ -235,7 +235,7 @@ function ProviderRow({
   };
 
   const providerDisplayName = isCustomProvider
-    ? (provider.customProviderName ?? 'Custom')
+    ? provider.providerId
     : displayProviderName(provider.providerId);
 
   return (
@@ -252,7 +252,7 @@ function ProviderRow({
             {isCustomProvider ? (
               <span className="flex items-center gap-1">
                 <Sparkles className="h-3 w-3 text-violet-500" />
-                {provider.customProviderName ?? 'Custom'}
+                {provider.providerId}
               </span>
             ) : (
               displayProviderName(provider.providerId)

@@ -12,15 +12,8 @@ const ENV_MAP: Record<string, string[]> = {
 /** Resolve an API key for a provider with precedence: DB Provider row -> first present env var -> undefined. */
 export const getProviderApiKey = cache(
   async (providerId: string): Promise<string | undefined> => {
-    // DB override
-    try {
-      const record = await prisma.provider.findUnique({
-        where: { id: providerId },
-      });
-      if (record?.apiKey) return record.apiKey;
-    } catch {
-      // Swallow to avoid cascading failure if migration not yet applied; callers can handle missing keys.
-    }
+    const record = await prisma.provider.findUnique({ where: { id: providerId } });
+    if (record?.apiKey) return record.apiKey;
     const envCandidates = ENV_MAP[providerId] || [];
     for (const name of envCandidates) {
       const val = process.env[name];

@@ -1,7 +1,7 @@
 const SAFE_REDIRECT_FALLBACK = '/';
 const RELATIVE_URL_BASE = 'http://localhost';
 const ENV_DEFAULT_ORIGIN =
-  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXT_PUBLIC_APP_BASE_URL ||
   process.env.APP_URL ||
   (process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`

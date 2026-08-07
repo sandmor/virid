@@ -38,7 +38,6 @@ import type { UserType } from '@/lib/auth/types';
 import { isProductionEnvironment } from '@/lib/constants';
 import { getChatSettings } from '@/lib/db/chat-settings';
 import {
-  createStreamId,
   deleteChatById,
   getActiveMessagesByChatId,
   getChatById,
@@ -77,11 +76,6 @@ import {
 } from 'ai';
 import { createHash } from 'crypto';
 import { unstable_cache as nextCache } from 'next/cache';
-import { after } from 'next/server';
-import {
-  createResumableStreamContext,
-  type ResumableStreamContext,
-} from 'resumable-stream';
 import { ZodError } from 'zod';
 import { createPostRequestBodySchema, type PostRequestBody } from './schema';
 
@@ -99,15 +93,6 @@ const getCachedModelCapabilities = (modelId: string) =>
     ['model-capabilities', modelId], // Key for cache invalidation
     { revalidate: 300 } // 5 minutes
   );
-
-function isErrorWithMessage(error: unknown): error is { message: string } {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error &&
-    typeof (error as { message?: unknown }).message === 'string'
-  );
-}
 
 type ComparableUserContent = {
   textParts: string[];
@@ -213,28 +198,6 @@ function shouldEnablePromptCaching(
     injectedMessages.reduce((sum, message) => sum + message.content.length, 0);
 
   return totalLength >= 500;
-}
-
-let globalStreamContext: ResumableStreamContext | null = null;
-
-export function getStreamContext() {
-  if (!globalStreamContext) {
-    try {
-      globalStreamContext = createResumableStreamContext({
-        waitUntil: after,
-      });
-    } catch (error: unknown) {
-      if (isErrorWithMessage(error) && error.message.includes('REDIS_URL')) {
-        console.log(
-          ' > Resumable streams are disabled due to missing REDIS_URL'
-        );
-      } else {
-        console.error(error);
-      }
-    }
-  }
-
-  return globalStreamContext;
 }
 
 export async function POST(request: Request) {
@@ -588,9 +551,6 @@ export async function POST(request: Request) {
     // Regeneration replays an existing user turn; avoid duplicating it in persistence.
     let finalMergedUsage: AppUsage | undefined;
 
-    const streamContext = getStreamContext();
-    const streamId = streamContext ? generateUUID() : undefined;
-
     let persistUserMessagePromise: Promise<unknown> | null = null;
 
     const stream = createUIMessageStream({
@@ -600,14 +560,6 @@ export async function POST(request: Request) {
           type: 'data-init',
           data: { chatId: id, createdNewChat, modelId: selectedChatModel },
         });
-        // Kick off context gathering in parallel while we prepare persistence.
-        const streamIdPromise =
-          streamId && streamContext
-            ? createStreamId({ streamId, chatId: id }).catch((e) =>
-                console.warn('Failed to persist stream id (non-fatal)', e)
-              )
-            : Promise.resolve<void>(undefined);
-
         const [
           messagesFromDb,
           model,
@@ -1039,7 +991,7 @@ export async function POST(request: Request) {
         });
 
         // Ensure persistence tasks complete, but don't block model start
-        Promise.all([persistUserMessagePromise, streamIdPromise]).catch(() => {
+        Promise.resolve(persistUserMessagePromise).catch(() => {
           /* already logged individually */
         });
 
@@ -1165,24 +1117,6 @@ export async function POST(request: Request) {
       'X-Accel-Buffering': 'no',
       Connection: 'keep-alive',
     };
-
-    if (streamContext && streamId) {
-      try {
-        const resumable = await streamContext.resumableStream(streamId, () =>
-          stream.pipeThrough(new JsonToSseTransformStream())
-        );
-
-        if (resumable) {
-          return new Response(resumable, { headers: sseHeaders });
-        }
-      } catch (error) {
-        console.warn('Resumable stream fallback triggered', {
-          chatId: id,
-          streamId,
-          error,
-        });
-      }
-    }
 
     return new Response(stream.pipeThrough(new JsonToSseTransformStream()), {
       headers: sseHeaders,

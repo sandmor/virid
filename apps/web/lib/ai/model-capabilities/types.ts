@@ -23,10 +23,6 @@ export type ModelProviderAssociation = {
   pricing: ModelPricing | null;
   isDefault: boolean;
   enabled: boolean;
-  /** Optional: ID of a custom platform provider to route through */
-  customPlatformProviderId?: string | null;
-  /** Display name of the custom provider (populated when fetching) */
-  customProviderName?: string;
 };
 
 /**

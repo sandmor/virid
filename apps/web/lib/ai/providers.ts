@@ -5,13 +5,8 @@ import { createXai } from '@ai-sdk/xai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { prisma } from '@vero/db';
 import { isTestEnvironment } from '../constants';
-import { parseModelId } from './model-id';
 import { getProviderApiKey } from './provider-keys';
-import {
-  SDK_PROVIDERS,
-  providerHasSdkSupport,
-  inferProviderFromCreator,
-} from './registry';
+import { SDK_PROVIDERS } from './registry';
 import { type ParsedByokModelId } from './byok';
 
 // =============================================================================
@@ -102,10 +97,10 @@ type BuiltinProviderInfo = {
 };
 
 /**
- * Resolution result for a platform custom provider (admin-defined OpenAI-compatible endpoint)
+ * Resolution result for an admin-configured OpenAI-compatible endpoint.
  */
-type PlatformCustomProviderInfo = {
-  type: 'platform-custom';
+type OpenAICompatibleProviderInfo = {
+  type: 'openai-compatible';
   providerModelId: string;
   customProvider: {
     slug: string;
@@ -114,38 +109,15 @@ type PlatformCustomProviderInfo = {
   };
 };
 
-type ProviderInfo = BuiltinProviderInfo | PlatformCustomProviderInfo;
+type ProviderInfo = BuiltinProviderInfo | OpenAICompatibleProviderInfo;
 
 /**
  * Resolve provider and providerModelId for a model ID.
  *
- * Resolution order:
- * 1. PlatformCustomModel - admin-defined custom models (e.g., "mycorp:custom-gpt")
- * 2. Model + ModelProvider - models with registered providers
- *    - If ModelProvider has customPlatformProviderId, route through that custom provider
- *    - Otherwise use the standard builtin provider
- * 3. Fallback parsing - for openai: and google: prefixed models not in DB
+ * Models must be configured in the database. There is deliberately no model-ID
+ * inference: it silently routes unreviewed models to the wrong endpoint.
  */
 async function resolveProviderInfo(modelId: string): Promise<ProviderInfo> {
-  // 1. Check PlatformCustomModel first (admin-defined custom models)
-  const platformCustomModel = await prisma.platformCustomModel.findUnique({
-    where: { modelSlug: modelId },
-    include: { provider: true },
-  });
-
-  if (platformCustomModel?.enabled && platformCustomModel.provider.enabled) {
-    return {
-      type: 'platform-custom',
-      providerModelId: platformCustomModel.providerModelId,
-      customProvider: {
-        slug: platformCustomModel.provider.slug,
-        baseUrl: platformCustomModel.provider.baseUrl,
-        apiKey: platformCustomModel.provider.apiKey,
-      },
-    };
-  }
-
-  // 2. Look up from Model + ModelProvider tables
   const model = await prisma.model.findUnique({
     where: { id: modelId },
     include: {
@@ -153,33 +125,23 @@ async function resolveProviderInfo(modelId: string): Promise<ProviderInfo> {
         where: { enabled: true },
         orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
         take: 1,
-        include: {
-          customPlatformProvider: true,
-        },
+        include: { provider: true },
       },
     },
   });
 
-  if (model && model.providers[0]) {
-    const provider = model.providers[0];
-
-    // Check if this provider routes through a custom platform provider
-    if (provider.customPlatformProviderId && provider.customPlatformProvider) {
-      const customProvider = provider.customPlatformProvider;
-      if (customProvider.enabled) {
-        return {
-          type: 'platform-custom',
-          providerModelId: provider.providerModelId,
-          customProvider: {
-            slug: customProvider.slug,
-            baseUrl: customProvider.baseUrl,
-            apiKey: customProvider.apiKey,
-          },
-        };
+  const provider = model?.providers.find((association) => association.provider.enabled);
+  if (provider) {
+    if (provider.provider.kind === 'openai-compatible') {
+      if (!provider.provider.baseUrl) {
+        throw new Error(`Provider '${provider.providerId}' has no base URL`);
       }
+      return {
+        type: 'openai-compatible',
+        providerModelId: provider.providerModelId,
+        customProvider: { slug: provider.providerId, baseUrl: provider.provider.baseUrl, apiKey: provider.provider.apiKey },
+      };
     }
-
-    // Standard builtin provider
     return {
       type: 'builtin',
       provider: provider.providerId,
@@ -187,29 +149,7 @@ async function resolveProviderInfo(modelId: string): Promise<ProviderInfo> {
     };
   }
 
-  // 3. Fallback: parse from the model ID and infer provider
-  const parsed = parseModelId(modelId);
-  if (!parsed) {
-    throw new Error(`Invalid model ID format: ${modelId}`);
-  }
-
-  const { creator, modelName } = parsed;
-
-  // Use centralized registry to infer provider
-  const { providerId, needsCreatorPrefix } = inferProviderFromCreator(creator);
-  const providerModelId = needsCreatorPrefix
-    ? `${creator}/${modelName}`
-    : modelName;
-
-  // Only allow fallback for SDK providers (openai, google)
-  // OpenRouter models must be in the database
-  if (!providerHasSdkSupport(providerId) || providerId === 'openrouter') {
-    throw new Error(
-      `Provider for model "${modelId}" could not be determined. Ensure the model is configured in the database.`
-    );
-  }
-
-  return { type: 'builtin', provider: providerId, providerModelId };
+  throw new Error(`Model '${modelId}' has no enabled provider configuration`);
 }
 
 // =============================================================================
@@ -232,7 +172,7 @@ function buildLanguageModel(
   info: ProviderInfo,
   providerFactory?: (model: string) => any
 ) {
-  if (info.type === 'platform-custom') {
+  if (info.type === 'openai-compatible') {
     const factory = buildCustomProviderFactory(
       info.customProvider.slug,
       info.customProvider.apiKey || '',
@@ -254,7 +194,7 @@ function buildLanguageModel(
 async function resolveLanguageModel(modelId: string) {
   const info = await resolveProviderInfo(modelId);
 
-  if (info.type === 'platform-custom') {
+  if (info.type === 'openai-compatible') {
     return buildLanguageModel(info);
   }
 
@@ -297,8 +237,8 @@ export async function getLanguageModel(id: string) {
 export async function getLanguageModelWithKey(id: string, apiKey: string) {
   const info = await resolveProviderInfo(id);
 
-  if (info.type === 'platform-custom') {
-    // Platform custom models use the platform's configured key
+  if (info.type === 'openai-compatible') {
+    // OpenAI-compatible platform providers use their managed credential.
     return buildLanguageModel(info);
   }
 

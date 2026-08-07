@@ -253,7 +253,6 @@ export async function POST(request: NextRequest) {
     const bootstrap: ChatBootstrapResponse = {
       kind: 'existing',
       chatId: chat.id,
-      autoResume: true,
       isReadonly: false,
       initialChatModel: initialModel ?? DEFAULT_CHAT_MODEL,
       initialVisibilityType: chatForSerialization.visibility,

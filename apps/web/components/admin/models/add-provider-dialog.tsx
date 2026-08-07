@@ -72,7 +72,6 @@ type FormValues = z.infer<typeof formSchema>;
 
 type CustomProvider = {
   id: string;
-  slug: string;
   name: string;
   enabled: boolean;
 };
@@ -104,12 +103,15 @@ export function AddProviderDialog({
   const { data: customProviders = [], isLoading: loadingCustom } = useQuery<
     CustomProvider[]
   >({
-    queryKey: ['platform-providers'],
+    queryKey: ['providers'],
     queryFn: async () => {
-      const res = await fetch('/api/admin/platform-providers');
+      const res = await fetch('/api/admin/providers');
       if (!res.ok) return [];
       const json = await res.json();
-      return (json.providers ?? []).filter((p: CustomProvider) => p.enabled);
+      return (json.providers ?? []).filter(
+        (p: CustomProvider & { kind?: string }) =>
+          p.enabled && p.kind === 'openai-compatible'
+      );
     },
     enabled: open,
     staleTime: 30_000,
@@ -157,14 +159,12 @@ export function AddProviderDialog({
     setSubmitError(null);
     try {
       if (values.providerType === 'custom' && values.customProviderId) {
-        // For custom providers, use a special provider ID format
         const customProvider = customProviders.find(
           (p) => p.id === values.customProviderId
         );
         await onSave({
-          providerId: `custom:${customProvider?.slug ?? values.customProviderId}`,
+          providerId: customProvider?.id ?? values.customProviderId,
           providerModelId: values.providerModelId,
-          customPlatformProviderId: values.customProviderId,
         });
       } else if (values.providerType === 'platform' && values.providerId) {
         await onSave({
@@ -372,7 +372,7 @@ export function AddProviderDialog({
                                     <Sparkles className="h-3 w-3 text-violet-500" />
                                     <span>{provider.name}</span>
                                     <span className="text-xs text-muted-foreground">
-                                      ({provider.slug})
+                                      ({provider.id})
                                     </span>
                                   </div>
                                 </SelectItem>

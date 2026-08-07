@@ -10,12 +10,20 @@ datasource db {
   extensions = [ltree]
 }
 
-// Stores per-provider API keys overriding environment variables.
-// Only include providers we integrate with directly (e.g., openai, google, openrouter, etc.)
-// Id is the canonical slug for the provider ("openai", "google", "openrouter").
+// Platform inference endpoints. Built-in SDK metadata lives in the application
+// registry; this table owns the deployable routing configuration.
 model Provider {
-  id     String @id @db.VarChar(64)
-  apiKey String @db.Text
+  id        String   @id @db.VarChar(64)
+  name      String   @db.VarChar(128)
+  kind      String   @default("builtin") @db.VarChar(32)
+  baseUrl   String?  @db.Text
+  apiKey    String?  @db.Text
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  modelProviders ModelProvider[]
+  catalogEntries ProviderCatalog[]
 
   @@map("Provider")
 }
@@ -223,7 +231,6 @@ model Chat {
   user                 User                     @relation(fields: [userId], references: [id])
   agent                Agent?                   @relation(fields: [agentId], references: [id])
   messages             Message[]
-  streams              Stream[]
   pinnedArchiveEntries ChatPinnedArchiveEntry[]
 
   @@index([parentChatId])
@@ -250,16 +257,6 @@ model Message {
   @@index([chatId])
   @@index([chatId, pathText])
   @@map("Message")
-}
-
-model Stream {
-  id        String   @id @default(uuid()) @db.Uuid
-  chatId    String   @db.Uuid
-  createdAt DateTime
-
-  chat Chat @relation(fields: [chatId], references: [id])
-
-  @@map("Stream")
 }
 
 // Archive memory system: per-user knowledge entries and their relationships.
@@ -347,22 +344,20 @@ model Model {
 model ModelProvider {
   id                       String   @id @default(uuid()) @db.Uuid
   modelId                  String   @db.VarChar(256) // FK to Model
-  providerId               String   @db.VarChar(64) // Provider slug (openai, google, openrouter)
+  providerId               String   @db.VarChar(64)
   providerModelId          String   @db.VarChar(256) // Provider-specific model identifier used in API calls
-  customPlatformProviderId String?  @db.Uuid // Optional: link to a custom platform provider
   pricing                  Json? // Provider-specific pricing: { prompt, completion, image, reasoning, cacheRead, cacheWrite }
   isDefault                Boolean  @default(false) // Whether this is the default/preferred provider for this model
   enabled                  Boolean  @default(true) // Whether this association is active
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
-  model                  Model                   @relation(fields: [modelId], references: [id], onDelete: Cascade)
-  customPlatformProvider PlatformCustomProvider? @relation(fields: [customPlatformProviderId], references: [id], onDelete: SetNull)
+  model    Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Restrict)
 
   @@unique([modelId, providerId])
   @@index([providerId])
   @@index([modelId])
-  @@index([customPlatformProviderId])
   @@map("ModelProvider")
 }
 
@@ -381,6 +376,8 @@ model ProviderCatalog {
   lastSynced       DateTime @default(now())
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, providerModelId])
   @@index([providerId])
@@ -424,53 +421,4 @@ model TokenUsage {
   @@index([createdAt])
   @@index([model])
   @@map("TokenUsage")
-}
-
-// Admin-defined custom OpenAI-compatible provider for the platform
-// Unlike UserCustomProvider, these are platform-wide and managed by admins
-model PlatformCustomProvider {
-  id        String   @id @default(uuid()) @db.Uuid
-  slug      String   @unique @db.VarChar(64) // Unique provider slug
-  name      String   @db.VarChar(128) // Human-readable name
-  baseUrl   String   @db.Text // OpenAI-compatible API base URL
-  apiKey    String?  @db.Text // Optional API key
-  enabled   Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Platform custom models using this provider directly
-  models         PlatformCustomModel[]
-  // Regular models that can be routed through this custom provider
-  modelProviders ModelProvider[]
-
-  @@map("PlatformCustomProvider")
-}
-
-// Admin-defined custom model for the platform
-// These appear as regular platform models to users (indistinguishable from built-in)
-model PlatformCustomModel {
-  id               String   @id @default(uuid()) @db.Uuid
-  // The user-facing slug in {creator}:{model} format (e.g., "mycorp:custom-gpt")
-  // Admin can choose any unique non-empty slug
-  modelSlug        String   @unique @db.VarChar(256)
-  // Display name shown to users
-  displayName      String   @db.VarChar(256)
-  // The provider serving this model
-  providerId       String   @db.Uuid
-  // Model ID as used by the provider's API
-  providerModelId  String   @db.VarChar(256)
-  // Model capabilities
-  supportsTools    Boolean  @default(true)
-  supportedFormats String[] // text, image, etc.
-  maxOutputTokens  Int?
-  // Pricing (optional, for cost tracking)
-  pricing          Json?
-  enabled          Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  provider PlatformCustomProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-
-  @@index([providerId])
-  @@map("PlatformCustomModel")
 }

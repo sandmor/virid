@@ -9,9 +9,9 @@ import {
 const COOKIE_NAME = 'guest_session';
 
 function getSecret() {
-  const secret = process.env.GUEST_SECRET || process.env.AUTH_SECRET;
+  const secret = process.env.GUEST_SECRET;
   if (!secret) {
-    throw new Error('Missing GUEST_SECRET (or AUTH_SECRET as fallback)');
+    throw new Error('Missing GUEST_SECRET');
   }
   return secret;
 }

@@ -664,36 +664,12 @@ type CacheContextValue = {
    * This updates the chat's updatedAt locally for immediate UI feedback.
    */
   bumpChatToTop: (chatId: string) => void;
-  // Sync manager integration
-  /**
-   * Set the active chat being viewed. This chat receives special sync protection.
-   */
-  setActiveChat: (chatId: string | null) => void;
-  /**
-   * Mark that generation has started on the active chat.
-   * During generation, the active chat is protected from external sync updates.
-   */
-  markGenerationStarted: () => void;
-  /**
-   * Mark that generation has ended on the active chat.
-   */
-  markGenerationEnded: () => void;
-  /**
-   * @deprecated Invalidations are now idempotent and are never filtered by
-   * timestamp. Retained while callers migrate to direct invalidation.
-   */
-  recordLocalChange: (chatId: string) => void;
+  /** Optimistically order a changed chat, request reconciliation, and notify peers. */
+  notifyChatUpdated: (chatId: string) => void;
   /**
    * Check if this tab is the sync leader.
    */
   isSyncLeader: () => boolean;
-  /**
-   * Subscribe to message update events from other tabs.
-   * Returns an unsubscribe function.
-   */
-  subscribeToMessageUpdates: (
-    callback: (chatId: string, updatedAt: number) => void
-  ) => () => void;
 };
 
 const EncryptedCacheContext = createContext<CacheContextValue>({
@@ -709,12 +685,8 @@ const EncryptedCacheContext = createContext<CacheContextValue>({
   removeOptimisticChat: () => {},
   updateChatTitle: () => {},
   bumpChatToTop: () => {},
-  setActiveChat: () => {},
-  markGenerationStarted: () => {},
-  markGenerationEnded: () => {},
-  recordLocalChange: () => {},
+  notifyChatUpdated: () => {},
   isSyncLeader: () => true,
-  subscribeToMessageUpdates: () => () => {},
 });
 
 export function useEncryptedCache(): CacheContextValue {
@@ -1026,6 +998,14 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
       return { ...prev, bumpedChatUpdates: newBumpedChatUpdates };
     });
   }, []);
+
+  const notifyChatUpdated = useCallback(
+    (chatId: string) => {
+      bumpChatToTop(chatId);
+      getSyncManager()?.notifyMessagesUpdated(chatId);
+    },
+    [bumpChatToTop]
+  );
 
   // Clear optimistic state for chats that now exist in the real cache
   useEffect(() => {
@@ -1563,6 +1543,7 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
       isInitializedRef.current = false;
       manager.deactivate();
       void manager.reset();
+      searchIndexService.reset();
       setState(initialState);
       queryClientRef.current.removeQueries({ queryKey: ['chat', 'history'] });
       queryClientRef.current.removeQueries({ queryKey: ['chat', 'bootstrap'] });
@@ -1579,6 +1560,7 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
       isInitializedRef.current = false;
       manager.deactivate();
       void manager.reset();
+      searchIndexService.reset();
       setState(initialState);
       queryClientRef.current.removeQueries({ queryKey: ['chat', 'history'] });
       queryClientRef.current.removeQueries({ queryKey: ['chat', 'bootstrap'] });
@@ -1593,6 +1575,7 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    searchIndexService.reset();
     let cancelled = false;
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
@@ -1678,9 +1661,6 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
   refreshCacheRef.current = refreshCache;
 
   // Message update subscribers - for cross-tab real-time sync
-  const messageUpdateSubscribersRef = useRef<
-    Set<(chatId: string, updatedAt: number) => void>
-  >(new Set());
 
   // Initialize the SyncManager
   useEffect(() => {
@@ -1699,19 +1679,7 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
         cacheDebug('Reloading cache from storage (triggered by another tab)');
         await loadFromCache({ forceUpdateQueries: true });
       },
-      onMessagesUpdated: (chatId, updatedAt) => {
-        // Forward message update events to all subscribers
-        cacheDebug('Message update received from another tab:', chatId);
-        messageUpdateSubscribersRef.current.forEach((callback) => {
-          try {
-            callback(chatId, updatedAt);
-          } catch (error) {
-            console.warn('Error in message update subscriber:', error);
-          }
-        });
-      },
       debounceMs: 500,
-      postGenerationProtectionMs: 2000,
       debug: IS_DEV,
     });
 
@@ -1792,42 +1760,10 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
     };
   }, [isLoggedIn, state.status]); // Only re-setup interval when login or ready state changes
 
-  // Sync manager method wrappers
-  const setActiveChat = useCallback((chatId: string | null) => {
-    const syncManager = getSyncManager();
-    syncManager?.setActiveChat(chatId);
-  }, []);
-
-  const markGenerationStarted = useCallback(() => {
-    const syncManager = getSyncManager();
-    syncManager?.markGenerationStarted();
-  }, []);
-
-  const markGenerationEnded = useCallback(() => {
-    const syncManager = getSyncManager();
-    syncManager?.markGenerationEnded();
-  }, []);
-
-  const recordLocalChange = useCallback((chatId: string) => {
-    const syncManager = getSyncManager();
-    syncManager?.recordLocalChange(chatId);
-  }, []);
-
   const isSyncLeader = useCallback(() => {
     const syncManager = getSyncManager();
     return syncManager?.isLeader() ?? true;
   }, []);
-
-  // Subscribe to message update events from other tabs
-  const subscribeToMessageUpdates = useCallback(
-    (callback: (chatId: string, updatedAt: number) => void): (() => void) => {
-      messageUpdateSubscribersRef.current.add(callback);
-      return () => {
-        messageUpdateSubscribersRef.current.delete(callback);
-      };
-    },
-    []
-  );
 
   const getCachedBootstrap = useCallback(
     (chatId: string) => {
@@ -1879,7 +1815,6 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
     return {
       kind: 'new',
       chatId: generateUUID(),
-      autoResume: false,
       isReadonly: false,
       initialVisibilityType: 'private',
       initialChatModel,
@@ -2022,12 +1957,8 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
       removeOptimisticChat,
       updateChatTitle,
       bumpChatToTop,
-      setActiveChat,
-      markGenerationStarted,
-      markGenerationEnded,
-      recordLocalChange,
+      notifyChatUpdated,
       isSyncLeader,
-      subscribeToMessageUpdates,
     }),
     [
       state.status,
@@ -2042,12 +1973,8 @@ export function EncryptedCacheProvider({ children }: { children: ReactNode }) {
       removeOptimisticChat,
       updateChatTitle,
       bumpChatToTop,
-      setActiveChat,
-      markGenerationStarted,
-      markGenerationEnded,
-      recordLocalChange,
+      notifyChatUpdated,
       isSyncLeader,
-      subscribeToMessageUpdates,
     ]
   );
 

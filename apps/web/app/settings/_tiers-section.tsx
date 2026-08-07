@@ -4,7 +4,6 @@ import {
   type TierActionState,
 } from '@/components/admin/tier-editor';
 import {
-  ensureModelCapabilities,
   upsertModel,
   upsertModelProvider,
 } from '@/lib/ai/model-capabilities';
@@ -121,9 +120,6 @@ async function updateTierAction(
       message: `Cannot add models without providers to tier: ${invalidModels.join(', ')}`,
     };
   }
-
-  // Ensure all models have capabilities in the database
-  await ensureModelCapabilities();
 
   // Use transaction to update tier and its model associations
   await prisma.$transaction(async (tx: TxClient) => {

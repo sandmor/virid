@@ -2,7 +2,7 @@
  * Shared Provider Utilities
  *
  * Common utilities for provider validation and factory creation,
- * used by both platform custom providers and user BYOK providers.
+ * used by platform OpenAI-compatible providers and user BYOK providers.
  */
 
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
@@ -64,7 +64,7 @@ export function isValidBaseUrl(url: string): boolean {
 
 /**
  * Build an OpenAI-compatible provider client.
- * Used for both platform custom providers and user custom providers.
+ * Used for platform OpenAI-compatible providers and user custom providers.
  */
 export function buildOpenAICompatibleClient(
   name: string,

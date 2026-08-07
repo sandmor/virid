@@ -3,7 +3,6 @@ import {
   type ModelPricing,
 } from '@/lib/ai/model-capabilities';
 import { requireAdmin } from '@/lib/auth/admin';
-import { prisma } from '@vero/db';
 import { NextRequest, NextResponse } from 'next/server';
 
 // POST /api/admin/model-capabilities/[id]/providers - Add Provider
@@ -20,7 +19,6 @@ export async function POST(
       providerModelId,
       pricing,
       isDefault,
-      customPlatformProviderId,
     } = body;
 
     if (!providerId || !providerModelId) {
@@ -30,26 +28,12 @@ export async function POST(
       );
     }
 
-    if (customPlatformProviderId) {
-      const customProvider = await prisma.platformCustomProvider.findUnique({
-        where: { id: customPlatformProviderId },
-        select: { enabled: true },
-      });
-      if (!customProvider || !customProvider.enabled) {
-        return NextResponse.json(
-          { error: 'Custom provider not found or disabled.' },
-          { status: 400 }
-        );
-      }
-    }
-
     await upsertModelProvider(id, {
       providerId,
       providerModelId,
       pricing: pricing as ModelPricing | undefined,
       isDefault: isDefault ?? false,
       enabled: true,
-      customPlatformProviderId: customPlatformProviderId || null,
     });
 
     return NextResponse.json({ ok: true });

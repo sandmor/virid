@@ -21,7 +21,7 @@ async function prefetchArchive() {
     queryKey: ['archive', 'search', { q: undefined, tags: undefined }],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/archive/search?limit=20`,
+        `${process.env.NEXT_PUBLIC_APP_BASE_URL || ''}/api/archive/search?limit=20`,
         { cache: 'no-store' }
       );
       if (!res.ok) return { entries: [], hasMore: false, nextCursor: null };
@@ -39,7 +39,7 @@ async function prefetchAgents() {
     queryKey: ['agents'],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/agents`,
+        `${process.env.NEXT_PUBLIC_APP_BASE_URL || ''}/api/agents`,
         { cache: 'no-store' }
       );
       if (!res.ok) return { agents: [] };

@@ -6,7 +6,6 @@ import {
 } from '@/app/actions/chat';
 import { useEncryptedCache } from '@/components/encrypted-cache-provider';
 import { toast } from '@/components/toast';
-import { getSyncManager } from '@/lib/cache/sync-manager';
 import type { MessageTreeResult } from '@/lib/db/schema';
 import { ChatSDKError, toChatError } from '@/lib/errors';
 import type { MessageDeletionMode } from '@/lib/message-deletion';
@@ -99,11 +98,7 @@ export function useChatMessaging({
   const queryClient = useQueryClient();
   const {
     addOptimisticChat,
-    setActiveChat,
-    markGenerationStarted,
-    markGenerationEnded,
-    recordLocalChange,
-    bumpChatToTop,
+    notifyChatUpdated,
   } = useEncryptedCache();
 
   const {
@@ -143,7 +138,6 @@ export function useChatMessaging({
     sendMessage,
     status,
     stop: stopStream,
-    resumeStream,
     regenerate,
     error: chatError,
     clearError: clearChatError,
@@ -259,14 +253,6 @@ export function useChatMessaging({
   // Track previous streaming state to detect transitions
   const streamingStateRef = useRef(isStreamingStatus(status));
 
-  // Set this chat as the active chat for sync protection
-  useEffect(() => {
-    setActiveChat(chatId);
-    return () => {
-      setActiveChat(null);
-    };
-  }, [chatId, setActiveChat]);
-
   // Keep refs in sync with state
   useEffect(() => {
     messagesRef.current = messages;
@@ -327,11 +313,7 @@ export function useChatMessaging({
         },
         onNavigationComplete: () => {
           // Branch navigation updates the server timestamp, so bump the chat to top
-          recordLocalChange(chatId);
-          bumpChatToTop(chatId);
-          // Notify other tabs about the navigation
-          const syncManager = getSyncManager();
-          syncManager?.notifyMessagesUpdated(chatId);
+          notifyChatUpdated(chatId);
         },
       },
     }
@@ -367,7 +349,7 @@ export function useChatMessaging({
   // Cache snapshots are authoritative after local activity settles. Keep the
   // state machine's tree and selection aligned with the useChat messages that
   // useExternalChatSync replaces.
-  const { markLocalUpdate } = useExternalChatSync({
+  useExternalChatSync({
     chatId,
     messages,
     setMessages,
@@ -413,20 +395,9 @@ export function useChatMessaging({
 
     if (isStreaming && !wasStreaming) {
       sendOperations({ type: 'STREAM_STARTED' });
-      // Notify SyncManager that generation started - protects this chat from external syncs
-      markGenerationStarted();
     } else if (!isStreaming && wasStreaming) {
       sendOperations({ type: 'STREAM_FINISHED' });
-      // Notify SyncManager that generation ended - protection window begins
-      markGenerationEnded();
-      // Compatibility no-op; duplicate invalidations are coalesced centrally.
-      recordLocalChange(chatId);
-      // Bump this chat to top of sidebar (optimistic UI update)
-      bumpChatToTop(chatId);
-
-      // Notify other tabs about the message update via the tab-leader BroadcastChannel
-      const syncManager = getSyncManager();
-      syncManager?.notifyMessagesUpdated(chatId);
+      notifyChatUpdated(chatId);
     }
 
     streamingStateRef.current = isStreaming;
@@ -434,10 +405,7 @@ export function useChatMessaging({
     status,
     sendOperations,
     chatId,
-    markGenerationStarted,
-    markGenerationEnded,
-    recordLocalChange,
-    bumpChatToTop,
+    notifyChatUpdated,
   ]);
 
   // Sync messages with the machine when they change externally
@@ -518,11 +486,7 @@ export function useChatMessaging({
           return { chatDeleted: true } as const;
         }
 
-        // Compatibility no-op; duplicate invalidations are coalesced centrally.
-        recordLocalChange(chatId);
-        // Surface the chat update immediately in local and other tabs
-        bumpChatToTop(chatId);
-        getSyncManager()?.notifyMessagesUpdated(chatId);
+        notifyChatUpdated(chatId);
 
         // Request tree sync after deletion
         sendOperations({ type: 'SYNC_TREE' });
@@ -544,12 +508,12 @@ export function useChatMessaging({
     },
     [
       assignSelection,
-      bumpChatToTop,
+      notifyChatUpdated,
       chatId,
       getSelectedIds,
       handleChatDeleted,
       isReadonly,
-      recordLocalChange,
+      notifyChatUpdated,
       removeFromSelection,
       sendOperations,
     ]
@@ -588,11 +552,7 @@ export function useChatMessaging({
           return;
         }
 
-        // Compatibility no-op; duplicate invalidations are coalesced centrally.
-        recordLocalChange(chatId);
-        // Surface the chat update immediately in local and other tabs
-        bumpChatToTop(chatId);
-        getSyncManager()?.notifyMessagesUpdated(chatId);
+        notifyChatUpdated(chatId);
 
         // Request tree sync after deletion
         sendOperations({ type: 'SYNC_TREE' });
@@ -621,13 +581,13 @@ export function useChatMessaging({
     },
     [
       assignSelection,
-      bumpChatToTop,
+      notifyChatUpdated,
       chatId,
       clearSelection,
       getSelectedIds,
       handleChatDeleted,
       isReadonly,
-      recordLocalChange,
+      notifyChatUpdated,
       sendOperations,
       setMessages,
     ]
@@ -721,9 +681,6 @@ export function useChatMessaging({
 
   const sendMessageWithGuard = useCallback<typeof sendMessage>(
     (payload) => {
-      // Compatibility no-op; external invalidations are no longer timestamp-filtered.
-      markLocalUpdate();
-
       const readiness = ensureOperationsReady();
       if (!readiness) {
         return sendMessage(payload);
@@ -740,7 +697,7 @@ export function useChatMessaging({
           });
         });
     },
-    [ensureOperationsReady, markLocalUpdate, sendMessage]
+    [ensureOperationsReady, sendMessage]
   );
 
   const handleEditMessage = useCallback(
@@ -869,13 +826,7 @@ export function useChatMessaging({
           editedText: trimmed,
         });
 
-        // Compatibility no-op; duplicate invalidations are coalesced centrally.
-        recordLocalChange(chatId);
-        // Bump chat to top of sidebar
-        bumpChatToTop(chatId);
-        // Notify other tabs
-        const syncManager = getSyncManager();
-        syncManager?.notifyMessagesUpdated(chatId);
+        notifyChatUpdated(chatId);
 
         // Reset selection state
         selectionRef.current = null;
@@ -909,13 +860,13 @@ export function useChatMessaging({
     },
     [
       assignSelection,
-      bumpChatToTop,
+      notifyChatUpdated,
       chatId,
       ensureOperationsReady,
       fetchTree,
       getSelectedIds,
       isReadonly,
-      recordLocalChange,
+      notifyChatUpdated,
       removeFromSelection,
       sendMessage,
       sendOperations,
@@ -1004,13 +955,7 @@ export function useChatMessaging({
           editedText: trimmed,
         });
 
-        // Compatibility no-op; duplicate invalidations are coalesced centrally.
-        recordLocalChange(chatId);
-        // Bump chat to top of sidebar
-        bumpChatToTop(chatId);
-        // Notify other tabs
-        const syncManager = getSyncManager();
-        syncManager?.notifyMessagesUpdated(chatId);
+        notifyChatUpdated(chatId);
 
         // Invalidate the bootstrap query cache so the updated message is fetched on reload
         queryClient.invalidateQueries({
@@ -1032,12 +977,12 @@ export function useChatMessaging({
       }
     },
     [
-      bumpChatToTop,
+      notifyChatUpdated,
       chatId,
       ensureOperationsReady,
       isReadonly,
       queryClient,
-      recordLocalChange,
+      notifyChatUpdated,
       setMessages,
     ]
   );
@@ -1083,7 +1028,6 @@ export function useChatMessaging({
     sendMessage: sendMessageWithGuard,
     status,
     stop,
-    resumeStream,
     regenerate,
     chatError,
     clearChatError,

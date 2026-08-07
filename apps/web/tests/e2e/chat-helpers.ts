@@ -20,7 +20,6 @@ export type ChatBootstrapResponse = {
   allowedModels: ChatModelOption[];
   initialSettings: unknown;
   initialAgent: unknown;
-  autoResume: boolean;
   isReadonly: boolean;
   agentId?: string;
   initialMessages?: unknown;
@@ -85,7 +84,6 @@ export const DEFAULT_BOOTSTRAP: ChatBootstrapResponse = {
   allowedModels: [VISION_MODEL, TEXT_MODEL],
   initialSettings: null,
   initialAgent: null,
-  autoResume: false,
   isReadonly: false,
   initialBranchState: { rootMessageIndex: null },
 };

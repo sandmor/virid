@@ -199,7 +199,6 @@ export function ChatComposer({ chatId }: { chatId?: string }) {
     initialChatModel: validBootstrap.initialChatModel,
     initialVisibilityType: validBootstrap.initialVisibilityType,
     isReadonly: validBootstrap.isReadonly,
-    autoResume: validBootstrap.autoResume,
     allowedModels: validBootstrap.allowedModels,
     initialSettings: validBootstrap.initialSettings ?? null,
     initialAgent: validBootstrap.initialAgent ?? null,

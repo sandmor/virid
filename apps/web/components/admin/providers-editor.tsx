@@ -69,7 +69,7 @@ export function ProvidersEditor({
   const saveMutation = useMutation({
     mutationFn: async ({ id, apiKey }: { id: string; apiKey: string }) => {
       const response = await fetch('/api/admin/providers', {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, apiKey }),
       });
@@ -103,12 +103,11 @@ export function ProvidersEditor({
 
   const deleteMutation = useMutation({
     mutationFn: async ({ id }: { id: string }) => {
-      const response = await fetch(
-        `/api/admin/providers?id=${encodeURIComponent(id)}`,
-        {
-          method: 'DELETE',
-        }
-      );
+      const response = await fetch('/api/admin/providers', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, apiKey: null }),
+      });
 
       if (!response.ok) {
         const message = await response.text();

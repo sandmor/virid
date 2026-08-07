@@ -77,7 +77,7 @@ model Chat {
 
 The app maintains an AES-GCM encrypted cache in IndexedDB, synchronized across browser tabs and with the server via incremental sync. This provides ~10ms loads vs 200ms+ HTTP. The cache consists of three IndexedDB tables (chats, documents, metadata) storing encrypted records with ciphertext and initialization vectors. Encryption keys are derived using HKDF from the `CACHE_ENCRYPTION_SECRET` combined with the user's session ID, ensuring session-specific isolation.
 
-Tab coordination uses a lease-based leader election protocol built on localStorage and BroadcastChannel. Incremental sync requests (`POST /api/cache/sync` with `lastSyncedAt` timestamp) fetch only changes since the last sync. The `ChatDeletion` table maintains tombstones for deleted chats, enabling clients to remove stale cache entries when they appear in incremental sync responses. WebSocket notifications trigger immediate syncs (debounced to 500ms), and active generating chats are excluded from sync for 2 seconds to prevent overwrites.
+Tab coordination uses a lease-based leader election protocol built on localStorage and BroadcastChannel. Incremental sync requests (`POST /api/cache/sync` with `lastSyncedAt` timestamp) fetch only changes since the last sync. The `ChatDeletion` table maintains tombstones for deleted chats, enabling clients to remove stale cache entries when they appear in incremental sync responses. WebSocket and cross-tab notifications are idempotent invalidations, debounced to 500ms; mounted chats wait for an authoritative post-stream snapshot rather than filtering updates.
 
 ### Tab Leader Election
 
@@ -113,8 +113,6 @@ await cacheManager.storeMetadata('lastSyncedAt', serverTimestamp);
 tabLeader.notifySyncComplete(serverTimestamp);
 ```
 
-**Echo Filtering**: Own changes tracked for 5s to ignore realtime echoes.
-
 ---
 
 ## Providers, Creators & BYOK
@@ -127,7 +125,7 @@ The system distinguishes between model creators (companies that develop models) 
 
 For example, the model ID `openai:gpt-5.2` identifies a GPT-5.2 model from OpenAI. This model can be served through OpenAI's direct API or potentially through aggregator providers like OpenRouter. The `Model` table stores the creator and capabilities, while `ModelProvider` entries link each model to the specific provider(s) that can serve it.
 
-Supported providers include `openai` (OpenAI direct API), `google` (Google AI/Gemini), `openrouter` (aggregator serving models from many creators including Anthropic, Meta, Mistral, etc.), and `xai` (xAI's Grok models). Platform administrators can also add custom providers via `UserCustomProvider`, allowing connections to self-hosted or third-party OpenAI-compatible endpoints.
+Supported built-in providers are `openai` (OpenAI direct API), `google` (Google AI/Gemini), `openrouter` (aggregator serving models from many creators including Anthropic, Meta, Mistral, etc.), and `xai` (xAI's Grok models). Platform administrators configure both built-ins and platform-wide OpenAI-compatible endpoints in `Provider`; user-owned endpoints remain in `UserCustomProvider` for BYOK.
 
 **Why separate?**: The same model can be served by multiple providers, and aggregator providers like OpenRouter serve models from many different creators. This separation allows flexible routing and provider-specific configurations.
 
@@ -249,7 +247,6 @@ The WebSocket gateway authenticates connections using Clerk session tokens for a
 - AI SDK (`ai` v6) provider unification + streaming handlers
 - Prisma ORM with modular schema (model capabilities, archive, rate limit)
 - PostgreSQL primary storage (Neon friendly) with ltree extension for message trees
-- Redis (optional) for resuming interrupted streams via `resumable-stream` package; rate limiting uses PostgreSQL
 - Vercel Blob for file attachments
 - Cloudflare Workers at `/apps/edge-gateway` derive session-specific encryption keys for client-side cache using HKDF, running the same `deriveEncryptionKey` function as the Next.js app but at the edge for reduced latency
 
@@ -329,9 +326,8 @@ Create `apps/web/.env.local` (or `.env`) for the Next app and ensure `DATABASE_U
 
 | Variable                   | Purpose                                                                                    |
 | -------------------------- | ------------------------------------------------------------------------------------------ |
-| `AUTH_SECRET`              | Guest session encryption key                                                               |
+| `GUEST_SECRET`             | Required guest-session signing key                                                         |
 | `NEXT_PUBLIC_APP_BASE_URL` | Base URL for metadata / OAuth redirects                                                    |
-| `NEXT_PUBLIC_APP_URL`      | Alias used in some code paths; keep in sync with `NEXT_PUBLIC_APP_BASE_URL`                |
 | `DATABASE_URL`             | PostgreSQL connection string                                                               |
 | `OPENROUTER_API_KEY`       | OpenRouter API key (model catalog + routing)                                               |
 | `CACHE_ENCRYPTION_SECRET`  | A 32-byte, base64-encoded secret used to derive encryption keys for the client-side cache. |
@@ -347,16 +343,11 @@ Create `apps/web/.env.local` (or `.env`) for the Next app and ensure `DATABASE_U
 
 | Variable                           | Purpose                                                                                                    |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `GUEST_SECRET`                     | Dedicated guest cookie signing secret; falls back to `AUTH_SECRET` if omitted                              |
 | `COOKIE_DOMAIN`                    | Set to `.yourdomain.com` to share guest cookies with subdomains (required for separate worker subdomains). |
 | `OPENAI_API_KEY`                   | Direct OpenAI API access (bypassing OpenRouter)                                                            |
 | `GOOGLE_GENERATIVE_AI_API_KEY`     | Direct Gemini API access                                                                                   |
 | `GOOGLE_API_KEY`                   | Alternate env name for direct Gemini access (either works)                                                 |
-| `DEFAULT_CHAT_MODEL`               | Default model for new chats and fallback                                                                   |
-| `ARTIFACT_GENERATION_MODEL`        | Override model for artifact generation flows                                                               |
-| `GUEST_MODELS`                     | Comma-separated fallback guest tier model list                                                             |
-| `REGULAR_MODELS`                   | Comma-separated fallback regular tier model list                                                           |
-| `REDIS_URL`                        | (Pluggable) Redis caching / future rate control                                                            |
+| `DEFAULT_CHAT_MODEL`               | Bootstrap baseline only; runtime tier/model routing is database-owned                                      |
 | `BLOB_READ_WRITE_TOKEN`            | Vercel Blob storage token                                                                                  |
 | `ADMIN_USER_ID`                    | Hard admin (takes precedence over email)                                                                   |
 | `ADMIN_EMAIL`                      | Fallback admin identity (bootstrap)                                                                        |
@@ -451,7 +442,6 @@ If you plan to enforce tier overrides or seed model capabilities manually, inser
 2. Configure environment variables
 3. Enable Vercel integrations:
    - Neon for PostgreSQL
-   - Upstash for Redis
    - Vercel Blob for file storage
 4. Use `bun run build:web` as the Vercel build command so only the web app (and its db dependency) is built
 5. Deploy automatically on push

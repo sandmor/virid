@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import { act, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
 
-let subscribedCallback: ((chatId: string) => void) | null = null;
 let requestSyncCalls: Array<[string, string]> = [];
 let cachedChats: any[] = [];
 let appliedMessages: any[][] = [];
@@ -11,12 +10,6 @@ let deletedCount = 0;
 mock.module('@/components/encrypted-cache-provider', () => ({
   useEncryptedCache: () => ({
     cachedChats,
-    subscribeToMessageUpdates: (callback: (chatId: string) => void) => {
-      subscribedCallback = callback;
-      return () => {
-        if (subscribedCallback === callback) subscribedCallback = null;
-      };
-    },
   }),
 }));
 
@@ -81,7 +74,6 @@ function Harness({ isStreaming }: { isStreaming: boolean }) {
 
 describe('useExternalChatSync', () => {
   beforeEach(() => {
-    subscribedCallback = null;
     requestSyncCalls = [];
     cachedChats = [];
     appliedMessages = [];
@@ -126,12 +118,6 @@ describe('useExternalChatSync', () => {
     });
     expect(appliedMessages[0]?.[0]?.id).toBe('message-2');
     view.unmount();
-  });
-
-  it('never drops a cross-tab invalidation based on timestamp proximity', () => {
-    render(<Harness isStreaming={false} />);
-    subscribedCallback?.('chat-1');
-    expect(requestSyncCalls).toEqual([['tab-request', 'chat-1']]);
   });
 
   it('clears and closes a mounted chat once its authoritative snapshot is deleted', async () => {

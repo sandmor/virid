@@ -15,9 +15,3 @@ export {
   areSelectionSnapshotsEqual,
   ensureSelectionMap,
 } from './selection-snapshot';
-
-// Tree updates
-export {
-  shouldDeferTreeUpdate,
-  type TreeUpdateDeferOptions,
-} from './tree-update';
