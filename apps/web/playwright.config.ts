@@ -97,7 +97,7 @@ export default defineConfig({
       APP_E2E: '1',
       NEXT_PUBLIC_E2E: '1',
     },
-    // Hit the lightweight /ping endpoint (handled in middleware) for a fast 200 readiness check.
+    // Hit the lightweight /ping endpoint (handled in proxy.ts) for a fast 200 readiness check.
     url: `${baseURL}/ping`,
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,

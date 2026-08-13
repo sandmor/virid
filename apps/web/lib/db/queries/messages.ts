@@ -795,34 +795,6 @@ export async function getMessagesByChatId({
   }
 }
 
-export async function getMessagesByChatIdRaw({
-  id,
-}: {
-  id: string;
-}): Promise<{ messages: DBMessage[]; rootMessageIndex: number | null }> {
-  try {
-    const [chat, rows] = await Promise.all([
-      prisma.chat.findUnique({
-        where: { id },
-        select: { rootMessageIndex: true },
-      }),
-      prisma.message.findMany({
-        where: { chatId: id },
-        orderBy: { pathText: 'asc' },
-      }),
-    ]);
-    return {
-      messages: rows as DBMessage[],
-      rootMessageIndex: chat?.rootMessageIndex ?? null,
-    };
-  } catch (_error) {
-    throw new ChatSDKError(
-      'bad_request:database',
-      'Failed to get raw messages by chat id'
-    );
-  }
-}
-
 export async function getActiveMessagesByChatId({
   id,
 }: {
@@ -985,7 +957,6 @@ export async function deleteMessageById({
       });
 
       if (remainingMessages === 0) {
-        await tx.stream.deleteMany({ where: { chatId } });
         await tx.chat.delete({ where: { id: chatId } });
         await tx.chatDeletion.create({
           data: { id: chatId, userId: userId, deletedAt: new Date() },
@@ -1267,7 +1238,6 @@ export async function deleteMessagesByIds({
       });
 
       if (remainingMessages === 0) {
-        await tx.stream.deleteMany({ where: { chatId } });
         await tx.chat.delete({ where: { id: chatId } });
         await tx.chatDeletion.create({
           data: { id: chatId, userId: userId, deletedAt: new Date() },

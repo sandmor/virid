@@ -5,8 +5,6 @@
 import { prisma } from '@vero/db';
 import { Prisma } from '@vero/db';
 import type { CatalogEntry, ModelFormat, ModelPricing } from './types';
-import { upsertModel, upsertModelProvider } from './db';
-import { parseModelId } from '../model-id';
 
 // ============================================================================
 // Catalog Cleanup Operations
@@ -38,47 +36,6 @@ export async function deleteCatalogEntriesForProvider(
   });
 
   return result.count;
-}
-
-/**
- * Delete all catalog entries for a provider
- *
- * @param providerId - The provider ID to clear
- * @returns The number of entries deleted
- */
-export async function clearCatalogForProvider(
-  providerId: string
-): Promise<number> {
-  const result = await prisma.providerCatalog.deleteMany({
-    where: { providerId },
-  });
-
-  return result.count;
-}
-
-/**
- * Get all catalog entries for a provider
- */
-export async function getProviderCatalog(
-  providerId: string
-): Promise<CatalogEntry[]> {
-  const entries = await prisma.providerCatalog.findMany({
-    where: { providerId },
-    orderBy: { suggestedModelId: 'asc' },
-  });
-
-  return entries.map((e) => ({
-    id: e.id,
-    providerId: e.providerId,
-    providerModelId: e.providerModelId,
-    suggestedModelId: e.suggestedModelId,
-    suggestedName: e.suggestedName,
-    suggestedCreator: e.suggestedCreator,
-    supportsTools: e.supportsTools,
-    supportedFormats: e.supportedFormats as ModelFormat[],
-    pricing: e.pricing as ModelPricing | null,
-    lastSynced: e.lastSynced,
-  }));
 }
 
 /**
@@ -138,89 +95,5 @@ export async function upsertCatalogEntry(
       pricing: pricingData,
       lastSynced: new Date(),
     },
-  });
-}
-
-// ============================================================================
-// Model Creation from Catalog
-// ============================================================================
-
-/**
- * Create a model from a catalog entry and link it to the provider
- */
-export async function createModelFromCatalog(
-  catalogEntryId: string,
-  overrides?: {
-    modelId?: string;
-    name?: string;
-    supportsTools?: boolean;
-    supportedFormats?: ModelFormat[];
-    isDefault?: boolean;
-  }
-): Promise<void> {
-  const entry = await prisma.providerCatalog.findUnique({
-    where: { id: catalogEntryId },
-  });
-
-  if (!entry) {
-    throw new Error('Catalog entry not found');
-  }
-
-  const modelId = overrides?.modelId ?? entry.suggestedModelId;
-  if (!modelId) {
-    throw new Error('No model ID provided or suggested');
-  }
-
-  const parsed = parseModelId(modelId);
-  if (!parsed) {
-    throw new Error('Invalid model ID format');
-  }
-
-  // Create or update the model
-  await upsertModel({
-    id: modelId,
-    name: overrides?.name ?? entry.suggestedName ?? parsed.modelName,
-    creator: entry.suggestedCreator ?? parsed.creator,
-    supportsTools: overrides?.supportsTools ?? entry.supportsTools,
-    supportedFormats:
-      overrides?.supportedFormats ?? (entry.supportedFormats as ModelFormat[]),
-  });
-
-  // Link to the provider
-  await upsertModelProvider(modelId, {
-    providerId: entry.providerId,
-    providerModelId: entry.providerModelId,
-    pricing: entry.pricing as ModelPricing | null,
-    isDefault: overrides?.isDefault ?? true,
-    enabled: true,
-  });
-}
-
-/**
- * Link an existing model to a catalog entry (add provider)
- */
-export async function linkModelToCatalog(
-  modelId: string,
-  catalogEntryId: string,
-  options?: { isDefault?: boolean }
-): Promise<void> {
-  const [model, entry] = await Promise.all([
-    prisma.model.findUnique({ where: { id: modelId } }),
-    prisma.providerCatalog.findUnique({ where: { id: catalogEntryId } }),
-  ]);
-
-  if (!model) {
-    throw new Error('Model not found');
-  }
-  if (!entry) {
-    throw new Error('Catalog entry not found');
-  }
-
-  await upsertModelProvider(modelId, {
-    providerId: entry.providerId,
-    providerModelId: entry.providerModelId,
-    pricing: entry.pricing as ModelPricing | null,
-    isDefault: options?.isDefault ?? false,
-    enabled: true,
   });
 }

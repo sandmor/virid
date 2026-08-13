@@ -62,12 +62,6 @@ export type ProviderConfig = {
   description?: string;
 };
 
-/**
- * Legacy ProviderInfo type for backward compatibility
- * @deprecated Use ProviderConfig instead
- */
-export type ProviderInfo = ProviderConfig;
-
 // =============================================================================
 // Provider Registry
 // =============================================================================
@@ -165,28 +159,11 @@ export const SDK_PROVIDERS = ALL_PROVIDER_IDS.filter(
 
 export type SdkProvider = 'openrouter' | 'openai' | 'google' | 'xai';
 
-/** Providers that support BYOK */
-export const BYOK_PROVIDERS = ALL_PROVIDER_IDS.filter(
-  (id) => PROVIDER_REGISTRY[id]?.supportsByok
-);
-
-/** Aggregator providers (serve models from multiple other providers) */
-export const AGGREGATOR_PROVIDERS = ALL_PROVIDER_IDS.filter(
-  (id) => PROVIDER_REGISTRY[id]?.isAggregator
-);
-
 /**
  * Providers that should use models.dev for catalog sync
  */
 export const MODELS_DEV_PROVIDERS = ALL_PROVIDER_IDS.filter(
   (id) => PROVIDER_REGISTRY[id]?.catalogSource === 'models.dev'
-);
-
-/**
- * Providers that use OpenRouter for catalog sync (just OpenRouter itself)
- */
-export const OPENROUTER_CATALOG_PROVIDERS = ALL_PROVIDER_IDS.filter(
-  (id) => PROVIDER_REGISTRY[id]?.catalogSource === 'openrouter'
 );
 
 // =============================================================================
@@ -216,14 +193,6 @@ export function getProviderConfig(id: string): ProviderConfig {
       supportedFormats: ['text'],
     },
   };
-}
-
-/**
- * Legacy alias for backward compatibility
- * @deprecated Use getProviderConfig instead
- */
-export function getProviderInfo(id: string): ProviderConfig {
-  return getProviderConfig(id);
 }
 
 /**
@@ -271,13 +240,6 @@ export function isAggregatorProvider(id: string): boolean {
 }
 
 /**
- * Check if a provider has SDK support for direct API calls
- */
-export function providerHasSdkSupport(id: string): id is SdkProvider {
-  return getProviderConfig(id).hasSdkSupport;
-}
-
-/**
  * Check if a provider should use models.dev for catalog sync
  */
 export function isModelsDevProvider(id: string): boolean {
@@ -311,48 +273,8 @@ export function getInternalProviderId(modelsDevId: string): string {
 }
 
 /**
- * Get default capabilities for a provider
- */
-export function getProviderDefaults(id: string): ProviderConfig['defaults'] {
-  return getProviderConfig(id).defaults;
-}
-
-/**
  * Get all registered providers
  */
 export function getAllProviders(): ProviderConfig[] {
   return ALL_PROVIDER_IDS.map((id) => PROVIDER_REGISTRY[id]);
-}
-
-/**
- * Get all providers with SDK support
- */
-export function getSdkProviders(): ProviderConfig[] {
-  return SDK_PROVIDERS.map((id) => PROVIDER_REGISTRY[id]);
-}
-
-// =============================================================================
-// Provider Inference (for model ID routing)
-// =============================================================================
-
-/**
- * Infer the provider for a model based on its creator.
- *
- * For direct providers (OpenAI, Google), the provider is the same as the creator.
- * For all other creators, models are served through OpenRouter.
- *
- * @param creator - The model creator slug (e.g., 'openai', 'anthropic')
- * @returns The provider ID and whether the model ID needs the creator prefix
- */
-export function inferProviderFromCreator(creator: string): {
-  providerId: SdkProvider;
-  needsCreatorPrefix: boolean;
-} {
-  // Direct SDK providers where creator === provider
-  if (creator === 'openai' || creator === 'google' || creator === 'xai') {
-    return { providerId: creator, needsCreatorPrefix: false };
-  }
-
-  // All other creators go through OpenRouter
-  return { providerId: 'openrouter', needsCreatorPrefix: true };
 }

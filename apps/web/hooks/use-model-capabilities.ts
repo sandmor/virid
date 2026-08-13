@@ -119,7 +119,6 @@ export function useProviderMutation() {
       providerModelId: string;
       pricing?: ModelPricing;
       isDefault?: boolean;
-      customPlatformProviderId?: string;
     }) => {
       const { modelId, ...body } = data;
       const res = await fetch(

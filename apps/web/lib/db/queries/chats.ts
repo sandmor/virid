@@ -73,7 +73,6 @@ export async function deleteChatById({
     }
 
     await prisma.message.deleteMany({ where: { chatId: id } });
-    await prisma.stream.deleteMany({ where: { chatId: id } });
 
     // Delete chat and create tombstone atomically
     const [deleted] = await prisma.$transaction([
@@ -130,7 +129,6 @@ export async function deleteChatsByIds({
     }
 
     await prisma.message.deleteMany({ where: { chatId: { in: targetIds } } });
-    await prisma.stream.deleteMany({ where: { chatId: { in: targetIds } } });
 
     // Delete chats and create tombstones atomically
     const now = new Date();
@@ -580,9 +578,6 @@ export async function forkChat({
     return { newChatId, insertedEditedMessageId, previousUserText };
   } catch (e) {
     if (e instanceof ChatSDKError) throw e;
-    throw new ChatSDKError(
-      'bad_request:database',
-      'Failed to fork chat (simplified)'
-    );
+    throw new ChatSDKError('bad_request:database', 'Failed to fork chat');
   }
 }

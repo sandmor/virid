@@ -1,7 +1,7 @@
 /**
  * Model ID Utilities
  *
- * Pure utility functions for parsing and building model IDs.
+ * Pure utility functions for parsing model IDs.
  * This file is safe to import from client components (no server dependencies).
  *
  * Model ID format: {creator}:{model_name}
@@ -10,13 +10,6 @@
  *   - openai:gpt-5.1
  *   - google:gemini-2.5-flash
  */
-
-/**
- * Build a model ID from creator and model name
- */
-export function buildModelId(creator: string, modelName: string): string {
-  return `${creator}:${modelName}`;
-}
 
 /**
  * Parse a model ID into creator and model name

@@ -50,10 +50,6 @@ type ModelForSelection = {
   providers: ProviderInfo[];
   // Catalog entry info for creating Model/ModelProvider when adding to tier
   catalogEntry: CatalogEntry;
-  // Flag indicating this is a custom platform model (vs regular catalog model)
-  isCustomPlatformModel?: boolean;
-  // Display name for custom provider (only set for custom platform models)
-  customProviderName?: string;
 };
 
 // ============================================================================
@@ -268,14 +264,6 @@ function ModelRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="truncate font-medium">{model.name}</span>
-          {model.isCustomPlatformModel && (
-            <Badge
-              variant="secondary"
-              className="text-[9px] px-1.5 py-0 h-4 bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400"
-            >
-              Custom
-            </Badge>
-          )}
           {model.supportsTools && (
             <Wrench className="h-3 w-3 text-muted-foreground shrink-0" />
           )}
@@ -284,11 +272,6 @@ function ModelRow({
           <span className="text-[10px] text-muted-foreground truncate">
             {model.id}
           </span>
-          {model.customProviderName && (
-            <span className="text-[10px] text-violet-600 dark:text-violet-400">
-              via {model.customProviderName}
-            </span>
-          )}
         </div>
       </div>
       <div className="shrink-0">
@@ -454,13 +437,6 @@ export function TierModelPicker({
       // Store the first catalog entry for this model ID (for creating Model/ModelProvider)
       catalogMap.set(modelId, primary);
 
-      // Check if this is a custom platform model (extended catalog entry)
-      const isCustomPlatformModel =
-        (primary as any).isCustomPlatformModel === true;
-      const customProviderName = (primary as any).customProviderName as
-        | string
-        | undefined;
-
       models.push({
         id: modelId,
         name: primary.suggestedName ?? modelId,
@@ -470,14 +446,9 @@ export function TierModelPicker({
         providers: entries.map((e) => ({
           providerId: e.providerId,
           providerModelId: e.providerModelId,
-          displayName:
-            isCustomPlatformModel && customProviderName
-              ? customProviderName
-              : displayProviderName(e.providerId),
+          displayName: displayProviderName(e.providerId),
         })),
         catalogEntry: primary,
-        isCustomPlatformModel,
-        customProviderName,
       });
     }
 

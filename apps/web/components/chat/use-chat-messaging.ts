@@ -11,7 +11,7 @@ import { ChatSDKError, toChatError } from '@/lib/errors';
 import type { MessageDeletionMode } from '@/lib/message-deletion';
 import { buildEditedUserMessageParts } from '@/lib/message-editing';
 import { chatOperationsMachine } from '@/lib/state-machines/chat-operations.machine';
-import type { ChatMessage, CustomUIDataTypes } from '@/lib/types';
+import type { ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
 import {
   fetchWithErrorHandlers,
@@ -31,10 +31,8 @@ import type {
 import { useChat } from '@ai-sdk/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMachine } from '@xstate/react';
-import type { DataUIPart } from 'ai';
 import { DefaultChatTransport } from 'ai';
 import { useRouter } from 'next/navigation';
-import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { VisibilityType } from '../visibility-selector';
 import type { ChatPreferences } from './use-chat-preferences';
@@ -77,9 +75,6 @@ export type UseChatMessagingArgs = {
   isReadonly: boolean;
   preferences: ChatPreferences;
   setUsage: (usage: AppUsage | undefined) => void;
-  setDataStream: React.Dispatch<
-    React.SetStateAction<DataUIPart<CustomUIDataTypes>[]>
-  >;
   selection: SelectionApi;
 };
 
@@ -91,15 +86,11 @@ export function useChatMessaging({
   isReadonly,
   preferences,
   setUsage,
-  setDataStream,
   selection,
 }: UseChatMessagingArgs) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const {
-    addOptimisticChat,
-    notifyChatUpdated,
-  } = useEncryptedCache();
+  const { addOptimisticChat, notifyChatUpdated } = useEncryptedCache();
 
   const {
     getSelectedIds,
@@ -192,7 +183,6 @@ export function useChatMessaging({
       },
     }),
     onData: (dataPart) => {
-      setDataStream((previous) => (previous ? [...previous, dataPart] : []));
       if (dataPart.type === 'data-usage') {
         setUsage(dataPart.data);
       }
@@ -335,8 +325,7 @@ export function useChatMessaging({
   const handleExternalSnapshot = useCallback(
     (snapshot: ExistingChatBootstrap) => {
       const tree = buildMessageTree(snapshot.initialMessages, {
-        rootMessageIndex:
-          snapshot.initialBranchState.rootMessageIndex ?? null,
+        rootMessageIndex: snapshot.initialBranchState.rootMessageIndex ?? null,
       });
       const selection = buildSelectionSnapshot(tree);
       currentMessageTreeRef.current = tree;
@@ -401,12 +390,7 @@ export function useChatMessaging({
     }
 
     streamingStateRef.current = isStreaming;
-  }, [
-    status,
-    sendOperations,
-    chatId,
-    notifyChatUpdated,
-  ]);
+  }, [status, sendOperations, chatId, notifyChatUpdated]);
 
   // Sync messages with the machine when they change externally
   useEffect(() => {

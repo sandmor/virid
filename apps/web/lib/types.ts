@@ -8,8 +8,6 @@ import type { runCode } from './ai/tools/run-code';
 
 import type { AppUsage } from './usage';
 
-export type DataPart = { type: 'append-message'; message: string };
-
 export const messageMetadataSchema = z.object({
   createdAt: z.string(),
   model: z.string().optional(),
@@ -36,17 +34,7 @@ export type ChatTools = {
 };
 
 export type CustomUIDataTypes = {
-  textDelta: string;
-  imageDelta: string;
-  sheetDelta: string;
-  codeDelta: string;
-  codeLanguage: string;
-  appendMessage: string;
-  id: string;
-
   init: { chatId: string; createdNewChat: boolean; modelId: string };
-  clear: null;
-  finish: null;
   usage: AppUsage;
 };
 

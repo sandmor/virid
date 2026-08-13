@@ -5,7 +5,6 @@
 import { prisma, Prisma } from '@vero/db';
 import type {
   ManagedModelCapabilities,
-  ModelCapabilities,
   ModelFormat,
   ModelPricing,
   ResolvedModelCapabilities,
@@ -14,34 +13,6 @@ import type {
 // ============================================================================
 // Model CRUD Operations
 // ============================================================================
-
-/**
- * Get a model with all its provider associations
- */
-export async function getModelWithProviders(
-  modelId: string
-): Promise<ModelCapabilities | null> {
-  const model = await prisma.model.findUnique({
-    where: { id: modelId },
-    include: { providers: true },
-  });
-
-  if (!model) return null;
-
-  return {
-    ...model,
-    supportedFormats: model.supportedFormats as ModelFormat[],
-    maxOutputTokens: model.maxOutputTokens,
-    providers: model.providers.map((p) => ({
-      id: p.id,
-      providerId: p.providerId,
-      providerModelId: p.providerModelId,
-      pricing: p.pricing as ModelPricing | null,
-      isDefault: p.isDefault,
-      enabled: p.enabled,
-    })),
-  };
-}
 
 /**
  * Get model capabilities resolved for a specific provider (for API calls)
@@ -185,30 +156,6 @@ export async function ensureDefaultProvider(modelId: string): Promise<void> {
   });
 }
 
-/**
- * Get all models from database
- */
-export async function getAllModels(): Promise<ModelCapabilities[]> {
-  const models = await prisma.model.findMany({
-    include: { providers: true },
-    orderBy: [{ creator: 'asc' }, { name: 'asc' }],
-  });
-
-  return models.map((m) => ({
-    ...m,
-    supportedFormats: m.supportedFormats as ModelFormat[],
-    maxOutputTokens: m.maxOutputTokens,
-    providers: m.providers.map((p) => ({
-      id: p.id,
-      providerId: p.providerId,
-      providerModelId: p.providerModelId,
-      pricing: p.pricing as ModelPricing | null,
-      isDefault: p.isDefault,
-      enabled: p.enabled,
-    })),
-  }));
-}
-
 // ============================================================================
 // ModelProvider CRUD Operations
 // ============================================================================
@@ -326,21 +273,4 @@ export async function getManagedModels(): Promise<ManagedModelCapabilities[]> {
     // A model can be added to tiers only if it has at least one provider
     canBeInTier: model.providers.length > 0,
   }));
-}
-
-/**
- * Get all models that can be added to tiers (have at least one provider)
- */
-export async function getModelsForTierSelection(): Promise<
-  ManagedModelCapabilities[]
-> {
-  const models = await getManagedModels();
-  return models.filter((m) => m.providers.length > 0);
-}
-
-/**
- * Get all models available for BYOK (all models in the registry, with or without providers)
- */
-export async function getModelsForByok(): Promise<ManagedModelCapabilities[]> {
-  return getManagedModels();
 }

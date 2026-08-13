@@ -15,7 +15,6 @@ import type { Attachment, ChatMessage } from '@/lib/types';
 import type { AppUsage } from '@/lib/usage';
 import { convertToUIMessages } from '@/lib/utils';
 
-import { useDataStreamDispatch } from './data-stream-provider';
 import { Messages } from './messages';
 import { MultimodalInput } from './multimodal-input';
 import { toast } from './toast';
@@ -67,7 +66,6 @@ export function Chat({
     chatId: id,
     initialVisibilityType,
   });
-  const setDataStream = useDataStreamDispatch();
 
   const [input, setInput] = useState<string>('');
   const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
@@ -161,7 +159,6 @@ export function Chat({
     isReadonly,
     preferences,
     setUsage,
-    setDataStream,
     selection: selectionApi,
   });
 

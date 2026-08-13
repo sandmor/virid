@@ -22,7 +22,7 @@ Advanced multimodal AI chat application built with Next.js 16 (App Router), Reac
 - **Live Streaming**: Incremental token + tool call streaming via AI SDK (`ai` v6)
 - **Conversation Lineage**: Fork chats from any message to create new independent conversation trees (parent/fork metadata persisted in `Chat` table)
 - **Message Branching & Versioning**: Seamlessly switch between message edits and regenerations within the same chat using PostgreSQL ltree paths
-- **Auto-Resume**: Recent context & pinned archive memory automatically reattached on reload
+- **Pinned Context Restore**: Recent context & pinned archive memory automatically reattached on reload
 - **Token Bucket Rate Limiting**: Per-tier configurable capacity/refill stored in `Tier` + per-user runtime state in `UserRateLimit`
 - **Guest & Auth Modes**: Seamless anonymous upgrade path without losing context
 - **Encrypted Client-Side Caching**: AES-GCM encrypted IndexedDB cache with cross-tab synchronization and realtime updates

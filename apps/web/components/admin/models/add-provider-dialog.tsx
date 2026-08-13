@@ -83,7 +83,6 @@ type AddProviderDialogProps = {
   onSave: (data: {
     providerId: string;
     providerModelId: string;
-    customPlatformProviderId?: string;
   }) => Promise<void>;
 };
 
